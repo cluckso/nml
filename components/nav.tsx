@@ -1,8 +1,41 @@
+"use client"
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { UserButton } from "@clerk/nextjs"
+import { createClient } from "@/lib/supabase/client"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 
 export function Nav() {
+  const [user, setUser] = useState<any>(null)
+  const router = useRouter()
+  const supabase = createClient()
+
+  useEffect(() => {
+    const getUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      setUser(user)
+    }
+
+    getUser()
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [supabase])
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    router.push("/")
+    router.refresh()
+  }
+
   return (
     <nav className="border-b">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -13,7 +46,25 @@ export function Nav() {
           <Link href="/pricing">
             <Button variant="ghost">Pricing</Button>
           </Link>
-          <UserButton afterSignOutUrl="/" />
+          {user ? (
+            <>
+              <Link href="/dashboard">
+                <Button variant="outline">Dashboard</Button>
+              </Link>
+              <Button variant="outline" onClick={handleSignOut}>
+                Sign Out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link href="/sign-in">
+                <Button variant="outline">Sign In</Button>
+              </Link>
+              <Link href="/sign-up">
+                <Button>Sign Up</Button>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </nav>

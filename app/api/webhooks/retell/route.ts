@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { sendEmailNotification, sendSMSNotification } from "@/lib/notifications"
+import {
+  sendEmailNotification,
+  sendSMSNotification,
+  sendSMSToCaller,
+  forwardToCrm,
+} from "@/lib/notifications"
 import { reportUsageToStripe } from "@/lib/stripe"
+import { hasSmsToCallers, hasCrmForwarding, hasLeadTagging } from "@/lib/plans"
+import { PlanType } from "@prisma/client"
 import { rateLimit } from "@/lib/rate-limit"
 import crypto from "crypto"
 
@@ -73,9 +80,10 @@ async function handleCallCompletion(event: any) {
     return
   }
 
-  // Find business by agent ID
+  // Find business by agent ID (include subscription for plan-based features)
   const business = await db.business.findUnique({
     where: { retellAgentId: agentId },
+    include: { subscription: true },
   })
 
   if (!business) {
@@ -83,79 +91,93 @@ async function handleCallCompletion(event: any) {
     return
   }
 
-  // Extract structured intake data
+  const planType = business.subscription?.planType ?? PlanType.STARTER
   const analysis = event.call_analysis || {}
+  const hasAnalysis = Object.keys(analysis).length > 0
+
+  // Missed-call recovery: use whatever we have (call_ended may arrive before call_analysis)
   const structuredIntake = {
     name: analysis.caller_name || analysis.extracted_variables?.name,
-    phone: analysis.caller_phone || analysis.extracted_variables?.phone,
+    phone: analysis.caller_phone || analysis.extracted_variables?.phone || event.call?.from_number,
     address: analysis.service_address || analysis.extracted_variables?.address,
     city: analysis.city || analysis.extracted_variables?.city,
     issue_description: analysis.issue_description || analysis.extracted_variables?.issue_description,
     emergency: detectEmergency(analysis),
+    appointment_preference: analysis.extracted_variables?.appointment_preference,
+    department: analysis.extracted_variables?.department,
   }
+  const leadTag = detectLeadTag(analysis, structuredIntake.emergency)
+  const summary =
+    analysis.summary || analysis.call_summary || (analysis.transcript ? String(analysis.transcript).slice(0, 500) : null)
+  const appointmentRequest = structuredIntake.appointment_preference
+    ? { preferredDays: undefined as string | undefined, preferredTime: undefined as string | undefined, notes: String(structuredIntake.appointment_preference) }
+    : undefined
 
-  // Calculate duration
   const duration = event.call?.end_timestamp && event.call?.start_timestamp
     ? Math.floor((event.call.end_timestamp - event.call.start_timestamp) / 1000)
     : 0
   const minutes = duration / 60
+  const missedCallRecovery = !hasAnalysis && (structuredIntake.phone || event.call?.from_number)
 
-  // Check if call already exists
   const existingCall = await db.call.findUnique({
     where: { retellCallId: callId },
   })
 
-  if (existingCall) {
-    // Update existing call
-    await db.call.update({
-      where: { id: existingCall.id },
-      data: {
-        duration,
-        minutes,
-        transcript: analysis.transcript || event.call?.transcript,
-        structuredIntake: structuredIntake as any,
-        emergencyFlag: structuredIntake.emergency,
-        callerName: structuredIntake.name,
-        callerPhone: structuredIntake.phone,
-        issueDescription: structuredIntake.issue_description,
-      },
-    })
-    return
+  const callData = {
+    duration,
+    minutes,
+    transcript: analysis.transcript || event.call?.transcript || undefined,
+    summary: summary || undefined,
+    structuredIntake: structuredIntake as any,
+    emergencyFlag: structuredIntake.emergency,
+    leadTag: hasLeadTagging(planType) ? leadTag : undefined,
+    department: structuredIntake.department || undefined,
+    appointmentRequest: appointmentRequest as any,
+    callerName: structuredIntake.name || undefined,
+    callerPhone: structuredIntake.phone || undefined,
+    issueDescription: structuredIntake.issue_description || undefined,
+    missedCallRecovery: !!missedCallRecovery,
   }
 
-  // Create new call record
-  const call = await db.call.create({
-    data: {
-      retellCallId: callId,
-      businessId: business.id,
-      duration,
-      minutes,
-      transcript: analysis.transcript || event.call?.transcript,
-      structuredIntake: structuredIntake as any,
-      emergencyFlag: structuredIntake.emergency,
-      callerName: structuredIntake.name,
-      callerPhone: structuredIntake.phone,
-      issueDescription: structuredIntake.issue_description,
-    },
-  })
+  const call = existingCall
+    ? await db.call.update({
+        where: { id: existingCall.id },
+        data: callData,
+      })
+    : await db.call.create({
+        data: {
+          retellCallId: callId,
+          businessId: business.id,
+          ...callData,
+        },
+      })
 
-  // Send notifications
+  // Notifications: email + SMS to owner; SMS to caller (Pro+); CRM forward (Pro+)
   try {
-    await Promise.all([
-      sendEmailNotification(business, call, structuredIntake),
-      sendSMSNotification(business, call, structuredIntake),
-    ])
+    const notifies = [
+      sendEmailNotification(business, call, structuredIntake as any),
+      sendSMSNotification(business, call, structuredIntake as any),
+    ]
+    if (hasSmsToCallers(planType) && structuredIntake.phone) {
+      notifies.push(sendSMSToCaller(business, structuredIntake.phone, structuredIntake as any))
+    }
+    await Promise.all(notifies)
   } catch (error) {
     console.error("Notification error:", error)
-    // Don't fail the webhook if notifications fail
   }
 
-  // Report usage to Stripe
+  try {
+    if (hasCrmForwarding(planType)) {
+      await forwardToCrm(business, call, structuredIntake as any)
+    }
+  } catch (error) {
+    console.error("CRM forward error:", error)
+  }
+
   try {
     await reportUsageToStripe(business.id, minutes)
   } catch (error) {
     console.error("Usage reporting error:", error)
-    // Don't fail the webhook if usage reporting fails
   }
 }
 
@@ -174,7 +196,16 @@ function detectEmergency(analysis: any): boolean {
     "no water",
     "frozen pipes",
   ]
-
   const text = JSON.stringify(analysis).toLowerCase()
   return emergencyKeywords.some((keyword) => text.includes(keyword))
 }
+
+function detectLeadTag(analysis: any, isEmergency: boolean): "EMERGENCY" | "ESTIMATE" | "FOLLOW_UP" | "GENERAL" {
+  if (isEmergency) return "EMERGENCY"
+  const raw = (analysis.extracted_variables?.lead_tag || analysis.lead_tag || "").toLowerCase()
+  const text = JSON.stringify(analysis).toLowerCase()
+  if (raw.includes("estimate") || text.includes("estimate") || text.includes("quote")) return "ESTIMATE"
+  if (raw.includes("follow") || text.includes("follow-up") || text.includes("callback")) return "FOLLOW_UP"
+  return "GENERAL"
+}
+

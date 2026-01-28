@@ -30,6 +30,13 @@ enum PlanType {
   LOCAL_PLUS
 }
 
+enum LeadTag {
+  EMERGENCY
+  ESTIMATE
+  FOLLOW_UP
+  GENERAL
+}
+
 enum SubscriptionStatus {
   ACTIVE
   PAST_DUE
@@ -38,37 +45,42 @@ enum SubscriptionStatus {
 }
 
 model User {
-  id         String   @id @default(cuid())
-  email      String   @unique
-  clerkId    String?  @unique
-  role       UserRole @default(CUSTOMER)
-  businessId String?
-  business   Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id             String   @id @default(cuid())
+  email          String   @unique
+  supabaseUserId String?  @unique
+  phoneNumber    String?  // For SMS notifications to owner
+  role           UserRole @default(CUSTOMER)
+  businessId     String?
+  business       Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([businessId])
-  @@index([clerkId])
+  @@index([supabaseUserId])
 }
 
 model Business {
-  id                String    @id @default(cuid())
-  name              String
-  industry          Industry
-  phoneNumber       String?
-  retellAgentId     String?   @unique
-  stripeCustomerId  String?   @unique
-  serviceAreas      String[]  @default([])
-  businessHours     Json?     // { open: "09:00", close: "17:00", days: ["monday", "tuesday", ...] }
-  address           String?
-  city              String?
-  state             String?
-  zipCode           String?
-  onboardingComplete Boolean  @default(false)
-  requiresManualSetup Boolean @default(false)
-  isActive          Boolean   @default(true)
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  id                     String    @id @default(cuid())
+  name                   String
+  industry               Industry
+  phoneNumber            String?
+  retellAgentId          String?   @unique
+  stripeCustomerId       String?   @unique
+  serviceAreas            String[]  @default([])
+  businessHours          Json?     // { open: "09:00", close: "17:00", days: ["monday", "tuesday", ...] }
+  departments            String[]  @default([]) // Local Plus: e.g. ["Plumbing", "HVAC"]
+  address                String?
+  city                   String?
+  state                  String?
+  zipCode                String?
+  onboardingComplete     Boolean  @default(false)
+  requiresManualSetup    Boolean  @default(false)
+  isActive               Boolean  @default(true)
+  crmWebhookUrl          String?  // Pro+: POST lead data to CRM
+  forwardToEmail         String?  // Pro+: forward leads to this email (e.g. CRM pipe)
+  afterHoursEmergencyPhone String? // Local Plus: on-call number for after-hours emergencies
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 
   users       User[]
   calls       Call[]
@@ -80,24 +92,30 @@ model Business {
 }
 
 model Call {
-  id                String   @id @default(cuid())
-  retellCallId      String   @unique
-  businessId        String
-  business          Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  duration          Int      // Duration in seconds
-  minutes           Float    // Duration in minutes (for billing)
-  transcript        String?
-  structuredIntake  Json?    // { name, phone, address, issue_description, emergency, etc. }
-  emergencyFlag     Boolean  @default(false)
-  callerName        String?
-  callerPhone       String?
-  issueDescription  String?
-  createdAt         DateTime @default(now())
+  id                 String    @id @default(cuid())
+  retellCallId       String    @unique
+  businessId         String
+  business           Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  duration           Int       // Duration in seconds
+  minutes            Float     // Duration in minutes (for billing)
+  transcript         String?
+  summary            String?   // Short summary (Pro+)
+  structuredIntake   Json?    // { name, phone, address, issue_description, emergency, appointmentRequest, etc. }
+  emergencyFlag      Boolean   @default(false)
+  leadTag            LeadTag?  // Pro+: EMERGENCY | ESTIMATE | FOLLOW_UP | GENERAL
+  department         String?   // Local Plus: which department was requested
+  appointmentRequest Json?    // Pro+: { preferredDays?, preferredTime?, notes? }
+  callerName         String?
+  callerPhone        String?
+  issueDescription   String?
+  missedCallRecovery Boolean   @default(false) // True if call ended early but we captured partial info
+  createdAt          DateTime  @default(now())
 
   @@index([businessId])
   @@index([retellCallId])
   @@index([createdAt])
   @@index([emergencyFlag])
+  @@index([leadTag])
 }
 
 model Usage {

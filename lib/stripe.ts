@@ -1,6 +1,7 @@
 import Stripe from "stripe"
 import { db } from "./db"
 import { PlanType } from "@prisma/client"
+import { getIncludedMinutes, getOverageMinutes } from "./plans"
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error("STRIPE_SECRET_KEY is not configured")
@@ -27,6 +28,7 @@ export async function createCheckoutSession(
 ) {
   const business = await db.business.findUnique({
     where: { id: businessId },
+    include: { users: { take: 1 } },
   })
 
   if (!business) {
@@ -40,6 +42,11 @@ export async function createCheckoutSession(
     {
       price: priceId,
       quantity: 1,
+    },
+    // Metered overage ($0.10/min); subscription must have this item so we can report usage
+    {
+      price: STRIPE_USAGE_PRICE_ID,
+      quantity: 0,
     },
   ]
 
@@ -120,9 +127,21 @@ export async function reportUsageToStripe(businessId: string, minutes: number) {
   // Get current billing period
   const now = new Date()
   const billingPeriod = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
+  const includedMinutes = getIncludedMinutes(subscription.planType)
 
-  // Update or create usage record
-  const usage = await db.usage.upsert({
+  // Fetch current usage before adding this call (to compute overage delta)
+  const existing = await db.usage.findUnique({
+    where: {
+      businessId_billingPeriod: { businessId, billingPeriod },
+    },
+  })
+  const previousTotal = existing?.minutesUsed ?? 0
+  const overageBefore = getOverageMinutes(subscription.planType, previousTotal)
+  const overageAfter = getOverageMinutes(subscription.planType, previousTotal + minutes)
+  const incrementalOverage = Math.max(0, overageAfter - overageBefore)
+
+  // Update or create usage record (total minutes for our records)
+  await db.usage.upsert({
     where: {
       businessId_billingPeriod: {
         businessId,
@@ -133,7 +152,7 @@ export async function reportUsageToStripe(businessId: string, minutes: number) {
       businessId,
       minutesUsed: minutes,
       billingPeriod,
-      reportedToStripe: false,
+      reportedToStripe: incrementalOverage === 0,
     },
     update: {
       minutesUsed: {
@@ -142,24 +161,21 @@ export async function reportUsageToStripe(businessId: string, minutes: number) {
     },
   })
 
-  // Report to Stripe if not already reported
-  if (!usage.reportedToStripe && usage.minutesUsed > 0) {
+  // Report only overage minutes to Stripe (incremental); needs subscription item id for metered price
+  if (incrementalOverage > 0) {
     try {
-      const usageRecord = await stripe.subscriptionItems.createUsageRecord(
-        subscription.stripeSubscriptionId,
-        {
-          quantity: Math.ceil(usage.minutesUsed),
-          timestamp: Math.floor(now.getTime() / 1000),
-        }
-      )
-
-      await db.usage.update({
-        where: { id: usage.id },
-        data: {
-          reportedToStripe: true,
-          stripeUsageRecordId: usageRecord.id,
-        },
+      const sub = await stripe.subscriptions.retrieve(subscription.stripeSubscriptionId, {
+        expand: ["items.data.price"],
       })
+      const overageItem = sub.items.data.find(
+        (item) => (item.price as Stripe.Price).id === STRIPE_USAGE_PRICE_ID
+      )
+      if (overageItem) {
+        await stripe.subscriptionItems.createUsageRecord(overageItem.id, {
+          quantity: Math.ceil(incrementalOverage),
+          timestamp: Math.floor(now.getTime() / 1000),
+        })
+      }
     } catch (error) {
       console.error("Stripe usage reporting error:", error)
       // Don't throw - we'll retry on next call

@@ -24,7 +24,17 @@ export async function POST(req: NextRequest) {
       serviceAreas: businessInfo.city ? [businessInfo.city] : [],
     })
 
-    // Create or update business
+    const businessHours = businessInfo.businessHours
+      ? {
+          open: businessInfo.businessHours.open,
+          close: businessInfo.businessHours.close,
+          days: Array.isArray(businessInfo.businessHours.days) ? businessInfo.businessHours.days : [],
+        }
+      : undefined
+    const departments = Array.isArray(businessInfo.departments) ? businessInfo.departments : []
+    const serviceAreas = businessInfo.city ? [businessInfo.city] : []
+
+    // Create or update business (with plan-related fields: business hours, departments, CRM, emergency phone)
     const business = await db.business.upsert({
       where: { id: user.businessId || "new" },
       create: {
@@ -34,6 +44,13 @@ export async function POST(req: NextRequest) {
         city: businessInfo.city,
         state: businessInfo.state,
         zipCode: businessInfo.zipCode,
+        phoneNumber: businessInfo.phoneNumber || undefined,
+        businessHours: businessHours ?? undefined,
+        departments,
+        serviceAreas,
+        crmWebhookUrl: businessInfo.crmWebhookUrl || undefined,
+        forwardToEmail: businessInfo.forwardToEmail || undefined,
+        afterHoursEmergencyPhone: businessInfo.afterHoursEmergencyPhone || undefined,
         onboardingComplete: !requiresManualSetup,
         requiresManualSetup,
         users: {
@@ -47,15 +64,25 @@ export async function POST(req: NextRequest) {
         city: businessInfo.city,
         state: businessInfo.state,
         zipCode: businessInfo.zipCode,
+        phoneNumber: businessInfo.phoneNumber || undefined,
+        businessHours: businessHours ?? undefined,
+        departments,
+        serviceAreas,
+        crmWebhookUrl: businessInfo.crmWebhookUrl || undefined,
+        forwardToEmail: businessInfo.forwardToEmail || undefined,
+        afterHoursEmergencyPhone: businessInfo.afterHoursEmergencyPhone || undefined,
         onboardingComplete: !requiresManualSetup,
         requiresManualSetup,
       },
     })
 
-    // Update user's businessId
+    // Update user's businessId and owner phone (for SMS notifications)
     await db.user.update({
       where: { id: user.id },
-      data: { businessId: business.id },
+      data: {
+        businessId: business.id,
+        phoneNumber: businessInfo.ownerPhone || undefined,
+      },
     })
 
     return NextResponse.json({ success: true, business })

@@ -2,12 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { requireAuth } from "@/lib/auth"
 import { createCheckoutSession } from "@/lib/stripe"
 import { PlanType } from "@prisma/client"
-
-const PLAN_DETAILS = {
-  [PlanType.STARTER]: { setupFee: 99 },
-  [PlanType.PRO]: { setupFee: 199 },
-  [PlanType.LOCAL_PLUS]: { setupFee: 299 },
-}
+import { SETUP_FEES } from "@/lib/plans"
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,8 +16,8 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const plan = PLAN_DETAILS[planType as PlanType]
-    if (!plan) {
+    const setupFee = SETUP_FEES[planType as PlanType]
+    if (setupFee === undefined) {
       return NextResponse.json(
         { error: "Invalid plan" },
         { status: 400 }
@@ -32,7 +27,7 @@ export async function POST(req: NextRequest) {
     const session = await createCheckoutSession(
       user.businessId,
       planType as PlanType,
-      plan.setupFee
+      setupFee
     )
 
     return NextResponse.json({ url: session.url })

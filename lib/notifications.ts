@@ -8,13 +8,15 @@ const twilioClient = process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_T
   ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
   : null
 
-interface StructuredIntake {
+export interface StructuredIntake {
   name?: string
   phone?: string
   address?: string
   city?: string
   issue_description?: string
   emergency?: boolean
+  appointment_preference?: string
+  department?: string
 }
 
 export async function sendEmailNotification(
@@ -77,6 +79,13 @@ export async function sendEmailNotification(
             <p><strong>Call ID:</strong> ${call.retellCallId}</p>
           </div>
 
+          ${(call as { summary?: string }).summary ? `
+            <div style="background: #ecfdf5; padding: 15px; border-radius: 8px; margin: 20px 0;">
+              <h2 style="margin-top: 0;">Summary</h2>
+              <p style="white-space: pre-wrap;">${(call as { summary?: string }).summary}</p>
+            </div>
+          ` : ""}
+
           ${call.transcript ? `
             <div style="background: #f9fafb; padding: 15px; border-radius: 8px; margin: 20px 0;">
               <h2 style="margin-top: 0;">Transcript</h2>
@@ -121,9 +130,8 @@ export async function sendSMSNotification(
     where: { businessId: business.id },
   }))
 
-  // SMS would need phone number in user profile
-  // For MVP, we'll skip if not available
-  if (!owner) {
+  const ownerPhone = (owner as { phoneNumber?: string }).phoneNumber
+  if (!owner || !ownerPhone) {
     return
   }
 
@@ -131,16 +139,87 @@ export async function sendSMSNotification(
   const message = `${emergencyPrefix}New call from ${intake.name || "Unknown"}. ${intake.issue_description ? `Issue: ${intake.issue_description.substring(0, 100)}` : ""} Call back: ${intake.phone || "N/A"}`
 
   try {
-    // Note: In production, you'd need to store phone numbers in user profile
-    // For now, this is a placeholder
-    // await twilioClient.messages.create({
-    //   body: message,
-    //   from: process.env.TWILIO_PHONE_NUMBER,
-    //   to: owner.phoneNumber, // Would need to add this field
-    // })
-    console.log("SMS notification (placeholder):", message)
+    await twilioClient.messages.create({
+      body: message,
+      from: process.env.TWILIO_PHONE_NUMBER!,
+      to: ownerPhone,
+    })
   } catch (error) {
     console.error("SMS send error:", error)
     throw error
+  }
+}
+
+/** Pro+: send SMS confirmation to caller after the call */
+export async function sendSMSToCaller(
+  business: Business,
+  callerPhone: string,
+  intake: StructuredIntake
+) {
+  if (!twilioClient || !process.env.TWILIO_PHONE_NUMBER) {
+    return
+  }
+  const message = `Thanks for calling ${business.name}. We received your information and will reach out shortly.`
+  try {
+    await twilioClient.messages.create({
+      body: message,
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: callerPhone,
+    })
+  } catch (error) {
+    console.error("SMS to caller error:", error)
+  }
+}
+
+/** Pro+: forward lead to CRM webhook and/or forward email */
+export async function forwardToCrm(
+  business: Business & { crmWebhookUrl?: string | null; forwardToEmail?: string | null },
+  call: Call,
+  intake: StructuredIntake
+) {
+  const payload = {
+    source: "nevermisslead-ai",
+    businessId: business.id,
+    businessName: business.name,
+    callId: call.id,
+    retellCallId: call.retellCallId,
+    createdAt: call.createdAt,
+    callerName: intake.name,
+    callerPhone: intake.phone,
+    address: intake.address,
+    city: intake.city,
+    issueDescription: intake.issue_description,
+    emergency: intake.emergency,
+    transcript: call.transcript,
+    summary: (call as { summary?: string }).summary,
+  }
+
+  if (business.crmWebhookUrl) {
+    try {
+      await fetch(business.crmWebhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+    } catch (error) {
+      console.error("CRM webhook error:", error)
+      throw error
+    }
+  }
+
+  if (business.forwardToEmail && resend) {
+    try {
+      await resend.emails.send({
+        from: "NeverMissLead-AI <notifications@nevermisslead.ai>",
+        to: business.forwardToEmail,
+        subject: `Lead: ${intake.name || "Unknown"} - ${business.name}`,
+        html: `
+          <p>New lead from NeverMissLead-AI:</p>
+          <pre>${JSON.stringify(payload, null, 2)}</pre>
+        `,
+      })
+    } catch (error) {
+      console.error("CRM forward email error:", error)
+    }
   }
 }

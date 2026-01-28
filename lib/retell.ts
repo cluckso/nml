@@ -1,5 +1,10 @@
-import { Industry } from "@prisma/client"
-import { generatePrompt } from "./prompts"
+import { Industry, PlanType } from "@prisma/client"
+import { generatePrompt, BusinessHoursInput } from "./prompts"
+import {
+  hasAppointmentCapture,
+  hasBrandedVoice,
+  hasMultiDepartment,
+} from "./plans"
 
 const RETELL_API_BASE = "https://api.retellai.com"
 
@@ -26,6 +31,10 @@ export interface CreateAgentRequest {
   industry: Industry
   serviceAreas: string[]
   phoneNumber?: string
+  planType?: PlanType
+  businessHours?: BusinessHoursInput
+  departments?: string[]
+  afterHoursEmergencyPhone?: string
 }
 
 export async function createRetellAgent(
@@ -36,15 +45,28 @@ export async function createRetellAgent(
     throw new Error("RETELL_API_KEY is not configured")
   }
 
-  const globalPrompt = generatePrompt(data.businessName, data.industry, data.serviceAreas)
+  const globalPrompt = generatePrompt(
+    data.businessName,
+    data.industry,
+    data.serviceAreas,
+    {
+      businessHours: data.businessHours ?? undefined,
+      departments: data.departments?.length ? data.departments : undefined,
+      afterHoursEmergencyPhone: data.afterHoursEmergencyPhone,
+      includeAppointmentCapture: data.planType ? hasAppointmentCapture(data.planType) : false,
+    }
+  )
 
   // Build conversation flow based on Kip (3).json structure
   const conversationFlow = buildConversationFlow(data.businessName, data.industry, data.serviceAreas)
 
+  // Local Plus: use a distinct "branded" voice; others use default
+  const voiceId = data.planType && hasBrandedVoice(data.planType) ? "11labs-Adam" : "11labs-Chloe"
+
   const agentPayload: RetellAgent = {
     agent_name: data.businessName,
     language: "en-US",
-    voice_id: "11labs-Chloe",
+    voice_id: voiceId,
     voice_temperature: 0.98,
     voice_speed: 0.98,
     volume: 0.94,

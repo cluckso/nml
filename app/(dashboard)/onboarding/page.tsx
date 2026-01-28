@@ -18,6 +18,13 @@ interface OnboardingData {
     city: string
     state: string
     zipCode: string
+    phoneNumber?: string
+    ownerPhone?: string
+    businessHours?: { open: string; close: string; days: string[] }
+    departments?: string[]
+    crmWebhookUrl?: string
+    forwardToEmail?: string
+    afterHoursEmergencyPhone?: string
   }
 }
 

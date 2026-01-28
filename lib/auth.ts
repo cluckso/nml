@@ -1,62 +1,63 @@
-import { auth, currentUser } from "@clerk/nextjs/server"
+import { createClient } from "@/lib/supabase/server"
 import { db } from "./db"
 import { UserRole } from "@prisma/client"
 import { redirect } from "next/navigation"
 
 export async function getCurrentUser() {
-  const { userId } = await auth()
-  if (!userId) return null
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  const clerkUser = await currentUser()
-  if (!clerkUser) return null
+  if (!user) return null
 
-  let user = await db.user.findUnique({
-    where: { clerkId: userId },
+  let dbUser = await db.user.findUnique({
+    where: { supabaseUserId: user.id },
     include: { business: true },
   })
 
-  if (!user) {
-    user = await db.user.create({
+  if (!dbUser) {
+    dbUser = await db.user.create({
       data: {
-        clerkId: userId,
-        email: clerkUser.emailAddresses[0]?.emailAddress || "",
+        supabaseUserId: user.id,
+        email: user.email || "",
         role: UserRole.CUSTOMER,
       },
       include: { business: true },
     })
   }
 
-  return user
+  return dbUser
 }
 
 export async function requireAuth() {
-  const { userId } = await auth()
-  if (!userId) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
+
+  if (error || !user) {
     redirect("/sign-in")
   }
 
-  const clerkUser = await currentUser()
-  if (!clerkUser) {
-    redirect("/sign-in")
-  }
-
-  let user = await db.user.findUnique({
-    where: { clerkId: userId },
+  let dbUser = await db.user.findUnique({
+    where: { supabaseUserId: user.id },
     include: { business: true },
   })
 
-  if (!user) {
-    user = await db.user.create({
+  if (!dbUser) {
+    dbUser = await db.user.create({
       data: {
-        clerkId: userId,
-        email: clerkUser.emailAddresses[0]?.emailAddress || "",
+        supabaseUserId: user.id,
+        email: user.email || "",
         role: UserRole.CUSTOMER,
       },
       include: { business: true },
     })
   }
 
-  return user
+  return dbUser
 }
 
 export async function requireAdmin() {
