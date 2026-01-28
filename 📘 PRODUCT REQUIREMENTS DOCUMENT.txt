@@ -1,0 +1,441 @@
+📘 PRODUCT REQUIREMENTS DOCUMENT (PRD)
+Product Name
+
+NeverMissLead-AI
+
+Version
+
+v1.0 (MVP → Scalable SaaS)
+
+Owner
+
+Steven Steinhoff
+📧 ststeinhoff80@gmail.com
+
+📞 (608) 642-1459
+
+1️⃣ PRODUCT OVERVIEW
+Problem Statement
+
+Local service businesses lose revenue due to:
+
+Missed calls
+
+After-hours inquiries
+
+Voicemail abandonment
+
+Interrupted work due to phone calls
+
+Hiring a receptionist is expensive and inflexible.
+
+Solution
+
+NeverMissLead-AI is an AI-powered call answering and intake service that:
+
+Answers every inbound call
+
+Collects structured intake data
+
+Sends summaries via SMS/email
+
+Works 24/7
+
+Requires no technical setup for basic users
+
+2️⃣ TARGET CUSTOMERS
+Primary Users
+
+HVAC companies
+
+Plumbers
+
+Auto repair shops
+
+Childcare centers
+
+Electricians
+
+Small service businesses (1–20 employees)
+
+Secondary Users
+
+Marketing agencies (white-label resale)
+
+MSPs / local IT providers
+
+3️⃣ GOALS & SUCCESS METRICS
+Business Goals
+
+Reduce missed calls by >80%
+
+Achieve <$50 CAC locally
+
+Reach profitability at 20–30 customers
+
+Enable self-serve onboarding for 80% of users
+
+Product Metrics
+
+Call answer rate: ≥99%
+
+Intake completion rate: ≥90%
+
+Avg setup time: <10 minutes
+
+Churn: <5% monthly
+
+4️⃣ NON-GOALS (OUT OF SCOPE FOR v1)
+
+Outbound sales calls
+
+Taking payments over the phone
+
+Scheduling directly into third-party calendars
+
+Giving price quotes
+
+Replacing human dispatch entirely
+
+5️⃣ FEATURE REQUIREMENTS
+5.1 AI CALL ANSWERING (CORE)
+
+Description
+Answer all inbound calls using Retell AI voice agents.
+
+Requirements
+
+Professional, friendly tone
+
+Business-name-aware greeting
+
+Industry-specific conversation logic
+
+Never gives pricing
+
+Never promises availability
+
+Never collects payment info
+
+Supported Scenarios
+
+Business hours
+
+After-hours
+
+Missed calls
+
+Emergency detection
+
+5.2 INTAKE DATA CAPTURE
+
+Required Fields
+
+Caller name
+
+Callback phone number
+
+Reason for call
+
+Emergency (yes/no)
+
+Service address (if applicable)
+
+Preferred callback time
+
+Format
+Structured JSON returned via Retell post-call webhook.
+
+5.3 POST-CALL SUMMARIES
+
+Delivery Methods
+
+Email
+
+SMS (Twilio)
+
+Timing
+
+Within 30 seconds of call completion
+
+Content
+
+Caller details
+
+Short issue summary
+
+Emergency flag
+
+5.4 INDUSTRY-SPECIFIC LOGIC
+HVAC / Plumbing
+
+Emergency vs non-emergency detection
+
+After-hours escalation tagging
+
+Seasonal messaging
+
+Auto Repair
+
+Appointment requests
+
+Repair status inquiries
+
+Drop-off/pick-up questions
+
+Childcare
+
+Enrollment inquiries
+
+Age range filtering
+
+Tour requests
+
+Availability questions
+
+5.5 USER ONBOARDING (SELF-SERVE)
+
+Steps
+
+Account creation
+
+Business info
+
+Industry selection
+
+Plan selection
+
+Billing setup
+
+Call preferences
+
+Phone number assignment
+
+Go live
+
+Time Target
+<10 minutes
+
+5.6 COMPLEX SETUP ESCALATION
+
+If user selects:
+
+Multi-location
+
+Multi-department
+
+Custom scripts
+
+Then:
+
+Block self-serve completion
+
+Show contact info for Steven Steinhoff
+
+Create internal “manual onboarding” ticket
+
+5.7 BILLING & SUBSCRIPTIONS
+
+Pricing Source
+Must match pricing_reference.txt exactly 
+
+pricing_reference
+
+Plans
+
+Starter — $99/mo (500 min)
+
+Pro — $199/mo (1,200 min)
+
+Local Plus — $299/mo (2,500 min)
+
+Overage
+
+$0.10 per minute
+
+Setup Fees
+
+Starter: $0–99
+
+Pro: $199
+
+Local Plus: $299–499
+
+5.8 STRIPE IMPLEMENTATION
+
+Billing Model
+
+Flat subscription + metered usage
+
+Requirements
+
+Monthly billing
+
+Usage reporting from Retell
+
+Itemized invoices
+
+Annual plans (2 months free)
+
+Payment retry logic
+
+5.9 ADMIN DASHBOARD
+
+Admin Capabilities
+
+View customers
+
+View call logs
+
+See usage
+
+Adjust plans
+
+Trigger manual setup flags
+
+Pause or cancel service
+
+6️⃣ TECHNICAL REQUIREMENTS
+Backend
+
+Node.js 20+
+
+TypeScript
+
+PostgreSQL
+
+Prisma ORM
+
+REST + webhooks
+
+Frontend
+
+Next.js App Router
+
+Server Components
+
+Tailwind + shadcn/ui
+
+Integrations
+
+Retell AI (calls + webhooks)
+
+Stripe (billing + usage)
+
+Twilio (SMS)
+
+Email provider (Resend/SendGrid)
+
+7️⃣ DATA MODELS (HIGH-LEVEL)
+User
+
+id
+
+email
+
+role (customer/admin)
+
+business_id
+
+Business
+
+name
+
+industry
+
+hours
+
+plan
+
+phone_number
+
+Call
+
+retell_call_id
+
+business_id
+
+duration
+
+transcript
+
+structured_intake
+
+emergency_flag
+
+Usage
+
+business_id
+
+minutes_used
+
+billing_period
+
+8️⃣ SECURITY & COMPLIANCE
+
+HTTPS everywhere
+
+Webhook signature verification
+
+No payment data stored
+
+No SSNs or DOBs collected
+
+GDPR-style data deletion on request
+
+9️⃣ LAUNCH REQUIREMENTS
+MVP Launch Checklist
+
+Retell live number
+
+Stripe live mode
+
+Email + SMS verified
+
+3 industry flows tested
+
+5 beta users onboarded
+
+🔟 MARKETING REQUIREMENTS
+Channels
+
+Facebook Ads (local targeting)
+
+Cold calling
+
+Referrals
+
+White-label agencies
+
+Positioning
+
+“Revenue protection for missed calls”
+
+1️⃣1️⃣ COLD-CALL SCRIPT (INCLUDED IN PRODUCT)
+
+“What happens when someone calls your business and you’re busy or closed?”
+
+1️⃣2️⃣ RISKS & MITIGATIONS
+Risk	Mitigation
+Call hallucinations	Strict prompts
+Overuse minutes	Metered overage
+Complex setups	Manual escalation
+Churn	Local support + fast setup
+1️⃣3️⃣ FUTURE ROADMAP (POST-MVP)
+
+Call recordings in dashboard
+
+Zapier / n8n integration
+
+Multi-language support
+
+CRM sync
+
+Appointment booking
+
+FINAL NOTE (IMPORTANT)
+
+NeverMissLead-AI is not sold as AI software.
+It is sold as “We make sure you never miss a lead.”
+
+Everything — UX, pricing, onboarding, copy — must reinforce that.

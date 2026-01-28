@@ -1,0 +1,39 @@
+import { Industry } from "@prisma/client"
+
+export const INDUSTRIES = [
+  { value: Industry.HVAC, label: "HVAC", description: "Heating, ventilation, and air conditioning" },
+  { value: Industry.PLUMBING, label: "Plumbing", description: "Plumbing services" },
+  { value: Industry.AUTO_REPAIR, label: "Auto Repair", description: "Automotive repair and maintenance" },
+  { value: Industry.CHILDCARE, label: "Childcare", description: "Daycare, preschool, after-school programs" },
+  { value: Industry.ELECTRICIAN, label: "Electrician", description: "Electrical services" },
+  { value: Industry.GENERIC, label: "Other", description: "Other service business" },
+] as const
+
+export const SUPPORTED_CITIES = [
+  "Platteville",
+  "Lancaster",
+  "Cuba City",
+  "Belmont",
+  "Potosi",
+  "Kieler",
+  "Jonestown",
+  "Rewey",
+]
+
+export function isComplexSetup(data: {
+  industry?: Industry
+  serviceAreas?: string[]
+  customScript?: boolean
+  multiLocation?: boolean
+}): boolean {
+  // Multi-location requires manual setup
+  if (data.multiLocation) return true
+  
+  // Custom scripts require manual setup
+  if (data.customScript) return true
+  
+  // Multiple service areas might need review
+  if (data.serviceAreas && data.serviceAreas.length > 3) return true
+  
+  return false
+}
