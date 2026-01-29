@@ -6,6 +6,13 @@ import { getTrialStatus } from "@/lib/trial"
 
 export async function POST(req: NextRequest) {
   try {
+    if (!process.env.RETELL_API_KEY) {
+      return NextResponse.json(
+        { error: "Call assistant is not configured. Set RETELL_API_KEY in your environment." },
+        { status: 503 }
+      )
+    }
+
     const user = await getAuthUserFromRequest(req)
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     
@@ -73,8 +80,12 @@ export async function POST(req: NextRequest) {
     })
   } catch (error) {
     console.error("Agent creation error:", error)
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Failed to create agent"
     return NextResponse.json(
-      { error: "Failed to create agent" },
+      { error: message },
       { status: 500 }
     )
   }

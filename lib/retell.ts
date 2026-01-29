@@ -57,15 +57,19 @@ export async function createRetellAgent(
     }
   )
 
-  // Build conversation flow based on Kip (3).json structure
-  const conversationFlow = buildConversationFlow(data.businessName, data.industry, data.serviceAreas)
+  // Retell requires creating the conversation flow first, then attaching by ID
+  const flow = buildConversationFlow(data.businessName, data.industry, data.serviceAreas)
+  const { conversation_flow_id, version } = await createConversationFlow(apiKey, {
+    ...flow,
+    global_prompt: globalPrompt,
+  })
 
   // Local Plus: use a distinct "branded" voice; others use default
   const voiceId = data.planType && hasBrandedVoice(data.planType) ? "11labs-Adam" : "11labs-Chloe"
 
-  const agentPayload: RetellAgent = {
+  const agentPayload = {
     agent_name: data.businessName,
-    language: "en-US",
+    language: "en-US" as const,
     voice_id: voiceId,
     voice_temperature: 0.98,
     voice_speed: 0.98,
@@ -73,12 +77,9 @@ export async function createRetellAgent(
     max_call_duration_ms: 3600000, // 1 hour
     interruption_sensitivity: 0.9,
     response_engine: {
-      type: "conversation-flow",
-      version: 0,
-    },
-    conversationFlow: {
-      ...conversationFlow,
-      global_prompt: globalPrompt,
+      type: "conversation-flow" as const,
+      conversation_flow_id,
+      version: version ?? 0,
     },
   }
 
@@ -136,6 +137,40 @@ async function assignPhoneNumber(
   }
 
   return phoneNumber
+}
+
+/** Create a conversation flow via Retell API; returns conversation_flow_id and version for use in create-agent. */
+async function createConversationFlow(
+  apiKey: string,
+  flow: { nodes: any[]; start_node_id: string; start_speaker: string; global_prompt?: string }
+): Promise<{ conversation_flow_id: string; version: number }> {
+  const body = {
+    model_choice: { model: "gpt-4.1", type: "cascading" },
+    nodes: flow.nodes,
+    start_speaker: flow.start_speaker as "agent",
+    start_node_id: flow.start_node_id,
+    global_prompt: flow.global_prompt ?? undefined,
+  }
+
+  const response = await fetch(`${RETELL_API_BASE}/create-conversation-flow`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(body),
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`Failed to create Retell conversation flow: ${error}`)
+  }
+
+  const result = await response.json()
+  return {
+    conversation_flow_id: result.conversation_flow_id,
+    version: result.version ?? 0,
+  }
 }
 
 function buildConversationFlow(
