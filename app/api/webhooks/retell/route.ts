@@ -14,8 +14,9 @@ import crypto from "crypto"
 
 export async function POST(req: NextRequest) {
   try {
-    // Rate limiting
-    const ip = req.headers.get("x-forwarded-for") || req.ip || "unknown"
+    // Rate limiting (NextRequest has no .ip; use headers)
+    const forwarded = req.headers.get("x-forwarded-for")
+    const ip = forwarded ? forwarded.split(",")[0].trim() : req.headers.get("x-real-ip") || "unknown"
     const limit = rateLimit(`webhook-retell-${ip}`, 100, 60000) // 100 requests per minute
     if (!limit.allowed) {
       return NextResponse.json(
