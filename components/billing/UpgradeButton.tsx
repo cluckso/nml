@@ -6,7 +6,7 @@ import { PlanType } from "@prisma/client"
 
 interface UpgradeButtonProps {
   planType: PlanType
-  currentPlan?: PlanType
+  currentPlan?: PlanType | null
   agreedToLegal?: boolean
 }
 

@@ -1,5 +1,6 @@
 import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { getTrialStatus } from "@/lib/trial"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CallLog } from "@/components/calls/CallLog"
 import { SetupAICard } from "@/components/dashboard/SetupAICard"
@@ -13,7 +14,7 @@ export default async function DashboardPage() {
     return <div>Please complete onboarding</div>
   }
 
-  const [business, recentCalls, stats] = await Promise.all([
+  const [business, recentCalls, stats, trial] = await Promise.all([
     db.business.findUnique({
       where: { id: user.businessId },
     }),
@@ -27,6 +28,7 @@ export default async function DashboardPage() {
       _count: true,
       _sum: { minutes: true },
     }),
+    getTrialStatus(user.businessId),
   ])
 
   const emergencyCalls = recentCalls.filter((c) => c.emergencyFlag).length
@@ -44,12 +46,37 @@ export default async function DashboardPage() {
         </p>
       </div>
 
+      {trial.isOnTrial && (
+        <Card className="mb-8 border-amber-200 bg-amber-50/50 dark:border-amber-900 dark:bg-amber-950/20">
+          <CardContent className="pt-6">
+            {trial.isExhausted ? (
+              <p className="text-sm">
+                Your free trial minutes are used.{" "}
+                <Link href="/billing" className="font-medium text-primary underline">
+                  Upgrade to a plan
+                </Link>{" "}
+                to continue receiving calls.
+              </p>
+            ) : (
+              <p className="text-sm">
+                Free trial: <span className="font-semibold">{Math.ceil(trial.minutesRemaining)}</span> of 100 minutes remaining.{" "}
+                <Link href="/billing" className="font-medium text-primary underline">
+                  Upgrade
+                </Link>{" "}
+                when you&apos;re ready.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       <div className="mb-8">
         <SetupAICard
           hasAgent={hasAgent}
           phoneNumber={phoneNumber}
           businessName={business?.name ?? "your business"}
           ownerPhone={ownerPhone}
+          trialStatus={trial}
         />
       </div>
 

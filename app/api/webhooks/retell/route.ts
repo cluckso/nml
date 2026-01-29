@@ -8,6 +8,7 @@ import {
 } from "@/lib/notifications"
 import { reportUsageToStripe } from "@/lib/stripe"
 import { hasSmsToCallers, hasCrmForwarding, hasLeadTagging, getEffectivePlanType } from "@/lib/plans"
+import { getTrialStatus } from "@/lib/trial"
 import { PlanType } from "@prisma/client"
 import { rateLimit } from "@/lib/rate-limit"
 import crypto from "crypto"
@@ -179,6 +180,15 @@ async function handleCallCompletion(event: any) {
     await reportUsageToStripe(business.id, minutes)
   } catch (error) {
     console.error("Usage reporting error:", error)
+  }
+
+  // Free trial: pause service when trial minutes exhausted
+  const trial = await getTrialStatus(business.id)
+  if (trial.isExhausted) {
+    await db.business.update({
+      where: { id: business.id },
+      data: { isActive: false },
+    })
   }
 }
 

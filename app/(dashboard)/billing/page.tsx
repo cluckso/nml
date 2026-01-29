@@ -1,11 +1,13 @@
 import { redirect } from "next/navigation"
 import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { getEffectivePlanType } from "@/lib/plans"
+import { getEffectivePlanType, FREE_TRIAL_MINUTES } from "@/lib/plans"
+import { getTrialStatus } from "@/lib/trial"
 import { PlanType } from "@prisma/client"
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { BillingPlansWithAgreement } from "@/components/billing/BillingPlansWithAgreement"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 const PLAN_DETAILS = {
   [PlanType.STARTER]: {
@@ -35,7 +37,7 @@ export default async function BillingPage() {
     redirect("/onboarding")
   }
 
-  const [business, subscription, usage] = await Promise.all([
+  const [business, subscription, usage, trial] = await Promise.all([
     db.business.findUnique({
       where: { id: user.businessId },
     }),
@@ -48,13 +50,15 @@ export default async function BillingPage() {
         billingPeriod: new Date().toISOString().slice(0, 7), // YYYY-MM
       },
     }),
+    getTrialStatus(user.businessId),
   ])
 
-  const currentPlan = getEffectivePlanType(subscription?.planType)
-  const planDetails = PLAN_DETAILS[currentPlan]
-  const minutesUsed = usage?.minutesUsed || 0
-  const minutesIncluded = planDetails?.minutes || 0
-  const overageMinutes = Math.max(0, minutesUsed - minutesIncluded)
+  const isOnTrial = trial.isOnTrial
+  const currentPlan = subscription ? getEffectivePlanType(subscription.planType) : null
+  const planDetails = currentPlan ? PLAN_DETAILS[currentPlan] : null
+  const minutesUsed = isOnTrial ? trial.minutesUsed : (usage?.minutesUsed ?? 0)
+  const minutesIncluded = isOnTrial ? FREE_TRIAL_MINUTES : (planDetails?.minutes ?? 0)
+  const overageMinutes = isOnTrial ? 0 : Math.max(0, minutesUsed - minutesIncluded)
   const overageCost = overageMinutes * 0.1
 
   return (
@@ -66,30 +70,52 @@ export default async function BillingPage() {
           <CardHeader>
             <CardTitle>Current Plan</CardTitle>
             <CardDescription>
-              {planDetails ? planDetails.name : "No active subscription"}
+              {isOnTrial
+                ? trial.isExhausted
+                  ? "Free trial used — upgrade to continue"
+                  : "Free trial"
+                : planDetails
+                  ? planDetails.name
+                  : "No active subscription"}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {planDetails && (
+            {isOnTrial ? (
               <div className="space-y-2">
-                <p className="text-2xl font-bold">${planDetails.price}/month</p>
+                <p className="text-2xl font-bold">Free trial</p>
                 <p className="text-sm text-muted-foreground">
-                  Includes {planDetails.minutes} minutes
+                  {FREE_TRIAL_MINUTES} call minutes to try real calls. No time limit. Upgrade to any plan to continue.
                 </p>
-                {subscription && (
-                  <p className="text-sm text-muted-foreground">
-                    Next billing: {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
-                  </p>
+                {trial.isExhausted && (
+                  <Button asChild className="mt-2">
+                    <Link href="/billing#plans">Upgrade to continue</Link>
+                  </Button>
                 )}
               </div>
+            ) : (
+              planDetails && (
+                <div className="space-y-2">
+                  <p className="text-2xl font-bold">${planDetails.price}/month</p>
+                  <p className="text-sm text-muted-foreground">
+                    Includes {planDetails.minutes} minutes
+                  </p>
+                  {subscription && (
+                    <p className="text-sm text-muted-foreground">
+                      Next billing: {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                    </p>
+                  )}
+                </div>
+              )
             )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Usage This Month</CardTitle>
-            <CardDescription>Current billing period</CardDescription>
+            <CardTitle>{isOnTrial ? "Trial usage" : "Usage This Month"}</CardTitle>
+            <CardDescription>
+              {isOnTrial ? "Free trial minutes" : "Current billing period"}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
@@ -97,7 +123,7 @@ export default async function BillingPage() {
                 <span>Minutes used:</span>
                 <span className="font-semibold">{Math.ceil(minutesUsed)} / {minutesIncluded}</span>
               </div>
-              {overageMinutes > 0 && (
+              {!isOnTrial && overageMinutes > 0 && (
                 <div className="flex justify-between text-destructive">
                   <span>Overage:</span>
                   <span className="font-semibold">${overageCost.toFixed(2)}</span>
@@ -107,7 +133,7 @@ export default async function BillingPage() {
                 <div
                   className="bg-primary h-2 rounded-full"
                   style={{
-                    width: `${Math.min(100, (minutesUsed / minutesIncluded) * 100)}%`,
+                    width: `${Math.min(100, minutesIncluded > 0 ? (minutesUsed / minutesIncluded) * 100 : 0)}%`,
                   }}
                 />
               </div>
@@ -116,10 +142,12 @@ export default async function BillingPage() {
         </Card>
       </div>
 
-      <Card>
+      <Card id="plans">
         <CardHeader>
           <CardTitle>Available Plans</CardTitle>
-          <CardDescription>Upgrade or change your plan</CardDescription>
+          <CardDescription>
+            {isOnTrial ? "Upgrade to continue when you're ready" : "Upgrade or change your plan"}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <BillingPlansWithAgreement

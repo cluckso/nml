@@ -16,7 +16,7 @@ export function BillingPlansWithAgreement({
   currentPlan,
   planDetails,
 }: {
-  currentPlan: PlanType
+  currentPlan: PlanType | null
   planDetails: Record<string, PlanDetailsEntry>
 }) {
   const [agreedToLegal, setAgreedToLegal] = useState(false)
@@ -51,7 +51,7 @@ export function BillingPlansWithAgreement({
           <div
             key={planType}
             className={`border rounded-lg p-6 ${
-              currentPlan === planType ? "border-primary" : ""
+              currentPlan != null && currentPlan === planType ? "border-primary" : ""
             }`}
           >
             <h3 className="text-xl font-semibold mb-2">{details.name}</h3>

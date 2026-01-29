@@ -206,6 +206,11 @@ export async function handleStripeWebhook(event: Stripe.Event) {
             currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
           },
         })
+        // Reactivate business if it was paused (e.g. after free trial exhausted)
+        await db.business.update({
+          where: { id: businessId },
+          data: { isActive: true },
+        })
       }
       break
     }

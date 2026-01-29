@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { requireAuth } from "@/lib/auth"
+import { getAuthUserFromRequest } from "@/lib/auth"
 import { createCheckoutSession, stripe } from "@/lib/stripe"
 import { db } from "@/lib/db"
 import { PlanType } from "@prisma/client"
@@ -17,7 +17,8 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const user = await requireAuth()
+    const user = await getAuthUserFromRequest(req)
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     const { planType } = await req.json()
 
     const setupFee = SETUP_FEES[planType as PlanType]

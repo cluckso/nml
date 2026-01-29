@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Phone, CheckCircle2, Loader2, Smartphone } from "lucide-react"
+import type { TrialStatus } from "@/lib/trial"
 
 interface SetupAICardProps {
   hasAgent: boolean
@@ -13,9 +14,11 @@ interface SetupAICardProps {
   businessName: string
   /** Owner phone for SMS alerts — shown in same card to avoid two-number confusion */
   ownerPhone?: string | null
+  /** When on free trial, show remaining minutes; when exhausted, disable connect */
+  trialStatus?: TrialStatus
 }
 
-export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone }: SetupAICardProps) {
+export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, trialStatus }: SetupAICardProps) {
   const router = useRouter()
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -95,6 +98,9 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone }:
     )
   }
 
+  const trialExhausted = trialStatus?.isExhausted ?? false
+  const onTrial = trialStatus?.isOnTrial ?? false
+
   return (
     <Card className="border-primary/30 bg-primary/5">
       <CardHeader>
@@ -104,28 +110,44 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone }:
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {onTrial && !trialExhausted && (
+          <p className="text-sm text-muted-foreground rounded-md bg-muted/50 p-3">
+            You&apos;re on the free trial ({Math.ceil(trialStatus?.minutesRemaining ?? 0)} minutes remaining). Upgrade from <Link href="/billing" className="text-primary underline">Billing</Link> when you&apos;re ready.
+          </p>
+        )}
+        {trialExhausted && (
+          <p className="rounded-md bg-amber-100 dark:bg-amber-950/30 p-3 text-sm text-amber-800 dark:text-amber-200">
+            Free trial minutes used. <Link href="/billing" className="font-medium underline">Upgrade to a plan</Link> to connect your call assistant.
+          </p>
+        )}
         <p className="text-sm text-muted-foreground">
           We&apos;ll create your AI and (when available) assign a phone number. Then you&apos;ll forward your business line to that number and confirm where you want call alerts (SMS/email). No need to enter numbers in multiple spots — we&apos;ll show everything here after you connect.
         </p>
         {error && (
           <p className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</p>
         )}
-        <Button
-          onClick={handleActivate}
-          disabled={creating}
-          className="w-full sm:w-auto"
-        >
-          {creating ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Connecting…
-            </>
-          ) : (
-            "Connect to my call assistant"
-          )}
-        </Button>
+        {trialExhausted ? (
+          <Button asChild className="w-full sm:w-auto">
+            <Link href="/billing">Upgrade to connect</Link>
+          </Button>
+        ) : (
+          <Button
+            onClick={handleActivate}
+            disabled={creating}
+            className="w-full sm:w-auto"
+          >
+            {creating ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Connecting…
+              </>
+            ) : (
+              "Connect to my call assistant"
+            )}
+          </Button>
+        )}
         <p className="text-xs text-muted-foreground">
-          In development you can connect without a subscription. In production, subscribe first from <Link href="/billing" className="text-primary underline">Billing</Link>.
+          In development you can connect without a subscription. In production, subscribe or use your free trial from <Link href="/billing" className="text-primary underline">Billing</Link>.
         </p>
       </CardContent>
     </Card>
