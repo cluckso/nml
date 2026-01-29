@@ -4,7 +4,7 @@ import { db } from "@/lib/db"
 
 export const dynamic = "force-dynamic"
 
-/** Plan-first: no subscription → pricing. Then onboarding, then dashboard. */
+/** Dashboard: require business + onboarding. Trial (no subscription) or paid both allowed. */
 export default async function DashboardLayout({
   children,
 }: {
@@ -19,13 +19,13 @@ export default async function DashboardLayout({
       })
     : null
 
-  // 1. No plan yet → choose plan first (pricing / checkout)
-  if (!business?.subscription) {
-    redirect("/pricing")
+  // No business → start trial (creates business) or choose plan
+  if (!user.businessId || !business) {
+    redirect("/trial/start")
   }
 
-  // 2. No business or onboarding not complete → onboarding
-  if (!user.businessId || !business?.onboardingComplete) {
+  // Onboarding not complete → onboarding
+  if (!business.onboardingComplete) {
     redirect("/onboarding")
   }
 

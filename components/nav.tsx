@@ -38,9 +38,9 @@ export function Nav() {
   }
 
   return (
-    <nav className="border-b">
+    <nav className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <Link href="/" className="text-xl font-bold">
+        <Link href="/" className="text-xl font-bold text-foreground">
           NeverMissLead-AI
         </Link>
         <div className="flex gap-4 items-center">
@@ -53,7 +53,10 @@ export function Nav() {
           {user ? (
             <>
               <Link href="/dashboard">
-                <Button variant="outline">Dashboard</Button>
+                <Button variant="ghost">Dashboard</Button>
+              </Link>
+              <Link href="/billing">
+                <Button variant="ghost">Billing</Button>
               </Link>
               <Button variant="outline" onClick={handleSignOut}>
                 Sign Out

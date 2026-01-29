@@ -1,27 +1,55 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-// Landing page - no Check icon needed
+import { ArrowRight, CreditCard, Clock, Globe } from "lucide-react"
 
 export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <h1 className="text-5xl font-bold mb-6">
-          Never Miss Another Call — Even After Hours
-        </h1>
-        <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-          AI-powered answering & intake built specifically for local service businesses.
-          Capture leads, book requests, and emergencies — without hiring staff.
-        </p>
-        <div className="flex gap-4 justify-center">
-          <Link href="/sign-up">
-            <Button size="lg">Get Started</Button>
-          </Link>
-          <Link href="/pricing">
-            <Button size="lg" variant="outline">View Pricing</Button>
-          </Link>
+      {/* Hero Section — dark blue/purple gradient overlay */}
+      <section className="relative min-h-[85vh] flex flex-col items-center justify-center px-4 py-24 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/10" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(217_91%_60%_/_.15),transparent)]" />
+        <div className="container relative z-10 mx-auto text-center max-w-4xl">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary mb-8">
+            <Globe className="h-4 w-4" />
+            Now supporting multi-language intake
+          </div>
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight">
+            Never Miss Another Call{" "}
+            <span className="text-gradient-hero">Even After Hours</span>
+          </h1>
+          <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
+            AI-powered answering & intake built for local service businesses.
+            Capture leads, book requests, and emergencies — without hiring staff.
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center mb-10">
+            <Link href="/sign-up">
+              <Button size="lg" className="gap-2 text-base px-8">
+                Start Free Trial with 100 Call Minutes!
+                <ArrowRight className="h-5 w-5" />
+              </Button>
+            </Link>
+            <Link href="/pricing">
+              <Button size="lg" variant="outline" className="border-2 border-muted-foreground/40 bg-transparent hover:bg-white/5">
+                View Pricing
+              </Button>
+            </Link>
+          </div>
+          <div className="flex flex-wrap gap-8 justify-center text-sm text-muted-foreground">
+            <span className="inline-flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+                <CreditCard className="h-4 w-4" />
+              </span>
+              No credit card required
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+                <Clock className="h-4 w-4" />
+              </span>
+              5-minute setup
+            </span>
+          </div>
         </div>
       </section>
 
@@ -29,7 +57,7 @@ export default function HomePage() {
       <section className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center mb-12">What It Does</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
+          <Card className="border-border/50 bg-card/50 backdrop-blur">
             <CardHeader>
               <CardTitle>Answers Every Call</CardTitle>
             </CardHeader>
@@ -40,7 +68,7 @@ export default function HomePage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-border/50 bg-card/50 backdrop-blur">
             <CardHeader>
               <CardTitle>Captures Caller Info</CardTitle>
             </CardHeader>
@@ -51,7 +79,7 @@ export default function HomePage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-border/50 bg-card/50 backdrop-blur">
             <CardHeader>
               <CardTitle>Filters Emergencies</CardTitle>
             </CardHeader>
@@ -62,7 +90,7 @@ export default function HomePage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-border/50 bg-card/50 backdrop-blur">
             <CardHeader>
               <CardTitle>Sends Summaries</CardTitle>
             </CardHeader>
@@ -73,7 +101,7 @@ export default function HomePage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-border/50 bg-card/50 backdrop-blur">
             <CardHeader>
               <CardTitle>Works 24/7</CardTitle>
             </CardHeader>
@@ -84,7 +112,7 @@ export default function HomePage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-border/50 bg-card/50 backdrop-blur">
             <CardHeader>
               <CardTitle>Feels Like a Receptionist</CardTitle>
             </CardHeader>
@@ -98,9 +126,9 @@ export default function HomePage() {
       </section>
 
       {/* Who It's For */}
-      <section className="bg-muted py-16">
+      <section className="bg-muted/50 py-16 border-y border-border/50">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Who It's For</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">Who It&apos;s For</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div>
               <h3 className="font-semibold mb-2">Plumbers & HVAC</h3>
@@ -138,7 +166,7 @@ export default function HomePage() {
             If you recover just one missed service call per month, the system covers its cost.
             Most customers recover 3–10 calls they were missing before.
           </p>
-          <div className="bg-muted p-8 rounded-lg">
+          <div className="bg-muted/50 border border-border/50 p-8 rounded-xl">
             <p className="text-2xl font-semibold mb-4">
               A human receptionist = $2,000–$3,500/month
             </p>
@@ -154,11 +182,12 @@ export default function HomePage() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Start Capturing Every Call</h2>
           <p className="text-lg mb-8 opacity-90">
-            Get set up in under 10 minutes. No technical knowledge required.
+            Get 100 free trial minutes. No credit card required. 5-minute setup.
           </p>
           <Link href="/sign-up">
-            <Button size="lg" variant="secondary">
-              Get Started Today
+            <Button size="lg" variant="secondary" className="gap-2 bg-white text-primary hover:bg-white/90">
+              Start Free Trial with 100 Call Minutes!
+              <ArrowRight className="h-5 w-5" />
             </Button>
           </Link>
         </div>

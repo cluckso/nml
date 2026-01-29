@@ -17,7 +17,7 @@ export default async function OnboardingPage() {
     : null
 
   if (!business) {
-    redirect("/pricing")
+    redirect("/trial/start")
   }
 
   const planType = business.subscription?.planType ?? null

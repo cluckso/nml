@@ -1,5 +1,7 @@
+import Link from "next/link"
 import { getCurrentUser } from "@/lib/auth"
 import { PricingPlansWithAgreement } from "@/components/pricing/PricingPlansWithAgreement"
+import { Button } from "@/components/ui/button"
 
 const PLANS = [
   {
@@ -71,14 +73,25 @@ export default async function PricingPage() {
         )}
       </div>
 
-      {/* Free Trial (all plans) */}
-      <div className="max-w-2xl mx-auto mb-12 p-6 rounded-lg border bg-muted/30 text-center">
-        <h2 className="text-lg font-semibold mb-2">Free Trial (All Plans)</h2>
-        <p className="text-sm text-muted-foreground mb-2">100 free call minutes · No time limit · No setup fee</p>
-        <p className="text-sm text-muted-foreground">
-          No overage during trial. Service pauses when minutes are used. Upgrade to any plan to continue.
+      {/* Free Trial — primary CTA to access 100 minutes */}
+      <div className="max-w-2xl mx-auto mb-12 p-8 rounded-xl border-2 border-primary/20 bg-primary/5 text-center">
+        <h2 className="text-2xl font-bold mb-2">100 free trial minutes</h2>
+        <p className="text-muted-foreground mb-4">
+          100 call minutes to try real AI answering. No time limit. No setup fee. No overage during trial.
         </p>
-        <p className="text-xs text-muted-foreground mt-2">Designed so businesses can test real calls—not demos.</p>
+        <p className="text-sm text-muted-foreground mb-6">
+          Service pauses when minutes are used. Upgrade to any plan to continue.
+        </p>
+        {isLoggedIn ? (
+          <Button size="lg" asChild>
+            <Link href="/trial/start">Start your free trial</Link>
+          </Button>
+        ) : (
+          <Button size="lg" asChild>
+            <Link href="/sign-up">Sign up to start free trial</Link>
+          </Button>
+        )}
+        <p className="text-xs text-muted-foreground mt-4">Designed so you can test real calls—not demos.</p>
       </div>
 
       <PricingPlansWithAgreement plans={PLANS} isLoggedIn={isLoggedIn} />

@@ -4,6 +4,7 @@ import { getTrialStatus } from "@/lib/trial"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CallLog } from "@/components/calls/CallLog"
 import { SetupAICard } from "@/components/dashboard/SetupAICard"
+import { TrialCard } from "@/components/dashboard/TrialCard"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
@@ -47,30 +48,12 @@ export default async function DashboardPage() {
       </div>
 
       {trial.isOnTrial && (
-        <Card className="mb-8 border-amber-200 bg-amber-50/50 dark:border-amber-900 dark:bg-amber-950/20">
-          <CardContent className="pt-6">
-            {trial.isExhausted ? (
-              <p className="text-sm">
-                Your free trial minutes are used.{" "}
-                <Link href="/billing" className="font-medium text-primary underline">
-                  Upgrade to a plan
-                </Link>{" "}
-                to continue receiving calls.
-              </p>
-            ) : (
-              <p className="text-sm">
-                Free trial: <span className="font-semibold">{Math.ceil(trial.minutesRemaining)}</span> of 100 minutes remaining.{" "}
-                <Link href="/billing" className="font-medium text-primary underline">
-                  Upgrade
-                </Link>{" "}
-                when you&apos;re ready.
-              </p>
-            )}
-          </CardContent>
-        </Card>
+        <div className="mb-8" id="trial">
+          <TrialCard trial={trial} hasAgent={hasAgent} />
+        </div>
       )}
 
-      <div className="mb-8">
+      <div className="mb-8" id="setup">
         <SetupAICard
           hasAgent={hasAgent}
           phoneNumber={phoneNumber}
