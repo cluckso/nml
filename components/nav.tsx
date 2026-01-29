@@ -9,9 +9,9 @@ import { useEffect, useState } from "react"
 export function Nav() {
   const [user, setUser] = useState<any>(null)
   const router = useRouter()
-  const supabase = createClient()
 
   useEffect(() => {
+    const supabase = createClient()
     const getUser = async () => {
       const {
         data: { user },
@@ -28,9 +28,10 @@ export function Nav() {
     })
 
     return () => subscription.unsubscribe()
-  }, [supabase])
+  }, [])
 
   const handleSignOut = async () => {
+    const supabase = createClient()
     await supabase.auth.signOut()
     router.push("/")
     router.refresh()
@@ -45,6 +46,9 @@ export function Nav() {
         <div className="flex gap-4 items-center">
           <Link href="/pricing">
             <Button variant="ghost">Pricing</Button>
+          </Link>
+          <Link href="/docs/faq">
+            <Button variant="ghost">Help</Button>
           </Link>
           {user ? (
             <>

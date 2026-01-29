@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { IndustrySelector } from "@/components/onboarding/IndustrySelector"
 import { BusinessInfoForm } from "@/components/onboarding/BusinessInfoForm"
 import { Industry } from "@prisma/client"
-import { Button } from "@/components/ui/button"
 import { isComplexSetup } from "@/lib/industries"
+import { PlanType } from "@prisma/client"
 
 type OnboardingStep = "industry" | "business-info" | "complete" | "manual-setup"
 
@@ -28,50 +28,58 @@ interface OnboardingData {
   }
 }
 
-export default function OnboardingPage() {
+interface OnboardingClientProps {
+  planType: PlanType | null
+  initialBusiness?: {
+    name?: string
+    address?: string
+    city?: string
+    state?: string
+    zipCode?: string
+    phoneNumber?: string
+    businessHours?: { open: string; close: string; days: string[] } | null
+    departments?: string[]
+    crmWebhookUrl?: string | null
+    forwardToEmail?: string | null
+    afterHoursEmergencyPhone?: string | null
+  }
+}
+
+export function OnboardingClient({ planType, initialBusiness }: OnboardingClientProps) {
   const router = useRouter()
   const [step, setStep] = useState<OnboardingStep>("industry")
   const [data, setData] = useState<OnboardingData>({})
 
   const handleIndustrySelect = async (industry: Industry) => {
     setData({ ...data, industry })
-    
-    // Check if this requires manual setup
     if (isComplexSetup({ industry })) {
       setStep("manual-setup")
       return
     }
-    
     setStep("business-info")
   }
 
   const handleBusinessInfoSubmit = async (businessInfo: OnboardingData["businessInfo"]) => {
     const newData = { ...data, businessInfo }
     setData(newData)
-
-    // Check if complex setup is needed
-    if (isComplexSetup({ 
-      industry: data.industry,
-      serviceAreas: businessInfo ? [businessInfo.city] : []
-    })) {
+    if (
+      isComplexSetup({
+        industry: data.industry,
+        serviceAreas: businessInfo ? [businessInfo.city] : [],
+      })
+    ) {
       setStep("manual-setup")
       return
     }
-
-    // Save to backend
     try {
       const response = await fetch("/api/onboarding", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newData),
       })
-
       if (!response.ok) throw new Error("Failed to save")
-
       setStep("complete")
-      setTimeout(() => {
-        router.push("/dashboard")
-      }, 2000)
+      setTimeout(() => router.push("/dashboard"), 2000)
     } catch (error) {
       console.error("Error saving onboarding:", error)
       alert("Failed to save. Please try again.")
@@ -81,7 +89,7 @@ export default function OnboardingPage() {
   if (step === "manual-setup") {
     return (
       <div className="container mx-auto max-w-2xl py-12">
-        <div className="rounded-lg border p-8 text-center">
+        <div className="rounded-lg border border-border bg-card p-8 text-center shadow-sm">
           <h1 className="text-2xl font-bold mb-4">Manual Setup Required</h1>
           <p className="text-muted-foreground mb-6">
             Your setup requires additional configuration. Our team will help you get started.
@@ -107,7 +115,7 @@ export default function OnboardingPage() {
   if (step === "complete") {
     return (
       <div className="container mx-auto max-w-2xl py-12">
-        <div className="rounded-lg border p-8 text-center">
+        <div className="rounded-lg border border-border bg-card p-8 text-center shadow-sm">
           <h1 className="text-2xl font-bold mb-4">Setup Complete!</h1>
           <p className="text-muted-foreground">Redirecting to your dashboard...</p>
         </div>
@@ -120,18 +128,15 @@ export default function OnboardingPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Welcome to NeverMissLead-AI</h1>
         <p className="text-muted-foreground">
-          Let's get your business set up in just a few minutes
+          Set up your business in a few minutes. You&apos;ve already chosen your plan.
         </p>
       </div>
 
-      <div className="rounded-lg border p-8">
+      <div className="rounded-lg border border-border bg-card p-8 shadow-sm">
         {step === "industry" && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Select Your Industry</h2>
-            <IndustrySelector
-              selected={data.industry}
-              onSelect={handleIndustrySelect}
-            />
+            <IndustrySelector selected={data.industry} onSelect={handleIndustrySelect} />
           </div>
         )}
 
@@ -139,9 +144,10 @@ export default function OnboardingPage() {
           <div>
             <h2 className="text-xl font-semibold mb-4">Business Information</h2>
             <BusinessInfoForm
-              initialData={data.businessInfo}
+              initialData={data.businessInfo ?? initialBusiness}
               onSubmit={handleBusinessInfoSubmit}
               onBack={() => setStep("industry")}
+              planType={planType}
             />
           </div>
         )}

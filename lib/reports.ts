@@ -1,6 +1,6 @@
 import { db } from "./db"
 import { PlanType } from "@prisma/client"
-import { hasWeeklyReports } from "./plans"
+import { hasWeeklyReports, getEffectivePlanType } from "./plans"
 import { subDays } from "date-fns"
 import { Resend } from "resend"
 
@@ -15,7 +15,10 @@ export async function sendWeeklyReportForBusiness(businessId: string): Promise<b
     },
   })
 
-  if (!business?.subscription || !hasWeeklyReports(business.subscription.planType)) {
+  if (!business) return false
+
+  const effectivePlan = getEffectivePlanType(business.subscription?.planType)
+  if (!hasWeeklyReports(effectivePlan)) {
     return false
   }
 

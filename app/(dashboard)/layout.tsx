@@ -2,6 +2,9 @@ import { redirect } from "next/navigation"
 import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
 
+export const dynamic = "force-dynamic"
+
+/** Plan-first: no subscription → pricing. Then onboarding, then dashboard. */
 export default async function DashboardLayout({
   children,
 }: {
@@ -9,16 +12,20 @@ export default async function DashboardLayout({
 }) {
   const user = await requireAuth()
 
-  // If user doesn't have a business and hasn't completed onboarding, redirect to onboarding
-  if (!user.businessId) {
-    redirect("/onboarding")
+  const business = user.businessId
+    ? await db.business.findUnique({
+        where: { id: user.businessId },
+        include: { subscription: true },
+      })
+    : null
+
+  // 1. No plan yet → choose plan first (pricing / checkout)
+  if (!business?.subscription) {
+    redirect("/pricing")
   }
 
-  const business = await db.business.findUnique({
-    where: { id: user.businessId },
-  })
-
-  if (!business?.onboardingComplete) {
+  // 2. No business or onboarding not complete → onboarding
+  if (!user.businessId || !business?.onboardingComplete) {
     redirect("/onboarding")
   }
 

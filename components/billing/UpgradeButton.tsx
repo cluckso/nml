@@ -7,12 +7,14 @@ import { PlanType } from "@prisma/client"
 interface UpgradeButtonProps {
   planType: PlanType
   currentPlan?: PlanType
+  agreedToLegal?: boolean
 }
 
-export function UpgradeButton({ planType, currentPlan }: UpgradeButtonProps) {
+export function UpgradeButton({ planType, currentPlan, agreedToLegal = true }: UpgradeButtonProps) {
   const router = useRouter()
 
   const handleUpgrade = async () => {
+    if (!agreedToLegal) return
     const response = await fetch("/api/checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -34,7 +36,11 @@ export function UpgradeButton({ planType, currentPlan }: UpgradeButtonProps) {
   }
 
   return (
-    <Button onClick={handleUpgrade} className="w-full">
+    <Button
+      onClick={handleUpgrade}
+      className="w-full"
+      disabled={!agreedToLegal}
+    >
       {currentPlan ? "Switch Plan" : "Subscribe"}
     </Button>
   )

@@ -2,6 +2,7 @@ import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CallLog } from "@/components/calls/CallLog"
+import { SetupAICard } from "@/components/dashboard/SetupAICard"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 
@@ -30,6 +31,9 @@ export default async function DashboardPage() {
 
   const emergencyCalls = recentCalls.filter((c) => c.emergencyFlag).length
   const totalMinutes = stats._sum.minutes || 0
+  const hasAgent = !!business?.retellAgentId
+  const phoneNumber = business?.phoneNumber ?? null
+  const ownerPhone = user.phoneNumber ?? null
 
   return (
     <div className="container mx-auto max-w-7xl py-8">
@@ -38,6 +42,15 @@ export default async function DashboardPage() {
         <p className="text-muted-foreground">
           Welcome back, {business?.name}
         </p>
+      </div>
+
+      <div className="mb-8">
+        <SetupAICard
+          hasAgent={hasAgent}
+          phoneNumber={phoneNumber}
+          businessName={business?.name ?? "your business"}
+          ownerPhone={ownerPhone}
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

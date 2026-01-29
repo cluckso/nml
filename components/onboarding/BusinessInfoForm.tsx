@@ -27,13 +27,18 @@ interface BusinessInfoFormProps {
   initialData?: Partial<BusinessInfo>
   onSubmit: (data: BusinessInfo) => void
   onBack?: () => void
+  /** Plan type from subscription — only show Pro/Local Plus fields when relevant */
+  planType?: "STARTER" | "PRO" | "LOCAL_PLUS" | null
 }
 
 export function BusinessInfoForm({
   initialData,
   onSubmit,
   onBack,
+  planType = null,
 }: BusinessInfoFormProps) {
+  const showProFeatures = planType === "PRO" || planType === "LOCAL_PLUS"
+  const showLocalPlusFeatures = planType === "LOCAL_PLUS"
   const [formData, setFormData] = useState<BusinessInfo>({
     name: initialData?.name || "",
     address: initialData?.address || "",
@@ -49,7 +54,6 @@ export function BusinessInfoForm({
     forwardToEmail: initialData?.forwardToEmail || "",
     afterHoursEmergencyPhone: initialData?.afterHoursEmergencyPhone || "",
   })
-  const [showAdvanced, setShowAdvanced] = useState(false)
   const [smsConsentError, setSmsConsentError] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -215,18 +219,12 @@ export function BusinessInfoForm({
         </div>
       </div>
 
-      <div>
-        <button
-          type="button"
-          className="text-sm text-primary hover:underline"
-          onClick={() => setShowAdvanced(!showAdvanced)}
-        >
-          {showAdvanced ? "Hide" : "Show"} advanced (CRM, departments, after-hours)
-        </button>
-        {showAdvanced && (
-          <div className="mt-4 space-y-4 rounded-lg border p-4">
+      {showProFeatures && (
+        <div className="space-y-4 rounded-lg border border-border bg-muted/30 p-4">
+          <h3 className="font-medium">Included in your plan</h3>
+          {showLocalPlusFeatures && (
             <div className="space-y-2">
-              <Label htmlFor="departments">Departments (Local Plus, comma-separated)</Label>
+              <Label htmlFor="departments">Departments (comma-separated)</Label>
               <Input
                 id="departments"
                 value={(formData.departments || []).join(", ")}
@@ -234,28 +232,30 @@ export function BusinessInfoForm({
                 placeholder="Plumbing, HVAC"
               />
             </div>
+          )}
+          <div className="space-y-2">
+            <Label htmlFor="crmWebhookUrl">CRM webhook URL (optional)</Label>
+            <Input
+              id="crmWebhookUrl"
+              type="url"
+              value={formData.crmWebhookUrl || ""}
+              onChange={(e) => setFormData({ ...formData, crmWebhookUrl: e.target.value })}
+              placeholder="https://..."
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="forwardToEmail">Forward leads to email (optional)</Label>
+            <Input
+              id="forwardToEmail"
+              type="email"
+              value={formData.forwardToEmail || ""}
+              onChange={(e) => setFormData({ ...formData, forwardToEmail: e.target.value })}
+              placeholder="crm@company.com"
+            />
+          </div>
+          {showLocalPlusFeatures && (
             <div className="space-y-2">
-              <Label htmlFor="crmWebhookUrl">CRM webhook URL (Pro+)</Label>
-              <Input
-                id="crmWebhookUrl"
-                type="url"
-                value={formData.crmWebhookUrl || ""}
-                onChange={(e) => setFormData({ ...formData, crmWebhookUrl: e.target.value })}
-                placeholder="https://..."
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="forwardToEmail">Forward leads to email (Pro+)</Label>
-              <Input
-                id="forwardToEmail"
-                type="email"
-                value={formData.forwardToEmail || ""}
-                onChange={(e) => setFormData({ ...formData, forwardToEmail: e.target.value })}
-                placeholder="crm@company.com"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="afterHoursEmergencyPhone">After-hours emergency phone (Local Plus)</Label>
+              <Label htmlFor="afterHoursEmergencyPhone">After-hours emergency phone</Label>
               <Input
                 id="afterHoursEmergencyPhone"
                 type="tel"
@@ -264,9 +264,9 @@ export function BusinessInfoForm({
                 placeholder="+16085551234"
               />
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       <div className="flex gap-4">
         {onBack && (

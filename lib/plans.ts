@@ -81,3 +81,14 @@ export function hasWeeklyReports(planType: PlanType): boolean {
 export function hasBrandedVoice(planType: PlanType): boolean {
   return planType === PlanType.LOCAL_PLUS
 }
+
+/**
+ * In development, returns LOCAL_PLUS so all features are enabled for testing.
+ * In production, returns the actual plan (or STARTER if none).
+ */
+export function getEffectivePlanType(planType: PlanType | null | undefined): PlanType {
+  if (process.env.NODE_ENV === "development") {
+    return PlanType.LOCAL_PLUS
+  }
+  return planType ?? PlanType.STARTER
+}

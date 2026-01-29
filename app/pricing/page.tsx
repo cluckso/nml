@@ -1,16 +1,9 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Check } from "lucide-react"
-
-// Note: lucide-react Check icon import
+import { getCurrentUser } from "@/lib/auth"
+import { PricingPlansWithAgreement } from "@/components/pricing/PricingPlansWithAgreement"
 
 const PLANS = [
   {
     name: "Starter",
-    price: 99,
-    minutes: 500,
-    setupFee: 99,
     description: "Perfect for solo operators & small shops",
     features: [
       "Up to 500 call minutes",
@@ -20,13 +13,9 @@ const PLANS = [
       "Missed-call recovery",
       "Custom greeting with your business name",
     ],
-    popular: false,
   },
   {
     name: "Pro",
-    price: 199,
-    minutes: 1200,
-    setupFee: 199,
     description: "Best for growing service businesses",
     features: [
       "Up to 1,200 call minutes",
@@ -38,13 +27,9 @@ const PLANS = [
       "Call transcripts + summaries",
       "Email / CRM forwarding",
     ],
-    popular: true,
   },
   {
     name: "Local Plus",
-    price: 299,
-    minutes: 2500,
-    setupFee: 299,
     description: "Built for high-volume trades",
     features: [
       "Up to 2,500 call minutes",
@@ -55,11 +40,13 @@ const PLANS = [
       "Weekly usage & lead reports",
       "Fully branded AI voice",
     ],
-    popular: false,
   },
 ]
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const user = await getCurrentUser()
+  const isLoggedIn = !!user
+
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="text-center mb-16">
@@ -70,50 +57,14 @@ export default function PricingPage() {
         <p className="mt-4 text-muted-foreground">
           Overage: $0.10/min after included minutes
         </p>
+        {isLoggedIn && (
+          <p className="mt-2 text-sm text-primary font-medium">
+            Choose a plan below — then you&apos;ll set up your business details.
+          </p>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-        {PLANS.map((plan) => (
-          <Card
-            key={plan.name}
-            className={plan.popular ? "border-primary border-2" : ""}
-          >
-            <CardHeader>
-              {plan.popular && (
-                <div className="mb-2">
-                  <span className="bg-primary text-primary-foreground text-xs font-semibold px-2 py-1 rounded">
-                    Most Popular
-                  </span>
-                </div>
-              )}
-              <CardTitle className="text-2xl">{plan.name}</CardTitle>
-              <CardDescription>{plan.description}</CardDescription>
-              <div className="mt-4">
-                <span className="text-4xl font-bold">${plan.price}</span>
-                <span className="text-muted-foreground">/month</span>
-              </div>
-              <p className="text-sm text-muted-foreground mt-2">
-                Setup: ${plan.setupFee}
-              </p>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-3 mb-6">
-                {plan.features.map((feature, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                    <span className="text-sm">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link href="/sign-up" className="block">
-                <Button className="w-full" variant={plan.popular ? "default" : "outline"}>
-                  Get Started
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <PricingPlansWithAgreement plans={PLANS} isLoggedIn={isLoggedIn} />
 
       <div className="max-w-3xl mx-auto text-center">
         <h2 className="text-2xl font-bold mb-4">Why This Pays for Itself</h2>
@@ -122,7 +73,7 @@ export default function PricingPage() {
           Most customers recover 3–10 calls they were missing before.
         </p>
         <p className="text-muted-foreground">
-          Don't talk tech. Talk results. This is revenue protection, not just call answering.
+          Don&apos;t talk tech. Talk results. This is revenue protection, not just call answering.
         </p>
       </div>
     </div>

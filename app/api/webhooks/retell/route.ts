@@ -7,7 +7,7 @@ import {
   forwardToCrm,
 } from "@/lib/notifications"
 import { reportUsageToStripe } from "@/lib/stripe"
-import { hasSmsToCallers, hasCrmForwarding, hasLeadTagging } from "@/lib/plans"
+import { hasSmsToCallers, hasCrmForwarding, hasLeadTagging, getEffectivePlanType } from "@/lib/plans"
 import { PlanType } from "@prisma/client"
 import { rateLimit } from "@/lib/rate-limit"
 import crypto from "crypto"
@@ -91,7 +91,7 @@ async function handleCallCompletion(event: any) {
     return
   }
 
-  const planType = business.subscription?.planType ?? PlanType.STARTER
+  const planType = getEffectivePlanType(business.subscription?.planType)
   const analysis = event.call_analysis || {}
   const hasAnalysis = Object.keys(analysis).length > 0
 

@@ -1,9 +1,11 @@
+import { redirect } from "next/navigation"
 import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { getEffectivePlanType } from "@/lib/plans"
 import { PlanType } from "@prisma/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { UpgradeButton } from "@/components/billing/UpgradeButton"
+import { BillingPlansWithAgreement } from "@/components/billing/BillingPlansWithAgreement"
 
 const PLAN_DETAILS = {
   [PlanType.STARTER]: {
@@ -48,8 +50,8 @@ export default async function BillingPage() {
     }),
   ])
 
-  const currentPlan = subscription?.planType
-  const planDetails = currentPlan ? PLAN_DETAILS[currentPlan] : null
+  const currentPlan = getEffectivePlanType(subscription?.planType)
+  const planDetails = PLAN_DETAILS[currentPlan]
   const minutesUsed = usage?.minutesUsed || 0
   const minutesIncluded = planDetails?.minutes || 0
   const overageMinutes = Math.max(0, minutesUsed - minutesIncluded)
@@ -120,23 +122,10 @@ export default async function BillingPage() {
           <CardDescription>Upgrade or change your plan</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {Object.entries(PLAN_DETAILS).map(([planType, details]) => (
-              <div
-                key={planType}
-                className={`border rounded-lg p-6 ${
-                  currentPlan === planType ? "border-primary" : ""
-                }`}
-              >
-                <h3 className="text-xl font-semibold mb-2">{details.name}</h3>
-                <p className="text-3xl font-bold mb-2">${details.price}/mo</p>
-                <p className="text-sm text-muted-foreground mb-4">
-                  {details.minutes} minutes included
-                </p>
-                <UpgradeButton planType={planType as PlanType} currentPlan={currentPlan} />
-              </div>
-            ))}
-          </div>
+          <BillingPlansWithAgreement
+            currentPlan={currentPlan}
+            planDetails={PLAN_DETAILS}
+          />
         </CardContent>
       </Card>
     </div>

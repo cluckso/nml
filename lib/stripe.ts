@@ -3,13 +3,12 @@ import { db } from "./db"
 import { PlanType } from "@prisma/client"
 import { getIncludedMinutes, getOverageMinutes } from "./plans"
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error("STRIPE_SECRET_KEY is not configured")
-}
-
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2024-11-20.acacia",
-})
+/** Only initialized when STRIPE_SECRET_KEY is set — app works without Stripe (e.g. dev before keys). */
+export const stripe: Stripe | null = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: "2024-11-20.acacia",
+    })
+  : null
 
 // Stripe Product IDs (create these in Stripe dashboard or via API)
 export const STRIPE_PRODUCTS = {
@@ -26,6 +25,9 @@ export async function createCheckoutSession(
   planType: PlanType,
   setupFee: number
 ) {
+  if (!stripe) {
+    throw new Error("STRIPE_SECRET_KEY is not configured. Add it to .env to enable billing.")
+  }
   const business = await db.business.findUnique({
     where: { id: businessId },
     include: { users: { take: 1 } },
@@ -68,8 +70,8 @@ export async function createCheckoutSession(
     customer_email: business.users?.[0]?.email,
     line_items: lineItems,
     mode: "subscription",
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/onboarding`,
+    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/onboarding?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
     metadata: {
       businessId,
       planType,
@@ -108,6 +110,7 @@ async function getPriceIdForPlan(planType: PlanType): Promise<string> {
 }
 
 export async function reportUsageToStripe(businessId: string, minutes: number) {
+  if (!stripe) return
   const business = await db.business.findUnique({
     where: { id: businessId },
     include: { subscription: true },
@@ -184,6 +187,7 @@ export async function reportUsageToStripe(businessId: string, minutes: number) {
 }
 
 export async function handleStripeWebhook(event: Stripe.Event) {
+  if (!stripe) return
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session

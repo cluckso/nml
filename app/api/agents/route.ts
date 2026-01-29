@@ -33,13 +33,14 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Create Retell agent (with plan-based features: hours, departments, voice, appointment capture)
+    // Create Retell agent (with plan-based features; in dev all features enabled for testing)
+    const { getEffectivePlanType } = await import("@/lib/plans")
     const { agent_id, phone_number } = await createRetellAgent({
       businessName: business.name,
       industry: business.industry,
       serviceAreas: business.serviceAreas,
       phoneNumber: business.phoneNumber || undefined,
-      planType: business.subscription?.planType,
+      planType: getEffectivePlanType(business.subscription?.planType),
       businessHours: (business.businessHours as { open?: string; close?: string; days?: string[] } | null) ?? undefined,
       departments: business.departments?.length ? business.departments : undefined,
       afterHoursEmergencyPhone: business.afterHoursEmergencyPhone ?? undefined,
