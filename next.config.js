@@ -1,8 +1,3 @@
-const path = require('path')
-
-// Same value for turbopack and file tracing (Vercel warns if they differ).
-const projectRoot = path.resolve(__dirname).split(path.sep).join('/')
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
@@ -10,11 +5,8 @@ const nextConfig = {
       bodySizeLimit: '2mb',
     },
   },
-  // Align tracing root with turbopack root so "outputFileTracingRoot and turbopack.root must have the same value" is satisfied.
-  outputFileTracingRoot: projectRoot,
-  turbopack: {
-    root: projectRoot,
-  },
+  // No custom outputFileTracingRoot/turbopack.root — use defaults so Vercel build (Linux) doesn't fail during TypeScript.
+  // If you see "multiple lockfiles" locally, run from project root or use: next dev --webpack
 }
 
 module.exports = nextConfig
