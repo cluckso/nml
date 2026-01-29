@@ -7,12 +7,15 @@ export const INCLUDED_MINUTES: Record<PlanType, number> = {
   [PlanType.LOCAL_PLUS]: 2500,
 }
 
-/** One-time setup fee per plan (USD) */
+/** One-time setup fee per plan (USD) — no setup fees */
 export const SETUP_FEES: Record<PlanType, number> = {
-  [PlanType.STARTER]: 99,
-  [PlanType.PRO]: 199,
-  [PlanType.LOCAL_PLUS]: 299,
+  [PlanType.STARTER]: 0,
+  [PlanType.PRO]: 0,
+  [PlanType.LOCAL_PLUS]: 0,
 }
+
+/** Free trial: included call minutes for all plans before first paid subscription */
+export const FREE_TRIAL_MINUTES = 100
 
 /** Monthly price per plan (USD) */
 export const MONTHLY_PRICES: Record<PlanType, number> = {
@@ -30,6 +33,11 @@ export function getIncludedMinutes(planType: PlanType): number {
 
 export function getOverageMinutes(planType: PlanType, minutesUsed: number): number {
   return Math.max(0, minutesUsed - getIncludedMinutes(planType))
+}
+
+/** Whether plan has industry-optimized / prebuilt agents (Pro+); user selects business type, system links prebuilt intake flow */
+export function hasIndustryOptimizedAgents(planType: PlanType): boolean {
+  return planType === PlanType.PRO || planType === PlanType.LOCAL_PLUS
 }
 
 /** Whether plan has custom intake flows by service type (Pro+) */

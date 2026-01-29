@@ -6,6 +6,7 @@ import { IndustrySelector } from "@/components/onboarding/IndustrySelector"
 import { BusinessInfoForm } from "@/components/onboarding/BusinessInfoForm"
 import { Industry } from "@prisma/client"
 import { isComplexSetup } from "@/lib/industries"
+import { hasIndustryOptimizedAgents } from "@/lib/plans"
 import { PlanType } from "@prisma/client"
 
 type OnboardingStep = "industry" | "business-info" | "complete" | "manual-setup"
@@ -136,6 +137,11 @@ export function OnboardingClient({ planType, initialBusiness }: OnboardingClient
         {step === "industry" && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Select Your Industry</h2>
+            {planType && hasIndustryOptimizedAgents(planType) && (
+              <p className="text-sm text-muted-foreground mb-4">
+                Your plan includes industry-optimized AI agents. Select your business type to use the right prebuilt intake flow.
+              </p>
+            )}
             <IndustrySelector selected={data.industry} onSelect={handleIndustrySelect} />
           </div>
         )}

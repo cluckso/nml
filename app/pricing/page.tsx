@@ -3,42 +3,46 @@ import { PricingPlansWithAgreement } from "@/components/pricing/PricingPlansWith
 
 const PLANS = [
   {
-    name: "Starter",
-    description: "Perfect for solo operators & small shops",
+    name: "Basic",
+    description: "Best for solo operators & small shops",
     features: [
-      "Up to 500 call minutes",
-      "AI answers calls during business hours or after-hours",
-      "Captures caller name, number, and reason",
-      "Sends call summaries via text or email",
+      "Up to 500 call minutes / month",
+      "24/7 AI call answering (business hours + after-hours logic)",
+      "Caller name, phone number, and reason captured",
+      "Call summaries via SMS and/or email",
       "Missed-call recovery",
-      "Custom greeting with your business name",
+      "Custom greeting with business name",
     ],
+    annualPrice: 990,
+    annualLabel: "2 months free, paid upfront",
   },
   {
     name: "Pro",
     description: "Best for growing service businesses",
     features: [
-      "Up to 1,200 call minutes",
-      "Everything in Starter, plus:",
-      "Custom intake flows by service type",
-      "Appointment request capture",
-      "Emergency vs non-emergency routing",
+      "Up to 1,200 call minutes / month",
+      "Everything in Basic, plus:",
+      "Industry-optimized AI agents (select business type → prebuilt intake flow)",
+      "Service-specific intake flows (plumbing, HVAC, electrical, etc.)",
+      "Appointment request capture (date/time preferences)",
+      "Emergency vs non-emergency detection and routing",
       "SMS confirmation to callers",
-      "Call transcripts + summaries",
-      "Email / CRM forwarding",
+      "Full call transcripts + summaries",
+      "Email and CRM forwarding",
     ],
   },
   {
     name: "Local Plus",
-    description: "Built for high-volume trades",
+    description: "Built for high-volume, multi-department trades",
     features: [
-      "Up to 2,500 call minutes",
+      "Up to 2,500 call minutes / month",
+      "Everything in Pro, plus:",
       "Priority call routing",
-      "Multi-department logic",
-      "After-hours emergency handling",
+      "Multi-department logic (sales vs service, by trade, or by team)",
+      "After-hours emergency handling with escalation logic",
       "Lead tagging (emergency, estimate, follow-up)",
       "Weekly usage & lead reports",
-      "Fully branded AI voice",
+      "Fully branded AI voice (tone, pacing, greeting)",
     ],
   },
 ]
@@ -49,13 +53,16 @@ export default async function PricingPage() {
 
   return (
     <div className="container mx-auto px-4 py-16">
-      <div className="text-center mb-16">
-        <h1 className="text-4xl font-bold mb-4">Pricing Plans</h1>
+      <div className="text-center mb-12">
+        <h1 className="text-4xl font-bold mb-4">NeverMissLead — Pricing</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Simple, transparent pricing. No hidden fees. Cancel anytime.
+          Simple, usage-based pricing built for service businesses.
         </p>
-        <p className="mt-4 text-muted-foreground">
-          Overage: $0.10/min after included minutes
+        <p className="mt-2 text-muted-foreground">
+          No setup fees. No contracts. Cancel anytime.
+        </p>
+        <p className="mt-2 text-muted-foreground">
+          Overage on all plans: $0.10/min after included minutes.
         </p>
         {isLoggedIn && (
           <p className="mt-2 text-sm text-primary font-medium">
@@ -64,16 +71,26 @@ export default async function PricingPage() {
         )}
       </div>
 
+      {/* Free Trial (all plans) */}
+      <div className="max-w-2xl mx-auto mb-12 p-6 rounded-lg border bg-muted/30 text-center">
+        <h2 className="text-lg font-semibold mb-2">Free Trial (All Plans)</h2>
+        <p className="text-sm text-muted-foreground mb-2">100 free call minutes · No time limit · No setup fee</p>
+        <p className="text-sm text-muted-foreground">
+          No overage during trial. Service pauses when minutes are used. Upgrade to any plan to continue.
+        </p>
+        <p className="text-xs text-muted-foreground mt-2">Designed so businesses can test real calls—not demos.</p>
+      </div>
+
       <PricingPlansWithAgreement plans={PLANS} isLoggedIn={isLoggedIn} />
 
       <div className="max-w-3xl mx-auto text-center">
-        <h2 className="text-2xl font-bold mb-4">Why This Pays for Itself</h2>
+        <h2 className="text-2xl font-bold mb-4">Why This Pricing Works</h2>
         <p className="text-lg text-muted-foreground mb-6">
-          If you recover just one missed service call per month, the system covers its cost.
-          Most customers recover 3–10 calls they were missing before.
+          Minute-based trial ensures fairness and real value delivery. No setup fees reduce friction.
+          Industry-optimized Pro agents feel &quot;custom&quot; without custom labor. Clear upgrade ladder based on call volume and complexity.
         </p>
         <p className="text-muted-foreground">
-          Don&apos;t talk tech. Talk results. This is revenue protection, not just call answering.
+          Consistent overage rate keeps pricing transparent.
         </p>
       </div>
     </div>

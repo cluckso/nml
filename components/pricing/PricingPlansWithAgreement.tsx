@@ -8,6 +8,8 @@ export type PlanInfo = {
   name: string
   description: string
   features: string[]
+  annualPrice?: number
+  annualLabel?: string
 }
 
 export function PricingPlansWithAgreement({
@@ -53,6 +55,8 @@ export function PricingPlansWithAgreement({
             name={plan.name}
             description={plan.description}
             features={plan.features}
+            annualPrice={plan.annualPrice}
+            annualLabel={plan.annualLabel}
             isLoggedIn={isLoggedIn}
             agreedToLegal={agreedToLegal}
           />

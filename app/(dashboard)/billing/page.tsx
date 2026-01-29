@@ -9,22 +9,22 @@ import { BillingPlansWithAgreement } from "@/components/billing/BillingPlansWith
 
 const PLAN_DETAILS = {
   [PlanType.STARTER]: {
-    name: "Starter",
+    name: "Basic",
     price: 99,
     minutes: 500,
-    setupFee: 99,
+    setupFee: 0,
   },
   [PlanType.PRO]: {
     name: "Pro",
     price: 199,
     minutes: 1200,
-    setupFee: 199,
+    setupFee: 0,
   },
   [PlanType.LOCAL_PLUS]: {
     name: "Local Plus",
     price: 299,
     minutes: 2500,
-    setupFee: 299,
+    setupFee: 0,
   },
 }
 

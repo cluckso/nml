@@ -8,22 +8,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Check, Loader2 } from "lucide-react"
 import { PlanType } from "@prisma/client"
 
-const PLANS: Record<string, { name: string; price: number; setupFee: number; planType: PlanType; popular: boolean }> = {
-  Starter: { name: "Starter", price: 99, setupFee: 99, planType: PlanType.STARTER, popular: false },
-  Pro: { name: "Pro", price: 199, setupFee: 199, planType: PlanType.PRO, popular: true },
-  "Local Plus": { name: "Local Plus", price: 299, setupFee: 299, planType: PlanType.LOCAL_PLUS, popular: false },
+const PLANS: Record<string, { name: string; price: number; planType: PlanType; popular: boolean }> = {
+  Basic: { name: "Basic", price: 99, planType: PlanType.STARTER, popular: false },
+  Pro: { name: "Pro", price: 199, planType: PlanType.PRO, popular: true },
+  "Local Plus": { name: "Local Plus", price: 299, planType: PlanType.LOCAL_PLUS, popular: false },
 }
 
 export function PlanCard({
   name,
   description,
   features,
+  annualPrice,
+  annualLabel,
   isLoggedIn,
   agreedToLegal = true,
 }: {
   name: string
   description: string
   features: string[]
+  annualPrice?: number
+  annualLabel?: string
   isLoggedIn: boolean
   agreedToLegal?: boolean
 }) {
@@ -69,7 +73,12 @@ export function PlanCard({
           <span className="text-4xl font-bold">${plan.price}</span>
           <span className="text-muted-foreground">/month</span>
         </div>
-        <p className="text-sm text-muted-foreground mt-2">Setup: ${plan.setupFee}</p>
+        {annualPrice != null && annualLabel && (
+          <p className="text-sm text-muted-foreground mt-2">
+            Annual: ${annualPrice}/year ({annualLabel})
+          </p>
+        )}
+        <p className="text-sm text-muted-foreground mt-1">No setup fee</p>
       </CardHeader>
       <CardContent>
         <ul className="space-y-3 mb-6">
