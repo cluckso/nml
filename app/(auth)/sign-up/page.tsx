@@ -21,12 +21,15 @@ export default function SignUpPage() {
     setLoading(true)
     setError(null)
 
+    const baseUrl =
+      (typeof process.env.NEXT_PUBLIC_APP_URL === "string" && process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "")) ||
+      (typeof window !== "undefined" ? window.location.origin : "")
+    const emailRedirectTo = baseUrl ? `${baseUrl}/dashboard` : undefined
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/dashboard`,
-      },
+      options: emailRedirectTo ? { emailRedirectTo } : {},
     })
 
     if (error) {
