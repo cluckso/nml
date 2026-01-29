@@ -19,7 +19,17 @@ export async function POST(req: NextRequest) {
 
     const user = await getAuthUserFromRequest(req)
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    const { planType } = await req.json()
+
+    let body: { planType?: string }
+    try {
+      body = await req.json()
+    } catch {
+      return NextResponse.json({ error: "Invalid request body" }, { status: 400 })
+    }
+    const planType = body?.planType
+    if (!planType || typeof planType !== "string") {
+      return NextResponse.json({ error: "Missing planType" }, { status: 400 })
+    }
 
     const setupFee = SETUP_FEES[planType as PlanType]
     if (setupFee === undefined) {
@@ -28,6 +38,8 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       )
     }
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
 
     let businessId = user.businessId
     if (!businessId) {
@@ -49,7 +61,8 @@ export async function POST(req: NextRequest) {
     const session = await createCheckoutSession(
       businessId,
       planType as PlanType,
-      setupFee
+      setupFee,
+      appUrl
     )
 
     return NextResponse.json({ url: session.url })
@@ -57,16 +70,18 @@ export async function POST(req: NextRequest) {
     console.error("Checkout error:", error)
 
     // Stripe API errors (invalid price, etc.) — return message so frontend can show it
-    if (error instanceof Stripe.errors.StripeError) {
+    const stripeError = error as { type?: string; code?: string; message?: string }
+    if (stripeError?.type === "StripeError" || (stripeError?.code && typeof stripeError?.message === "string")) {
       const message =
-        error.code === "resource_missing"
+        stripeError.code === "resource_missing"
           ? "Stripe price or product not found. Create prices in Stripe Dashboard and set STRIPE_PRICE_* / STRIPE_PRODUCT_* env vars."
-          : error.message
+          : stripeError.message || "Stripe error"
       return NextResponse.json({ error: message }, { status: 400 })
     }
 
+    const message = error instanceof Error ? error.message : "Failed to create checkout session"
     return NextResponse.json(
-      { error: "Failed to create checkout session" },
+      { error: "Failed to create checkout session", details: message },
       { status: 500 }
     )
   }

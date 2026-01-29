@@ -24,7 +24,8 @@ export const STRIPE_USAGE_PRICE_ID = process.env.STRIPE_USAGE_PRICE_ID || "price
 export async function createCheckoutSession(
   businessId: string,
   planType: PlanType,
-  setupFee: number
+  setupFee: number,
+  appUrl: string = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
 ) {
   if (!stripe) {
     throw new Error("STRIPE_SECRET_KEY is not configured. Add it to .env to enable billing.")
@@ -38,8 +39,12 @@ export async function createCheckoutSession(
     throw new Error("Business not found")
   }
 
-  const productId = getProductIdForPlan(planType)
-  const priceId = await getPriceIdForPlan(planType)
+  const priceId = getPriceIdForPlan(planType)
+  if (PLACEHOLDER_IDS.includes(STRIPE_USAGE_PRICE_ID) || !STRIPE_USAGE_PRICE_ID.startsWith("price_")) {
+    throw new Error(
+      "Stripe usage (overage) price ID is not set. Set STRIPE_USAGE_PRICE_ID in .env (value must start with price_)"
+    )
+  }
 
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
     {
@@ -67,12 +72,13 @@ export async function createCheckoutSession(
     })
   }
 
+  const baseUrl = appUrl.replace(/\/$/, "")
   const session = await stripe.checkout.sessions.create({
-    customer_email: business.users?.[0]?.email,
+    customer_email: business.users?.[0]?.email ?? undefined,
     line_items: lineItems,
     mode: "subscription",
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/onboarding?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
+    success_url: `${baseUrl}/onboarding?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${baseUrl}/pricing`,
     metadata: {
       businessId,
       planType,
@@ -99,15 +105,22 @@ function getProductIdForPlan(planType: PlanType): string {
   }
 }
 
-async function getPriceIdForPlan(planType: PlanType): Promise<string> {
-  // In production, these would be stored in env or database
-  // For now, return placeholder IDs that should be created in Stripe
-  const priceIds: Record<PlanType, string> = {
-    [PlanType.STARTER]: process.env.STRIPE_PRICE_STARTER || "price_starter",
-    [PlanType.PRO]: process.env.STRIPE_PRICE_PRO || "price_pro",
-    [PlanType.LOCAL_PLUS]: process.env.STRIPE_PRICE_LOCAL_PLUS || "price_local_plus",
+const PLACEHOLDER_IDS = ["price_starter", "price_pro", "price_local_plus", "price_usage"]
+
+// Monthly price IDs only (STRIPE_PRICE_*). Annual: STRIPE_PRICE_*_ANNUAL for future use.
+function getPriceIdForPlan(planType: PlanType): string {
+  const priceIds: Record<PlanType, string | undefined> = {
+    [PlanType.STARTER]: process.env.STRIPE_PRICE_STARTER,
+    [PlanType.PRO]: process.env.STRIPE_PRICE_PRO,
+    [PlanType.LOCAL_PLUS]: process.env.STRIPE_PRICE_LOCAL_PLUS,
   }
-  return priceIds[planType]
+  const id = priceIds[planType] || (planType === "STARTER" ? "price_starter" : planType === "PRO" ? "price_pro" : "price_local_plus")
+  if (PLACEHOLDER_IDS.includes(id) || !id.startsWith("price_")) {
+    throw new Error(
+      `Stripe price ID for ${planType} is not set. Set STRIPE_PRICE_${planType} in .env (value must start with price_)`
+    )
+  }
+  return id
 }
 
 export async function reportUsageToStripe(businessId: string, minutes: number) {
