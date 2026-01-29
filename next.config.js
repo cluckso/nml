@@ -1,5 +1,8 @@
 const path = require('path')
 
+// Same value for turbopack and file tracing (Vercel warns if they differ).
+const projectRoot = path.resolve(__dirname).split(path.sep).join('/')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
@@ -7,10 +10,10 @@ const nextConfig = {
       bodySizeLimit: '2mb',
     },
   },
-  // Explicit root so Next.js uses this project, not a parent with another lockfile.
-  // Use forward slashes on Windows to avoid Turbopack "Failed to benchmark file I/O" (os error 3).
+  // Align tracing root with turbopack root so "outputFileTracingRoot and turbopack.root must have the same value" is satisfied.
+  outputFileTracingRoot: projectRoot,
   turbopack: {
-    root: path.resolve(__dirname).split(path.sep).join('/'),
+    root: projectRoot,
   },
 }
 
