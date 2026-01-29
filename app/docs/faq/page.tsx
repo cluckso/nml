@@ -14,6 +14,9 @@ export const metadata = {
     "How to forward your business line to your AI call assistant. Step-by-step instructions by carrier.",
 }
 
+// Force dynamic so Vercel builder gets a lambda for this route (static pages don't emit one).
+export const dynamic = "force-dynamic"
+
 const CARRIERS = [
   {
     name: "AT&T",
