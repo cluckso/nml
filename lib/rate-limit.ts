@@ -1,5 +1,6 @@
-// Simple in-memory rate limiter
-// In production, use Redis or a dedicated service
+// Simple in-memory rate limiter.
+// In serverless (e.g. Vercel), the store resets on cold start, so limits are per-instance.
+// For production at scale, use Redis or Vercel KV so limits are shared across instances.
 
 interface RateLimitStore {
   [key: string]: {

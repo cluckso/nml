@@ -1,5 +1,6 @@
 import { db } from "./db"
 import { FREE_TRIAL_MINUTES } from "./plans"
+import { isSubscriptionActive } from "./subscription"
 import { normalizePhoneToE164 } from "./utils"
 
 export type TrialStatus = {
@@ -22,7 +23,7 @@ export async function getTrialStatus(businessId: string): Promise<TrialStatus> {
     include: { subscription: true },
   })
 
-  const hasActiveSubscription = business?.subscription?.status === "ACTIVE"
+  const hasActiveSubscription = isSubscriptionActive(business?.subscription)
   const isOnTrial = !hasActiveSubscription
 
   const now = new Date()

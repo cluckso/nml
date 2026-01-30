@@ -19,14 +19,31 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    const validIndustries = Object.values(Industry) as string[]
+    if (typeof industry !== "string" || !validIndustries.includes(industry)) {
+      return NextResponse.json(
+        { error: "Invalid industry" },
+        { status: 400 }
+      )
+    }
+
+    const businessName = typeof businessInfo.name === "string" ? businessInfo.name.trim() : ""
+    if (!businessName) {
+      return NextResponse.json(
+        { error: "Business name is required" },
+        { status: 400 }
+      )
+    }
+
     const serviceAreas = Array.isArray(businessInfo.serviceAreas)
       ? businessInfo.serviceAreas.map((s: string) => String(s).trim()).filter(Boolean)
       : businessInfo.city
         ? [businessInfo.city]
         : []
 
+    const industryTyped = industry as Industry
     const requiresManualSetup = isComplexSetup({
-      industry: industry as Industry,
+      industry: industryTyped,
       serviceAreas,
     })
 
@@ -43,8 +60,8 @@ export async function POST(req: NextRequest) {
     const business = await db.business.upsert({
       where: { id: user.businessId || "new" },
       create: {
-        name: businessInfo.name,
-        industry: industry as Industry,
+        name: businessName,
+        industry: industryTyped,
         address: businessInfo.address,
         city: businessInfo.city,
         state: businessInfo.state,
@@ -63,8 +80,8 @@ export async function POST(req: NextRequest) {
         },
       },
       update: {
-        name: businessInfo.name,
-        industry: industry as Industry,
+        name: businessName,
+        industry: industryTyped,
         address: businessInfo.address,
         city: businessInfo.city,
         state: businessInfo.state,

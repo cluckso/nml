@@ -57,18 +57,28 @@ export async function POST(req: NextRequest) {
     const now = new Date()
     const trialEndsAt = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000)
 
-    const business = await db.business.create({
-      data: {
-        name: "My Business",
-        industry: Industry.GENERIC,
-        businessLinePhone: normalizedPhone,
-        stripeCustomerId,
-        onboardingComplete: false,
-        trialStartedAt: now,
-        trialEndsAt,
-        trialMinutesUsed: 0,
-        users: { connect: { id: user.id } },
-      },
+    // Create Business + TrialClaim in a transaction so the same phone can't win two trials (unique on TrialClaim.phoneNumber).
+    const business = await db.$transaction(async (tx) => {
+      const b = await tx.business.create({
+        data: {
+          name: "My Business",
+          industry: Industry.GENERIC,
+          businessLinePhone: normalizedPhone,
+          stripeCustomerId,
+          onboardingComplete: false,
+          trialStartedAt: now,
+          trialEndsAt,
+          trialMinutesUsed: 0,
+          users: { connect: { id: user.id } },
+        },
+      })
+      await tx.trialClaim.create({
+        data: {
+          phoneNumber: normalizedPhone,
+          businessId: b.id,
+        },
+      })
+      return b
     })
 
     await db.user.update({
@@ -76,18 +86,19 @@ export async function POST(req: NextRequest) {
       data: { businessId: business.id },
     })
 
-    await db.trialClaim.create({
-      data: {
-        phoneNumber: normalizedPhone,
-        businessId: business.id,
-      },
-    })
-
     const session = await createTrialSetupSession(business.id, stripeCustomerId, appUrl)
 
     return NextResponse.json({ url: session.url })
   } catch (error) {
     console.error("Trial start error:", error)
+    // Unique constraint on TrialClaim.phoneNumber — same number claimed between check and create
+    const prismaError = error as { code?: string }
+    if (prismaError.code === "P2002") {
+      return NextResponse.json(
+        { error: "This number has already been used for a trial. Upgrade or contact support.", code: "phone_already_used_trial" },
+        { status: 403 }
+      )
+    }
     const message = error instanceof Error ? error.message : "Failed to start trial"
     return NextResponse.json({ error: message }, { status: 500 })
   }

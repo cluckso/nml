@@ -7,6 +7,7 @@ import {
   forwardToCrm,
 } from "@/lib/notifications"
 import { reportUsageToStripe } from "@/lib/stripe"
+import { isSubscriptionActive } from "@/lib/subscription"
 import { hasSmsToCallers, hasCrmForwarding, hasLeadTagging, getEffectivePlanType } from "@/lib/plans"
 import { FREE_TRIAL_MINUTES } from "@/lib/plans"
 import { PlanType } from "@prisma/client"
@@ -37,7 +38,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const event = JSON.parse(body)
+    const event = JSON.parse(body) as RetellCallWebhookEvent
 
     // Handle call completion event
     if (event.event === "call_ended" || event.event === "call_analysis") {
@@ -67,13 +68,42 @@ function verifyRetellSignature(body: string, signature: string): boolean {
     .update(body)
     .digest("hex")
 
-  return crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(expectedSignature)
-  )
+  const sigBuf = Buffer.from(signature, "utf8")
+  const expectedBuf = Buffer.from(expectedSignature, "utf8")
+  if (sigBuf.length !== expectedBuf.length) return false
+  return crypto.timingSafeEqual(sigBuf, expectedBuf)
 }
 
-async function handleCallCompletion(event: any) {
+/** Minimal shape for Retell call_ended / call_analysis webhook payload. */
+interface RetellCallAnalysis {
+  caller_name?: string
+  caller_phone?: string
+  service_address?: string
+  city?: string
+  issue_description?: string
+  extracted_variables?: {
+    name?: string
+    phone?: string
+    address?: string
+    city?: string
+    issue_description?: string
+    lead_tag?: string
+    appointment_preference?: string
+    department?: string
+  }
+  summary?: string
+  call_summary?: string
+  transcript?: string
+  [key: string]: unknown
+}
+
+interface RetellCallWebhookEvent {
+  event?: string
+  call?: { call_id?: string; agent_id?: string; from_number?: string; start_timestamp?: number; end_timestamp?: number; transcript?: string }
+  call_analysis?: RetellCallAnalysis
+}
+
+async function handleCallCompletion(event: RetellCallWebhookEvent) {
   const callId = event.call?.call_id
   const agentId = event.call?.agent_id
 
@@ -176,7 +206,7 @@ async function handleCallCompletion(event: any) {
     console.error("CRM forward error:", error)
   }
 
-  const hasActiveSubscription = business.subscription?.status === "ACTIVE"
+  const hasActiveSubscription = isSubscriptionActive(business.subscription)
   const isOnFormalTrial = !hasActiveSubscription && business.trialStartedAt != null
 
   if (isOnFormalTrial) {

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
+import { validateEmail, validatePasswordSignIn } from "@/lib/utils"
 
 function SignInContent() {
   const [email, setEmail] = useState("")
@@ -22,16 +23,35 @@ function SignInContent() {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
     setError(null)
 
+    const emailResult = validateEmail(email)
+    if (emailResult.ok === false) {
+      setError(emailResult.error)
+      return
+    }
+    const passwordResult = validatePasswordSignIn(password)
+    if (passwordResult.ok === false) {
+      setError(passwordResult.error)
+      return
+    }
+
+    setLoading(true)
     const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+      email: emailResult.email,
+      password: password.trim(),
     })
 
     if (error) {
-      setError(error.message)
+      const status = (error as { status?: number }).status
+      const code = (error as { code?: string }).code
+      if (status === 429 || code === "over_email_send_limit") {
+        setError("Too many attempts. Please wait a few minutes and try again.")
+      } else if (code === "invalid_credentials" || (error.message && error.message.toLowerCase().includes("invalid"))) {
+        setError("Invalid email or password. Please try again or reset your password.")
+      } else {
+        setError(error.message)
+      }
       setLoading(false)
     } else {
       router.push("/dashboard")
@@ -67,6 +87,8 @@ function SignInContent() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="you@example.com"
+                maxLength={255}
+                autoComplete="email"
               />
             </div>
             <div className="space-y-2">
@@ -78,6 +100,7 @@ function SignInContent() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder="••••••••"
+                autoComplete="current-password"
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>

@@ -1,7 +1,25 @@
 import Stripe from "stripe"
 import { db } from "./db"
-import { PlanType } from "@prisma/client"
+import { PlanType, SubscriptionStatus } from "@prisma/client"
 import { getIncludedMinutes, getOverageMinutes } from "./plans"
+
+/** Map Stripe subscription status to our DB SubscriptionStatus (single place for mapping). */
+function stripeSubscriptionStatusToDb(stripeStatus: string): SubscriptionStatus {
+  switch (stripeStatus) {
+    case "active":
+    case "trialing":
+      return "ACTIVE"
+    case "past_due":
+    case "unpaid":
+    case "incomplete":
+      return "PAST_DUE"
+    case "canceled":
+    case "incomplete_expired":
+      return "CANCELED"
+    default:
+      return "CANCELED"
+  }
+}
 
 /** Only initialized when STRIPE_SECRET_KEY is set — app works without Stripe (e.g. dev before keys). */
 export const stripe: Stripe | null = process.env.STRIPE_SECRET_KEY
@@ -272,7 +290,7 @@ export async function handleStripeWebhook(event: Stripe.Event) {
       await db.subscription.update({
         where: { stripeSubscriptionId: subscription.id },
         data: {
-          status: subscription.status === "active" ? "ACTIVE" : "CANCELED",
+          status: stripeSubscriptionStatusToDb(subscription.status),
           currentPeriodStart: new Date(subscription.current_period_start * 1000),
           currentPeriodEnd: new Date(subscription.current_period_end * 1000),
           cancelAtPeriodEnd: subscription.cancel_at_period_end,
