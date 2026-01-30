@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { useSearchParams } from "next/navigation"
@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Loader2 } from "lucide-react"
 
-export default function SignInPage() {
+function SignInContent() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
@@ -92,5 +93,24 @@ export default function SignInPage() {
         </CardContent>
       </Card>
     </div>
+  )
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center p-4">
+          <Card className="w-full max-w-md">
+            <CardContent className="pt-6 flex flex-col items-center gap-4">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">Loading…</p>
+            </CardContent>
+          </Card>
+        </div>
+      }
+    >
+      <SignInContent />
+    </Suspense>
   )
 }
