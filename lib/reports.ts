@@ -6,7 +6,17 @@ import { Resend } from "resend"
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
-export async function sendWeeklyReportForBusiness(businessId: string): Promise<boolean> {
+/** From address for report emails. Use RESEND_FROM_EMAIL in .env for testing (e.g. onboarding@resend.dev). */
+const REPORT_FROM =
+  process.env.RESEND_FROM_EMAIL ||
+  "NeverMissLead-AI <notifications@nevermisslead.ai>"
+
+export type SendWeeklyReportOptions = { test?: boolean }
+
+export async function sendWeeklyReportForBusiness(
+  businessId: string,
+  options?: SendWeeklyReportOptions
+): Promise<boolean> {
   const business = await db.business.findUnique({
     where: { id: businessId },
     include: {
@@ -18,7 +28,7 @@ export async function sendWeeklyReportForBusiness(businessId: string): Promise<b
   if (!business) return false
 
   const effectivePlan = getEffectivePlanType(business.subscription?.planType)
-  if (!hasWeeklyReports(effectivePlan)) {
+  if (!options?.test && !hasWeeklyReports(effectivePlan)) {
     return false
   }
 
@@ -93,12 +103,20 @@ export async function sendWeeklyReportForBusiness(businessId: string): Promise<b
     </html>
   `
 
-  await resend.emails.send({
-    from: "NeverMissLead-AI <notifications@nevermisslead.ai>",
+  const subject = options?.test
+    ? `[TEST] Weekly report: ${business.name}`
+    : `Weekly report: ${business.name}`
+
+  const { error } = await resend.emails.send({
+    from: REPORT_FROM,
     to: owner.email,
-    subject: `Weekly report: ${business.name}`,
+    subject,
     html,
   })
+  if (error) {
+    console.error("Weekly report send error:", error)
+    return false
+  }
   return true
 }
 
