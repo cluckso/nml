@@ -45,7 +45,7 @@ You need to create the products/prices in Stripe and set env vars so checkout an
      - **Usage aggregation:** Sum (default)
    - Copy the **Price ID** (starts with `price_`) → use as `STRIPE_USAGE_PRICE_ID`
 
-Important: the overage price must be **metered** so the app can report usage with `createUsageRecord`. The subscription is created at checkout with both the plan price and this overage price; the app only reports minutes *above* the plan’s included minutes.
+Important: the overage price must be **metered** so the app can report usage with `createUsageRecord`. The app adds this overage item to the subscription in the webhook after checkout (not at checkout), so customers are not charged for usage until the app reports overage minutes.
 
 ---
 
@@ -132,8 +132,8 @@ Use **test** keys and **test** price IDs while developing; switch to **live** wh
 - **Checkout:**  
   Creates a Stripe Checkout session with:
   - One **recurring** line item (plan: Starter, Pro, or Local Plus)
-  - One **metered** line item (overage price, quantity 0 at checkout)
-  - Optional one-time **setup fee** line item
+  - Optional one-time **setup fee** line item  
+  No usage/overage line at checkout — the metered overage item is added to the subscription in the webhook after payment, so customers are only charged for usage when the app reports overage minutes.
 
 - **After payment:**  
   Webhook `checkout.session.completed` creates the subscription in your DB and links it to the business.

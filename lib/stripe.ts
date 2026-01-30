@@ -70,21 +70,11 @@ export async function createCheckoutSession(
   }
 
   const priceId = getPriceIdForPlan(planType)
-  if (PLACEHOLDER_IDS.includes(STRIPE_USAGE_PRICE_ID) || !STRIPE_USAGE_PRICE_ID.startsWith("price_")) {
-    throw new Error(
-      "Stripe usage (overage) price ID is not set. Set STRIPE_USAGE_PRICE_ID in .env (value must start with price_)"
-    )
-  }
 
+  // Checkout shows only the plan (no usage charge). We add the metered overage item in the webhook after subscription creation.
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
     {
       price: priceId,
-      quantity: 1,
-    },
-    // Metered overage ($0.20/min); subscription has this item so we can report usage via createUsageRecord.
-    // Stripe validates quantity >= 1 at checkout; billing is driven by reported usage, not this initial quantity.
-    {
-      price: STRIPE_USAGE_PRICE_ID,
       quantity: 1,
     },
   ]
@@ -242,16 +232,26 @@ export async function handleStripeWebhook(event: Stripe.Event) {
       const planType = session.metadata?.planType as PlanType
 
       if (businessId && planType) {
+        const stripeSubscriptionId = session.subscription as string
         await db.subscription.create({
           data: {
             businessId,
-            stripeSubscriptionId: session.subscription as string,
+            stripeSubscriptionId,
             planType,
             status: "ACTIVE",
             currentPeriodStart: new Date(),
             currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
           },
         })
+        // Add metered overage item so we can report usage later; not included at checkout so no upfront charge
+        try {
+          await stripe.subscriptionItems.create({
+            subscription: stripeSubscriptionId,
+            price: STRIPE_USAGE_PRICE_ID,
+          })
+        } catch (err) {
+          console.error("Failed to add metered overage item to subscription:", err)
+        }
         // Reactivate business and clear trial fields (converted to paid)
         await db.business.update({
           where: { id: businessId },
