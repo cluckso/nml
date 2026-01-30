@@ -67,21 +67,47 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: session.url })
   } catch (error) {
-    console.error("Checkout error:", error)
+    const message = error instanceof Error ? error.message : String(error)
+    const stack = error instanceof Error ? error.stack : undefined
 
-    // Stripe API errors (invalid price, etc.) — return message so frontend can show it
-    const stripeError = error as { type?: string; code?: string; message?: string }
-    if (stripeError?.type === "StripeError" || (stripeError?.code && typeof stripeError?.message === "string")) {
-      const message =
-        stripeError.code === "resource_missing"
-          ? "Stripe price or product not found. Create prices in Stripe Dashboard and set STRIPE_PRICE_* / STRIPE_PRODUCT_* env vars."
-          : stripeError.message || "Stripe error"
+    // Log full error for debugging (terminal / server logs)
+    console.error("Checkout error:", message)
+    if (stack) console.error(stack)
+    const raw = error as { raw?: { message?: string }; response?: { statusCode?: number }; code?: string; type?: string }
+    if (raw?.raw?.message) console.error("Stripe raw:", raw.raw.message)
+    if (raw?.response?.statusCode) console.error("Stripe status:", raw.response.statusCode)
+
+    // Stripe API errors — return 400 with message
+    const stripeMessage = raw?.raw?.message || (error as { message?: string })?.message || message
+    if (
+      raw?.type === "StripeError" ||
+      raw?.response?.statusCode !== undefined ||
+      (typeof stripeMessage === "string" && (stripeMessage.toLowerCase().includes("stripe") || raw?.code))
+    ) {
+      const clientMessage =
+        raw?.code === "resource_missing"
+          ? "Stripe price or product not found. Create prices in Stripe Dashboard and set STRIPE_PRICE_* / STRIPE_USAGE_PRICE_ID in .env. See STRIPE_SETUP.md."
+          : stripeMessage
+      return NextResponse.json({ error: clientMessage }, { status: 400 })
+    }
+
+    // Config / validation errors — return 400
+    if (
+      message.includes("not set") ||
+      message.includes("STRIPE_") ||
+      message.includes("Business not found") ||
+      message.includes("must start with price_")
+    ) {
       return NextResponse.json({ error: message }, { status: 400 })
     }
 
-    const message = error instanceof Error ? error.message : "Failed to create checkout session"
+    // In development, return 500 with actual error in `error` so UI shows it
+    const isDev = process.env.NODE_ENV === "development"
     return NextResponse.json(
-      { error: "Failed to create checkout session", details: message },
+      {
+        error: isDev ? message : "Failed to create checkout session",
+        details: isDev ? undefined : message,
+      },
       { status: 500 }
     )
   }

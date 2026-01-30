@@ -32,7 +32,7 @@ export function UpgradeButton({ planType, currentPlan, agreedToLegal = true }: U
         router.push(data.url)
         return
       }
-      const message = data.error || data.details || (response.ok ? "" : "Checkout failed")
+      const message = data.error || data.details || (response.ok ? "" : `Checkout failed${data.details ? `: ${data.details}` : ""}`)
       if (message) setError(message)
     } catch {
       setError("Network error. Try again.")

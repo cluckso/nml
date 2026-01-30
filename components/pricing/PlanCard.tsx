@@ -51,9 +51,9 @@ export function PlanCard({
       })
       const data = await res.json()
       if (data.url) window.location.href = data.url
-      else alert(data.error || "Something went wrong")
+      else alert(data.error || data.details || "Something went wrong")
     } catch (e) {
-      alert("Failed to start checkout")
+      alert("Network or server error. Check the terminal for details.")
     } finally {
       setLoading(false)
     }

@@ -75,7 +75,34 @@ Use **test** keys and **test** price IDs while developing; switch to **live** wh
 
 ---
 
-## 3. Webhook
+## 3. Local testing (checkout & billing)
+
+1. **Stripe test mode**  
+   In Stripe Dashboard, switch to **Test mode** (toggle top-right). Create the same products and prices there and copy the **test** Price IDs into `.env` / `.env.local`.
+
+2. **Required env vars for checkout**  
+   All of these must be set or the checkout API returns **400** with a clear message:
+   - `STRIPE_SECRET_KEY` (e.g. `sk_test_...`)
+   - `STRIPE_PRICE_STARTER` (e.g. `price_...`)
+   - `STRIPE_PRICE_PRO`
+   - `STRIPE_PRICE_LOCAL_PLUS`
+   - `STRIPE_USAGE_PRICE_ID` (metered overage price)
+
+3. **Run the app and try checkout**  
+   - Start the app: `npm run dev`
+   - Sign in, go to **Pricing** or **Billing**, pick a plan and click through.
+   - If something is missing, the UI now shows the exact error (e.g. *"Stripe price ID for STARTER is not set. Set STRIPE_PRICE_STARTER in .env (value must start with price_)"*).
+
+4. **Webhook (optional for local)**  
+   To test the full flow (subscription created in DB after payment), run:
+   ```bash
+   stripe listen --forward-to localhost:3000/api/webhooks/stripe
+   ```
+   Use the printed `whsec_...` as `STRIPE_WEBHOOK_SECRET` in `.env.local`.
+
+---
+
+## 4. Webhook
 
 1. **Stripe Dashboard** → **Developers** → **Webhooks** → **Add endpoint**
 
@@ -100,7 +127,7 @@ Use **test** keys and **test** price IDs while developing; switch to **live** wh
 
 ---
 
-## 4. How it works in the app
+## 5. How it works in the app
 
 - **Checkout:**  
   Creates a Stripe Checkout session with:
@@ -116,7 +143,7 @@ Use **test** keys and **test** price IDs while developing; switch to **live** wh
 
 ---
 
-## 5. Checklist
+## 6. Checklist
 
 - [ ] Created 3 products with **recurring licensed** prices ($99, $199, $299/month)
 - [ ] Created 1 product with a **recurring metered** price ($0.20, monthly, metered)

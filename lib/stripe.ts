@@ -80,10 +80,11 @@ export async function createCheckoutSession(
       price: priceId,
       quantity: 1,
     },
-    // Metered overage ($0.20/min); subscription must have this item so we can report usage.
-    // For usage_type: metered, Stripe requires quantity to be omitted (not 0 or 1).
+    // Metered overage ($0.20/min); subscription has this item so we can report usage via createUsageRecord.
+    // Stripe requires quantity for the line item; use 0 at checkout, then report overage minutes later.
     {
       price: STRIPE_USAGE_PRICE_ID,
+      quantity: 0,
     },
   ]
 
