@@ -9,17 +9,6 @@ export const INDUSTRIES = [
   { value: Industry.GENERIC, label: "Other", description: "Other service business" },
 ] as const
 
-export const SUPPORTED_CITIES = [
-  "Platteville",
-  "Lancaster",
-  "Cuba City",
-  "Belmont",
-  "Potosi",
-  "Kieler",
-  "Jonestown",
-  "Rewey",
-]
-
 export function isComplexSetup(data: {
   industry?: Industry
   serviceAreas?: string[]

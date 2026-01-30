@@ -40,11 +40,6 @@ export function hasIndustryOptimizedAgents(planType: PlanType): boolean {
   return planType === PlanType.PRO || planType === PlanType.LOCAL_PLUS
 }
 
-/** Whether plan has custom intake flows by service type (Pro+) */
-export function hasCustomIntakeFlows(planType: PlanType): boolean {
-  return planType === PlanType.PRO || planType === PlanType.LOCAL_PLUS
-}
-
 /** Whether plan has appointment request capture (Pro+) */
 export function hasAppointmentCapture(planType: PlanType): boolean {
   return planType === PlanType.PRO || planType === PlanType.LOCAL_PLUS
@@ -65,18 +60,8 @@ export function hasLeadTagging(planType: PlanType): boolean {
   return planType === PlanType.PRO || planType === PlanType.LOCAL_PLUS
 }
 
-/** Whether plan has priority call routing (Local Plus) */
-export function hasPriorityRouting(planType: PlanType): boolean {
-  return planType === PlanType.LOCAL_PLUS
-}
-
 /** Whether plan has multi-department logic (Local Plus) */
 export function hasMultiDepartment(planType: PlanType): boolean {
-  return planType === PlanType.LOCAL_PLUS
-}
-
-/** Whether plan has after-hours emergency handling (Local Plus) */
-export function hasAfterHoursEmergency(planType: PlanType): boolean {
   return planType === PlanType.LOCAL_PLUS
 }
 

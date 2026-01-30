@@ -29,7 +29,8 @@ export default async function OnboardingPage() {
     state: business.state ?? undefined,
     zipCode: business.zipCode ?? undefined,
     serviceAreas: business.serviceAreas?.length ? business.serviceAreas : business.city ? [business.city] : undefined,
-    phoneNumber: business.businessLinePhone ?? business.phoneNumber ?? undefined,
+    // Only use businessLinePhone for "Your existing business line"; Business.phoneNumber is the Retell AI number.
+    phoneNumber: business.businessLinePhone ?? undefined,
     businessHours: business.businessHours as { open: string; close: string; days: string[] } | null,
     departments: business.departments,
     crmWebhookUrl: business.crmWebhookUrl ?? undefined,

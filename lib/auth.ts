@@ -93,7 +93,11 @@ export async function requireAuth() {
     const { data: { user }, error } = await supabase.auth.getUser()
     if (error || !user) redirect("/sign-in")
     return getDbUserFromSupabaseUser(user.id, user.email ?? undefined)
-  } catch (err) {
+  } catch (err: unknown) {
+    // Next.js redirect() throws; rethrow so the redirect happens and don't log it
+    if (err && typeof err === "object" && "digest" in err && String((err as { digest?: string }).digest).startsWith("NEXT_REDIRECT")) {
+      throw err
+    }
     console.error("requireAuth error:", err)
     redirect("/sign-in")
   }

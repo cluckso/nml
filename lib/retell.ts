@@ -8,24 +8,6 @@ import {
 
 const RETELL_API_BASE = process.env.RETELL_API_BASE ?? "https://api.retellai.com"
 
-export interface RetellAgent {
-  agent_id?: string
-  agent_name: string
-  language: string
-  voice_id: string
-  voice_temperature: number
-  voice_speed: number
-  volume: number
-  max_call_duration_ms: number
-  interruption_sensitivity: number
-  response_engine: {
-    type: string
-    version: number
-    conversation_flow_id?: string
-  }
-  conversationFlow?: any
-}
-
 export interface CreateAgentRequest {
   businessName: string
   industry: Industry
@@ -463,23 +445,4 @@ function buildConversationFlow(
       },
     ],
   }
-}
-
-export async function getRetellAgent(agentId: string) {
-  const apiKey = process.env.RETELL_API_KEY
-  if (!apiKey) {
-    throw new Error("RETELL_API_KEY is not configured")
-  }
-
-  const response = await fetch(`${RETELL_API_BASE}/get-agent/${agentId}`, {
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-    },
-  })
-
-  if (!response.ok) {
-    throw new Error("Failed to get Retell agent")
-  }
-
-  return response.json()
 }

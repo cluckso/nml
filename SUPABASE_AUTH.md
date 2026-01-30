@@ -8,6 +8,7 @@ This app uses Supabase Auth for sign-up and sign-in. If you see **429**, **400**
 
 | Status | Meaning | What to do |
 |--------|--------|------------|
+| **403** | Forbidden on `/auth/v1/user` | Usually **URL / CORS**. Add your app origin to Supabase: **Authentication** → **URL Configuration** → **Site URL** and **Redirect URLs** (e.g. `http://localhost:3000`, `https://your-app.vercel.app`, `https://your-app.vercel.app/**`). Clear cookies and sign in again. |
 | **429** | Too many requests (rate limit) | Wait a few minutes and try again. Supabase free tier limits auth requests per hour. |
 | **400** | Bad request | Check email/password format. If you already signed up, use **Sign in** and confirm your email first. |
 | **500** | Supabase server error | Often related to **email sending**. Check the steps below. |
