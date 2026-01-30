@@ -184,7 +184,24 @@ function buildConversationFlow(
   industry: Industry,
   serviceAreas: string[]
 ): any {
-  // Base structure from Kip (3).json
+  switch (industry) {
+    case Industry.AUTO_REPAIR:
+      return buildAutoRepairFlow(businessName)
+    case Industry.CHILDCARE:
+      return buildChildcareFlow(businessName)
+    case Industry.GENERIC:
+      return buildGenericFlow(businessName)
+    case Industry.HVAC:
+    case Industry.PLUMBING:
+    case Industry.ELECTRICIAN:
+    default:
+      return buildPropertyServiceFlow(businessName, serviceAreas)
+  }
+}
+
+/** HVAC, PLUMBING, ELECTRICIAN: property + service area + address + issue + emergency path */
+function buildPropertyServiceFlow(businessName: string, serviceAreas: string[]): any {
+  const areas = serviceAreas.join(", ")
   return {
     start_node_id: "start-node",
     start_speaker: "agent",
@@ -193,255 +210,303 @@ function buildConversationFlow(
         id: "start-node",
         type: "conversation",
         name: "Welcome Node",
-        instruction: {
-          type: "static_text",
-          text: `Thanks for calling ${businessName}! This is our virtual assistant. Who am I speaking with today?\n`,
-        },
-        edges: [
-          {
-            id: "edge-1",
-            destination_node_id: "collect-name",
-            transition_condition: {
-              type: "prompt",
-              prompt: "User provided name",
-            },
-          },
-        ],
+        instruction: { type: "static_text", text: `Thanks for calling ${businessName}! This is our virtual assistant. Who am I speaking with today?\n` },
+        edges: [{ id: "edge-1", destination_node_id: "collect-name", transition_condition: { type: "prompt", prompt: "User provided name" } }],
         start_speaker: "agent",
       },
       {
         id: "collect-name",
         type: "conversation",
         name: "Collect Name",
-        instruction: {
-          type: "prompt",
-          text: `Thank you {{Name}}! Could you please provide the city the property is in that needs service?\n`,
-        },
-        edges: [
-          {
-            id: "edge-2",
-            destination_node_id: "verify-city",
-            transition_condition: {
-              type: "prompt",
-              prompt: "User provided city",
-            },
-          },
-        ],
+        instruction: { type: "prompt", text: `Thank you {{Name}}! Could you please provide the city where the property needing service is located?\n` },
+        edges: [{ id: "edge-2", destination_node_id: "verify-city", transition_condition: { type: "prompt", prompt: "User provided city" } }],
       },
       {
         id: "verify-city",
         type: "conversation",
         name: "City Verified",
-        instruction: {
-          type: "prompt",
-          text: `Ask the caller to confirm the city.\nInternally verify the city is one of the supported service locations:\n${serviceAreas.join(", ")}.\n\nDo not show the list to the caller.`,
-        },
+        instruction: { type: "prompt", text: `Confirm the city with the caller. Verify it is one of our service areas: ${areas}. Do not read the list to the caller.\n` },
         edges: [
-          {
-            id: "edge-3",
-            destination_node_id: "collect-address",
-            transition_condition: {
-              type: "prompt",
-              prompt: "if city IS supported",
-            },
-          },
-          {
-            id: "edge-4",
-            destination_node_id: "not-supported",
-            transition_condition: {
-              type: "prompt",
-              prompt: "if city IS NOT supported",
-            },
-          },
+          { id: "edge-3", destination_node_id: "collect-address", transition_condition: { type: "prompt", prompt: "if city IS supported" } },
+          { id: "edge-4", destination_node_id: "not-supported", transition_condition: { type: "prompt", prompt: "if city IS NOT supported" } },
         ],
       },
       {
         id: "collect-address",
         type: "conversation",
         name: "Ask Address",
-        instruction: {
-          type: "prompt",
-          text: `Great, we do service {{city}}. Could you please provide the full address of the property needing service?`,
-        },
-        edges: [
-          {
-            id: "edge-5",
-            destination_node_id: "collect-issue",
-            transition_condition: {
-              type: "prompt",
-              prompt: "If address is provided",
-            },
-          },
-        ],
+        instruction: { type: "prompt", text: `Great, we do service {{city}}. What is the full address of the property needing service?` },
+        edges: [{ id: "edge-5", destination_node_id: "collect-issue", transition_condition: { type: "prompt", prompt: "If address is provided" } }],
       },
       {
         id: "collect-issue",
         type: "conversation",
         name: "Ask Issue Details",
-        instruction: {
-          type: "prompt",
-          text: `Please describe the issue you're experiencing in as much detail as possible.`,
-        },
+        instruction: { type: "prompt", text: `Please describe the issue in as much detail as you can.` },
         edges: [
-          {
-            id: "edge-6",
-            destination_node_id: "confirm-details",
-            transition_condition: {
-              type: "prompt",
-              prompt: "If user is done",
-            },
-          },
-          {
-            id: "edge-7",
-            destination_node_id: "emergency-flag",
-            transition_condition: {
-              type: "prompt",
-              prompt: "If urgent or emergency, i.e. 'flooding', 'no heat', 'gas smell', 'burst pipe'",
-            },
-          },
+          { id: "edge-6", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "If user is done" } },
+          { id: "edge-7", destination_node_id: "emergency-flag", transition_condition: { type: "prompt", prompt: "If urgent or emergency, e.g. flooding, no heat, gas smell, burst pipe, no power, sparks" } },
         ],
       },
       {
         id: "emergency-flag",
         type: "conversation",
         name: "Emergency Detected",
-        instruction: {
-          type: "prompt",
-          text: `This sounds urgent. I'll make sure it's flagged as a priority.`,
-        },
-        edges: [
-          {
-            id: "edge-8",
-            destination_node_id: "confirm-details",
-            transition_condition: {
-              type: "prompt",
-              prompt: "Always",
-            },
-          },
-        ],
+        instruction: { type: "prompt", text: `This sounds urgent. I'll make sure it's flagged as a priority.` },
+        edges: [{ id: "edge-8", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "Always" } }],
       },
       {
         id: "confirm-details",
         type: "conversation",
         name: "Recite Issue",
-        instruction: {
-          type: "prompt",
-          text: `Repeat back to the user the information gathered about the issue. Ask if it is correct.`,
-        },
-        edges: [
-          {
-            id: "edge-9",
-            destination_node_id: "phone-confirm",
-            transition_condition: {
-              type: "prompt",
-              prompt: "if user agrees that information recited is correct",
-            },
-          },
-        ],
+        instruction: { type: "prompt", text: `Repeat back the information gathered. Ask if it is correct.` },
+        edges: [{ id: "edge-9", destination_node_id: "phone-confirm", transition_condition: { type: "prompt", prompt: "if user agrees that information recited is correct" } }],
       },
       {
         id: "phone-confirm",
         type: "conversation",
         name: "Phone Confirm",
-        instruction: {
-          type: "prompt",
-          text: `Ok, got it! {{Name}}! Now, is the best number to reach you the one you're calling from?`,
-        },
+        instruction: { type: "prompt", text: `Is the best number to reach you the one you're calling from?` },
         edges: [
-          {
-            id: "edge-10",
-            destination_node_id: "final-assistant",
-            transition_condition: {
-              type: "prompt",
-              prompt: "if confirmed",
-            },
-          },
-          {
-            id: "edge-11",
-            destination_node_id: "ask-number",
-            transition_condition: {
-              type: "prompt",
-              prompt: "if NOT confirmed",
-            },
-          },
+          { id: "edge-10", destination_node_id: "final-assistant", transition_condition: { type: "prompt", prompt: "if confirmed" } },
+          { id: "edge-11", destination_node_id: "ask-number", transition_condition: { type: "prompt", prompt: "if NOT confirmed" } },
         ],
       },
       {
         id: "ask-number",
         type: "conversation",
         name: "Ask number",
-        instruction: {
-          type: "prompt",
-          text: `Ask for best contact phone number`,
-        },
-        edges: [
-          {
-            id: "edge-12",
-            destination_node_id: "final-assistant",
-            transition_condition: {
-              type: "prompt",
-              prompt: "user provides number",
-            },
-          },
-        ],
+        instruction: { type: "prompt", text: `What is the best phone number to reach you?` },
+        edges: [{ id: "edge-12", destination_node_id: "final-assistant", transition_condition: { type: "prompt", prompt: "user provides number" } }],
       },
       {
         id: "final-assistant",
         type: "conversation",
         name: "Final Assistant",
-        instruction: {
-          type: "prompt",
-          text: `Is there anything else we should know or anything else I can help you with today?`,
-        },
-        edges: [
-          {
-            id: "edge-13",
-            destination_node_id: "end-call",
-            transition_condition: {
-              type: "prompt",
-              prompt: "If conversation is complete",
-            },
-          },
-        ],
+        instruction: { type: "prompt", text: `Is there anything else I can help you with today?` },
+        edges: [{ id: "edge-13", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: "If conversation is complete" } }],
       },
       {
         id: "not-supported",
         type: "conversation",
         name: "Not supported",
-        instruction: {
-          type: "prompt",
-          text: `Apologize, and inform the caller that we don't currently provide services in {{city}}. Do not offer any future services.`,
-        },
-        edges: [
-          {
-            id: "edge-14",
-            destination_node_id: "end-call-not-supported",
-            transition_condition: {
-              type: "prompt",
-              prompt: "Always",
-            },
-          },
-        ],
+        instruction: { type: "prompt", text: `Apologize and say we don't currently provide services in {{city}}. Do not offer future services.` },
+        edges: [{ id: "edge-14", destination_node_id: "end-call-not-supported", transition_condition: { type: "prompt", prompt: "Always" } }],
       },
       {
         id: "end-call",
         type: "end",
         name: "End Call",
         speak_during_execution: true,
-        instruction: {
-          type: "prompt",
-          text: `Thanks {{Name}}. A member of our team will reach out shortly regarding your {{issue_description}}. Thank you for calling ${businessName}. Have a great day!`,
-        },
+        instruction: { type: "prompt", text: `Thanks {{Name}}. A team member will reach out shortly about your request. Thank you for calling ${businessName}. Have a great day!` },
       },
       {
         id: "end-call-not-supported",
         type: "end",
         name: "End Call",
         speak_during_execution: true,
-        instruction: {
-          type: "prompt",
-          text: `Politely end the call`,
-        },
+        instruction: { type: "prompt", text: `Politely end the call` },
+      },
+    ],
+  }
+}
+
+/** AUTO_REPAIR: name, phone, vehicle (year/make/model), reason — no address or service area */
+function buildAutoRepairFlow(businessName: string): any {
+  return {
+    start_node_id: "start-node",
+    start_speaker: "agent",
+    nodes: [
+      {
+        id: "start-node",
+        type: "conversation",
+        name: "Welcome Node",
+        instruction: { type: "static_text", text: `Thanks for calling ${businessName}! Who am I speaking with today?\n` },
+        edges: [{ id: "edge-1", destination_node_id: "collect-name", transition_condition: { type: "prompt", prompt: "User provided name" } }],
+        start_speaker: "agent",
+      },
+      {
+        id: "collect-name",
+        type: "conversation",
+        name: "Collect Name",
+        instruction: { type: "prompt", text: `Thanks {{Name}}. What's the best phone number to reach you?` },
+        edges: [{ id: "edge-2", destination_node_id: "collect-vehicle", transition_condition: { type: "prompt", prompt: "User provided phone number" } }],
+      },
+      {
+        id: "collect-vehicle",
+        type: "conversation",
+        name: "Vehicle Info",
+        instruction: { type: "prompt", text: `What vehicle are you calling about? Please give the year, make, and model.` },
+        edges: [{ id: "edge-3", destination_node_id: "collect-reason", transition_condition: { type: "prompt", prompt: "User provided vehicle year, make, or model" } }],
+      },
+      {
+        id: "collect-reason",
+        type: "conversation",
+        name: "Reason for Call",
+        instruction: { type: "prompt", text: `What can we help you with today — a new issue, maintenance, checking on an existing repair, or scheduling?` },
+        edges: [
+          { id: "edge-4a", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "If new issue or maintenance" } },
+          { id: "edge-4b", destination_node_id: "collect-dropoff", transition_condition: { type: "prompt", prompt: "If checking on existing repair or status" } },
+          { id: "edge-4c", destination_node_id: "collect-appointment-pref", transition_condition: { type: "prompt", prompt: "If scheduling or appointment" } },
+        ],
+      },
+      {
+        id: "collect-dropoff",
+        type: "conversation",
+        name: "When Dropped Off",
+        instruction: { type: "prompt", text: `When did you drop the vehicle off?` },
+        edges: [{ id: "edge-5", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "User provided date or time" } }],
+      },
+      {
+        id: "collect-appointment-pref",
+        type: "conversation",
+        name: "Appointment Preference",
+        instruction: { type: "prompt", text: `Do you have preferred days or times for an appointment?` },
+        edges: [{ id: "edge-6", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "User provided preference or said no preference" } }],
+      },
+      {
+        id: "confirm-details",
+        type: "conversation",
+        name: "Recite Details",
+        instruction: { type: "prompt", text: `Repeat back the information gathered. Ask if it is correct.` },
+        edges: [{ id: "edge-7", destination_node_id: "final-assistant", transition_condition: { type: "prompt", prompt: "if user agrees" } }],
+      },
+      {
+        id: "final-assistant",
+        type: "conversation",
+        name: "Final Assistant",
+        instruction: { type: "prompt", text: `Anything else we should know?` },
+        edges: [{ id: "edge-8", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: "If conversation is complete" } }],
+      },
+      {
+        id: "end-call",
+        type: "end",
+        name: "End Call",
+        speak_during_execution: true,
+        instruction: { type: "prompt", text: `Thanks {{Name}}. We'll be in touch about your vehicle. Thank you for calling ${businessName}.` },
+      },
+    ],
+  }
+}
+
+/** CHILDCARE: parent name, contact, child age, type of care, tour preference if applicable */
+function buildChildcareFlow(businessName: string): any {
+  return {
+    start_node_id: "start-node",
+    start_speaker: "agent",
+    nodes: [
+      {
+        id: "start-node",
+        type: "conversation",
+        name: "Welcome Node",
+        instruction: { type: "static_text", text: `Thanks for calling ${businessName}! Who am I speaking with today?\n` },
+        edges: [{ id: "edge-1", destination_node_id: "collect-name", transition_condition: { type: "prompt", prompt: "User provided name" } }],
+        start_speaker: "agent",
+      },
+      {
+        id: "collect-name",
+        type: "conversation",
+        name: "Collect Name",
+        instruction: { type: "prompt", text: `Thanks. What's the best phone number to reach you?` },
+        edges: [{ id: "edge-2", destination_node_id: "collect-child-age", transition_condition: { type: "prompt", prompt: "User provided phone number" } }],
+      },
+      {
+        id: "collect-child-age",
+        type: "conversation",
+        name: "Child Age",
+        instruction: { type: "prompt", text: `How old is your child, or what age range are you looking for care for?` },
+        edges: [{ id: "edge-3", destination_node_id: "collect-care-type", transition_condition: { type: "prompt", prompt: "User provided age or range" } }],
+      },
+      {
+        id: "collect-care-type",
+        type: "conversation",
+        name: "Type of Care",
+        instruction: { type: "prompt", text: `What type of care are you looking for — full-time, part-time, drop-in, or something else?` },
+        edges: [
+          { id: "edge-4a", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "If not requesting a tour" } },
+          { id: "edge-4b", destination_node_id: "collect-tour-pref", transition_condition: { type: "prompt", prompt: "If requesting a tour or visit" } },
+        ],
+      },
+      {
+        id: "collect-tour-pref",
+        type: "conversation",
+        name: "Tour Preference",
+        instruction: { type: "prompt", text: `Do you have preferred days or times for a tour?` },
+        edges: [{ id: "edge-5", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "User provided preference or said no preference" } }],
+      },
+      {
+        id: "confirm-details",
+        type: "conversation",
+        name: "Recite Details",
+        instruction: { type: "prompt", text: `Repeat back the information gathered. Ask if it is correct.` },
+        edges: [{ id: "edge-6", destination_node_id: "final-assistant", transition_condition: { type: "prompt", prompt: "if user agrees" } }],
+      },
+      {
+        id: "final-assistant",
+        type: "conversation",
+        name: "Final Assistant",
+        instruction: { type: "prompt", text: `Anything else we should know?` },
+        edges: [{ id: "edge-7", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: "If conversation is complete" } }],
+      },
+      {
+        id: "end-call",
+        type: "end",
+        name: "End Call",
+        speak_during_execution: true,
+        instruction: { type: "prompt", text: `Thanks {{Name}}. We'll be in touch. Thank you for calling ${businessName}.` },
+      },
+    ],
+  }
+}
+
+/** GENERIC: minimal — name, reason for call, contact, confirm */
+function buildGenericFlow(businessName: string): any {
+  return {
+    start_node_id: "start-node",
+    start_speaker: "agent",
+    nodes: [
+      {
+        id: "start-node",
+        type: "conversation",
+        name: "Welcome Node",
+        instruction: { type: "static_text", text: `Thanks for calling ${businessName}! Who am I speaking with today?\n` },
+        edges: [{ id: "edge-1", destination_node_id: "collect-name", transition_condition: { type: "prompt", prompt: "User provided name" } }],
+        start_speaker: "agent",
+      },
+      {
+        id: "collect-name",
+        type: "conversation",
+        name: "Collect Name",
+        instruction: { type: "prompt", text: `Thanks {{Name}}. What can we help you with today?` },
+        edges: [{ id: "edge-2", destination_node_id: "collect-contact", transition_condition: { type: "prompt", prompt: "User described reason for calling" } }],
+      },
+      {
+        id: "collect-contact",
+        type: "conversation",
+        name: "Contact Info",
+        instruction: { type: "prompt", text: `What's the best phone number to reach you?` },
+        edges: [{ id: "edge-3", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "User provided phone number" } }],
+      },
+      {
+        id: "confirm-details",
+        type: "conversation",
+        name: "Recite Details",
+        instruction: { type: "prompt", text: `Repeat back what you gathered. Ask if it is correct.` },
+        edges: [{ id: "edge-4", destination_node_id: "final-assistant", transition_condition: { type: "prompt", prompt: "if user agrees" } }],
+      },
+      {
+        id: "final-assistant",
+        type: "conversation",
+        name: "Final Assistant",
+        instruction: { type: "prompt", text: `Anything else?` },
+        edges: [{ id: "edge-5", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: "If conversation is complete" } }],
+      },
+      {
+        id: "end-call",
+        type: "end",
+        name: "End Call",
+        speak_during_execution: true,
+        instruction: { type: "prompt", text: `Thanks {{Name}}. We'll be in touch. Thank you for calling ${businessName}.` },
       },
     ],
   }
