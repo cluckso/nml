@@ -44,6 +44,7 @@ export async function createTrialSetupSession(
   return stripe.checkout.sessions.create({
     mode: "setup",
     customer: stripeCustomerId,
+    currency: "usd",
     success_url: `${baseUrl}/onboarding?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${baseUrl}/trial/start`,
     metadata: { businessId },
@@ -81,10 +82,10 @@ export async function createCheckoutSession(
       quantity: 1,
     },
     // Metered overage ($0.20/min); subscription has this item so we can report usage via createUsageRecord.
-    // Stripe requires quantity for the line item; use 0 at checkout, then report overage minutes later.
+    // Stripe validates quantity >= 1 at checkout; billing is driven by reported usage, not this initial quantity.
     {
       price: STRIPE_USAGE_PRICE_ID,
-      quantity: 0,
+      quantity: 1,
     },
   ]
 
