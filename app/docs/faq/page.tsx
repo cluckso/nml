@@ -83,12 +83,12 @@ const CARRIERS = [
         ],
       },
       {
-        method: "Conditional (no answer, busy, unreachable)",
+        method: "Conditional (AI answers only when you don’t)",
         items: [
-          "**No answer:** Dial ****61*** + AI number + **#**, then Call.",
-          "**Busy:** Dial ****67*** + AI number + **#**, then Call.",
-          "**Unreachable:** Dial ****62*** + AI number + **#**, then Call.",
-          "To turn off: **##61#**, **##67#**, or **##62#** respectively.",
+          "**No answer** (when you don’t pick up, e.g. after 4–5 rings): Dial ***61*** + AI number + **#**, then Call.",
+          "**Busy** (when your line is busy, e.g. on another call): Dial ***67*** + AI number + **#**, then Call.",
+          "**Unreachable** (when your phone is off or out of service): Dial ***62*** + AI number + **#**, then Call.",
+          "To turn off: **#61#**, **#67#**, or **#62#** respectively (same order as above).",
         ],
       },
       {
@@ -114,11 +114,11 @@ const CARRIERS = [
         ],
       },
       {
-        method: "Conditional forwarding",
+        method: "Conditional (AI answers only when you don’t)",
         items: [
-          "**No answer:** Dial ***71** + 10-digit AI number, press Send.",
-          "**Busy:** Dial ***90** + 10-digit AI number, press Send.",
-          "**Unreachable:** Dial ***92** + 10-digit AI number, press Send.",
+          "**No answer** (when you don’t pick up, e.g. after 4–5 rings): Dial ***71*** + 10-digit AI number, press Send.",
+          "**Busy** (when your line is busy, e.g. on another call): Dial ***90*** + 10-digit AI number, press Send.",
+          "**Unreachable** (when your phone is off or out of service): Dial ***92*** + 10-digit AI number, press Send.",
         ],
       },
       {
@@ -171,12 +171,12 @@ const CARRIERS = [
         ],
       },
       {
-        method: "Conditional forwarding",
+        method: "Conditional (AI answers only when you don’t)",
         items: [
-          "**No answer:** Dial ***61** + AI number + **#**, then Call.",
-          "**Busy:** Dial ***67** + AI number + **#**, then Call.",
-          "**Unreachable:** Dial ***62** + AI number + **#**, then Call.",
-          "To turn off: **#61#**, **#67#**, or **#62#** respectively.",
+          "**No answer** (when you don’t pick up, e.g. after 4–5 rings): Dial ***61*** + AI number + **#**, then Call.",
+          "**Busy** (when your line is busy, e.g. on another call): Dial ***67*** + AI number + **#**, then Call.",
+          "**Unreachable** (when your phone is off or out of service): Dial ***62*** + AI number + **#**, then Call.",
+          "To turn off: **#61#**, **#67#**, or **#62#** respectively (same order as above).",
         ],
       },
       {
@@ -201,11 +201,11 @@ const CARRIERS = [
         ],
       },
       {
-        method: "Conditional forwarding",
+        method: "Conditional (AI answers only when you don’t)",
         items: [
-          "**No answer:** Dial ***73** + AI number, press Call.",
-          "**Busy:** Dial ***74** + AI number, press Call.",
-          "**Unreachable:** Dial ***62** + AI number, press Call.",
+          "**No answer** (when you don’t pick up, e.g. after 4–5 rings): Dial ***73*** + AI number, press Call.",
+          "**Busy** (when your line is busy, e.g. on another call): Dial ***74*** + AI number, press Call.",
+          "**Unreachable** (when your phone is off or out of service): Dial ***62*** + AI number, press Call.",
         ],
       },
     ],
@@ -224,11 +224,11 @@ const CARRIERS = [
         ],
       },
       {
-        method: "Conditional forwarding",
+        method: "Conditional (AI answers only when you don’t)",
         items: [
-          "**No answer:** **21*1** + number + **#**. Off: **##61#**.",
-          "**Unreachable:** **62*1** + number + **#**. Off: **##62#**.",
-          "**Busy:** **67*1** + number + **#**. Off: **##67#**.",
+          "**No answer** (when you don’t pick up, e.g. after 4–5 rings): **21*1** + number + **#**. Off: **##61#**.",
+          "**Unreachable** (when your phone is off or out of service): **62*1** + number + **#**. Off: **##62#**.",
+          "**Busy** (when your line is busy, e.g. on another call): **67*1** + number + **#**. Off: **##67#**.",
         ],
       },
     ],
@@ -247,10 +247,10 @@ const CARRIERS = [
         ],
       },
       {
-        method: "Conditional forwarding",
+        method: "Conditional (AI answers only when you don’t)",
         items: [
-          "**Busy:** Dial ***73** + AI number, press Send. Off: ***730**.",
-          "**No answer:** Dial ***74** + AI number, press Send. Off: ***740**.",
+          "**Busy** (when your line is busy, e.g. on another call): Dial ***73*** + AI number, press Send. Off: ***730**.",
+          "**No answer** (when you don’t pick up, e.g. after 4–5 rings): Dial ***74*** + AI number, press Send. Off: ***740**.",
         ],
       },
     ],
@@ -300,9 +300,14 @@ export default function DocsFaqPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          <p className="text-sm font-medium">Can I have the AI answer only when I don&apos;t pick up?</p>
+          <p className="text-sm text-muted-foreground">
+            Yes. That&apos;s controlled by your phone carrier, not the app. Use <strong>conditional</strong> or <strong>no-answer</strong> forwarding (e.g. &quot;forward when unanswered&quot; or &quot;after 4–5 rings&quot;) instead of &quot;forward all.&quot; Then your phone rings first; if you don&apos;t answer, the call goes to the AI. Check your carrier&apos;s steps below for &quot;conditional forwarding&quot; or &quot;forward when busy/no answer.&quot;
+          </p>
           <ol className="list-decimal list-inside space-y-2 text-sm">
             <li>Get your <strong>AI number</strong> from the dashboard (after clicking &quot;Connect to my call assistant&quot;).</li>
             <li>Use the steps below for <strong>your carrier</strong> and enter that AI number as the &quot;forward to&quot; number.</li>
+            <li>If you want the AI only when you don&apos;t answer, choose <strong>conditional</strong> or <strong>no-answer</strong> forwarding, not &quot;always forward.&quot;</li>
             <li>Save the settings and test by calling your business line from another phone.</li>
           </ol>
           <Link href="/dashboard">
