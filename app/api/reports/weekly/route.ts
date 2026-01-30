@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
           where: { businessId },
           select: { email: true },
         })
-        const actualTo = testToEmail || owner?.email ?? null
+        const actualTo = testToEmail || (owner?.email ?? null)
         return NextResponse.json({
           sent: ok,
           test: true,
