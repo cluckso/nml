@@ -11,7 +11,11 @@ const REPORT_FROM =
   process.env.RESEND_FROM_EMAIL ||
   "NeverMissLead-AI <notifications@nevermisslead.ai>"
 
-export type SendWeeklyReportOptions = { test?: boolean }
+export type SendWeeklyReportOptions = {
+  test?: boolean
+  /** In test mode, send to this email instead of owner (e.g. Resend account email when domain not verified). */
+  testToEmail?: string
+}
 
 export async function sendWeeklyReportForBusiness(
   businessId: string,
@@ -34,6 +38,14 @@ export async function sendWeeklyReportForBusiness(
 
   const owner = business.users[0]
   if (!owner || !resend) return false
+
+  // Resend sandbox: without a verified domain you can only send to your Resend account email.
+  // In test mode, allow override so you can send to that address.
+  const toEmail =
+    options?.test && options?.testToEmail?.trim()
+      ? options.testToEmail.trim()
+      : owner.email
+  if (!toEmail) return false
 
   const weekStart = subDays(new Date(), 7)
   const [calls, usage] = await Promise.all([
@@ -109,7 +121,7 @@ export async function sendWeeklyReportForBusiness(
 
   const { error } = await resend.emails.send({
     from: REPORT_FROM,
-    to: owner.email,
+    to: toEmail,
     subject,
     html,
   })

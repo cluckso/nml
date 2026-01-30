@@ -36,17 +36,24 @@ export async function POST(req: NextRequest) {
     }
 
     if (businessId) {
-      const ok = await sendWeeklyReportForBusiness(businessId, { test: testMode || undefined })
+      const testToEmail = process.env.RESEND_TEST_TO?.trim() || undefined
+      const ok = await sendWeeklyReportForBusiness(businessId, {
+        test: testMode || undefined,
+        testToEmail: isDevTest ? testToEmail : undefined,
+      })
       if (isDevTest) {
         const owner = await db.user.findFirst({
           where: { businessId },
           select: { email: true },
         })
+        const actualTo = testToEmail || owner?.email ?? null
         return NextResponse.json({
           sent: ok,
           test: true,
-          to: owner?.email ?? null,
-          hint: ok ? "Check inbox for [TEST] Weekly report" : "Send failed (check server logs and RESEND_API_KEY)",
+          to: actualTo,
+          hint: ok
+            ? "Check inbox for [TEST] Weekly report"
+            : "Send failed (check server logs; without a verified domain set RESEND_TEST_TO to your Resend account email)",
         })
       }
       return NextResponse.json({ sent: ok })
