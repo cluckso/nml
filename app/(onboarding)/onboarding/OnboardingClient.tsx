@@ -19,6 +19,7 @@ interface OnboardingData {
     city: string
     state: string
     zipCode: string
+    serviceAreas?: string[]
     phoneNumber?: string
     ownerPhone?: string
     businessHours?: { open: string; close: string; days: string[] }
@@ -37,6 +38,7 @@ interface OnboardingClientProps {
     city?: string
     state?: string
     zipCode?: string
+    serviceAreas?: string[]
     phoneNumber?: string
     businessHours?: { open: string; close: string; days: string[] } | null
     departments?: string[]
@@ -63,10 +65,11 @@ export function OnboardingClient({ planType, initialBusiness }: OnboardingClient
   const handleBusinessInfoSubmit = async (businessInfo: OnboardingData["businessInfo"]) => {
     const newData = { ...data, businessInfo }
     setData(newData)
+    const serviceAreas = businessInfo?.serviceAreas?.length ? businessInfo.serviceAreas : businessInfo?.city ? [businessInfo.city] : []
     if (
       isComplexSetup({
         industry: data.industry,
-        serviceAreas: businessInfo ? [businessInfo.city] : [],
+        serviceAreas,
       })
     ) {
       setStep("manual-setup")

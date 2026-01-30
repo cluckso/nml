@@ -51,32 +51,34 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Create Retell agent (with plan-based features; in dev all features enabled for testing)
+    // Create Retell agent and purchase a new AI number (no user-provided number)
     const { getEffectivePlanType } = await import("@/lib/plans")
     const { agent_id, phone_number } = await createRetellAgent({
       businessName: business.name,
       industry: business.industry,
       serviceAreas: business.serviceAreas,
-      phoneNumber: business.phoneNumber || undefined,
       planType: getEffectivePlanType(business.subscription?.planType ?? null),
       businessHours: (business.businessHours as { open?: string; close?: string; days?: string[] } | null) ?? undefined,
       departments: business.departments?.length ? business.departments : undefined,
       afterHoursEmergencyPhone: business.afterHoursEmergencyPhone ?? undefined,
     })
 
-    // Update business with agent ID
+    // Update business with agent ID and Retell-assigned AI number when we have it
     await db.business.update({
       where: { id: business.id },
       data: {
         retellAgentId: agent_id,
-        phoneNumber: phone_number || business.phoneNumber,
+        ...(phone_number != null && phone_number !== "" ? { phoneNumber: phone_number } : {}),
       },
     })
 
     return NextResponse.json({
       success: true,
       agentId: agent_id,
-      phoneNumber: phone_number,
+      phoneNumber: phone_number ?? null,
+      ...(phone_number == null || phone_number === ""
+        ? { warning: "Agent created but we couldn't purchase a phone number. Check Retell billing and RETELL_DEFAULT_AREA_CODE, or add a number in the Retell dashboard." }
+        : {}),
     })
   } catch (error) {
     console.error("Agent creation error:", error)

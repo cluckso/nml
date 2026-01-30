@@ -13,19 +13,19 @@ const PLAN_DETAILS = {
   [PlanType.STARTER]: {
     name: "Basic",
     price: 99,
-    minutes: 500,
+    minutes: 300,
     setupFee: 0,
   },
   [PlanType.PRO]: {
     name: "Pro",
-    price: 199,
-    minutes: 1200,
+    price: 229,
+    minutes: 900,
     setupFee: 0,
   },
   [PlanType.LOCAL_PLUS]: {
     name: "Local Plus",
-    price: 299,
-    minutes: 2500,
+    price: 349,
+    minutes: 1800,
     setupFee: 0,
   },
 }
@@ -59,7 +59,7 @@ export default async function BillingPage() {
   const minutesUsed = isOnTrial ? trial.minutesUsed : (usage?.minutesUsed ?? 0)
   const minutesIncluded = isOnTrial ? FREE_TRIAL_MINUTES : (planDetails?.minutes ?? 0)
   const overageMinutes = isOnTrial ? 0 : Math.max(0, minutesUsed - minutesIncluded)
-  const overageCost = overageMinutes * 0.1
+  const overageCost = overageMinutes * 0.2
 
   return (
     <div className="container mx-auto max-w-6xl py-8">

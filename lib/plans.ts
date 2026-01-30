@@ -2,9 +2,9 @@ import { PlanType } from "@prisma/client"
 
 /** Included call minutes per plan per month */
 export const INCLUDED_MINUTES: Record<PlanType, number> = {
-  [PlanType.STARTER]: 500,
-  [PlanType.PRO]: 1200,
-  [PlanType.LOCAL_PLUS]: 2500,
+  [PlanType.STARTER]: 300,
+  [PlanType.PRO]: 900,
+  [PlanType.LOCAL_PLUS]: 1800,
 }
 
 /** One-time setup fee per plan (USD) — no setup fees */
@@ -20,12 +20,12 @@ export const FREE_TRIAL_MINUTES = 100
 /** Monthly price per plan (USD) */
 export const MONTHLY_PRICES: Record<PlanType, number> = {
   [PlanType.STARTER]: 99,
-  [PlanType.PRO]: 199,
-  [PlanType.LOCAL_PLUS]: 299,
+  [PlanType.PRO]: 229,
+  [PlanType.LOCAL_PLUS]: 349,
 }
 
 /** Overage rate per minute (USD) */
-export const OVERAGE_RATE_PER_MIN = 0.1
+export const OVERAGE_RATE_PER_MIN = 0.2
 
 export function getIncludedMinutes(planType: PlanType): number {
   return INCLUDED_MINUTES[planType] ?? 0

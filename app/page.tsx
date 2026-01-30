@@ -96,7 +96,7 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground">
-                Get instant email and SMS notifications with all call details.
+                Get instant email notifications with all call details.
               </p>
             </CardContent>
           </Card>
@@ -171,7 +171,7 @@ export default function HomePage() {
               A human receptionist = $2,000–$3,500/month
             </p>
             <p className="text-2xl font-semibold text-primary">
-              Your AI = $99–$299/month
+              Your AI = $99–$349/month
             </p>
           </div>
         </div>

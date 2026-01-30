@@ -6,7 +6,7 @@ import {
   hasMultiDepartment,
 } from "./plans"
 
-const RETELL_API_BASE = "https://api.retellai.com"
+const RETELL_API_BASE = process.env.RETELL_API_BASE ?? "https://api.retellai.com"
 
 export interface RetellAgent {
   agent_id?: string
@@ -30,7 +30,6 @@ export interface CreateAgentRequest {
   businessName: string
   industry: Industry
   serviceAreas: string[]
-  phoneNumber?: string
   planType?: PlanType
   businessHours?: BusinessHoursInput
   departments?: string[]
@@ -99,10 +98,16 @@ export async function createRetellAgent(
 
   const result = await response.json()
 
-  // Assign phone number if provided
+  // Purchase a new number from Retell and bind it to this agent
+  const areaCode = process.env.RETELL_DEFAULT_AREA_CODE
+    ? parseInt(process.env.RETELL_DEFAULT_AREA_CODE, 10)
+    : 415
   let phone_number: string | undefined
-  if (data.phoneNumber) {
-    phone_number = await assignPhoneNumber(result.agent_id, data.phoneNumber)
+  try {
+    phone_number = await createPhoneNumber(apiKey, result.agent_id, areaCode)
+  } catch (err) {
+    console.error("Retell create-phone-number failed (agent was created):", err)
+    // Still return agent so we save it; number can be added later or retried
   }
 
   return {
@@ -111,32 +116,51 @@ export async function createRetellAgent(
   }
 }
 
-async function assignPhoneNumber(
+/** Purchase a new phone number from Retell and bind it to the agent. */
+async function createPhoneNumber(
+  apiKey: string,
   agentId: string,
-  phoneNumber: string
+  areaCode: number
 ): Promise<string> {
-  const apiKey = process.env.RETELL_API_KEY
-  if (!apiKey) {
-    throw new Error("RETELL_API_KEY is not configured")
+  const body: Record<string, unknown> = {
+    inbound_agent_id: agentId,
+    outbound_agent_id: agentId,
+    area_code: areaCode,
+    country_code: "US",
   }
 
-  const response = await fetch(`${RETELL_API_BASE}/update-agent/${agentId}`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      phone_number: phoneNumber,
-    }),
-  })
+  // Try v2 then non-versioned (Retell may use api.retellai.com/v2 for phone number)
+  const bases = ["https://api.retellai.com/v2", RETELL_API_BASE]
+  const seen = new Set<string>()
+  let lastError: string | null = null
 
-  if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`Failed to assign phone number: ${error}`)
+  for (const base of bases) {
+    const url = `${base}/create-phone-number`
+    if (seen.has(url)) continue
+    seen.add(url)
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(body),
+    })
+    const text = await response.text()
+    if (response.ok) {
+      try {
+        const result = JSON.parse(text) as { phone_number?: string }
+        if (result.phone_number) return result.phone_number
+      } catch {
+        // ignore parse error
+      }
+      lastError = "Response missing phone_number"
+      continue
+    }
+    lastError = text || `HTTP ${response.status}`
   }
 
-  return phoneNumber
+  throw new Error(`Failed to create Retell phone number: ${lastError}`)
 }
 
 /** Create a conversation flow via Retell API; returns conversation_flow_id and version for use in create-agent. */

@@ -8,28 +8,23 @@ const PLANS = [
     name: "Basic",
     description: "Best for solo operators & small shops",
     features: [
-      "Up to 500 call minutes / month",
-      "24/7 AI call answering (business hours + after-hours logic)",
-      "Caller name, phone number, and reason captured",
-      "Call summaries via SMS and/or email",
-      "Missed-call recovery",
-      "Custom greeting with business name",
+      "300 minutes / month",
+      "$0.20/min overage",
+      "Self-serve only",
+      "24/7 AI call answering",
+      "Caller name, phone, and reason captured",
+      "Call summaries by email",
     ],
-    annualPrice: 990,
-    annualLabel: "2 months free, paid upfront",
   },
   {
     name: "Pro",
     description: "Best for growing service businesses",
     features: [
-      "Up to 1,200 call minutes / month",
-      "Everything in Basic, plus:",
-      "Industry-optimized AI agents (select business type → prebuilt intake flow)",
-      "Service-specific intake flows (plumbing, HVAC, electrical, etc.)",
-      "Appointment request capture (date/time preferences)",
-      "Emergency vs non-emergency detection and routing",
-      "SMS confirmation to callers",
-      "Full call transcripts + summaries",
+      "900 minutes / month",
+      "Industry-optimized AI agents",
+      "Appointment + emergency logic",
+      "$0.20/min overage",
+      "Service-specific intake flows",
       "Email and CRM forwarding",
     ],
   },
@@ -37,14 +32,12 @@ const PLANS = [
     name: "Local Plus",
     description: "Built for high-volume, multi-department trades",
     features: [
-      "Up to 2,500 call minutes / month",
-      "Everything in Pro, plus:",
-      "Priority call routing",
-      "Multi-department logic (sales vs service, by trade, or by team)",
-      "After-hours emergency handling with escalation logic",
-      "Lead tagging (emergency, estimate, follow-up)",
+      "1,800 minutes / month",
+      "Multi-department routing",
+      "Branded voice + reporting",
+      "$0.20/min overage",
+      "After-hours emergency handling",
       "Weekly usage & lead reports",
-      "Fully branded AI voice (tone, pacing, greeting)",
     ],
   },
 ]
@@ -64,7 +57,7 @@ export default async function PricingPage() {
           No setup fees. No contracts. Cancel anytime.
         </p>
         <p className="mt-2 text-muted-foreground">
-          Overage on all plans: $0.10/min after included minutes.
+          Overage on all plans: $0.20/min after included minutes.
         </p>
         {isLoggedIn && (
           <p className="mt-2 text-sm text-primary font-medium">
@@ -75,7 +68,7 @@ export default async function PricingPage() {
 
       {/* Free Trial — primary CTA to access 100 minutes */}
       <div className="max-w-2xl mx-auto mb-12 p-8 rounded-xl border-2 border-primary/20 bg-primary/5 text-center">
-        <h2 className="text-2xl font-bold mb-2">100 free trial minutes</h2>
+        <h2 className="text-2xl font-bold mb-2">Free trial: 100 minutes, no time limit</h2>
         <p className="text-muted-foreground mb-4">
           100 call minutes to try real AI answering. No time limit. No setup fee. No overage during trial.
         </p>

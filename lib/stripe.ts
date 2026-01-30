@@ -18,7 +18,7 @@ export const STRIPE_PRODUCTS = {
   LOCAL_PLUS: process.env.STRIPE_PRODUCT_LOCAL_PLUS || "prod_local_plus",
 }
 
-// Metered usage price ID for overages ($0.10/min)
+// Metered usage price ID for overages ($0.20/min)
 export const STRIPE_USAGE_PRICE_ID = process.env.STRIPE_USAGE_PRICE_ID || "price_usage"
 
 export async function createCheckoutSession(
@@ -51,7 +51,7 @@ export async function createCheckoutSession(
       price: priceId,
       quantity: 1,
     },
-    // Metered overage ($0.10/min); subscription must have this item so we can report usage.
+    // Metered overage ($0.20/min); subscription must have this item so we can report usage.
     // For usage_type: metered, Stripe requires quantity to be omitted (not 0 or 1).
     {
       price: STRIPE_USAGE_PRICE_ID,

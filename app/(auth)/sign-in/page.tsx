@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -14,6 +15,8 @@ export default function SignInPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const message = searchParams.get("message")
   const supabase = createClient()
 
   const handleSignIn = async (e: React.FormEvent) => {
@@ -44,6 +47,11 @@ export default function SignInPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignIn} className="space-y-4">
+            {message && (
+              <div className="bg-primary/10 text-primary text-sm p-3 rounded-md">
+                {message}
+              </div>
+            )}
             {error && (
               <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
                 {error}

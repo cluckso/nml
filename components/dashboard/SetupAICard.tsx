@@ -7,12 +7,13 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Phone, CheckCircle2, Loader2, Smartphone } from "lucide-react"
 import type { TrialStatus } from "@/lib/trial"
+import { formatPhoneForDisplay } from "@/lib/utils"
 
 interface SetupAICardProps {
   hasAgent: boolean
   phoneNumber: string | null
   businessName: string
-  /** Owner phone for SMS alerts — shown in same card to avoid two-number confusion */
+  /** Owner phone (optional) — shown in same card for reference */
   ownerPhone?: string | null
   /** When on free trial, show remaining minutes; when exhausted, disable connect */
   trialStatus?: TrialStatus
@@ -22,14 +23,17 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
   const router = useRouter()
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [warning, setWarning] = useState<string | null>(null)
 
   const handleActivate = async () => {
     setCreating(true)
     setError(null)
+    setWarning(null)
     try {
       const res = await fetch("/api/agents", { method: "POST" })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || "Failed to create AI")
+      if (data.warning) setWarning(data.warning)
       router.refresh()
     } catch (e: any) {
       setError(e.message || "Something went wrong")
@@ -57,19 +61,22 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
               <Phone className="h-5 w-5 text-muted-foreground shrink-0" />
               <div>
                 <p className="text-sm font-medium text-muted-foreground">1. Business line → forward to this AI number</p>
-                <p className="text-xl font-mono font-semibold mt-1">{phoneNumber}</p>
+                <p className="text-xl font-mono font-semibold mt-1">{formatPhoneForDisplay(phoneNumber) || phoneNumber}</p>
                 <p className="text-xs text-muted-foreground mt-2">
-                  In your phone provider&apos;s settings (or carrier app), set call forwarding to this number. Incoming calls will be answered by your AI; you&apos;ll get a summary by email and SMS.
+                  In your phone provider&apos;s settings (or carrier app), set call forwarding to this number. Incoming calls will be answered by your AI; you&apos;ll get a summary by email.
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  If this number doesn&apos;t work for real calls, you may be in Retell test mode — use a live Retell account with billing for a callable number.
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-3 rounded-lg border border-border bg-background p-4">
               <Smartphone className="h-5 w-5 text-muted-foreground shrink-0" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">2. Your number for call alerts (SMS + email)</p>
-                <p className="font-mono font-semibold mt-1">{ownerPhone || "Not set — add in onboarding or settings"}</p>
+                <p className="text-sm font-medium text-muted-foreground">2. Call summaries by email</p>
+                <p className="font-semibold mt-1">Sent to your account email</p>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Call summaries and alerts go here. You set this in onboarding; update it there if needed.
+                  Call summaries are sent by email to the address you signed up with.
                 </p>
               </div>
             </div>
@@ -91,9 +98,14 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
             AI created
           </CardTitle>
           <CardDescription>
-            Your AI receptionist is set up. If you don&apos;t see a number, connect one in your Retell dashboard or contact support.
+            Your AI receptionist is set up. If you don&apos;t see a number, we couldn&apos;t purchase one — check Retell billing and RETELL_DEFAULT_AREA_CODE, or add a number in the Retell dashboard.
           </CardDescription>
         </CardHeader>
+        {warning && (
+          <CardContent>
+            <p className="rounded-md bg-amber-100 dark:bg-amber-950/30 p-3 text-sm text-amber-800 dark:text-amber-200">{warning}</p>
+          </CardContent>
+        )}
       </Card>
     )
   }
@@ -121,7 +133,7 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
           </p>
         )}
         <p className="text-sm text-muted-foreground">
-          We&apos;ll create your AI and (when available) assign a phone number. Then you&apos;ll forward your business line to that number and confirm where you want call alerts (SMS/email). No need to enter numbers in multiple spots — we&apos;ll show everything here after you connect.
+          We&apos;ll create your AI and assign a dedicated phone number. Then you&apos;ll forward your business line to that number. Call summaries are sent by email. No need to enter an AI number — we&apos;ll show it here after you connect.
         </p>
         {error && (
           <p className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</p>

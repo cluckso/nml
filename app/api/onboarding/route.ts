@@ -19,10 +19,15 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Check if complex setup is needed
+    const serviceAreas = Array.isArray(businessInfo.serviceAreas)
+      ? businessInfo.serviceAreas.map((s: string) => String(s).trim()).filter(Boolean)
+      : businessInfo.city
+        ? [businessInfo.city]
+        : []
+
     const requiresManualSetup = isComplexSetup({
       industry: industry as Industry,
-      serviceAreas: businessInfo.city ? [businessInfo.city] : [],
+      serviceAreas,
     })
 
     const businessHours = businessInfo.businessHours
@@ -33,9 +38,8 @@ export async function POST(req: NextRequest) {
         }
       : undefined
     const departments = Array.isArray(businessInfo.departments) ? businessInfo.departments : []
-    const serviceAreas = businessInfo.city ? [businessInfo.city] : []
 
-    // Create or update business (with plan-related fields: business hours, departments, CRM, emergency phone)
+    // Create or update business (businessLinePhone = user's existing line; phoneNumber = AI number, set when agent is created)
     const business = await db.business.upsert({
       where: { id: user.businessId || "new" },
       create: {
@@ -45,7 +49,7 @@ export async function POST(req: NextRequest) {
         city: businessInfo.city,
         state: businessInfo.state,
         zipCode: businessInfo.zipCode,
-        phoneNumber: businessInfo.phoneNumber || undefined,
+        businessLinePhone: businessInfo.phoneNumber || undefined,
         businessHours: businessHours ?? undefined,
         departments,
         serviceAreas,
@@ -65,7 +69,7 @@ export async function POST(req: NextRequest) {
         city: businessInfo.city,
         state: businessInfo.state,
         zipCode: businessInfo.zipCode,
-        phoneNumber: businessInfo.phoneNumber || undefined,
+        businessLinePhone: businessInfo.phoneNumber || undefined,
         businessHours: businessHours ?? undefined,
         departments,
         serviceAreas,
@@ -77,7 +81,7 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    // Update user's businessId and owner phone (for SMS notifications)
+    // Update user's businessId and owner phone (optional, for future use)
     await db.user.update({
       where: { id: user.id },
       data: {

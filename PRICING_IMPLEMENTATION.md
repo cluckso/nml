@@ -65,7 +65,7 @@ All features from `PRICING_FEATURES.md` are implemented and automated as follows
 
 ## Env / Stripe
 
-- **Stripe:** Create a subscription that includes (1) a recurring price for the plan and (2) a **metered** price for overage ($0.10/min). Set `STRIPE_USAGE_PRICE_ID` to the **price ID** of that metered product so the app can find the subscription item and report overage.
+- **Stripe:** Create a subscription that includes (1) a recurring price for the plan and (2) a **metered** price for overage ($0.20/min). Set `STRIPE_USAGE_PRICE_ID` to the **price ID** of that metered product so the app can find the subscription item and report overage.
 - **Cron:** Set `CRON_SECRET` and use the same value in Vercel Cron (or when calling `POST /api/reports/weekly` manually).
 - **Twilio:** Required for SMS to owner and SMS to callers (Pro+).
 - **Resend:** Required for email notifications and weekly reports.

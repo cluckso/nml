@@ -16,7 +16,7 @@
 ## 3. Onboarding (plan-aware)
 
 - Set up your business: industry, name, address, business hours.
-- **Phone setup (one place):** Enter your **business line** (for forwarding to the AI) and **your number for call alerts** (SMS + email). No need to enter these in two different spots.
+- **Phone setup (one place):** Enter your **business line** (for forwarding to the AI). Call summaries are sent by email.
 - Fields like departments, CRM, after-hours emergency only show when they’re included in your plan (Pro / Local Plus).
 
 ---
@@ -36,7 +36,7 @@ Forward your business line to the AI number (via your carrier or Retell). Then t
 ## 5. After that
 
 - **Incoming calls** to the AI number are answered by your AI (business name, hours, intake).
-- **You get** call summaries by email and SMS at your alert number. **Calls** in the app show transcripts, lead tags, etc.
+- **You get** call summaries by email. **Calls** in the app show transcripts, lead tags, etc.
 - **Billing** tracks minutes and overage. **Weekly reports** (Local Plus) by email.
 
 **Flow:** Sign up → choose plan (Pricing / checkout) → onboarding (plan-based fields, one phone setup) → dashboard → **Connect to my call assistant** → forward your line to the number shown. Both numbers (AI + alerts) are managed in one place.

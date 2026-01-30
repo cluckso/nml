@@ -33,11 +33,19 @@ export default function SignUpPage() {
     })
 
     if (error) {
-      setError(error.message)
+      const status = (error as { status?: number }).status
+      if (status === 429) {
+        setError("Too many sign-up attempts. Please wait a few minutes and try again.")
+      } else if (status === 500) {
+        setError("Our auth service had an error. Please try again in a moment. If it keeps happening, check your Supabase project's Auth settings (email templates, SMTP) or contact support.")
+      } else if (status === 400) {
+        setError(error.message || "Invalid request. Check your email and password, or try signing in if you already have an account.")
+      } else {
+        setError(error.message)
+      }
       setLoading(false)
     } else {
-      // Check if email confirmation is required
-      router.push("/sign-in?message=Check your email to confirm your account")
+      router.push(`/confirm-email?email=${encodeURIComponent(email)}`)
     }
   }
 
@@ -90,6 +98,9 @@ export default function SignUpPage() {
             <a href="/sign-in" className="text-primary hover:underline">
               Sign in
             </a>
+          </p>
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            If you see &quot;too many attempts&quot;, wait a few minutes. After signing up, check your email (and spam) for the confirmation link.
           </p>
         </CardContent>
       </Card>

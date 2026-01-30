@@ -63,7 +63,8 @@ model Business {
   id                     String    @id @default(cuid())
   name                   String
   industry               Industry
-  phoneNumber            String?
+  phoneNumber            String?   // AI number (Retell-assigned when agent is created)
+  businessLinePhone      String?   // User's existing business line (forward this to AI number)
   retellAgentId          String?   @unique
   stripeCustomerId       String?   @unique
   serviceAreas            String[]  @default([])
