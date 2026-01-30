@@ -11,8 +11,20 @@ interface TrialCardProps {
 }
 
 export function TrialCard({ trial, hasAgent }: TrialCardProps) {
-  const { minutesRemaining, minutesUsed, isExhausted } = trial
+  const { minutesRemaining, minutesUsed, isExhausted, isExpired, daysRemaining } = trial
   const percentUsed = FREE_TRIAL_MINUTES > 0 ? (minutesUsed / FREE_TRIAL_MINUTES) * 100 : 0
+  const isEnded = isExhausted || isExpired
+  const warningLow = minutesRemaining <= 5 && minutesRemaining > 0
+  const warningEighty = percentUsed >= 80 && !isExhausted
+
+  const description = () => {
+    if (isExpired && !isExhausted)
+      return "Your trial has ended. Upgrade to a plan to reactivate your number and keep capturing leads."
+    if (isExhausted)
+      return "You've used all 50 free minutes. Upgrade to keep receiving calls."
+    if (isEnded) return "Your trial has ended. Upgrade to a plan to continue."
+    return "50 call minutes over 14 days. No charge until you upgrade. One trial per business number."
+  }
 
   return (
     <Card className="border-emerald-200 bg-emerald-50/50 dark:border-emerald-900 dark:bg-emerald-950/20">
@@ -21,11 +33,7 @@ export function TrialCard({ trial, hasAgent }: TrialCardProps) {
           <Zap className="h-5 w-5" />
           Your free trial
         </CardTitle>
-        <CardDescription>
-          {isExhausted
-            ? "You've used all 100 free minutes. Upgrade to keep receiving calls."
-            : "100 call minutes to try real AI answering — no time limit, no credit card for trial."}
-        </CardDescription>
+        <CardDescription>{description()}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
@@ -44,24 +52,40 @@ export function TrialCard({ trial, hasAgent }: TrialCardProps) {
           {!isExhausted && (
             <p className="text-sm text-muted-foreground mt-2">
               <span className="font-medium text-foreground">{Math.ceil(minutesRemaining)}</span> minutes remaining
+              {daysRemaining > 0 && (
+                <> · <span className="font-medium text-foreground">{daysRemaining}</span> days left</>
+              )}
+            </p>
+          )}
+          {isExpired && !isExhausted && (
+            <p className="text-sm text-amber-700 dark:text-amber-400 mt-2">Trial ended</p>
+          )}
+          {warningEighty && (
+            <p className="text-sm text-amber-700 dark:text-amber-400 mt-2">
+              About {Math.ceil(minutesRemaining)} minutes left — upgrade to avoid interruption.
+            </p>
+          )}
+          {warningLow && (
+            <p className="text-sm text-amber-700 dark:text-amber-400 mt-2">
+              5 minutes left in your trial — upgrade to avoid interruption.
             </p>
           )}
         </div>
 
-        {!hasAgent && !isExhausted && (
+        {!hasAgent && !isEnded && (
           <p className="text-sm">
             Connect your call assistant below to start using your trial minutes. Forward your business line to the AI number and receive real calls.
           </p>
         )}
 
-        {hasAgent && !isExhausted && (
+        {hasAgent && !isEnded && (
           <p className="text-sm text-muted-foreground">
             You&apos;re using your trial. Calls appear under <Link href="/calls" className="text-primary underline">Calls</Link>. Upgrade anytime from Billing.
           </p>
         )}
 
         <div className="flex flex-wrap gap-2">
-          {!hasAgent && !isExhausted && (
+          {!hasAgent && !isEnded && (
             <a href="#setup" className="inline-flex">
               <Button size="sm" className="gap-2">
                 <Phone className="h-4 w-4" />
@@ -69,9 +93,15 @@ export function TrialCard({ trial, hasAgent }: TrialCardProps) {
               </Button>
             </a>
           )}
-          <Button variant="outline" size="sm" asChild>
-            <Link href="/billing">View Billing & Upgrade</Link>
-          </Button>
+          {isEnded ? (
+            <Button size="sm" asChild>
+              <Link href="/billing">Upgrade to keep receiving calls</Link>
+            </Button>
+          ) : (
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/billing">View Billing & Upgrade</Link>
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>

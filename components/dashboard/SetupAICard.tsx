@@ -111,6 +111,8 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
   }
 
   const trialExhausted = trialStatus?.isExhausted ?? false
+  const trialExpired = trialStatus?.isExpired ?? false
+  const trialEnded = trialExhausted || trialExpired
   const onTrial = trialStatus?.isOnTrial ?? false
 
   return (
@@ -122,14 +124,14 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {onTrial && !trialExhausted && (
+        {onTrial && !trialEnded && (
           <p className="text-sm text-muted-foreground rounded-md bg-muted/50 p-3">
-            You&apos;re on the free trial ({Math.ceil(trialStatus?.minutesRemaining ?? 0)} minutes remaining). Upgrade from <Link href="/billing" className="text-primary underline">Billing</Link> when you&apos;re ready.
+            You&apos;re on the free trial ({Math.ceil(trialStatus?.minutesRemaining ?? 0)} minutes remaining{trialStatus?.daysRemaining != null && trialStatus.daysRemaining > 0 ? `, ${trialStatus.daysRemaining} days left` : ""}). Upgrade from <Link href="/billing" className="text-primary underline">Billing</Link> when you&apos;re ready.
           </p>
         )}
-        {trialExhausted && (
+        {trialEnded && (
           <p className="rounded-md bg-amber-100 dark:bg-amber-950/30 p-3 text-sm text-amber-800 dark:text-amber-200">
-            Free trial minutes used. <Link href="/billing" className="font-medium underline">Upgrade to a plan</Link> to connect your call assistant.
+            {trialExpired ? "Your trial has ended." : "Free trial minutes used."} <Link href="/billing" className="font-medium underline">Upgrade to a plan</Link> to connect your call assistant.
           </p>
         )}
         <p className="text-sm text-muted-foreground">
@@ -138,7 +140,7 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
         {error && (
           <p className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</p>
         )}
-        {trialExhausted ? (
+        {trialEnded ? (
           <Button asChild className="w-full sm:w-auto">
             <Link href="/billing">Upgrade to connect</Link>
           </Button>

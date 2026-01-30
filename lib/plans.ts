@@ -14,8 +14,11 @@ export const SETUP_FEES: Record<PlanType, number> = {
   [PlanType.LOCAL_PLUS]: 0,
 }
 
-/** Free trial: included call minutes for all plans before first paid subscription */
-export const FREE_TRIAL_MINUTES = 100
+/** Free trial: call minutes cap before first paid subscription */
+export const FREE_TRIAL_MINUTES = 50
+
+/** Free trial: validity window in days */
+export const TRIAL_DAYS = 14
 
 /** Monthly price per plan (USD) */
 export const MONTHLY_PRICES: Record<PlanType, number> = {

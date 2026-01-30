@@ -21,6 +21,35 @@ export const STRIPE_PRODUCTS = {
 // Metered usage price ID for overages ($0.20/min)
 export const STRIPE_USAGE_PRICE_ID = process.env.STRIPE_USAGE_PRICE_ID || "price_usage"
 
+/**
+ * Create a Stripe Customer for trial (card on file, no charge). Call before creating Business.
+ */
+export async function createStripeCustomerForTrial(email: string): Promise<string> {
+  if (!stripe) throw new Error("STRIPE_SECRET_KEY is not configured.")
+  const customer = await stripe.customers.create({ email })
+  return customer.id
+}
+
+/**
+ * Create a Checkout Session in setup mode to collect payment method for trial.
+ * No charge. On success, customer has payment method attached; use same customer for upgrade.
+ */
+export async function createTrialSetupSession(
+  businessId: string,
+  stripeCustomerId: string,
+  appUrl: string = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+): Promise<Stripe.Checkout.Session> {
+  if (!stripe) throw new Error("STRIPE_SECRET_KEY is not configured.")
+  const baseUrl = appUrl.replace(/\/$/, "")
+  return stripe.checkout.sessions.create({
+    mode: "setup",
+    customer: stripeCustomerId,
+    success_url: `${baseUrl}/onboarding?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${baseUrl}/trial/start`,
+    metadata: { businessId },
+  })
+}
+
 export async function createCheckoutSession(
   businessId: string,
   planType: PlanType,
@@ -73,8 +102,10 @@ export async function createCheckoutSession(
   }
 
   const baseUrl = appUrl.replace(/\/$/, "")
+  // Use existing Stripe Customer when upgrading from trial so same payment method is charged
   const session = await stripe.checkout.sessions.create({
-    customer_email: business.users?.[0]?.email ?? undefined,
+    customer: business.stripeCustomerId ?? undefined,
+    customer_email: business.stripeCustomerId ? undefined : (business.users?.[0]?.email ?? undefined),
     line_items: lineItems,
     mode: "subscription",
     success_url: `${baseUrl}/onboarding?session_id={CHECKOUT_SESSION_ID}`,
@@ -219,10 +250,15 @@ export async function handleStripeWebhook(event: Stripe.Event) {
             currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
           },
         })
-        // Reactivate business if it was paused (e.g. after free trial exhausted)
+        // Reactivate business and clear trial fields (converted to paid)
         await db.business.update({
           where: { id: businessId },
-          data: { isActive: true },
+          data: {
+            isActive: true,
+            trialStartedAt: null,
+            trialEndsAt: null,
+            trialMinutesUsed: 0,
+          },
         })
       }
       break

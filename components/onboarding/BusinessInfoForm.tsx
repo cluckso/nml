@@ -49,7 +49,6 @@ export function BusinessInfoForm({
     serviceAreas:
       initialData?.serviceAreas?.length ? initialData.serviceAreas : initialData?.city ? [initialData.city] : [],
     phoneNumber: initialData?.phoneNumber || "",
-    ownerPhone: initialData?.ownerPhone || "",
     businessHours: initialData?.businessHours || { open: "09:00", close: "17:00", days: ["monday", "tuesday", "wednesday", "thursday", "friday"] },
     departments: initialData?.departments || [],
     crmWebhookUrl: initialData?.crmWebhookUrl || "",
@@ -63,10 +62,7 @@ export function BusinessInfoForm({
     if (!formData.serviceAreas.length) {
       return
     }
-    onSubmit({
-      ...formData,
-      ownerPhone: formData.ownerPhone?.trim() ? formData.ownerPhone : undefined,
-    })
+    onSubmit(formData)
   }
 
   const addServiceArea = () => {
@@ -152,6 +148,21 @@ export function BusinessInfoForm({
       </div>
 
       <div className="space-y-2">
+        <Label htmlFor="phoneNumber">Business phone number *</Label>
+        <Input
+          id="phoneNumber"
+          type="tel"
+          value={formData.phoneNumber || ""}
+          onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+          required
+          placeholder="(608) 555-1234"
+        />
+        <p className="text-xs text-muted-foreground">
+          The line you forward to your AI number. One trial per business number.
+        </p>
+      </div>
+
+      <div className="space-y-2">
         <Label>Service areas (cities/towns you serve) *</Label>
         <p className="text-xs text-muted-foreground">
           Add each city or town where you provide service. The AI will only accept calls for these areas.
@@ -189,34 +200,6 @@ export function BusinessInfoForm({
         {formData.serviceAreas.length === 0 && (
           <p className="text-sm text-destructive">Add at least one city or town you serve.</p>
         )}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="phoneNumber">Your existing business line (optional)</Label>
-        <Input
-          id="phoneNumber"
-          type="tel"
-          value={formData.phoneNumber || ""}
-          onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-          placeholder="+16085551234"
-        />
-        <p className="text-xs text-muted-foreground">
-          The number you forward to your AI. Your AI number is assigned when you connect your call assistant on the dashboard.
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="ownerPhone">Your phone (optional)</Label>
-        <Input
-          id="ownerPhone"
-          type="tel"
-          value={formData.ownerPhone || ""}
-          onChange={(e) => setFormData({ ...formData, ownerPhone: e.target.value })}
-          placeholder="+16085551234"
-        />
-        <p className="text-xs text-muted-foreground">
-          Call summaries are sent by email to your account email. This number is optional for future use.
-        </p>
       </div>
 
       <div className="rounded-lg border p-4 space-y-4">

@@ -71,9 +71,9 @@ export default async function BillingPage() {
             <CardTitle>Current Plan</CardTitle>
             <CardDescription>
               {isOnTrial
-                ? trial.isExhausted
-                  ? "Free trial used — upgrade to continue"
-                  : "Free trial"
+                ? trial.isExhausted || trial.isExpired
+                  ? "Trial ended or used — upgrade to continue"
+                  : "Free trial (14 days, 50 minutes)"
                 : planDetails
                   ? planDetails.name
                   : "No active subscription"}
@@ -84,11 +84,11 @@ export default async function BillingPage() {
               <div className="space-y-2">
                 <p className="text-2xl font-bold">Free trial</p>
                 <p className="text-sm text-muted-foreground">
-                  {FREE_TRIAL_MINUTES} call minutes to try real calls. No time limit. Upgrade to any plan to continue.
+                  You&apos;re on a 14-day trial — 50 free call minutes. Upgrade anytime to keep your number and continue.
                 </p>
-                {trial.isExhausted && (
+                {(trial.isExhausted || trial.isExpired) && (
                   <Button asChild className="mt-2">
-                    <Link href="/billing#plans">Upgrade to continue</Link>
+                    <Link href="/billing#plans">Upgrade to keep receiving calls</Link>
                   </Button>
                 )}
               </div>

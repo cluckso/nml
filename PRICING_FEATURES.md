@@ -8,11 +8,12 @@ Overage on all plans: $0.20/min after included minutes.
 
 ## Free Trial (All Plans)
 
-- **100 free call minutes**
-- No time limit
+- **50 free call minutes** over **14 days**
+- Card required to start — no charge until you upgrade
+- One trial per business phone number
 - No setup fee
 - No overage during trial
-- Service pauses when minutes are used
+- Service pauses when minutes are used or when trial ends
 - Upgrade to any plan to continue
 
 Designed so businesses can test real calls—not demos.

@@ -66,14 +66,14 @@ export default async function PricingPage() {
         )}
       </div>
 
-      {/* Free Trial — primary CTA to access 100 minutes */}
+      {/* Free Trial — primary CTA: 50 minutes, 14 days, card required */}
       <div className="max-w-2xl mx-auto mb-12 p-8 rounded-xl border-2 border-primary/20 bg-primary/5 text-center">
-        <h2 className="text-2xl font-bold mb-2">Free trial: 100 minutes, no time limit</h2>
+        <h2 className="text-2xl font-bold mb-2">Free trial: 50 minutes, 14 days</h2>
         <p className="text-muted-foreground mb-4">
-          100 call minutes to try real AI answering. No time limit. No setup fee. No overage during trial.
+          50 call minutes to try real AI answering. Card required to start — we won&apos;t charge until you upgrade. One trial per business number.
         </p>
         <p className="text-sm text-muted-foreground mb-6">
-          Service pauses when minutes are used. Upgrade to any plan to continue.
+          No overage during trial. Service pauses when minutes are used or when the trial ends. Upgrade to any plan to continue.
         </p>
         {isLoggedIn ? (
           <Button size="lg" asChild>

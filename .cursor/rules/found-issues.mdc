@@ -1,0 +1,5 @@
+---
+alwaysApply: true
+---
+
+In Next.js 16 the edge handler file is proxy.ts, not middleware.ts. Having both caused the build error.

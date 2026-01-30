@@ -42,11 +42,11 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Free trial: allow creation only if trial not exhausted
+    // Free trial: allow creation only if trial not exhausted and not expired
     const trial = await getTrialStatus(business.id)
-    if (trial.isExhausted) {
+    if (trial.isExhausted || trial.isExpired) {
       return NextResponse.json(
-        { error: "Free trial minutes used. Upgrade to a plan to continue.", code: "TRIAL_EXHAUSTED" },
+        { error: "Free trial used or expired. Upgrade to a plan to continue.", code: "TRIAL_EXHAUSTED" },
         { status: 403 }
       )
     }

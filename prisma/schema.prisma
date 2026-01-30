@@ -80,6 +80,9 @@ model Business {
   crmWebhookUrl          String?  // Pro+: POST lead data to CRM
   forwardToEmail         String?  // Pro+: forward leads to this email (e.g. CRM pipe)
   afterHoursEmergencyPhone String? // Local Plus: on-call number for after-hours emergencies
+  trialStartedAt         DateTime? // When trial started (trial path only)
+  trialEndsAt            DateTime? // trialStartedAt + 14 days
+  trialMinutesUsed       Float    @default(0) // Minutes counting toward 50-minute trial cap
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 
@@ -87,9 +90,21 @@ model Business {
   calls       Call[]
   usage       Usage[]
   subscription Subscription?
+  trialClaim  TrialClaim?
 
   @@index([retellAgentId])
   @@index([stripeCustomerId])
+}
+
+// One trial per business phone (E.164). Insert when starting trial; prevents reuse of number.
+model TrialClaim {
+  id         String   @id @default(cuid())
+  phoneNumber String  @unique // E.164 normalized
+  businessId  String  @unique
+  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  claimedAt   DateTime @default(now())
+
+  @@index([phoneNumber])
 }
 
 model Call {

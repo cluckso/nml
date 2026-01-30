@@ -8,7 +8,7 @@ import {
 } from "@/lib/notifications"
 import { reportUsageToStripe } from "@/lib/stripe"
 import { hasSmsToCallers, hasCrmForwarding, hasLeadTagging, getEffectivePlanType } from "@/lib/plans"
-import { getTrialStatus } from "@/lib/trial"
+import { FREE_TRIAL_MINUTES } from "@/lib/plans"
 import { PlanType } from "@prisma/client"
 import { rateLimit } from "@/lib/rate-limit"
 import crypto from "crypto"
@@ -176,19 +176,29 @@ async function handleCallCompletion(event: any) {
     console.error("CRM forward error:", error)
   }
 
-  try {
-    await reportUsageToStripe(business.id, minutes)
-  } catch (error) {
-    console.error("Usage reporting error:", error)
-  }
+  const hasActiveSubscription = business.subscription?.status === "ACTIVE"
+  const isOnFormalTrial = !hasActiveSubscription && business.trialStartedAt != null
 
-  // Free trial: pause service when trial minutes exhausted
-  const trial = await getTrialStatus(business.id)
-  if (trial.isExhausted) {
-    await db.business.update({
+  if (isOnFormalTrial) {
+    const updated = await db.business.update({
       where: { id: business.id },
-      data: { isActive: false },
+      data: { trialMinutesUsed: { increment: minutes } },
     })
+    const now = new Date()
+    const exhausted = updated.trialMinutesUsed >= FREE_TRIAL_MINUTES
+    const expired = updated.trialEndsAt != null && now > updated.trialEndsAt
+    if (exhausted || expired) {
+      await db.business.update({
+        where: { id: business.id },
+        data: { isActive: false },
+      })
+    }
+  } else if (hasActiveSubscription) {
+    try {
+      await reportUsageToStripe(business.id, minutes)
+    } catch (error) {
+      console.error("Usage reporting error:", error)
+    }
   }
 }
 

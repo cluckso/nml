@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getAuthUserFromRequest } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { getTrialStatus } from "@/lib/trial"
 
 /** Dashboard summary for Flutter (and other API clients). Requires Bearer token or cookie. */
 export async function GET(req: NextRequest) {
@@ -10,12 +11,12 @@ export async function GET(req: NextRequest) {
 
     if (!user.businessId) {
       return NextResponse.json(
-        { error: "Complete onboarding first", business: null, recentCalls: [], stats: null },
+        { error: "Complete onboarding first", business: null, recentCalls: [], stats: null, trial: null },
         { status: 200 }
       )
     }
 
-    const [business, recentCalls, stats] = await Promise.all([
+    const [business, recentCalls, stats, trial] = await Promise.all([
       db.business.findUnique({
         where: { id: user.businessId },
       }),
@@ -29,6 +30,7 @@ export async function GET(req: NextRequest) {
         _count: true,
         _sum: { minutes: true },
       }),
+      getTrialStatus(user.businessId),
     ])
 
     const emergencyCount = recentCalls.filter((c) => c.emergencyFlag).length
@@ -49,6 +51,17 @@ export async function GET(req: NextRequest) {
         emergencyInRecent: emergencyCount,
       },
       hasAgent: !!business?.retellAgentId,
+      trial: trial
+        ? {
+            isOnTrial: trial.isOnTrial,
+            minutesUsed: trial.minutesUsed,
+            minutesRemaining: trial.minutesRemaining,
+            isExhausted: trial.isExhausted,
+            isExpired: trial.isExpired,
+            trialEndsAt: trial.trialEndsAt?.toISOString() ?? null,
+            daysRemaining: trial.daysRemaining,
+          }
+        : null,
     })
   } catch (error) {
     console.error("Dashboard API error:", error)
