@@ -65,10 +65,10 @@ export async function getAuthUserFromRequest(req: NextRequest) {
   const authHeader = req.headers.get("Authorization")
   if (authHeader?.startsWith("Bearer ")) {
     const token = authHeader.slice(7)
-    const supabase = createSupabaseClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    if (!url || !key) return null
+    const supabase = createSupabaseClient(url, key)
     const { data: { user }, error } = await supabase.auth.getUser(token)
     if (error || !user) return null
     return getDbUserFromSupabaseUser(user.id, user.email ?? undefined)
@@ -77,17 +77,26 @@ export async function getAuthUserFromRequest(req: NextRequest) {
 }
 
 export async function getCurrentUser() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return null
-  return getDbUserFromSupabaseUser(user.id, user.email ?? undefined)
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+    return getDbUserFromSupabaseUser(user.id, user.email ?? undefined)
+  } catch {
+    return null
+  }
 }
 
 export async function requireAuth() {
-  const supabase = await createClient()
-  const { data: { user }, error } = await supabase.auth.getUser()
-  if (error || !user) redirect("/sign-in")
-  return getDbUserFromSupabaseUser(user.id, user.email ?? undefined)
+  try {
+    const supabase = await createClient()
+    const { data: { user }, error } = await supabase.auth.getUser()
+    if (error || !user) redirect("/sign-in")
+    return getDbUserFromSupabaseUser(user.id, user.email ?? undefined)
+  } catch (err) {
+    console.error("requireAuth error:", err)
+    redirect("/sign-in")
+  }
 }
 
 export async function requireAdmin() {
