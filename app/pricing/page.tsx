@@ -2,6 +2,7 @@ import Link from "next/link"
 import { getCurrentUser } from "@/lib/auth"
 import { PricingPlansWithAgreement } from "@/components/pricing/PricingPlansWithAgreement"
 import { Button } from "@/components/ui/button"
+import { CRM_SETUP_FEE } from "@/lib/plans"
 
 const PLANS = [
   {
@@ -21,23 +22,23 @@ const PLANS = [
     description: "Best for growing service businesses",
     features: [
       "900 minutes / month",
-      "Industry-optimized AI agents",
+      "Industry-optimized intake flows",
       "Appointment + emergency logic",
+      "Email, CRM & SMS to callers",
       "$0.20/min overage",
-      "Service-specific intake flows",
-      "Email and CRM forwarding",
+      "Lead tagging (estimate, follow-up)",
     ],
   },
   {
     name: "Local Plus",
-    description: "Built for high-volume, multi-department trades",
+    description: "Built for high-volume local trades",
     features: [
       "1,800 minutes / month",
-      "Multi-department routing",
-      "Branded voice + reporting",
+      "Branded AI voice + voice controls",
+      "Weekly usage & lead report emails",
       "$0.20/min overage",
       "After-hours emergency handling",
-      "Weekly usage & lead reports",
+      "Priority support",
     ],
   },
 ]
@@ -54,7 +55,7 @@ export default async function PricingPage() {
           Simple, usage-based pricing built for service businesses.
         </p>
         <p className="mt-2 text-muted-foreground">
-          No setup fees. No contracts. Cancel anytime.
+          No setup fees on plans. Optional CRM Integration Setup add-on (Pro & Local Plus). No contracts. Cancel anytime.
         </p>
         <p className="mt-2 text-muted-foreground">
           Overage on all plans: $0.20/min after included minutes.
@@ -88,6 +89,16 @@ export default async function PricingPage() {
       </div>
 
       <PricingPlansWithAgreement plans={PLANS} isLoggedIn={isLoggedIn} />
+
+      <div className="max-w-2xl mx-auto mb-12 p-6 rounded-xl border bg-muted/30">
+        <h2 className="text-xl font-semibold mb-2">Add-ons</h2>
+        <div className="text-left">
+          <p className="font-medium">CRM Integration Setup — ${CRM_SETUP_FEE} one-time</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Available on Pro and Local Plus. We connect your CRM webhook and verify that leads flow through. Add at checkout when choosing Pro or Local Plus, or from Billing after you subscribe.
+          </p>
+        </div>
+      </div>
 
       <div className="max-w-3xl mx-auto text-center">
         <h2 className="text-2xl font-bold mb-4">Why This Pricing Works</h2>

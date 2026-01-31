@@ -9,9 +9,10 @@ interface UpgradeButtonProps {
   planType: PlanType
   currentPlan?: PlanType | null
   agreedToLegal?: boolean
+  addCrmSetup?: boolean
 }
 
-export function UpgradeButton({ planType, currentPlan, agreedToLegal = true }: UpgradeButtonProps) {
+export function UpgradeButton({ planType, currentPlan, agreedToLegal = true, addCrmSetup = false }: UpgradeButtonProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -24,7 +25,10 @@ export function UpgradeButton({ planType, currentPlan, agreedToLegal = true }: U
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planType }),
+        body: JSON.stringify({
+          planType,
+          ...(addCrmSetup ? { addCrmSetup: true } : {}),
+        }),
       })
 
       const data = await response.json()

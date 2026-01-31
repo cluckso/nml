@@ -17,9 +17,11 @@ interface SetupAICardProps {
   ownerPhone?: string | null
   /** When on free trial, show remaining minutes; when exhausted, disable connect */
   trialStatus?: TrialStatus
+  /** Compact layout for dashboard control board */
+  compact?: boolean
 }
 
-export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, trialStatus }: SetupAICardProps) {
+export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, trialStatus, compact }: SetupAICardProps) {
   const router = useRouter()
   const [creating, setCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -43,6 +45,24 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
   }
 
   if (hasAgent && phoneNumber) {
+    if (compact) {
+      return (
+        <Card className="border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-950/20 py-3 px-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2 min-w-0">
+              <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-green-800 dark:text-green-200">Call assistant connected</p>
+                <p className="text-xs text-muted-foreground font-mono">{formatPhoneForDisplay(phoneNumber) || phoneNumber}</p>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground shrink-0">
+              Forward your line to this number · <Link href="/calls" className="text-primary underline">Calls</Link> · <Link href="/docs/faq" className="text-primary underline">Help</Link>
+            </p>
+          </div>
+        </Card>
+      )
+    }
     return (
       <Card className="border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-950/20">
         <CardHeader>
@@ -117,6 +137,31 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
   const trialExpired = trialStatus?.isExpired ?? false
   const trialEnded = trialExhausted || trialExpired
   const onTrial = trialStatus?.isOnTrial ?? false
+
+  if (compact && !hasAgent) {
+    return (
+      <Card className="border-primary/30 bg-primary/5 py-3 px-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm font-semibold">Call assistant</p>
+          {trialEnded ? (
+            <Button size="sm" className="h-8" asChild>
+              <Link href="/billing">Upgrade to connect</Link>
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              className="h-8"
+              onClick={handleActivate}
+              disabled={creating}
+            >
+              {creating ? <Loader2 className="h-3 w-3 animate-spin" /> : "Connect"}
+            </Button>
+          )}
+        </div>
+        {error && <p className="text-xs text-destructive mt-2">{error}</p>}
+      </Card>
+    )
+  }
 
   return (
     <Card className="border-primary/30 bg-primary/5">

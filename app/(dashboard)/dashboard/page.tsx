@@ -22,7 +22,7 @@ export default async function DashboardPage() {
     db.call.findMany({
       where: { businessId: user.businessId },
       orderBy: { createdAt: "desc" },
-      take: 10,
+      take: 5,
     }),
     db.call.aggregate({
       where: { businessId: user.businessId },
@@ -41,70 +41,68 @@ export default async function DashboardPage() {
   const ownerPhone = user.phoneNumber ?? null
 
   return (
-    <div className="container mx-auto max-w-7xl py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welcome back, {business?.name}
-        </p>
-      </div>
-
-      {trial.isOnTrial && (
-        <div className="mb-8" id="trial">
-          <TrialCard trial={trial} hasAgent={hasAgent} />
+    <div className="container mx-auto max-w-7xl py-4 px-4">
+      {/* Control board header: one line */}
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <h1 className="text-xl font-bold">
+          Dashboard <span className="text-muted-foreground font-normal">— {business?.name}</span>
+        </h1>
+        <div className="flex items-center gap-2">
+          <Link href="/calls">
+            <Button variant="ghost" size="sm">Calls</Button>
+          </Link>
+          <Link href="/billing">
+            <Button variant="ghost" size="sm">Billing</Button>
+          </Link>
+          <Link href="/settings">
+            <Button variant="ghost" size="sm">Settings</Button>
+          </Link>
         </div>
-      )}
-
-      <div className="mb-8" id="setup">
-        <SetupAICard
-          hasAgent={hasAgent}
-          phoneNumber={phoneNumber}
-          businessName={business?.name ?? "your business"}
-          ownerPhone={ownerPhone}
-          trialStatus={trial}
-        />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <Card>
-          <CardHeader>
-            <CardTitle>Total Calls</CardTitle>
-            <CardDescription>All time</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{stats._count}</p>
-          </CardContent>
-        </Card>
+      {/* Top row: Trial (if on trial) + Setup — side by side to fit one screen */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4" id="trial">
+        {trial.isOnTrial && (
+          <div id="trial-card">
+            <TrialCard trial={trial} hasAgent={hasAgent} compact />
+          </div>
+        )}
+        <div className={trial.isOnTrial ? "" : "md:col-span-2"} id="setup">
+          <SetupAICard
+            hasAgent={hasAgent}
+            phoneNumber={phoneNumber}
+            businessName={business?.name ?? "your business"}
+            ownerPhone={ownerPhone}
+            trialStatus={trial}
+            compact
+          />
+        </div>
+      </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Total Minutes</CardTitle>
-            <CardDescription>All time</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{Math.ceil(totalMinutes)}</p>
-          </CardContent>
+      {/* Stats row: 3 compact cards */}
+      <div className="grid grid-cols-3 gap-3 mb-4">
+        <Card className="py-3 px-4">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">Calls</p>
+          <p className="text-2xl font-bold">{stats._count}</p>
         </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Emergency Calls</CardTitle>
-            <CardDescription>Recent calls</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-destructive">{emergencyCalls}</p>
-          </CardContent>
+        <Card className="py-3 px-4">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">Minutes</p>
+          <p className="text-2xl font-bold">{Math.ceil(totalMinutes)}</p>
+        </Card>
+        <Card className="py-3 px-4">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">Urgent</p>
+          <p className="text-2xl font-bold text-destructive">{emergencyCalls}</p>
         </Card>
       </div>
 
-      <div className="mb-4 flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">Recent Calls</h2>
+      {/* Recent calls: compact strip */}
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Recent Calls</h2>
         <Link href="/calls">
-          <Button variant="outline">View All</Button>
+          <Button variant="ghost" size="sm">View all</Button>
         </Link>
       </div>
-
-      <CallLog calls={recentCalls} />
+      <CallLog calls={recentCalls} compact />
     </div>
   )
 }

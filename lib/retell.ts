@@ -111,6 +111,67 @@ export async function createRetellAgent(
   }
 }
 
+/**
+ * Create one Retell agent + conversation flow for a given business type (industry).
+ * No phone number is created or attached. Use for bootstrapping per-use-case agents.
+ * Prompt uses {{BUSINESS_NAME}} and {{SERVICE_AREAS}} so you can override at runtime via dynamic_variables.
+ */
+export async function createAgentAndFlowForIndustry(
+  apiKey: string,
+  industry: Industry,
+  options?: { businessName?: string; serviceAreas?: string[] }
+): Promise<{ agent_id: string; conversation_flow_id: string; version: number }> {
+  const businessName = options?.businessName ?? "{{BUSINESS_NAME}}"
+  const serviceAreas = options?.serviceAreas ?? ["{{SERVICE_AREAS}}"]
+
+  const globalPrompt = generatePrompt(businessName, industry, serviceAreas, {
+    includeAppointmentCapture: true,
+  })
+  const flow = buildConversationFlow(businessName, industry, serviceAreas)
+  const { conversation_flow_id, version } = await createConversationFlow(apiKey, {
+    ...flow,
+    global_prompt: globalPrompt,
+  })
+
+  const agentName = `NML - ${industry}`
+  const agentPayload = {
+    agent_name: agentName,
+    language: "en-US" as const,
+    voice_id: "11labs-Chloe",
+    voice_temperature: 0.98,
+    voice_speed: 0.98,
+    volume: 0.94,
+    max_call_duration_ms: 3600000,
+    interruption_sensitivity: 0.9,
+    response_engine: {
+      type: "conversation-flow" as const,
+      conversation_flow_id,
+      version: version ?? 0,
+    },
+  }
+
+  const response = await fetch(`${RETELL_API_BASE}/create-agent`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(agentPayload),
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`Failed to create Retell agent for ${industry}: ${error}`)
+  }
+
+  const result = await response.json()
+  return {
+    agent_id: result.agent_id,
+    conversation_flow_id,
+    version: version ?? 0,
+  }
+}
+
 /** Purchase a new phone number from Retell and bind it to the agent. */
 async function createPhoneNumber(
   apiKey: string,

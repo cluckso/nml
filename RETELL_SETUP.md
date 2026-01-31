@@ -80,17 +80,37 @@ So in Retell you don’t need to manually create agents or flows; the app create
 
 ---
 
-## 5. Phone numbers (purchased on demand)
+## 4a. Tool: Create agents and flows per business type (optional)
 
-The app **purchases a new phone number from Retell** when the user connects their call assistant. You do not need to stockpile numbers or set an AI number in onboarding.
+You can **programmatically create one Retell agent and conversation flow per industry** (HVAC, PLUMBING, AUTO_REPAIR, CHILDCARE, ELECTRICIAN, HANDYMAN, GENERIC). Use this to bootstrap per–use-case agents or to generate flows/prompts for testing.
 
-| What | Where | Notes |
-|------|--------|--------|
-| Area code | Env `RETELL_DEFAULT_AREA_CODE` | 3-digit US area code (e.g. `608`). If unset, the app uses `415`. |
-| Billing | Retell account | Retell charges for numbers; ensure your Retell account has billing set up. |
+**What it does**
 
-Onboarding only collects the user’s **existing business line** (optional), which they will forward to the AI number. The AI number is assigned after they click **Connect to my call assistant** and is shown on the dashboard.
+- For each `Industry` value, calls the Retell API to create a **conversation flow** (nodes + global prompt) and an **agent** that uses that flow.
+- Does **not** create or attach phone numbers.
+- Prompts use placeholders `{{BUSINESS_NAME}}` and `{{SERVICE_AREAS}}` so you can override at runtime via `dynamic_variables` if needed.
 
+**How to run**
+
+1. Set `RETELL_API_KEY` in `.env` or `.env.local` (or export it).
+2. From the project root: `npm run create-retell-agents` (compiles the script with `tsc` then runs it with Node; no extra tools needed).
+3. The script prints each industry's `agent_id`, `conversation_flow_id`, and `version`, and writes **`retell-agents-by-industry.json`** in the project root (gitignored).
+
+**Using the result**
+
+- Pick one agent (e.g. for your shared intake) and set `RETELL_AGENT_ID` to its `agent_id`.
+- Attach your shared intake phone number to that agent in the Retell dashboard (or via their API).
+- The same logic lives in `lib/retell.ts`: `createAgentAndFlowForIndustry(apiKey, industry, options?)` if you want to call it from other scripts or APIs.
+
+---
+
+## 5. Phone numbers (shared intake)
+
+The app uses **one shared intake number**; all clients forward to it. You configure that number in Retell and set `NML_SHARED_INTAKE_NUMBER` or `RETELL_SHARED_NUMBER`. You do not need to stockpile numbers or set an AI number in onboarding.
+
+Purchase or configure **one** intake number in Retell, attach it to the shared agent, and set `NML_SHARED_INTAKE_NUMBER` or `RETELL_SHARED_NUMBER`. The dashboard shows this shared number; clients set their **primary forwarding number** in onboarding and forward their business line to the shared number at their carrier.
+
+Onboarding only collects the user’s **existing business line** (optional), 
 ---
 
 ## 6. How call forwarding works (not automatic)
@@ -124,19 +144,34 @@ These are Retell voice IDs. They’re usually available by default in Retell. If
 
 ---
 
-## 8. Checklist (copy and use)
+## 8. Post-call data extraction
+
+The app consumes post-call analysis from Retell via the `call_analysis` webhook. It expects fields such as name, phone, address, city, issue description, lead tag, appointment preference, department, and summary/transcript. The app does **not** configure extraction in code; it only reads what Retell sends.
+
+**Configure extraction in the Retell Dashboard** for your shared agent:
+
+1. Open the agent used as the shared agent (the one in `RETELL_AGENT_ID`).
+2. Go to the **Post-Call Analysis** tab for that agent.
+3. Add analysis categories (Text for free-form, Selector for fixed options). Use names the app expects: e.g. caller name, caller phone, service_address/address, city, issue_description, appointment_preference, department, and a summary. Optionally add a Selector for lead_tag (e.g. EMERGENCY, ESTIMATE, FOLLOW_UP, GENERAL).
+
+Retell sends these in the `call_analysis` webhook; the app maps both top-level and `extracted_variables`. See [Retell: Define the information you want to extract](https://docs.retellai.com/features/post-call-analysis-create).
+
+---
+
+## 9. Checklist (copy and use)
 
 - [ ] Retell account created.
 - [ ] API key created in Retell and set as `RETELL_API_KEY` in your app (local + production).
 - [ ] In Retell, webhook URL set to `https://<your-app-domain>/api/webhooks/retell`.
 - [ ] Webhook signing secret from Retell set as `RETELL_WEBHOOK_SECRET` in your app (required in production).
+- [ ] Post-Call Analysis configured on the shared agent (section 8) so name, phone, address, issue, etc. are extracted.
 - [ ] (Optional) `RETELL_DEFAULT_AREA_CODE` set if you want a specific area code for new numbers (default 415). Retell account has billing set up for number purchases.
 - [ ] (If needed) Voices **11labs-Chloe** and **11labs-Adam** available in your Retell account, or `lib/retell.ts` updated to use other voice IDs.
 - [ ] Test: In your app, connect the call assistant; then place a test call and confirm a `call_ended` / `call_analysis` webhook hits your app and the call appears in the dashboard.
 
 ---
 
-## 9. Troubleshooting
+## 10. Troubleshooting
 
 | Symptom | Check |
 |--------|--------|
@@ -149,7 +184,7 @@ These are Retell voice IDs. They’re usually available by default in Retell. If
 
 ---
 
-## 10. Retell dashboard links (typical)
+## 11. Retell dashboard links (typical)
 
 - Dashboard: [retellai.com](https://www.retellai.com) (log in).
 - API keys: Often under **Settings** → **API Keys** or **Developers**.

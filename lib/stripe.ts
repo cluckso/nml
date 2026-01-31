@@ -1,7 +1,7 @@
 import Stripe from "stripe"
 import { db } from "./db"
 import { PlanType, SubscriptionStatus } from "@prisma/client"
-import { getIncludedMinutes, getOverageMinutes } from "./plans"
+import { getIncludedMinutes, getOverageMinutes, hasCrmSetupAddonAvailable, CRM_SETUP_FEE } from "./plans"
 
 /** Map Stripe subscription status to our DB SubscriptionStatus (single place for mapping). */
 function stripeSubscriptionStatusToDb(stripeStatus: string): SubscriptionStatus {
@@ -73,7 +73,8 @@ export async function createCheckoutSession(
   businessId: string,
   planType: PlanType,
   setupFee: number,
-  appUrl: string = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+  appUrl: string = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  addCrmSetup: boolean = false
 ) {
   if (!stripe) {
     throw new Error("STRIPE_SECRET_KEY is not configured. Add it to .env to enable billing.")
@@ -106,6 +107,21 @@ export async function createCheckoutSession(
           name: "Setup Fee",
         },
         unit_amount: setupFee * 100, // Convert to cents
+      },
+      quantity: 1,
+    })
+  }
+
+  // Add CRM Integration Setup one-time add-on (Pro & Local Plus only)
+  if (addCrmSetup && hasCrmSetupAddonAvailable(planType) && CRM_SETUP_FEE > 0) {
+    lineItems.push({
+      price_data: {
+        currency: "usd",
+        product_data: {
+          name: "CRM Integration Setup",
+          description: "One-time setup: we connect your CRM webhook and verify leads flow through.",
+        },
+        unit_amount: CRM_SETUP_FEE * 100, // cents
       },
       quantity: 1,
     })

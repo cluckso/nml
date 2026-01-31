@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "emitDeclarationOnly": false,
+    "outDir": "dist.scripts",
+    "rootDir": ".",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "ES2020"
+  },
+  "include": [
+    "scripts/create-retell-agents.ts",
+    "lib/retell.ts",
+    "lib/prompts.ts",
+    "lib/plans.ts",
+    "config/agent-prompt.ts"
+  ]
+}

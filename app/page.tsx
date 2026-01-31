@@ -12,8 +12,8 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(217_91%_60%_/_.15),transparent)]" />
         <div className="container relative z-10 mx-auto text-center max-w-4xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary mb-8">
-            <Globe className="h-4 w-4" />
-            Now supporting multi-language intake
+            <PhoneForwarded className="h-4 w-4" />
+            AI call answering for local service businesses
           </div>
           <h1 className="text-5xl md:text-6xl font-bold mb-6 tracking-tight">
             Never Miss Another Call{" "}

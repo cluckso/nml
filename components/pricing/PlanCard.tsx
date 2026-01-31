@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, Loader2 } from "lucide-react"
 import { PlanType } from "@prisma/client"
+import { hasCrmSetupAddonAvailable, CRM_SETUP_FEE } from "@/lib/plans"
 
 const PLANS: Record<string, { name: string; price: number; planType: PlanType; popular: boolean }> = {
   Basic: { name: "Basic", price: 99, planType: PlanType.STARTER, popular: false },
@@ -33,7 +34,9 @@ export function PlanCard({
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [addCrmSetup, setAddCrmSetup] = useState(false)
   const plan = PLANS[name]
+  const showCrmAddon = plan && hasCrmSetupAddonAvailable(plan.planType)
   if (!plan) return null
 
   const handleGetStarted = async () => {
@@ -47,7 +50,10 @@ export function PlanCard({
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planType: plan.planType }),
+        body: JSON.stringify({
+          planType: plan.planType,
+          ...(showCrmAddon && addCrmSetup ? { addCrmSetup: true } : {}),
+        }),
       })
       const data = await res.json()
       if (data.url) window.location.href = data.url
@@ -81,6 +87,19 @@ export function PlanCard({
         <p className="text-sm text-muted-foreground mt-1">No setup fee</p>
       </CardHeader>
       <CardContent>
+        {showCrmAddon && isLoggedIn && (
+          <label className="mb-4 flex items-start gap-2 cursor-pointer rounded border p-3 text-sm">
+            <input
+              type="checkbox"
+              checked={addCrmSetup}
+              onChange={(e) => setAddCrmSetup(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-input accent-primary"
+            />
+            <span>
+              Add CRM Integration Setup — ${CRM_SETUP_FEE} one-time (we connect your webhook and verify leads)
+            </span>
+          </label>
+        )}
         <ul className="space-y-3 mb-6">
           {features.map((feature, index) => (
             <li key={index} className="flex items-start gap-2">

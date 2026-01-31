@@ -1,5 +1,5 @@
 import { Industry } from "@prisma/client"
-import { AGENT_PROMPT_CONFIG } from "@/config/agent-prompt"
+import { AGENT_PROMPT_CONFIG } from "../config/agent-prompt"
 
 export type BusinessHoursInput = {
   open?: string

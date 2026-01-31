@@ -3,7 +3,7 @@ import { getAuthUserFromRequest } from "@/lib/auth"
 import { createCheckoutSession, stripe } from "@/lib/stripe"
 import { db } from "@/lib/db"
 import { PlanType } from "@prisma/client"
-import { SETUP_FEES } from "@/lib/plans"
+import { SETUP_FEES, hasCrmSetupAddonAvailable } from "@/lib/plans"
 import Stripe from "stripe"
 
 /** Plan-first flow: create minimal business so user can checkout before onboarding. */
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     const user = await getAuthUserFromRequest(req)
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    let body: { planType?: string }
+    let body: { planType?: string; addCrmSetup?: boolean }
     try {
       body = await req.json()
     } catch {
@@ -38,6 +38,8 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    const addCrmSetup = Boolean(body.addCrmSetup) && hasCrmSetupAddonAvailable(planType as PlanType)
+
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
 
     const businessId = user.businessId
@@ -52,7 +54,8 @@ export async function POST(req: NextRequest) {
       businessId,
       planType as PlanType,
       setupFee,
-      appUrl
+      appUrl,
+      addCrmSetup
     )
 
     return NextResponse.json({ url: session.url })

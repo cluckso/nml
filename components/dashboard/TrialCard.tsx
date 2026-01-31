@@ -8,9 +8,11 @@ import { FREE_TRIAL_MINUTES } from "@/lib/plans"
 interface TrialCardProps {
   trial: TrialStatus
   hasAgent: boolean
+  /** Compact layout for dashboard control board */
+  compact?: boolean
 }
 
-export function TrialCard({ trial, hasAgent }: TrialCardProps) {
+export function TrialCard({ trial, hasAgent, compact }: TrialCardProps) {
   const { minutesRemaining, minutesUsed, isExhausted, isExpired, daysRemaining } = trial
   const percentUsed = FREE_TRIAL_MINUTES > 0 ? (minutesUsed / FREE_TRIAL_MINUTES) * 100 : 0
   const isEnded = isExhausted || isExpired
@@ -24,6 +26,46 @@ export function TrialCard({ trial, hasAgent }: TrialCardProps) {
       return "You've used all 50 free minutes. Upgrade to keep receiving calls."
     if (isEnded) return "Your trial has ended. Upgrade to a plan to continue."
     return "50 call minutes over 14 days. No charge until you upgrade. One trial per business number."
+  }
+
+  if (compact) {
+    return (
+      <Card className="border-emerald-200 bg-emerald-50/50 dark:border-emerald-900 dark:bg-emerald-950/20 py-3 px-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2 min-w-0">
+            <Zap className="h-4 w-4 text-emerald-600 shrink-0" />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-200 truncate">Free trial</p>
+              <p className="text-xs text-muted-foreground">
+                {isEnded
+                  ? "Ended — upgrade to continue"
+                  : `${Math.ceil(minutesUsed)}/${FREE_TRIAL_MINUTES} min used · ${Math.ceil(minutesRemaining)} left${daysRemaining > 0 ? ` · ${daysRemaining}d` : ""}`}
+              </p>
+            </div>
+          </div>
+          <div className="flex-1 min-w-[120px] max-w-[160px]">
+            <div className="w-full bg-muted rounded-full h-2">
+              <div
+                className="h-2 rounded-full bg-emerald-600 transition-all"
+                style={{ width: `${Math.min(100, percentUsed)}%` }}
+              />
+            </div>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            {!hasAgent && !isEnded && (
+              <a href="#setup">
+                <Button size="sm" className="h-8 text-xs gap-1">
+                  <Phone className="h-3 w-3" /> Connect
+                </Button>
+              </a>
+            )}
+            <Button size="sm" variant={isEnded ? "default" : "outline"} className="h-8 text-xs" asChild>
+              <Link href="/billing">{isEnded ? "Upgrade" : "Billing"}</Link>
+            </Button>
+          </div>
+        </div>
+      </Card>
+    )
   }
 
   return (
