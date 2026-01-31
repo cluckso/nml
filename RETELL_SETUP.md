@@ -54,7 +54,8 @@ Examples:
 | `RETELL_API_KEY` | Yes | Retell API key from dashboard. |
 | `RETELL_WEBHOOK_SECRET` | Yes in production | Webhook signing secret from Retell; in dev, missing = no verification. |
 | `RETELL_DEFAULT_AREA_CODE` | No | 3-digit US area code for new numbers (e.g. `608`). Defaults to `415` if unset. |
-| `RETELL_API_BASE` | No | API base URL (default `https://api.retellai.com`). Phone-number purchase tries `https://api.retellai.com/v2` first, then this base. |
+| `RETELL_EXISTING_PHONE` | No | E.164 number you already own in Retell (e.g. `+14157774444`). If set, the app uses `PATCH /update-phone-number/{phone_number}` to attach this number to the new agent instead of purchasing a new one. In development, a hardcoded number is used when this is unset. |
+| `RETELL_API_BASE` | No | API base URL (default `https://api.retellai.com`). Phone-number purchase/update tries `https://api.retellai.com/v2` first, then this base. |
 
 Add these to:
 
@@ -71,7 +72,7 @@ These are done in code; you don’t configure them in the Retell UI, but they sh
 |------|-----|--------|
 | 1 | `POST /create-conversation-flow` | Creates a conversation flow (nodes, global prompt, model). |
 | 2 | `POST /create-agent` | Creates a voice agent with `response_engine: { type: "conversation-flow", conversation_flow_id, version }`, voice, language, etc. |
-| 3 | `POST /create-phone-number` | Purchases a new phone number and binds it to the agent (area code from `RETELL_DEFAULT_AREA_CODE`, default 415). |
+| 3 | Phone number | If `RETELL_EXISTING_PHONE` is set (or in dev, a hardcoded number): `PATCH /update-phone-number/{phone_number}` to attach that number to the new agent. Otherwise: `POST /create-phone-number` to purchase a new number (area code from `RETELL_DEFAULT_AREA_CODE`, default 415). |
 | 4 | (Optional) `GET /get-agent/:agentId` | Used elsewhere in the app to fetch agent details. |
 
 So in Retell you don’t need to manually create agents or flows; the app creates them per business when the user clicks **Connect to my call assistant**.

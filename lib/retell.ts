@@ -80,16 +80,29 @@ export async function createRetellAgent(
 
   const result = await response.json()
 
-  // Purchase a new number from Retell and bind it to this agent
-  const areaCode = process.env.RETELL_DEFAULT_AREA_CODE
-    ? parseInt(process.env.RETELL_DEFAULT_AREA_CODE, 10)
-    : 415
+  // Use existing number (dev hardcoded or RETELL_EXISTING_PHONE) and attach to new agent via PATCH
+  const existingPhone =
+    process.env.NODE_ENV === "development"
+      ? "+14159972506"
+      : process.env.RETELL_EXISTING_PHONE ?? null
+
   let phone_number: string | undefined
-  try {
-    phone_number = await createPhoneNumber(apiKey, result.agent_id, areaCode)
-  } catch (err) {
-    console.error("Retell create-phone-number failed (agent was created):", err)
-    // Still return agent so we save it; number can be added later or retried
+  if (existingPhone) {
+    try {
+      await updatePhoneNumber(apiKey, existingPhone, result.agent_id)
+      phone_number = existingPhone
+    } catch (err) {
+      console.error("Retell update-phone-number failed (agent was created):", err)
+    }
+  } else {
+    const areaCode = process.env.RETELL_DEFAULT_AREA_CODE
+      ? parseInt(process.env.RETELL_DEFAULT_AREA_CODE, 10)
+      : 415
+    try {
+      phone_number = await createPhoneNumber(apiKey, result.agent_id, areaCode)
+    } catch (err) {
+      console.error("Retell create-phone-number failed (agent was created):", err)
+    }
   }
 
   return {
@@ -143,6 +156,37 @@ async function createPhoneNumber(
   }
 
   throw new Error(`Failed to create Retell phone number: ${lastError}`)
+}
+
+/** Attach an already-purchased Retell phone number to an agent via PATCH update-phone-number. */
+async function updatePhoneNumber(
+  apiKey: string,
+  phoneNumber: string,
+  agentId: string
+): Promise<void> {
+  const body = {
+    inbound_agent_id: agentId,
+    outbound_agent_id: agentId,
+  }
+  const encoded = encodeURIComponent(phoneNumber)
+  const bases = ["https://api.retellai.com/v2", RETELL_API_BASE]
+  let lastError: string | null = null
+
+  for (const base of bases) {
+    const url = `${base}/update-phone-number/${encoded}`
+    const response = await fetch(url, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(body),
+    })
+    if (response.ok) return
+    lastError = await response.text()
+  }
+
+  throw new Error(`Failed to update Retell phone number: ${lastError}`)
 }
 
 /** Create a conversation flow via Retell API; returns conversation_flow_id and version for use in create-agent. */
