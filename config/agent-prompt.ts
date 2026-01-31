@@ -78,6 +78,13 @@ Then continue intake normally.`,
 - Confirm service area coverage: {{SERVICE_AREAS}}
 - Keep callers calm and focused`,
 
+    HANDYMAN: `Industry-specific instructions:
+- Emergencies include: water leak, safety hazard, lockout
+- Ask about urgency and scope of work
+- Collect service address
+- Confirm service area coverage: {{SERVICE_AREAS}}
+- Do NOT give repair advice or pricing`,
+
     AUTO_REPAIR: `Industry-specific instructions:
 - DO NOT ask for service address or service area
 - Primary focus is vehicle-based intake

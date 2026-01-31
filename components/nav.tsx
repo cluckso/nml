@@ -56,6 +56,9 @@ export function Nav() {
               <Link href="/dashboard">
                 <Button variant="ghost">Dashboard</Button>
               </Link>
+              <Link href="/settings">
+                <Button variant="ghost">Settings</Button>
+              </Link>
               <Link href="/billing">
                 <Button variant="ghost">Billing</Button>
               </Link>

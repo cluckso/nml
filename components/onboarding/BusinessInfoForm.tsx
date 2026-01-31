@@ -39,7 +39,8 @@ export function BusinessInfoForm({
   planType = null,
 }: BusinessInfoFormProps) {
   const showProFeatures = planType === "PRO" || planType === "LOCAL_PLUS"
-  const showLocalPlusFeatures = planType === "LOCAL_PLUS"
+  const showLocalPlusFeatures = false
+  const showAfterHoursEmergency = planType === "PRO"
   const [formData, setFormData] = useState<BusinessInfo>({
     name: initialData?.name || "",
     address: initialData?.address || "",
@@ -250,17 +251,6 @@ export function BusinessInfoForm({
       {showProFeatures && (
         <div className="space-y-4 rounded-lg border border-border bg-muted/30 p-4">
           <h3 className="font-medium">Included in your plan</h3>
-          {showLocalPlusFeatures && (
-            <div className="space-y-2">
-              <Label htmlFor="departments">Departments (comma-separated)</Label>
-              <Input
-                id="departments"
-                value={(formData.departments || []).join(", ")}
-                onChange={(e) => setFormData({ ...formData, departments: e.target.value ? e.target.value.split(",").map((s) => s.trim()).filter(Boolean) : [] })}
-                placeholder="Plumbing, HVAC"
-              />
-            </div>
-          )}
           <div className="space-y-2">
             <Label htmlFor="crmWebhookUrl">CRM webhook URL (optional)</Label>
             <Input
@@ -281,9 +271,9 @@ export function BusinessInfoForm({
               placeholder="crm@company.com"
             />
           </div>
-          {showLocalPlusFeatures && (
+          {showAfterHoursEmergency && (
             <div className="space-y-2">
-              <Label htmlFor="afterHoursEmergencyPhone">After-hours emergency phone</Label>
+              <Label htmlFor="afterHoursEmergencyPhone">After-hours emergency phone (Pro)</Label>
               <Input
                 id="afterHoursEmergencyPhone"
                 type="tel"

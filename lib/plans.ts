@@ -58,14 +58,14 @@ export function hasCrmForwarding(planType: PlanType): boolean {
   return planType === PlanType.PRO || planType === PlanType.LOCAL_PLUS
 }
 
-/** Whether plan has lead tagging: emergency, estimate, follow-up (Pro+; full in Local Plus) */
+/** Whether plan has lead tagging: emergency, estimate, follow-up (Pro+) */
 export function hasLeadTagging(planType: PlanType): boolean {
   return planType === PlanType.PRO || planType === PlanType.LOCAL_PLUS
 }
 
-/** Whether plan has multi-department logic (Local Plus) */
+/** Whether plan has multi-department logic (removed from Local Plus; reserved for future) */
 export function hasMultiDepartment(planType: PlanType): boolean {
-  return planType === PlanType.LOCAL_PLUS
+  return false
 }
 
 /** Whether plan gets weekly usage & lead reports (Local Plus) */
@@ -73,8 +73,18 @@ export function hasWeeklyReports(planType: PlanType): boolean {
   return planType === PlanType.LOCAL_PLUS
 }
 
-/** Whether plan has fully branded AI voice (Local Plus) */
+/** Whether plan has fully branded AI voice + voice sliders (Local Plus) */
 export function hasBrandedVoice(planType: PlanType): boolean {
+  return planType === PlanType.LOCAL_PLUS
+}
+
+/** Whether plan shows urgency/emergency flags in dashboard (Pro+) */
+export function hasUrgencyFlags(planType: PlanType): boolean {
+  return planType === PlanType.PRO || planType === PlanType.LOCAL_PLUS
+}
+
+/** Whether plan has priority support (Local Plus; replaces multi-department & after-hours) */
+export function hasPrioritySupport(planType: PlanType): boolean {
   return planType === PlanType.LOCAL_PLUS
 }
 

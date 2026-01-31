@@ -194,6 +194,7 @@ function buildConversationFlow(
     case Industry.HVAC:
     case Industry.PLUMBING:
     case Industry.ELECTRICIAN:
+    case Industry.HANDYMAN:
     default:
       return buildPropertyServiceFlow(businessName, serviceAreas)
   }
