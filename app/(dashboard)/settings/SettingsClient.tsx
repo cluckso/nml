@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { FlowSelector } from "@/components/settings/FlowSelector"
 import { Industry } from "@prisma/client"
 import { PlanType } from "@prisma/client"
+import { normalizeE164 } from "@/lib/normalize-phone"
 import { hasPrioritySupport, hasBrandedVoice } from "@/lib/plans"
 import { Loader2, Volume2 } from "lucide-react"
 
@@ -18,7 +19,7 @@ interface BusinessData {
   id: string
   name: string
   industry: Industry
-  businessLinePhone?: string
+  primaryForwardingNumber?: string
   address?: string
   city?: string
   state?: string
@@ -45,7 +46,7 @@ export function SettingsClient({ business, planType, hasAgent }: SettingsClientP
   const [success, setSuccess] = useState(false)
 
   const [name, setName] = useState(business.name)
-  const [businessLinePhone, setBusinessLinePhone] = useState(business.businessLinePhone ?? "")
+  const [primaryForwardingNumber, setPrimaryForwardingNumber] = useState(business.primaryForwardingNumber ?? "")
   const [address, setAddress] = useState(business.address ?? "")
   const [city, setCity] = useState(business.city ?? "")
   const [state, setState] = useState(business.state ?? "")
@@ -91,7 +92,7 @@ export function SettingsClient({ business, planType, hasAgent }: SettingsClientP
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: name.trim(),
-          businessLinePhone: businessLinePhone.trim() || null,
+          primaryForwardingNumber: primaryForwardingNumber.trim() ? normalizeE164(primaryForwardingNumber) ?? undefined : undefined,
           address: address.trim() || null,
           city: city.trim() || null,
           state: state.trim() || null,
@@ -134,8 +135,8 @@ export function SettingsClient({ business, planType, hasAgent }: SettingsClientP
               <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your business" />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone">Business phone (line to forward)</Label>
-              <Input id="phone" type="tel" value={businessLinePhone} onChange={(e) => setBusinessLinePhone(e.target.value)} placeholder="(608) 555-1234" />
+              <Label htmlFor="phone">Primary forwarding number (E.164)</Label>
+              <Input id="phone" type="tel" value={primaryForwardingNumber} onChange={(e) => setPrimaryForwardingNumber(e.target.value)} placeholder="+1 (608) 555-1234" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="address">Address</Label>

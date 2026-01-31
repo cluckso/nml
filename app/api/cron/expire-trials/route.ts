@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     const businesses = await db.business.findMany({
       where: {
         trialEndsAt: { lt: now },
-        isActive: true,
+        status: "ACTIVE",
         subscription: { is: null },
       },
       select: { id: true },
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
       where: {
         id: { in: businesses.map((b) => b.id) },
       },
-      data: { isActive: false },
+      data: { status: "PAUSED" },
     })
 
     return NextResponse.json({ ok: true, paused: businesses.length })

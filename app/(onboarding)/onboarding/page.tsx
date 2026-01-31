@@ -31,7 +31,7 @@ export default async function OnboardingPage() {
     serviceAreas: business.serviceAreas?.length ? business.serviceAreas : business.city ? [business.city] : undefined,
     businessHours: business.businessHours as { open: string; close: string; days: string[] } | null,
     departments: business.departments,
-    phoneNumber: business.businessLinePhone ?? undefined,
+    phoneNumber: business.primaryForwardingNumber ?? undefined,
     crmWebhookUrl: business.crmWebhookUrl ?? undefined,
     forwardToEmail: business.forwardToEmail ?? undefined,
     afterHoursEmergencyPhone: business.afterHoursEmergencyPhone ?? undefined,

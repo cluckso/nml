@@ -34,8 +34,10 @@ export default async function DashboardPage() {
 
   const emergencyCalls = recentCalls.filter((c) => c.emergencyFlag).length
   const totalMinutes = stats._sum.minutes || 0
-  const hasAgent = !!business?.retellAgentId
-  const phoneNumber = business?.phoneNumber ?? null
+  const sharedNumber =
+    process.env.NML_SHARED_INTAKE_NUMBER ?? process.env.RETELL_SHARED_NUMBER ?? null
+  const hasAgent = !!sharedNumber
+  const phoneNumber = sharedNumber
   const ownerPhone = user.phoneNumber ?? null
 
   return (

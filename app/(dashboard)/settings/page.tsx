@@ -42,7 +42,7 @@ export default async function SettingsPage() {
           id: business.id,
           name: business.name,
           industry: business.industry,
-          businessLinePhone: business.businessLinePhone ?? undefined,
+          primaryForwardingNumber: business.primaryForwardingNumber ?? undefined,
           address: business.address ?? undefined,
           city: business.city ?? undefined,
           state: business.state ?? undefined,
@@ -59,7 +59,7 @@ export default async function SettingsPage() {
           voiceSettings: voiceSettings ?? undefined,
         }}
         planType={planType}
-        hasAgent={!!business.retellAgentId}
+        hasAgent={true}
       />
     </div>
   )

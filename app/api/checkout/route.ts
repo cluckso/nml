@@ -3,7 +3,6 @@ import { getAuthUserFromRequest } from "@/lib/auth"
 import { createCheckoutSession, stripe } from "@/lib/stripe"
 import { db } from "@/lib/db"
 import { PlanType } from "@prisma/client"
-import { Industry } from "@prisma/client"
 import { SETUP_FEES } from "@/lib/plans"
 import Stripe from "stripe"
 
@@ -41,21 +40,12 @@ export async function POST(req: NextRequest) {
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
 
-    let businessId = user.businessId
+    const businessId = user.businessId
     if (!businessId) {
-      const business = await db.business.create({
-        data: {
-          name: "My Business",
-          industry: Industry.GENERIC,
-          onboardingComplete: false,
-          users: { connect: { id: user.id } },
-        },
-      })
-      businessId = business.id
-      await db.user.update({
-        where: { id: user.id },
-        data: { businessId },
-      })
+      return NextResponse.json(
+        { error: "Complete signup first: start a trial at /trial/start or complete onboarding so we have your primary forwarding number." },
+        { status: 400 }
+      )
     }
 
     const session = await createCheckoutSession(

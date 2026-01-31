@@ -1,6 +1,6 @@
 # Retell Setup for NeverMissLead-AI
 
-This app uses [Retell AI](https://www.retellai.com/) for voice agents: when a user clicks **Connect to my call assistant**, the app creates a Retell agent and (optionally) assigns a phone number. Call events (e.g. call ended, call analysis) are sent to your app via webhooks.
+This app uses [Retell AI](https://www.retellai.com/) with a **shared agent and one intake number**. All clients forward their missed calls to the same number; the app routes each call to the correct client by the **forwarded-from** number. Call events (call_inbound, call_ended, call_analysis) are sent to your app via webhooks.
 
 Below is a full breakdown of tasks and configuration in Retell and in your app.
 
@@ -42,7 +42,8 @@ Examples:
 
 **Events the app handles:**
 
-- `call_ended` – saves/updates the call, sends notifications, reports usage to Stripe, checks trial.
+- `call_inbound` – resolves client by forwarded-from number, returns override_agent_id (shared agent), metadata (client_id, forwarded_from_number), and dynamic_variables (BUSINESS_NAME). If no client or not active, returns empty so Retell does not connect.
+- `call_ended` – creates/updates Call with client_id from metadata, caller_number, forwarded_from_number, ai_number_answered; sends notifications, reports usage, checks trial; sets testCallVerifiedAt when first call completes for that client.
 - `call_analysis` – same as above (analysis may arrive after call_ended).
 
 ---
@@ -53,9 +54,9 @@ Examples:
 |----------|----------|-------------|
 | `RETELL_API_KEY` | Yes | Retell API key from dashboard. |
 | `RETELL_WEBHOOK_SECRET` | Yes in production | Webhook signing secret from Retell; in dev, missing = no verification. |
-| `RETELL_DEFAULT_AREA_CODE` | No | 3-digit US area code for new numbers (e.g. `608`). Defaults to `415` if unset. |
-| `RETELL_EXISTING_PHONE` | No | E.164 number you already own in Retell (e.g. `+14157774444`). If set, the app uses `PATCH /update-phone-number/{phone_number}` to attach this number to the new agent instead of purchasing a new one. In development, a hardcoded number is used when this is unset. |
-| `RETELL_API_BASE` | No | API base URL (default `https://api.retellai.com`). Phone-number purchase/update tries `https://api.retellai.com/v2` first, then this base. |
+| `RETELL_AGENT_ID` | Yes | The **single** shared Retell agent ID. Create one agent in Retell (or via bootstrap script), attach the intake number to it, and set this env var. |
+| `NML_SHARED_INTAKE_NUMBER` or `RETELL_SHARED_NUMBER` | Yes | E.164 of the **one** intake number. All clients forward missed calls to this number. Configure this number in Retell with inbound webhook pointing to your app. |
+| `RETELL_API_BASE` | No | API base URL (default `https://api.retellai.com`). |
 
 Add these to:
 

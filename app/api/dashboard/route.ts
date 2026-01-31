@@ -35,22 +35,26 @@ export async function GET(req: NextRequest) {
 
     const emergencyCount = recentCalls.filter((c) => c.emergencyFlag).length
 
+    const sharedNumber =
+      process.env.NML_SHARED_INTAKE_NUMBER ?? process.env.RETELL_SHARED_NUMBER ?? null
+
     return NextResponse.json({
       business: business
         ? {
             id: business.id,
             name: business.name,
-            phoneNumber: business.phoneNumber,
-            retellAgentId: business.retellAgentId,
+            primaryForwardingNumber: business.primaryForwardingNumber,
+            status: business.status,
           }
         : null,
+      sharedNumber,
       recentCalls,
       stats: {
         totalCalls: stats._count,
         totalMinutes: stats._sum.minutes ?? 0,
         emergencyInRecent: emergencyCount,
       },
-      hasAgent: !!business?.retellAgentId,
+      hasAgent: !!sharedNumber,
       trial: trial
         ? {
             isOnTrial: trial.isOnTrial,

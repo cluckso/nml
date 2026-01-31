@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
+import { resolveClient } from "@/lib/resolve-client"
+import { normalizeE164 } from "@/lib/normalize-phone"
 import {
   sendEmailNotification,
   sendSMSNotification,
@@ -10,37 +12,51 @@ import { reportUsageToStripe } from "@/lib/stripe"
 import { isSubscriptionActive } from "@/lib/subscription"
 import { hasSmsToCallers, hasCrmForwarding, hasLeadTagging, getEffectivePlanType } from "@/lib/plans"
 import { FREE_TRIAL_MINUTES } from "@/lib/plans"
-import { PlanType } from "@prisma/client"
 import { rateLimit } from "@/lib/rate-limit"
 import crypto from "crypto"
 
+const SHARED_AGENT_ID = process.env.RETELL_AGENT_ID
+
 export async function POST(req: NextRequest) {
   try {
-    // Rate limiting (NextRequest has no .ip; use headers)
     const forwarded = req.headers.get("x-forwarded-for")
     const ip = forwarded ? forwarded.split(",")[0].trim() : req.headers.get("x-real-ip") || "unknown"
-    const limit = rateLimit(`webhook-retell-${ip}`, 100, 60000) // 100 requests per minute
+    const limit = rateLimit(`webhook-retell-${ip}`, 100, 60000)
     if (!limit.allowed) {
-      return NextResponse.json(
-        { error: "Rate limit exceeded" },
-        { status: 429 }
-      )
+      return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 })
     }
 
-    // Verify webhook signature
     const signature = req.headers.get("x-retell-signature")
     const body = await req.text()
-    
     if (!verifyRetellSignature(body, signature || "")) {
-      return NextResponse.json(
-        { error: "Invalid signature" },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 })
     }
 
     const event = JSON.parse(body) as RetellCallWebhookEvent
 
-    // Handle call completion event
+    // Inbound: resolve client by forwarded_from, return override + metadata + dynamic_variables
+    if (event.event === "call_inbound") {
+      const inbound = (event as RetellInboundEvent).call_inbound
+      const fromNumber = inbound?.from_number
+      const toNumber = inbound?.to_number
+      const forwardedFrom =
+        (inbound as { forwarded_from_number?: string; forwarded_from?: string })?.forwarded_from_number ??
+        (inbound as { forwarded_from_number?: string; forwarded_from?: string })?.forwarded_from ??
+        fromNumber
+      const client = await resolveClient(forwardedFrom)
+      if (!client || !SHARED_AGENT_ID) {
+        return NextResponse.json({ call_inbound: {} })
+      }
+      const forwardedFromNormalized = normalizeE164(forwardedFrom) ?? forwardedFrom
+      return NextResponse.json({
+        call_inbound: {
+          override_agent_id: SHARED_AGENT_ID,
+          metadata: { client_id: client.id, forwarded_from_number: forwardedFromNormalized },
+          dynamic_variables: { BUSINESS_NAME: client.name },
+        },
+      })
+    }
+
     if (event.event === "call_ended" || event.event === "call_analysis") {
       await handleCallCompletion(event)
     }
@@ -48,11 +64,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true })
   } catch (error) {
     console.error("Retell webhook error:", error)
-    return NextResponse.json(
-      { error: "Webhook processing failed" },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: "Webhook processing failed" }, { status: 500 })
   }
+}
+
+interface RetellInboundEvent {
+  event: "call_inbound"
+  call_inbound?: { from_number?: string; to_number?: string }
 }
 
 function verifyRetellSignature(body: string, signature: string): boolean {
@@ -99,27 +117,44 @@ interface RetellCallAnalysis {
 
 interface RetellCallWebhookEvent {
   event?: string
-  call?: { call_id?: string; agent_id?: string; from_number?: string; start_timestamp?: number; end_timestamp?: number; transcript?: string }
+  call?: {
+    call_id?: string
+    agent_id?: string
+    from_number?: string
+    to_number?: string
+    start_timestamp?: number
+    end_timestamp?: number
+    transcript?: string
+    metadata?: { client_id?: string; forwarded_from_number?: string }
+  }
   call_analysis?: RetellCallAnalysis
 }
 
 async function handleCallCompletion(event: RetellCallWebhookEvent) {
   const callId = event.call?.call_id
-  const agentId = event.call?.agent_id
-
-  if (!callId || !agentId) {
-    console.error("Missing call_id or agent_id in webhook")
+  if (!callId) {
+    console.error("Missing call_id in webhook")
     return
   }
 
-  // Find business by agent ID (include subscription for plan-based features)
-  const business = await db.business.findUnique({
-    where: { retellAgentId: agentId },
-    include: { subscription: true },
-  })
+  const metadata = event.call?.metadata
+  let business = metadata?.client_id
+    ? await db.business.findUnique({
+        where: { id: metadata.client_id },
+        include: { subscription: true },
+      })
+    : null
+  if (!business && metadata?.forwarded_from_number) {
+    const resolved = await resolveClient(metadata.forwarded_from_number)
+    business = resolved ?? null
+  }
+  if (!business && event.call?.from_number) {
+    const resolved = await resolveClient(event.call.from_number)
+    business = resolved ?? null
+  }
 
   if (!business) {
-    console.error(`Business not found for agent ${agentId}`)
+    console.error(`Client not found for call ${callId} (metadata.client_id or forwarded_from)`)
     return
   }
 
@@ -155,9 +190,16 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
     where: { retellCallId: callId },
   })
 
+  const callerNumber = event.call?.from_number ? normalizeE164(event.call.from_number) ?? event.call.from_number : undefined
+  const forwardedFromNumber = metadata?.forwarded_from_number ? normalizeE164(metadata.forwarded_from_number) ?? metadata.forwarded_from_number : undefined
+  const aiNumberAnswered = event.call?.to_number ? normalizeE164(event.call.to_number) ?? event.call.to_number : undefined
+
   const callData = {
     duration,
     minutes,
+    callerNumber,
+    forwardedFromNumber,
+    aiNumberAnswered,
     transcript: analysis.transcript || event.call?.transcript || undefined,
     summary: summary || undefined,
     structuredIntake: structuredIntake as any,
@@ -183,6 +225,14 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
           ...callData,
         },
       })
+
+  // Mandatory test call: mark testCallVerifiedAt when we receive a completed call for this client (forwarded_from matched)
+  if (!business.testCallVerifiedAt) {
+    await db.business.update({
+      where: { id: business.id },
+      data: { testCallVerifiedAt: new Date() },
+    })
+  }
 
   // Notifications: email + SMS to owner; SMS to caller (Pro+); CRM forward (Pro+)
   try {
@@ -220,7 +270,7 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
     if (exhausted || expired) {
       await db.business.update({
         where: { id: business.id },
-        data: { isActive: false },
+        data: { status: "PAUSED" },
       })
     }
   } else if (hasActiveSubscription) {

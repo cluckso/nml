@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getAuthUserFromRequest } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { syncRetellAgentFromBusiness } from "@/lib/retell"
+import { normalizeE164 } from "@/lib/normalize-phone"
 import { Industry, Prisma } from "@prisma/client"
+import { ClientStatus } from "@prisma/client"
 import { getEffectivePlanType } from "@/lib/plans"
 
 /**
@@ -31,8 +32,18 @@ export async function PATCH(req: NextRequest) {
     if (typeof body.name === "string" && body.name.trim()) {
       updates.name = body.name.trim()
     }
-    if (body.businessLinePhone !== undefined) {
-      updates.businessLinePhone = typeof body.businessLinePhone === "string" ? body.businessLinePhone.trim() || null : null
+    if (body.primaryForwardingNumber !== undefined) {
+      const normalized = normalizeE164(body.primaryForwardingNumber)
+      if (normalized) updates.primaryForwardingNumber = normalized
+    }
+    if (body.status !== undefined && (body.status === "ACTIVE" || body.status === "PAUSED")) {
+      if (body.status === "ACTIVE" && !business.testCallVerifiedAt) {
+        return NextResponse.json(
+          { error: "Complete a test call first: forward a call to the shared intake number so we can verify your forwarding number." },
+          { status: 400 }
+        )
+      }
+      updates.status = body.status as ClientStatus
     }
     if (body.address !== undefined) updates.address = typeof body.address === "string" ? body.address.trim() || null : null
     if (body.city !== undefined) updates.city = typeof body.city === "string" ? body.city.trim() || null : null
@@ -99,32 +110,7 @@ export async function PATCH(req: NextRequest) {
       include: { subscription: true },
     })
 
-    // Sync Retell agent when business has an agent and settings that affect it changed
-    let agentSyncFailed = false
-    if (updated.retellAgentId && process.env.RETELL_API_KEY) {
-      try {
-        await syncRetellAgentFromBusiness({
-          name: updated.name,
-          industry: updated.industry,
-          serviceAreas: updated.serviceAreas,
-          businessHours: updated.businessHours,
-          departments: updated.departments,
-          afterHoursEmergencyPhone: updated.afterHoursEmergencyPhone,
-          voiceSettings: updated.voiceSettings,
-          retellAgentId: updated.retellAgentId,
-          subscription: updated.subscription ?? undefined,
-        })
-      } catch (err) {
-        console.error("Retell agent sync after settings update:", err)
-        agentSyncFailed = true
-      }
-    }
-
-    return NextResponse.json({
-      success: true,
-      business: updated,
-      ...(agentSyncFailed ? { agentSyncFailed: true } : {}),
-    })
+    return NextResponse.json({ success: true, business: updated })
   } catch (error) {
     console.error("Business update error:", error)
     return NextResponse.json({ error: "Failed to update business" }, { status: 500 })

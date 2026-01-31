@@ -274,7 +274,7 @@ export async function handleStripeWebhook(event: Stripe.Event) {
         await db.business.update({
           where: { id: businessId },
           data: {
-            isActive: true,
+            status: "ACTIVE",
             trialStartedAt: null,
             trialEndsAt: null,
             trialMinutesUsed: 0,
@@ -319,7 +319,7 @@ export async function handleStripeWebhook(event: Stripe.Event) {
           // Optionally pause the business
           await db.business.update({
             where: { id: subscription.businessId },
-            data: { isActive: false },
+            data: { status: "PAUSED" },
           })
         }
       }

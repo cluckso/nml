@@ -45,6 +45,11 @@ enum SubscriptionStatus {
   PAUSED
 }
 
+enum ClientStatus {
+  ACTIVE
+  PAUSED
+}
+
 model User {
   id             String   @id @default(cuid())
   email          String   @unique
@@ -61,77 +66,81 @@ model User {
 }
 
 model Business {
-  id                     String    @id @default(cuid())
-  name                   String
-  industry               Industry
-  phoneNumber            String?   // AI number (Retell-assigned when agent is created)
-  businessLinePhone      String?   // User's existing business line (forward this to AI number)
-  retellAgentId          String?   @unique
-  stripeCustomerId       String?   @unique
-  serviceAreas            String[]  @default([])
-  businessHours          Json?     // { open: "09:00", close: "17:00", days: ["monday", "tuesday", ...] }
-  departments            String[]  @default([]) // Local Plus: e.g. ["Plumbing", "HVAC"]
-  address                String?
-  city                   String?
-  state                  String?
-  zipCode                String?
-  onboardingComplete     Boolean  @default(false)
-  requiresManualSetup    Boolean  @default(false)
-  isActive               Boolean  @default(true)
-  crmWebhookUrl          String?  // Pro+: POST lead data to CRM
-  forwardToEmail         String?  // Pro+: forward leads to this email (e.g. CRM pipe)
-  afterHoursEmergencyPhone String? // Pro only: on-call number for after-hours emergencies (not Local Plus)
-  offersRoadsideService   Boolean? // For AUTO_REPAIR: true = collect location for roadside
-  voiceSettings           Json?    // Local Plus: { speed?, temperature?, volume? } 0–1 or similar
-  trialStartedAt         DateTime? // When trial started (trial path only)
-  trialEndsAt            DateTime? // trialStartedAt + 14 days
-  trialMinutesUsed       Float    @default(0) // Minutes counting toward 50-minute trial cap
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+  id                        String      @id @default(cuid())
+  name                      String
+  industry                  Industry
+  primaryForwardingNumber   String      @unique // E.164; identifies client when they forward to shared intake number
+  stripeCustomerId          String?     @unique
+  serviceAreas              String[]    @default([])
+  businessHours             Json?        // { open: "09:00", close: "17:00", days: ["monday", "tuesday", ...] }
+  departments               String[]    @default([]) // Local Plus: e.g. ["Plumbing", "HVAC"]
+  address                   String?
+  city                      String?
+  state                     String?
+  zipCode                   String?
+  onboardingComplete       Boolean     @default(false)
+  requiresManualSetup       Boolean     @default(false)
+  status                    ClientStatus @default(PAUSED) // ACTIVE = answer calls and bill; PAUSED = do not connect
+  testCallVerifiedAt       DateTime?   // Set when inbound + call_ended confirmed for this client
+  crmWebhookUrl             String?     // Pro+: POST lead data to CRM
+  forwardToEmail            String?     // Pro+: forward leads to this email (e.g. CRM pipe)
+  afterHoursEmergencyPhone  String?    // Pro only: on-call number for after-hours emergencies (not Local Plus)
+  offersRoadsideService     Boolean?    // For AUTO_REPAIR: true = collect location for roadside
+  voiceSettings             Json?       // Local Plus: { speed?, temperature?, volume? } 0–1 or similar
+  trialStartedAt            DateTime?   // When trial started (trial path only)
+  trialEndsAt               DateTime?  // trialStartedAt + 14 days
+  trialMinutesUsed          Float       @default(0) // Minutes counting toward 50-minute trial cap
+  createdAt                 DateTime    @default(now())
+  updatedAt                 DateTime    @updatedAt
 
-  users       User[]
-  calls       Call[]
-  usage       Usage[]
+  users        User[]
+  calls        Call[]
+  usage        Usage[]
   subscription Subscription?
-  trialClaim  TrialClaim?
+  trialClaim   TrialClaim?
 
-  @@index([retellAgentId])
+  @@index([primaryForwardingNumber])
   @@index([stripeCustomerId])
+  @@index([status])
 }
 
-// One trial per business phone (E.164). Insert when starting trial; prevents reuse of number.
+// One trial per primary_forwarding_number (E.164). Insert when starting trial; prevents reuse of number.
 model TrialClaim {
-  id         String   @id @default(cuid())
-  phoneNumber String  @unique // E.164 normalized
-  businessId  String  @unique
-  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  claimedAt   DateTime @default(now())
+  id                      String   @id @default(cuid())
+  primaryForwardingNumber String   @unique // E.164 normalized
+  businessId              String   @unique
+  business                Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  claimedAt               DateTime @default(now())
 
-  @@index([phoneNumber])
+  @@index([primaryForwardingNumber])
 }
 
 model Call {
-  id                 String    @id @default(cuid())
-  retellCallId       String    @unique
-  businessId         String
-  business           Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  duration           Int       // Duration in seconds
-  minutes            Float     // Duration in minutes (for billing)
-  transcript         String?
-  summary            String?   // Short summary (Pro+)
-  structuredIntake   Json?    // { name, phone, address, issue_description, emergency, appointmentRequest, etc. }
-  emergencyFlag      Boolean   @default(false)
-  leadTag            LeadTag?  // Pro+: EMERGENCY | ESTIMATE | FOLLOW_UP | GENERAL
-  department         String?   // Local Plus: which department was requested
-  appointmentRequest Json?    // Pro+: { preferredDays?, preferredTime?, notes? }
-  callerName         String?
-  callerPhone        String?
-  issueDescription   String?
-  missedCallRecovery Boolean   @default(false) // True if call ended early but we captured partial info
-  createdAt          DateTime  @default(now())
+  id                    String    @id @default(cuid())
+  retellCallId          String    @unique
+  businessId            String
+  business              Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  callerNumber          String?   // E.164 caller (Retell from_number)
+  forwardedFromNumber   String?   // E.164 number that forwarded (client line); routing key
+  aiNumberAnswered      String?   // E.164 shared intake number (Retell to_number)
+  duration              Int       // Duration in seconds
+  minutes               Float     // Duration in minutes (for billing)
+  transcript            String?
+  summary               String?   // Short summary (Pro+)
+  structuredIntake      Json?     // { name, phone, address, issue_description, emergency, appointmentRequest, etc. }
+  emergencyFlag         Boolean   @default(false)
+  leadTag               LeadTag?  // Pro+: EMERGENCY | ESTIMATE | FOLLOW_UP | GENERAL
+  department            String?   // Local Plus: which department was requested
+  appointmentRequest    Json?     // Pro+: { preferredDays?, preferredTime?, notes? }
+  callerName            String?
+  callerPhone           String?
+  issueDescription      String?
+  missedCallRecovery    Boolean   @default(false) // True if call ended early but we captured partial info
+  createdAt             DateTime  @default(now())
 
   @@index([businessId])
   @@index([retellCallId])
+  @@index([forwardedFromNumber])
   @@index([createdAt])
   @@index([emergencyFlag])
   @@index([leadTag])

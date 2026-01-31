@@ -57,13 +57,13 @@ export async function POST(req: NextRequest) {
     const now = new Date()
     const trialEndsAt = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000)
 
-    // Create Business + TrialClaim in a transaction so the same phone can't win two trials (unique on TrialClaim.phoneNumber).
+    // Create Business + TrialClaim in a transaction so the same phone can't win two trials (unique on TrialClaim.primaryForwardingNumber).
     const business = await db.$transaction(async (tx) => {
       const b = await tx.business.create({
         data: {
           name: "My Business",
           industry: Industry.GENERIC,
-          businessLinePhone: normalizedPhone,
+          primaryForwardingNumber: normalizedPhone,
           stripeCustomerId,
           onboardingComplete: false,
           trialStartedAt: now,
@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
       })
       await tx.trialClaim.create({
         data: {
-          phoneNumber: normalizedPhone,
+          primaryForwardingNumber: normalizedPhone,
           businessId: b.id,
         },
       })
@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url: session.url })
   } catch (error) {
     console.error("Trial start error:", error)
-    // Unique constraint on TrialClaim.phoneNumber — same number claimed between check and create
+    // Unique constraint on TrialClaim.primaryForwardingNumber — same number claimed between check and create
     const prismaError = error as { code?: string }
     if (prismaError.code === "P2002") {
       return NextResponse.json(

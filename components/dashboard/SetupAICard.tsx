@@ -138,7 +138,7 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
           </p>
         )}
         <p className="text-sm text-muted-foreground">
-          We&apos;ll create your AI and assign a dedicated phone number. Then you&apos;ll forward your business line to that number. Call summaries are sent by email. No need to enter an AI number — we&apos;ll show it here after you connect.
+          Forward your missed calls to our shared intake number. Click Connect to load the number, then set your phone to forward to it. Call summaries are sent by email.
         </p>
         {error && (
           <p className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</p>
