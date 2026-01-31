@@ -13,9 +13,8 @@ import { isSubscriptionActive } from "@/lib/subscription"
 import { hasSmsToCallers, hasCrmForwarding, hasLeadTagging, getEffectivePlanType } from "@/lib/plans"
 import { FREE_TRIAL_MINUTES } from "@/lib/plans"
 import { rateLimit } from "@/lib/rate-limit"
+import { getAgentIdForInbound } from "@/lib/intake-routing"
 import crypto from "crypto"
-
-const SHARED_AGENT_ID = process.env.RETELL_AGENT_ID
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,23 +33,23 @@ export async function POST(req: NextRequest) {
 
     const event = JSON.parse(body) as RetellCallWebhookEvent
 
-    // Inbound: resolve client by forwarded_from, return override + metadata + dynamic_variables
+    // Inbound: resolve client by forwarded_from; pick agent by to_number (service vs childcare intake)
     if (event.event === "call_inbound") {
       const inbound = (event as RetellInboundEvent).call_inbound
-      const fromNumber = inbound?.from_number
       const toNumber = inbound?.to_number
       const forwardedFrom =
         (inbound as { forwarded_from_number?: string; forwarded_from?: string })?.forwarded_from_number ??
         (inbound as { forwarded_from_number?: string; forwarded_from?: string })?.forwarded_from ??
-        fromNumber
+        inbound?.from_number
       const client = await resolveClient(forwardedFrom)
-      if (!client || !SHARED_AGENT_ID) {
+      const agentId = getAgentIdForInbound(toNumber)
+      if (!client || !agentId) {
         return NextResponse.json({ call_inbound: {} })
       }
       const forwardedFromNormalized = normalizeE164(forwardedFrom) ?? forwardedFrom
       return NextResponse.json({
         call_inbound: {
-          override_agent_id: SHARED_AGENT_ID,
+          override_agent_id: agentId,
           metadata: { client_id: client.id, forwarded_from_number: forwardedFromNormalized },
           dynamic_variables: { BUSINESS_NAME: client.name },
         },

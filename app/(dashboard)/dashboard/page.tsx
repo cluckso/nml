@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { getTrialStatus } from "@/lib/trial"
+import { getIntakeNumberForIndustry, hasIntakeNumberConfigured } from "@/lib/intake-routing"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CallLog } from "@/components/calls/CallLog"
 import { SetupAICard } from "@/components/dashboard/SetupAICard"
@@ -34,10 +35,8 @@ export default async function DashboardPage() {
 
   const emergencyCalls = recentCalls.filter((c) => c.emergencyFlag).length
   const totalMinutes = stats._sum.minutes || 0
-  const sharedNumber =
-    process.env.NML_SHARED_INTAKE_NUMBER ?? process.env.RETELL_SHARED_NUMBER ?? null
-  const hasAgent = !!sharedNumber
-  const phoneNumber = sharedNumber
+  const phoneNumber = getIntakeNumberForIndustry(business?.industry ?? null)
+  const hasAgent = hasIntakeNumberConfigured()
   const ownerPhone = user.phoneNumber ?? null
 
   return (

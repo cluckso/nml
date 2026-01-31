@@ -54,9 +54,16 @@ Examples:
 |----------|----------|-------------|
 | `RETELL_API_KEY` | Yes | Retell API key from dashboard. |
 | `RETELL_WEBHOOK_SECRET` | Yes in production | Webhook signing secret from Retell; in dev, missing = no verification. |
-| `RETELL_AGENT_ID` | Yes | The **single** shared Retell agent ID. Create one agent in Retell (or via bootstrap script), attach the intake number to it, and set this env var. |
-| `NML_SHARED_INTAKE_NUMBER` or `RETELL_SHARED_NUMBER` | Yes | E.164 of the **one** intake number. All clients forward missed calls to this number. Configure this number in Retell with inbound webhook pointing to your app. |
+| **Industry routing (two numbers)** | | |
+| `NML_INTAKE_NUMBER_SERVICE` or `RETELL_INTAKE_SERVICE` | Yes* | E.164 of the **service-industry** intake number (HVAC, plumbing, electrician, handyman, auto repair, generic). Clients in these industries forward to this number. |
+| `NML_INTAKE_NUMBER_CHILDCARE` or `RETELL_INTAKE_CHILDCARE` | Yes* | E.164 of the **childcare** intake number. Childcare clients forward to this number. |
+| `RETELL_AGENT_ID` | Yes | Retell agent ID for **service-industry** calls (used when call comes in to the service intake number). |
+| `RETELL_AGENT_ID_CHILDCARE` | Yes* | Retell agent ID for **childcare** calls (used when call comes in to the childcare intake number). Omit if you only use one agent. |
+| **Legacy (single number)** | | |
+| `NML_SHARED_INTAKE_NUMBER` or `RETELL_SHARED_NUMBER` | No | Fallback single intake number if industry-specific numbers are not set. |
 | `RETELL_API_BASE` | No | API base URL (default `https://api.retellai.com`). |
+
+\* Use either industry-specific vars (service + childcare) or the legacy shared number. The webhook picks the agent by **to_number**: calls to the service number use `RETELL_AGENT_ID`; calls to the childcare number use `RETELL_AGENT_ID_CHILDCARE`. The dashboard shows each business the intake number for their industry.
 
 Add these to:
 
