@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowRight, CreditCard, Clock, Globe } from "lucide-react"
+import { ArrowRight, CreditCard, Clock, Globe, UserPlus, PhoneForwarded, LayoutDashboard } from "lucide-react"
 
 export default function HomePage() {
   return (
@@ -122,6 +122,51 @@ export default function HomePage() {
               </p>
             </CardContent>
           </Card>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="bg-muted/30 py-16 border-y border-border/50">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-4">How It Works</h2>
+          <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-12">
+            Three simple steps to start capturing every call.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            <div className="flex flex-col items-center text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary mb-4">
+                <UserPlus className="h-7 w-7" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">1. Sign up</h3>
+              <p className="text-muted-foreground text-sm">
+                Create your account and start a free trial. Add your business phone and payment method — we don&apos;t charge until you upgrade.
+              </p>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary mb-4">
+                <PhoneForwarded className="h-7 w-7" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">2. Forward your line</h3>
+              <p className="text-muted-foreground text-sm">
+                Follow our simple guide to route calls to your AI agent instead of voicemail. A few taps or a quick dial code — takes about 5 minutes.
+              </p>
+              <Link href="/docs/faq" className="mt-2 text-sm font-medium text-primary hover:underline">
+                See setup guide →
+              </Link>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary mb-4">
+                <LayoutDashboard className="h-7 w-7" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">3. Get your reports</h3>
+              <p className="text-muted-foreground text-sm">
+                View every call in your dashboard — transcripts, summaries, and lead details. Get instant email notifications for each call. Weekly report emails on higher plans.
+              </p>
+              <p className="mt-2 text-xs text-muted-foreground italic">
+                Reports by text coming soon.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
