@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getAuthUserFromRequest } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { syncRetellAgentFromBusiness } from "@/lib/retell"
 import { Industry, Prisma } from "@prisma/client"
 import { getEffectivePlanType } from "@/lib/plans"
 
@@ -95,9 +96,35 @@ export async function PATCH(req: NextRequest) {
     const updated = await db.business.update({
       where: { id: user.businessId },
       data: updates as Prisma.BusinessUpdateInput,
+      include: { subscription: true },
     })
 
-    return NextResponse.json({ success: true, business: updated })
+    // Sync Retell agent when business has an agent and settings that affect it changed
+    let agentSyncFailed = false
+    if (updated.retellAgentId && process.env.RETELL_API_KEY) {
+      try {
+        await syncRetellAgentFromBusiness({
+          name: updated.name,
+          industry: updated.industry,
+          serviceAreas: updated.serviceAreas,
+          businessHours: updated.businessHours,
+          departments: updated.departments,
+          afterHoursEmergencyPhone: updated.afterHoursEmergencyPhone,
+          voiceSettings: updated.voiceSettings,
+          retellAgentId: updated.retellAgentId,
+          subscription: updated.subscription ?? undefined,
+        })
+      } catch (err) {
+        console.error("Retell agent sync after settings update:", err)
+        agentSyncFailed = true
+      }
+    }
+
+    return NextResponse.json({
+      success: true,
+      business: updated,
+      ...(agentSyncFailed ? { agentSyncFailed: true } : {}),
+    })
   } catch (error) {
     console.error("Business update error:", error)
     return NextResponse.json({ error: "Failed to update business" }, { status: 500 })

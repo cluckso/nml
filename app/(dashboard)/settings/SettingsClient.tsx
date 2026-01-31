@@ -109,6 +109,9 @@ export function SettingsClient({ business, planType, hasAgent }: SettingsClientP
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || "Failed to save")
       setSuccess(true)
+      if (data.agentSyncFailed) {
+        setError("Settings saved, but the AI agent could not be updated. Try again later or contact support.")
+      }
       router.refresh()
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Failed to save")
