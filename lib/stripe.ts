@@ -262,8 +262,19 @@ export async function handleStripeWebhook(event: Stripe.Event) {
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session
-      const businessId = session.metadata?.businessId
-      const planType = session.metadata?.planType as PlanType
+      let businessId = session.metadata?.businessId
+      let planType = session.metadata?.planType as PlanType | undefined
+
+      // Fallback: read from subscription metadata (we set subscription_data.metadata at checkout)
+      if ((!businessId || !planType) && session.subscription) {
+        try {
+          const sub = await stripe.subscriptions.retrieve(session.subscription as string)
+          businessId = businessId ?? sub.metadata?.businessId ?? undefined
+          planType = (planType ?? sub.metadata?.planType) as PlanType | undefined
+        } catch (err) {
+          console.error("Failed to fetch subscription for metadata fallback:", err)
+        }
+      }
 
       if (businessId && planType) {
         const stripeSubscriptionId = session.subscription as string

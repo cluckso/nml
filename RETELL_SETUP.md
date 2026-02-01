@@ -72,6 +72,31 @@ Add these to:
 
 ---
 
+## 3a. Testing email summary (without a real call)
+
+To trigger the call summary email without placing a real Retell call:
+
+1. Ensure a **test business** has `primaryForwardingNumber` set to the number you use as “call forwarded from” (e.g. `+16086421459`). That’s the business line that forwards to the AI; the app uses it to find the business and the owner’s email.
+2. In **development**, POST to the test endpoint:
+
+   ```bash
+   curl -X POST http://localhost:3000/api/test/email-summary \
+     -H "Content-Type: application/json" \
+     -d '{"forwarded_from_number": "+16086421459"}'
+   ```
+
+   Or with no body (defaults to `+16086421459`):
+
+   ```bash
+   curl -X POST http://localhost:3000/api/test/email-summary
+   ```
+
+3. Outside development, call the same URL with a secret: set `TEST_EMAIL_SECRET` in env, then pass `?secret=<value>` or header `x-test-secret: <value>`.
+
+The endpoint creates a sample call record and sends one summary email to the business owner. If you get “Business not found”, set `primaryForwardingNumber` on a business to that number (e.g. in the DB or via onboarding).
+
+---
+
 ## 4. What the app does with the Retell API (no extra Retell UI needed)
 
 These are done in code; you don’t configure them in the Retell UI, but they show what Retell must support:

@@ -9,6 +9,7 @@ import type { User } from "@supabase/supabase-js"
 
 export function Nav() {
   const [user, setUser] = useState<User | null>(null)
+  const [businessName, setBusinessName] = useState<string | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -31,6 +32,26 @@ export function Nav() {
     return () => subscription.unsubscribe()
   }, [])
 
+  useEffect(() => {
+    if (!user) {
+      setBusinessName(null)
+      return
+    }
+    let cancelled = false
+    fetch("/api/dashboard")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!cancelled && data?.business?.name) setBusinessName(data.business.name)
+        else if (!cancelled) setBusinessName(null)
+      })
+      .catch(() => {
+        if (!cancelled) setBusinessName(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [user])
+
   const handleSignOut = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
@@ -41,9 +62,16 @@ export function Nav() {
   return (
     <nav className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <Link href="/" className="text-xl font-bold text-foreground">
-          NeverMissLead-AI
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link href="/" className="text-xl font-bold text-foreground">
+            NeverMissLead-AI
+          </Link>
+          {businessName && (
+            <span className="text-sm text-muted-foreground border-l border-border/60 pl-3 font-medium truncate max-w-[200px] sm:max-w-[280px]" title={businessName}>
+              {businessName}
+            </span>
+          )}
+        </div>
         <div className="flex gap-4 items-center">
           <Link href="/pricing">
             <Button variant="ghost">Pricing</Button>
