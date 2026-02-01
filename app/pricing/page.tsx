@@ -2,7 +2,6 @@ import Link from "next/link"
 import { getCurrentUser } from "@/lib/auth"
 import { PricingPlansWithAgreement } from "@/components/pricing/PricingPlansWithAgreement"
 import { Button } from "@/components/ui/button"
-import { CRM_SETUP_FEE } from "@/lib/plans"
 
 const PLANS = [
   {
@@ -55,7 +54,7 @@ export default async function PricingPage() {
           Simple, usage-based pricing built for service businesses.
         </p>
         <p className="mt-2 text-muted-foreground">
-          No setup fees on plans. Optional CRM Integration Setup add-on (Pro & Local Plus). No contracts. Cancel anytime.
+          No setup fees on plans. Contact us for CRM setup pricing. No contracts. Cancel anytime.
         </p>
         <p className="mt-2 text-muted-foreground">
           Overage on all plans: $0.20/min after included minutes.
@@ -85,7 +84,6 @@ export default async function PricingPage() {
             <Link href="/sign-up">Sign up to start free trial</Link>
           </Button>
         )}
-        <p className="text-xs text-muted-foreground mt-4">Designed so you can test real calls—not demos.</p>
       </div>
 
       <PricingPlansWithAgreement plans={PLANS} isLoggedIn={isLoggedIn} />
@@ -93,23 +91,10 @@ export default async function PricingPage() {
       <div className="max-w-2xl mx-auto mb-12 p-6 rounded-xl border bg-muted/30">
         <h2 className="text-xl font-semibold mb-2">Add-ons</h2>
         <div className="text-left">
-          <p className="font-medium">CRM Integration Setup — ${CRM_SETUP_FEE} one-time</p>
-          <p className="text-sm text-muted-foreground mt-1">
-            Available on Pro and Local Plus. We connect your CRM webhook and verify that leads flow through. Add at checkout when choosing Pro or Local Plus, or from Billing after you subscribe.
-          </p>
+          <p className="font-medium text-muted-foreground">Contact us for CRM setup pricing.</p>
         </div>
       </div>
 
-      <div className="max-w-3xl mx-auto text-center">
-        <h2 className="text-2xl font-bold mb-4">Why This Pricing Works</h2>
-        <p className="text-lg text-muted-foreground mb-6">
-          Minute-based trial ensures fairness and real value delivery. No setup fees reduce friction.
-          Industry-optimized Pro agents feel &quot;custom&quot; without custom labor. Clear upgrade ladder based on call volume and complexity.
-        </p>
-        <p className="text-muted-foreground">
-          Consistent overage rate keeps pricing transparent.
-        </p>
-      </div>
     </div>
   )
 }

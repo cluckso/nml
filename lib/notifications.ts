@@ -4,6 +4,10 @@ import twilio from "twilio"
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
+/** From address for call/lead emails. Use RESEND_FROM_EMAIL for testing (e.g. onboarding@resend.dev) if your domain isn't verified in Resend. */
+const NOTIFICATION_FROM =
+  process.env.RESEND_FROM_EMAIL || "NeverMissLead-AI <notifications@nevermisslead.ai>"
+
 const twilioClient = process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN
   ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
   : null
@@ -103,7 +107,7 @@ export async function sendEmailNotification(
 
   try {
     await resend.emails.send({
-      from: "NeverMissLead-AI <notifications@nevermisslead.ai>",
+      from: NOTIFICATION_FROM,
       to: owner.email,
       subject,
       html,
@@ -210,7 +214,7 @@ export async function forwardToCrm(
   if (business.forwardToEmail && resend) {
     try {
       await resend.emails.send({
-        from: "NeverMissLead-AI <notifications@nevermisslead.ai>",
+        from: NOTIFICATION_FROM,
         to: business.forwardToEmail,
         subject: `Lead: ${intake.name || "Unknown"} - ${business.name}`,
         html: `

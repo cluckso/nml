@@ -203,25 +203,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Value Proposition */}
-      <section className="container mx-auto px-4 py-16">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-6">Why This Pays for Itself</h2>
-          <p className="text-lg text-muted-foreground mb-8">
-            If you recover just one missed service call per month, the system covers its cost.
-            Most customers recover 3–10 calls they were missing before.
-          </p>
-          <div className="bg-muted/50 border border-border/50 p-8 rounded-xl">
-            <p className="text-2xl font-semibold mb-4">
-              A human receptionist = $2,000–$3,500/month
-            </p>
-            <p className="text-2xl font-semibold text-primary">
-              Your AI = $99–$349/month
-            </p>
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="bg-primary text-primary-foreground py-16">
         <div className="container mx-auto px-4 text-center">

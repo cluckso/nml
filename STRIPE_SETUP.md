@@ -9,6 +9,23 @@ You need to create the products/prices in Stripe and set env vars so checkout an
 
 ---
 
+## Quick fix for "Stripe price or product not found"
+
+1. **Stripe Dashboard** → switch to **Test mode** (toggle top-right) → **Products** → **Add product** for each plan.
+2. For each plan add a **recurring** price (USD, monthly, **Licensed**). Create a **metered** price for overage ($0.20, monthly, **Metered**).
+3. Copy each **Price ID** (starts with `price_`) into `.env` or `.env.local`:
+
+```env
+STRIPE_PRICE_STARTER=price_xxxxx    # Basic $99/mo
+STRIPE_PRICE_PRO=price_xxxxx       # Pro $229/mo
+STRIPE_PRICE_LOCAL_PLUS=price_xxxxx # Local Plus $349/mo
+STRIPE_USAGE_PRICE_ID=price_xxxxx  # Overage $0.20/min (metered)
+```
+
+4. Restart the dev server (`npm run dev`) and try Subscribe again. Use **test** keys (`sk_test_...`, `pk_test_...`) and **test** price IDs from Test mode.
+
+---
+
 ## 1. Create products and prices in Stripe
 
 ### Option A: Stripe Dashboard
@@ -145,9 +162,9 @@ Use **test** keys and **test** price IDs while developing; switch to **live** wh
 
 ## 6. Checklist
 
-- [ ] Created 3 products with **recurring licensed** prices ($99, $199, $299/month)
+- [ ] Created 3 products with **recurring licensed** prices ($99, $229, $349/month)
 - [ ] Created 1 product with a **recurring metered** price ($0.20, monthly, metered)
-- [ ] Set `STRIPE_PRICE_STARTER`, `STRIPE_PRICE_PRO`, `STRIPE_PRICE_LOCAL_PLUS`, `STRIPE_USAGE_PRICE_ID` in env
+- [ ] Set `STRIPE_PRICE_STARTER`, `STRIPE_PRICE_PRO`, `STRIPE_PRICE_LOCAL_PLUS`, `STRIPE_USAGE_PRICE_ID` in `.env` or `.env.local`
 - [ ] Set `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`
 - [ ] Webhook endpoint added in Stripe with the events above
 - [ ] Test a subscription in test mode and confirm usage appears under the subscription (overage item)

@@ -4,7 +4,6 @@ import Link from "next/link"
 import { useState } from "react"
 import { UpgradeButton } from "@/components/billing/UpgradeButton"
 import { PlanType } from "@prisma/client"
-import { CRM_SETUP_FEE, hasCrmSetupAddonAvailable } from "@/lib/plans"
 
 export type PlanDetailsEntry = {
   name: string
@@ -21,7 +20,6 @@ export function BillingPlansWithAgreement({
   planDetails: Record<string, PlanDetailsEntry>
 }) {
   const [agreedToLegal, setAgreedToLegal] = useState(false)
-  const [addCrmSetup, setAddCrmSetup] = useState(false)
 
   return (
     <>
@@ -49,18 +47,7 @@ export function BillingPlansWithAgreement({
       </div>
 
       <div className="mb-6 p-4 rounded-lg border bg-muted/30">
-        <label className="flex items-start gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={addCrmSetup}
-            onChange={(e) => setAddCrmSetup(e.target.checked)}
-            className="mt-1 h-4 w-4 rounded border-input accent-primary"
-            aria-describedby="crm-addon-desc"
-          />
-          <span id="crm-addon-desc" className="text-sm">
-            Add <strong>CRM Integration Setup</strong> — ${CRM_SETUP_FEE} one-time when upgrading to Pro or Local Plus. We connect your CRM webhook and verify leads flow through.
-          </span>
-        </label>
+        <p className="text-sm text-muted-foreground">Contact us for CRM setup pricing.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -80,7 +67,6 @@ export function BillingPlansWithAgreement({
               planType={planType as PlanType}
               currentPlan={currentPlan}
               agreedToLegal={agreedToLegal}
-              addCrmSetup={addCrmSetup && hasCrmSetupAddonAvailable(planType as PlanType)}
             />
           </div>
         ))}

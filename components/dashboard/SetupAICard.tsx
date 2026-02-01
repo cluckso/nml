@@ -88,9 +88,6 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
                 <p className="text-xs text-muted-foreground mt-1">
                   Want the AI to answer only when you don&apos;t pick up? At your carrier, use <strong>conditional</strong> or <strong>no-answer</strong> forwarding (e.g. forward after 4–5 rings) instead of &quot;forward all.&quot; See <Link href="/docs/faq" className="text-primary underline">Help & FAQ</Link> for carrier steps.
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  If this number doesn&apos;t work for real calls, you may be in Retell test mode — use a live Retell account with billing for a callable number.
-                </p>
               </div>
             </div>
             <div className="flex items-center gap-3 rounded-lg border border-border bg-background p-4">
@@ -121,7 +118,7 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
             AI created
           </CardTitle>
           <CardDescription>
-            Your AI receptionist is set up. If you don&apos;t see a number, we couldn&apos;t purchase one — check Retell billing and RETELL_DEFAULT_AREA_CODE, or add a number in the Retell dashboard.
+            Your AI receptionist is set up. If you don&apos;t see a number, contact support.
           </CardDescription>
         </CardHeader>
         {warning && (
@@ -208,9 +205,6 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
             )}
           </Button>
         )}
-        <p className="text-xs text-muted-foreground">
-          In development you can connect without a subscription. In production, subscribe or use your free trial from <Link href="/billing" className="text-primary underline">Billing</Link>.
-        </p>
       </CardContent>
     </Card>
   )
