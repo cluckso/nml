@@ -95,6 +95,9 @@ export async function GET(req: NextRequest) {
     })
   } catch (error) {
     console.error("Debug endpoint error:", error)
-    return NextResponse.json({ error: "Failed to fetch debug info" }, { status: 500 })
+    return NextResponse.json({ 
+      error: "Failed to fetch debug info",
+      details: error instanceof Error ? error.message : String(error),
+    }, { status: 500 })
   }
 }
