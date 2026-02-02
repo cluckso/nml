@@ -47,11 +47,15 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ call_inbound: {} })
       }
       const forwardedFromNormalized = normalizeE164(forwardedFrom) ?? forwardedFrom
+      // Business name from the number that forwarded the call (primaryForwardingNumber); Retell uses this for greeting (e.g. {{business_name}} or {{BUSINESS_NAME}})
       return NextResponse.json({
         call_inbound: {
           override_agent_id: agentId,
           metadata: { client_id: client.id, forwarded_from_number: forwardedFromNormalized },
-          dynamic_variables: { BUSINESS_NAME: client.name },
+          dynamic_variables: {
+            BUSINESS_NAME: client.name,
+            business_name: client.name,
+          },
         },
       })
     }

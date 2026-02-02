@@ -45,7 +45,7 @@ export default async function SettingsPage() {
             </>
           ) : (
             <p className="text-muted-foreground">
-              Intake number not configured for your account. Contact support or check your dashboard after connecting your call assistant.
+              The AI forward-to number is not configured for this app yet. Your admin needs to set one of these in the server environment: <code className="rounded bg-muted px-1">NML_INTAKE_NUMBER_SERVICE</code>, <code className="rounded bg-muted px-1">NML_INTAKE_NUMBER_CHILDCARE</code>, or <code className="rounded bg-muted px-1">NML_SHARED_INTAKE_NUMBER</code> (the Retell number that receives forwarded calls). Then redeploy. Contact support if you need help.
             </p>
           )}
         </CardContent>
