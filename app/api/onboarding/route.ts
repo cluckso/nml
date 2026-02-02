@@ -3,6 +3,7 @@ import { getAuthUserFromRequest } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { normalizeE164 } from "@/lib/normalize-phone"
 import { Industry } from "@prisma/client"
+import { ClientStatus } from "@prisma/client"
 import { isComplexSetup } from "@/lib/industries"
 
 export async function POST(req: NextRequest) {
@@ -83,6 +84,7 @@ export async function POST(req: NextRequest) {
         afterHoursEmergencyPhone: businessInfo.afterHoursEmergencyPhone || undefined,
         onboardingComplete: !requiresManualSetup,
         requiresManualSetup,
+        status: ClientStatus.ACTIVE, // so inbound calls are answered (trial or paid)
         users: {
           connect: { id: user.id },
         },
@@ -103,6 +105,7 @@ export async function POST(req: NextRequest) {
         afterHoursEmergencyPhone: businessInfo.afterHoursEmergencyPhone || undefined,
         onboardingComplete: !requiresManualSetup,
         requiresManualSetup,
+        status: ClientStatus.ACTIVE, // ensure trial users get calls after onboarding
       },
     })
 
