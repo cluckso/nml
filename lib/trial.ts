@@ -81,7 +81,7 @@ export async function checkTrialEligibility(
   if (!normalized) return { eligible: false, reason: "invalid_phone" }
 
   const existing = await db.trialClaim.findUnique({
-    where: { phoneNumber: normalized },
+    where: { primaryForwardingNumber: normalized },
   })
   if (existing) return { eligible: false, reason: "phone_already_used_trial" }
 

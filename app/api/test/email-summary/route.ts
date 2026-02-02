@@ -6,7 +6,7 @@ import { sendEmailNotification } from "@/lib/notifications"
 
 /**
  * Test endpoint to trigger the call summary email without a real Retell webhook.
- * Resolves the business by the "call forwarded from" number (businessLinePhone)
+ * Resolves the business by the "call forwarded from" number (primaryForwardingNumber)
  * and sends one sample email to the business owner.
  *
  * POST /api/test/email-summary
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         error: "Business not found",
-        hint: `No active business with businessLinePhone = ${normalized}. Set that number on a test business (e.g. in onboarding) to receive the email.`,
+        hint: `No active business with primaryForwardingNumber = ${normalized}. Set that number on a test business (e.g. in onboarding) to receive the email.`,
       },
       { status: 404 }
     )

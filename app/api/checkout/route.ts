@@ -47,6 +47,7 @@ export async function POST(req: NextRequest) {
         data: {
           name: "My Business",
           industry: Industry.GENERIC,
+          primaryForwardingNumber: "pending-" + user.id,
           onboardingComplete: false,
           users: { connect: { id: user.id } },
         },

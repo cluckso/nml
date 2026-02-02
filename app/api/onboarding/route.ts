@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getAuthUserFromRequest } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { normalizeE164 } from "@/lib/normalize-phone"
 import { Industry } from "@prisma/client"
 import { isComplexSetup } from "@/lib/industries"
 
@@ -55,18 +56,25 @@ export async function POST(req: NextRequest) {
         }
       : undefined
     const departments = Array.isArray(businessInfo.departments) ? businessInfo.departments : []
+    const primaryForwardingNumberNormalized = normalizeE164(businessInfo.phoneNumber ?? businessInfo.primaryForwardingNumber)
+    if (!primaryForwardingNumberNormalized) {
+      return NextResponse.json(
+        { error: "Primary forwarding number is required (valid US E.164). This is the number that will forward missed calls to us." },
+        { status: 400 }
+      )
+    }
 
-    // Create or update business (businessLinePhone = user's existing line; phoneNumber = AI number, set when agent is created)
+    // Create or update business (primaryForwardingNumber = user's existing line that forwards to AI)
     const business = await db.business.upsert({
       where: { id: user.businessId || "new" },
       create: {
         name: businessName,
         industry: industryTyped,
+        primaryForwardingNumber: primaryForwardingNumberNormalized,
         address: businessInfo.address,
         city: businessInfo.city,
         state: businessInfo.state,
         zipCode: businessInfo.zipCode,
-        businessLinePhone: businessInfo.phoneNumber || undefined,
         businessHours: businessHours ?? undefined,
         departments,
         serviceAreas,
@@ -86,7 +94,7 @@ export async function POST(req: NextRequest) {
         city: businessInfo.city,
         state: businessInfo.state,
         zipCode: businessInfo.zipCode,
-        businessLinePhone: businessInfo.phoneNumber || undefined,
+        primaryForwardingNumber: primaryForwardingNumberNormalized,
         businessHours: businessHours ?? undefined,
         departments,
         serviceAreas,

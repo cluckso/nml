@@ -1,9 +1,10 @@
 import { db } from "./db"
 import { normalizeE164 } from "./normalize-phone"
+import { ClientStatus } from "@prisma/client"
 
 /**
  * Resolve client (business) by the number that forwards the call to the shared intake number.
- * Used by inbound webhook to route calls. Returns null if not found or client is inactive.
+ * Used by inbound webhook to route calls. Returns null if not found or client is paused.
  */
 export async function resolveClient(forwardedFrom: string | null | undefined) {
   const normalized = normalizeE164(forwardedFrom)
@@ -11,8 +12,8 @@ export async function resolveClient(forwardedFrom: string | null | undefined) {
 
   const business = await db.business.findFirst({
     where: {
-      businessLinePhone: normalized,
-      isActive: true,
+      primaryForwardingNumber: normalized,
+      status: ClientStatus.ACTIVE,
     },
     include: { subscription: true },
   })

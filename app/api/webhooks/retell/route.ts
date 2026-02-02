@@ -225,6 +225,14 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
         },
       })
 
+  // Mark testCallVerifiedAt when we receive a completed call for this client (forwarded_from matched)
+  if (!business.testCallVerifiedAt) {
+    await db.business.update({
+      where: { id: business.id },
+      data: { testCallVerifiedAt: new Date() },
+    })
+  }
+
   // Notifications: email + SMS to owner; SMS to caller (Pro+); CRM forward (Pro+)
   try {
     const notifies = [
@@ -261,7 +269,7 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
     if (exhausted || expired) {
       await db.business.update({
         where: { id: business.id },
-        data: { isActive: false },
+        data: { status: "PAUSED" },
       })
     }
   } else if (hasActiveSubscription) {

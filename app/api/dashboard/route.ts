@@ -40,8 +40,7 @@ export async function GET(req: NextRequest) {
         ? {
             id: business.id,
             name: business.name,
-            phoneNumber: business.phoneNumber,
-            retellAgentId: business.retellAgentId,
+            primaryForwardingNumber: business.primaryForwardingNumber,
           }
         : null,
       recentCalls,
@@ -50,7 +49,7 @@ export async function GET(req: NextRequest) {
         totalMinutes: stats._sum.minutes ?? 0,
         emergencyInRecent: emergencyCount,
       },
-      hasAgent: !!business?.retellAgentId,
+      hasAgent: !!business?.primaryForwardingNumber && business.primaryForwardingNumber !== "" && !business.primaryForwardingNumber.startsWith("pending-"),
       trial: trial
         ? {
             isOnTrial: trial.isOnTrial,
