@@ -14,8 +14,8 @@ export type TrialStatus = {
 }
 
 /**
- * Returns trial status for a business. When trialStartedAt is set, uses
- * trialMinutesUsed and trialEndsAt; otherwise legacy behavior (Call aggregate, no expiry).
+ * Returns trial status for a business. Uses trialMinutesUsed and trialEndsAt;
+ * trial minutes are only incremented when trialStartedAt is set (webhook).
  */
 export async function getTrialStatus(businessId: string): Promise<TrialStatus> {
   const business = await db.business.findUnique({
@@ -40,11 +40,7 @@ export async function getTrialStatus(businessId: string): Promise<TrialStatus> {
     }
   }
 
-  const useTrialFields = business.trialStartedAt != null && business.trialEndsAt != null
-
-  const minutesUsed = useTrialFields
-    ? business.trialMinutesUsed
-    : (await db.call.aggregate({ where: { businessId }, _sum: { minutes: true } }))._sum.minutes ?? 0
+  const minutesUsed = business.trialMinutesUsed ?? 0
   const minutesRemaining = Math.max(0, FREE_TRIAL_MINUTES - minutesUsed)
   const isExhausted = isOnTrial && minutesRemaining <= 0
   const trialEndsAt = business.trialEndsAt ?? null

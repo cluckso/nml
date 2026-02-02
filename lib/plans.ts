@@ -30,6 +30,19 @@ export const MONTHLY_PRICES: Record<PlanType, number> = {
 /** Overage rate per minute (USD) */
 export const OVERAGE_RATE_PER_MIN = 0.2
 
+/** Max call duration (seconds) we accept from webhooks; longer calls are clamped to prevent abuse. */
+export const MAX_CALL_DURATION_SECONDS = 24 * 60 * 60 // 24 hours
+
+/**
+ * Convert raw call duration to billable minutes. Used for trial and plan usage.
+ * Rules: round up to whole minutes; minimum 1 minute per call (industry standard).
+ */
+export function toBillableMinutes(durationSeconds: number): number {
+  const clamped = Math.max(0, Math.min(MAX_CALL_DURATION_SECONDS, durationSeconds))
+  const rawMinutes = clamped / 60
+  return Math.max(1, Math.ceil(rawMinutes))
+}
+
 export function getIncludedMinutes(planType: PlanType): number {
   return INCLUDED_MINUTES[planType] ?? 0
 }

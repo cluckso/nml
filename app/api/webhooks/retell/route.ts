@@ -10,8 +10,7 @@ import {
 } from "@/lib/notifications"
 import { reportUsageToStripe } from "@/lib/stripe"
 import { isSubscriptionActive } from "@/lib/subscription"
-import { hasSmsToCallers, hasCrmForwarding, hasLeadTagging, getEffectivePlanType } from "@/lib/plans"
-import { FREE_TRIAL_MINUTES } from "@/lib/plans"
+import { hasSmsToCallers, hasCrmForwarding, hasLeadTagging, getEffectivePlanType, FREE_TRIAL_MINUTES, MAX_CALL_DURATION_SECONDS, toBillableMinutes } from "@/lib/plans"
 import { rateLimit } from "@/lib/rate-limit"
 import { getAgentIdForInbound } from "@/lib/intake-routing"
 import crypto from "crypto"
@@ -183,10 +182,13 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
     ? { preferredDays: undefined as string | undefined, preferredTime: undefined as string | undefined, notes: String(structuredIntake.appointment_preference) }
     : undefined
 
-  const duration = event.call?.end_timestamp && event.call?.start_timestamp
-    ? Math.floor((event.call.end_timestamp - event.call.start_timestamp) / 1000)
-    : 0
-  const minutes = duration / 60
+  // Duration from Retell timestamps only (server-side; never trust client). Clamp to prevent abuse.
+  const rawDurationSeconds =
+    event.call?.end_timestamp != null && event.call?.start_timestamp != null
+      ? Math.floor((event.call.end_timestamp - event.call.start_timestamp) / 1000)
+      : 0
+  const duration = Math.max(0, Math.min(MAX_CALL_DURATION_SECONDS, rawDurationSeconds))
+  const minutes = toBillableMinutes(duration) // min 1 min per call; round up (used for trial + plan usage)
   const missedCallRecovery = !hasAnalysis && (structuredIntake.phone || event.call?.from_number)
 
   const existingCall = await db.call.findUnique({
