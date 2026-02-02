@@ -42,7 +42,7 @@ Examples:
 
 **Events the app handles:**
 
-- `call_inbound` – resolves client by forwarded-from number, returns override_agent_id (shared agent), metadata (client_id, forwarded_from_number), and dynamic_variables (BUSINESS_NAME). If no client or not active, returns empty so Retell does not connect.
+- `call_inbound` – resolves client by forwarded-from number (only **ACTIVE** businesses). Returns override_agent_id (shared agent), metadata, and dynamic_variables (BUSINESS_NAME). If no client or not active (e.g. **PAUSED** ex-trial, unknown number), returns empty `call_inbound` (no override_agent_id) so **Retell rejects the call** — no connection, **no Retell usage**. Ex-trial users who leave call forwarding on do not consume minutes; blocked PAUSED clients are logged for visibility.
 - `call_ended` – creates/updates Call with client_id from metadata, caller_number, forwarded_from_number, ai_number_answered; sends notifications, reports usage, checks trial; sets testCallVerifiedAt when first call completes for that client.
 - `call_analysis` – same as above (analysis may arrive after call_ended).
 

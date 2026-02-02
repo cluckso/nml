@@ -13,6 +13,7 @@ import { isSubscriptionActive } from "@/lib/subscription"
 import { hasSmsToCallers, hasCrmForwarding, hasLeadTagging, getEffectivePlanType, FREE_TRIAL_MINUTES, MAX_CALL_DURATION_SECONDS, toBillableMinutes } from "@/lib/plans"
 import { rateLimit } from "@/lib/rate-limit"
 import { getAgentIdForInbound } from "@/lib/intake-routing"
+import { ClientStatus } from "@prisma/client"
 import crypto from "crypto"
 
 export async function POST(req: NextRequest) {
@@ -32,7 +33,9 @@ export async function POST(req: NextRequest) {
 
     const event = JSON.parse(body) as RetellCallWebhookEvent
 
-    // Inbound: resolve client by forwarded_from; pick agent by to_number (service vs childcare intake)
+    // Inbound: resolve client by forwarded_from; pick agent by to_number (service vs childcare intake).
+    // Only ACTIVE businesses are returned by resolveClient; PAUSED/unknown → we return empty call_inbound
+    // (no override_agent_id), so Retell rejects the call — no connection, no Retell usage.
     if (event.event === "call_inbound") {
       const inbound = (event as RetellInboundEvent).call_inbound
       const toNumber = inbound?.to_number
@@ -43,6 +46,17 @@ export async function POST(req: NextRequest) {
       const client = await resolveClient(forwardedFrom)
       const agentId = getAgentIdForInbound(toNumber)
       if (!client || !agentId) {
+        // Block call: no override_agent_id = Retell rejects, so ex-trial/unknown numbers don't use Retell minutes
+        const normalizedFrom = normalizeE164(forwardedFrom)
+        if (normalizedFrom) {
+          const paused = await db.business.findFirst({
+            where: { primaryForwardingNumber: normalizedFrom, status: ClientStatus.PAUSED },
+            select: { id: true, name: true },
+          })
+          if (paused) {
+            console.info("Retell inbound blocked: PAUSED client", { businessId: paused.id, name: paused.name, from: normalizedFrom })
+          }
+        }
         return NextResponse.json({ call_inbound: {} })
       }
       const forwardedFromNormalized = normalizeE164(forwardedFrom) ?? forwardedFrom
