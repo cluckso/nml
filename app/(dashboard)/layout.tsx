@@ -15,7 +15,6 @@ export default async function DashboardLayout({
   const business = user.businessId
     ? await db.business.findUnique({
         where: { id: user.businessId },
-        include: { subscription: true },
       })
     : null
 

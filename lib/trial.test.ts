@@ -32,7 +32,7 @@ describe("getTrialStatus", () => {
       id: "b1",
       trialMinutesUsed: 10,
       trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      subscription: null,
+      subscriptionStatus: null,
     } as any)
     const result = await getTrialStatus("b1")
     expect(result.isOnTrial).toBe(true)
@@ -61,7 +61,7 @@ describe("getTrialStatus", () => {
       id: "b3",
       trialMinutesUsed: 5,
       trialEndsAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
-      subscription: null,
+      subscriptionStatus: null,
     } as any)
     const result = await getTrialStatus("b3")
     expect(result.isOnTrial).toBe(true)
@@ -86,7 +86,8 @@ describe("getTrialStatus", () => {
       id: "b5",
       trialMinutesUsed: 10,
       trialEndsAt: null,
-      subscription: { status: "ACTIVE", planType: "STARTER" },
+      subscriptionStatus: "ACTIVE",
+      planType: "STARTER",
     } as any)
     const result = await getTrialStatus("b5")
     expect(result.isOnTrial).toBe(false)

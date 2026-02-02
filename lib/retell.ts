@@ -305,7 +305,7 @@ async function updateAgent(
   }
 }
 
-/** Business shape with subscription (from findUnique include). */
+/** Business shape for sync (plan on Business). */
 export type BusinessForSync = {
   name: string
   industry: Industry
@@ -315,7 +315,7 @@ export type BusinessForSync = {
   afterHoursEmergencyPhone: string | null
   voiceSettings: unknown
   retellAgentId: string | null
-  subscription?: { planType: PlanType } | null
+  planType: PlanType | null
 }
 
 /**
@@ -332,7 +332,7 @@ export async function syncRetellAgentFromBusiness(business: BusinessForSync): Pr
     throw new Error("Agent does not use a conversation flow; cannot sync")
   }
 
-  const planType = business.subscription?.planType
+  const planType = business.planType
   const effectivePlan = (await import("./plans")).getEffectivePlanType(planType)
   const bh = business.businessHours as BusinessHoursInput | null | undefined
 

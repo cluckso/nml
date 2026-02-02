@@ -11,7 +11,6 @@ export default async function AdminPage() {
     db.business.findMany({
       include: {
         users: true,
-        subscription: true,
         _count: {
           select: { calls: true },
         },
@@ -25,11 +24,11 @@ export default async function AdminPage() {
   ])
 
   const totalRevenue = businesses
-    .filter((b) => b.subscription?.status === "ACTIVE")
+    .filter((b) => b.subscriptionStatus === "ACTIVE")
     .reduce((sum, b) => {
-      const planPrice = b.subscription?.planType === PlanType.STARTER ? 99
-        : b.subscription?.planType === PlanType.PRO ? 199
-        : b.subscription?.planType === PlanType.LOCAL_PLUS ? 299
+      const planPrice = b.planType === PlanType.STARTER ? 99
+        : b.planType === PlanType.PRO ? 199
+        : b.planType === PlanType.LOCAL_PLUS ? 299
         : 0
       return sum + planPrice
     }, 0)
@@ -59,7 +58,7 @@ export default async function AdminPage() {
           </CardHeader>
           <CardContent>
             <p className="text-3xl font-bold">
-              {businesses.filter((b) => b.subscription?.status === "ACTIVE").length}
+              {businesses.filter((b) => b.subscriptionStatus === "ACTIVE").length}
             </p>
           </CardContent>
         </Card>
@@ -97,15 +96,15 @@ export default async function AdminPage() {
                   {business.requiresManualSetup && (
                     <Badge variant="outline">Manual Setup</Badge>
                   )}
-                  {business.subscription ? (
+                  {business.subscriptionStatus ? (
                     <Badge
                       variant={
-                        business.subscription.status === "ACTIVE"
+                        business.subscriptionStatus === "ACTIVE"
                           ? "default"
                           : "secondary"
                       }
                     >
-                      {business.subscription.status}
+                      {business.subscriptionStatus}
                     </Badge>
                   ) : (
                     <Badge variant="outline">No Subscription</Badge>

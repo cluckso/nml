@@ -23,16 +23,15 @@ function getOverageMinutes(planType, minutesUsed) {
   return Math.max(0, minutesUsed - getIncludedMinutes(planType))
 }
 
-function isSubscriptionActive(sub) {
-  return sub?.status === "ACTIVE"
+function isSubscriptionActive(business) {
+  return business?.subscriptionStatus === "ACTIVE"
 }
 
 async function getTrialStatus(businessId) {
   const business = await db.business.findUnique({
     where: { id: businessId },
-    include: { subscription: true },
   })
-  const hasActiveSubscription = isSubscriptionActive(business?.subscription)
+  const hasActiveSubscription = isSubscriptionActive(business)
   const isOnTrial = !hasActiveSubscription
   const minutesUsed = business?.trialMinutesUsed ?? 0
   const minutesRemaining = Math.max(0, FREE_TRIAL_MINUTES - minutesUsed)
@@ -90,11 +89,10 @@ async function main() {
     })
     const biz = await db.business.findUnique({
       where: { id: oneBusiness.id },
-      include: { subscription: true },
     })
     if (biz) {
       const trial = await getTrialStatus(biz.id)
-      if (biz.subscription?.status !== "ACTIVE" && trial.isOnTrial) {
+      if (biz.subscriptionStatus !== "ACTIVE" && trial.isOnTrial) {
         console.log(`[OK] Business ${biz.id} trial: minutesUsed=${trial.minutesUsed}, totalCallMinutes=${callSum._sum.minutes ?? 0}, calls=${callSum._count}`)
       }
     }

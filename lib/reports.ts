@@ -25,13 +25,12 @@ export async function sendWeeklyReportForBusiness(
     where: { id: businessId },
     include: {
       users: { take: 1 },
-      subscription: true,
     },
   })
 
   if (!business) return false
 
-  const effectivePlan = getEffectivePlanType(business.subscription?.planType)
+  const effectivePlan = getEffectivePlanType(business.planType)
   if (!options?.test && !hasWeeklyReports(effectivePlan)) {
     return false
   }
@@ -136,10 +135,8 @@ export async function sendWeeklyReportForBusiness(
 export async function sendAllWeeklyReports(): Promise<{ sent: number; skipped: number }> {
   const businesses = await db.business.findMany({
     where: {
-      subscription: {
-        planType: PlanType.LOCAL_PLUS,
-        status: "ACTIVE",
-      },
+      planType: PlanType.LOCAL_PLUS,
+      subscriptionStatus: "ACTIVE",
     },
     select: { id: true },
   })

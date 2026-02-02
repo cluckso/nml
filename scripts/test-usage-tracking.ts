@@ -25,7 +25,6 @@ async function main() {
         { trialStartedAt: { not: null } },
       ],
     },
-    include: { subscription: true },
     take: 5,
   })
 
@@ -55,11 +54,10 @@ async function main() {
     const totalFromCalls = callSum._sum.minutes ?? 0
     const biz = await db.business.findUnique({
       where: { id: oneBusiness.id },
-      include: { subscription: true },
     })
     if (biz) {
       const trial = await getTrialStatus(biz.id)
-      const hasActiveSub = biz.subscription?.status === "ACTIVE"
+      const hasActiveSub = biz.subscriptionStatus === "ACTIVE"
       if (!hasActiveSub && trial.isOnTrial) {
         // Trial: Business.trialMinutesUsed should match what webhook increments (we can't assert exact match to Call sum without replaying webhook logic; just log)
         console.log(`[OK] Business ${biz.id} trial: minutesUsed=${trial.minutesUsed}, totalCallMinutes=${totalFromCalls}, calls=${callSum._count}`)

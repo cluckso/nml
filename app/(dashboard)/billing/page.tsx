@@ -40,12 +40,9 @@ export default async function BillingPage() {
     redirect("/onboarding")
   }
 
-  const [business, subscription, usage, trial] = await Promise.all([
+  const [business, usage, trial] = await Promise.all([
     db.business.findUnique({
       where: { id: user.businessId },
-    }),
-    db.subscription.findUnique({
-      where: { businessId: user.businessId },
     }),
     db.usage.findFirst({
       where: {
@@ -57,7 +54,7 @@ export default async function BillingPage() {
   ])
 
   const isOnTrial = trial.isOnTrial
-  const currentPlan = subscription ? getEffectivePlanType(subscription.planType) : null
+  const currentPlan = business?.planType ? getEffectivePlanType(business.planType) : null
   const planDetails = currentPlan ? PLAN_DETAILS[currentPlan] : null
   const minutesUsed = isOnTrial ? trial.minutesUsed : (usage?.minutesUsed ?? 0)
   const minutesIncluded = isOnTrial ? FREE_TRIAL_MINUTES : (planDetails?.minutes ?? 0)
@@ -121,9 +118,9 @@ export default async function BillingPage() {
                   <p className="text-sm text-muted-foreground">
                     Includes {planDetails.minutes} minutes
                   </p>
-                  {subscription && (
+                  {business?.currentPeriodEnd && (
                     <p className="text-sm text-muted-foreground">
-                      Next billing: {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                      Next billing: {new Date(business.currentPeriodEnd).toLocaleDateString()}
                     </p>
                   )}
                 </div>

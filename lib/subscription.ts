@@ -1,31 +1,25 @@
 import { db } from "./db"
-import type { Subscription, SubscriptionStatus } from "@prisma/client"
+import type { SubscriptionStatus } from "@prisma/client"
 
 /**
- * Subscription state is read only from the database in this app.
- * Stripe is the source of truth for billing (payments, invoices, usage);
- * Stripe webhooks keep the DB in sync. Never read subscription status from
- * Stripe for access control or UI — use this module or business.subscription.
+ * Subscription state lives on Business (one plan per business).
+ * Stripe webhooks keep the DB in sync. Use this module or business.subscriptionStatus for access control.
  */
 
-export type { Subscription, SubscriptionStatus }
-
-/** Get the subscription record for a business (from DB only). */
-export async function getSubscriptionForBusiness(
-  businessId: string
-): Promise<Subscription | null> {
-  return db.subscription.findUnique({
-    where: { businessId },
-  })
-}
+export type { SubscriptionStatus }
 
 /** Whether the business has an active paid subscription (from DB only). */
 export async function hasActiveSubscription(businessId: string): Promise<boolean> {
-  const sub = await getSubscriptionForBusiness(businessId)
-  return sub?.status === "ACTIVE"
+  const business = await db.business.findUnique({
+    where: { id: businessId },
+    select: { subscriptionStatus: true },
+  })
+  return business?.subscriptionStatus === "ACTIVE"
 }
 
-/** Whether the given subscription record counts as "active" for access/trial logic. */
-export function isSubscriptionActive(sub: Subscription | null | undefined): boolean {
-  return sub?.status === "ACTIVE"
+/** Whether the given subscription status counts as "active" for access/trial logic. */
+export function isSubscriptionActive(
+  sub: { subscriptionStatus?: SubscriptionStatus | null } | null | undefined
+): boolean {
+  return sub?.subscriptionStatus === "ACTIVE"
 }

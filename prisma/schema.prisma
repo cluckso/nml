@@ -69,7 +69,7 @@ model Business {
   id                        String        @id @default(cuid())
   name                      String
   industry                  Industry
-  primaryForwardingNumber   String        // E.164; identifies client when they forward to shared intake number
+  primaryForwardingNumber   String        @unique // E.164; one business per number (trial eligibility)
   stripeCustomerId          String?       @unique
   serviceAreas              String[]      @default([])
   businessHours             Json?         // { open: "09:00", close: "17:00", days: ["monday", "tuesday", ...] }
@@ -86,32 +86,29 @@ model Business {
   forwardToEmail            String?       // Pro+: forward leads to this email (e.g. CRM pipe)
   afterHoursEmergencyPhone  String?       // Pro only: on-call number for after-hours emergencies (not Local Plus)
   offersRoadsideService     Boolean?      // For AUTO_REPAIR: true = collect location for roadside
-  voiceSettings             Json?        // Local Plus: { speed?, temperature?, volume? } 0–1 or similar
-  trialStartedAt            DateTime?     // When trial started (trial path only)
-  trialEndsAt               DateTime?    // trialStartedAt + 14 days
+  voiceSettings             Json?         // Local Plus: { speed?, temperature?, volume? } 0–1 or similar
+  // Trial (one per business; no separate TrialClaim table)
+  trialStartedAt            DateTime?     // When trial started
+  trialEndsAt               DateTime?     // trialStartedAt + 14 days
   trialMinutesUsed          Float        @default(0) // Minutes counting toward 50-minute trial cap
+  // Subscription (merged from Subscription table; one plan per business)
+  planType                  PlanType?
+  stripeSubscriptionId      String?       @unique
+  subscriptionStatus        SubscriptionStatus?
+  currentPeriodStart        DateTime?
+  currentPeriodEnd          DateTime?
+  cancelAtPeriodEnd         Boolean       @default(false)
   createdAt                 DateTime     @default(now())
   updatedAt                 DateTime     @updatedAt
 
   users         User[]
   calls         Call[]
   usage         Usage[]
-  subscription  Subscription?
-  trialClaim    TrialClaim?
 
   @@index([primaryForwardingNumber])
   @@index([stripeCustomerId])
-}
-
-// One trial per business phone (E.164). Insert when starting trial; prevents reuse of number.
-model TrialClaim {
-  id                      String   @id @default(cuid())
-  primaryForwardingNumber String   @unique // E.164 normalized
-  businessId              String   @unique
-  business                Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  claimedAt               DateTime @default(now())
-
-  @@index([primaryForwardingNumber])
+  @@index([stripeSubscriptionId])
+  @@index([subscriptionStatus])
 }
 
 model Call {
@@ -159,21 +156,4 @@ model Usage {
   @@unique([businessId, billingPeriod])
   @@index([businessId])
   @@index([billingPeriod])
-}
-
-model Subscription {
-  id                   String            @id @default(cuid())
-  businessId           String            @unique
-  business             Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  stripeSubscriptionId String            @unique
-  planType             PlanType
-  status               SubscriptionStatus @default(ACTIVE)
-  currentPeriodStart   DateTime
-  currentPeriodEnd     DateTime
-  cancelAtPeriodEnd    Boolean           @default(false)
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
-
-  @@index([stripeSubscriptionId])
-  @@index([status])
 }

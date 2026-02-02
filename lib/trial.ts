@@ -20,10 +20,9 @@ export type TrialStatus = {
 export async function getTrialStatus(businessId: string): Promise<TrialStatus> {
   const business = await db.business.findUnique({
     where: { id: businessId },
-    include: { subscription: true },
   })
 
-  const hasActiveSubscription = isSubscriptionActive(business?.subscription)
+  const hasActiveSubscription = isSubscriptionActive(business)
   const isOnTrial = !hasActiveSubscription
 
   const now = new Date()
@@ -67,8 +66,8 @@ export type TrialEligibilityResult =
 
 /**
  * Check if a business phone is eligible for a new trial (one trial per phone).
- * Normalizes to E.164 and checks TrialClaim; if the number was already claimed,
- * returns ineligible. Does not check whether the current user already has a business.
+ * Normalizes to E.164 and checks Business.primaryForwardingNumber (unique);
+ * if any business already has this number, returns ineligible.
  */
 export async function checkTrialEligibility(
   businessPhone: string
@@ -76,7 +75,7 @@ export async function checkTrialEligibility(
   const normalized = normalizePhoneToE164(businessPhone)
   if (!normalized) return { eligible: false, reason: "invalid_phone" }
 
-  const existing = await db.trialClaim.findUnique({
+  const existing = await db.business.findUnique({
     where: { primaryForwardingNumber: normalized },
   })
   if (existing) return { eligible: false, reason: "phone_already_used_trial" }

@@ -61,27 +61,53 @@ export async function POST(req: NextRequest) {
       }
       const forwardedFromNormalized = normalizeE164(forwardedFrom) ?? forwardedFrom
       const businessName = String(client.name ?? "").trim() || "our office"
-      // Retell requires dynamic variable values to be strings. Use both keys so {{business_name}} or {{BUSINESS_NAME}} in Dashboard work.
+      
+      // CRITICAL: Dynamic variables substitute {{variable}} placeholders in the Retell agent's greeting.
+      // The shared agent's conversation flow start node must use {{business_name}} (exactly this key).
+      // We send multiple case variations to handle any Dashboard config.
       const dynamicVars: Record<string, string> = {
-        BUSINESS_NAME: businessName,
+        // Exact match for {{business_name}} (lowercase with underscore)
         business_name: businessName,
+        // Common variations that might be in the Dashboard
+        BUSINESS_NAME: businessName,
+        businessName: businessName,
+        BusinessName: businessName,
+        name: businessName,
+        Name: businessName,
       }
-      // Pre-rendered begin message so the greeting always says the real business name (avoids "business underscore name" if Dashboard placeholder isn't substituted)
+      
+      // Pre-rendered begin_message for agent_override (works for retell_llm agents, may not work for conversation_flow)
       const beginMessage = `Thanks for calling ${businessName}! Who am I speaking with today?`
-      return NextResponse.json({
+      
+      const response = {
         call_inbound: {
           override_agent_id: agentId,
-          metadata: { client_id: client.id, forwarded_from_number: forwardedFromNormalized },
+          metadata: { 
+            client_id: client.id, 
+            forwarded_from_number: forwardedFromNormalized,
+            resolved_business_name: businessName,
+          },
           dynamic_variables: dynamicVars,
+          // agent_override: for retell_llm agents, begin_message overrides the greeting.
+          // For conversation_flow agents, begin_message may NOT override the start node instruction;
+          // in that case, ensure the shared agent's start node uses {{business_name}} placeholder.
           agent_override: {
-            retell_llm: { begin_message: beginMessage },
-            conversation_flow: { begin_message: beginMessage },
+            retell_llm: { 
+              begin_message: beginMessage,
+            },
+            conversation_flow: { 
+              begin_message: beginMessage,
+            },
           },
         },
-      })
+      }
+      
+      console.info("Retell inbound response for business:", businessName, "agent:", agentId)
+      return NextResponse.json(response)
     }
 
-    if (event.event === "call_ended" || event.event === "call_analysis") {
+    // Retell sends call_ended and call_analyzed (not call_analysis). Handle both so we never miss completion events.
+    if (event.event === "call_ended" || event.event === "call_analysis" || event.event === "call_analyzed") {
       await handleCallCompletion(event)
     }
 
@@ -141,6 +167,7 @@ interface RetellCallAnalysis {
 
 interface RetellCallWebhookEvent {
   event?: string
+  call_id?: string
   call?: {
     call_id?: string
     agent_id?: string
@@ -150,40 +177,65 @@ interface RetellCallWebhookEvent {
     end_timestamp?: number
     transcript?: string
     metadata?: { client_id?: string; forwarded_from_number?: string }
+    call_analysis?: RetellCallAnalysis
   }
   call_analysis?: RetellCallAnalysis
 }
 
 async function handleCallCompletion(event: RetellCallWebhookEvent) {
-  const callId = event.call?.call_id
+  // Retell may send call_id at top level or under event.call
+  const callId = event.call?.call_id ?? event.call_id
   if (!callId) {
-    console.error("Missing call_id in webhook")
+    console.error("Retell webhook: missing call_id in payload", { event: event.event, hasCall: !!event.call })
     return
   }
+
+  // Log the full event for debugging (remove in production once working)
+  console.info("Retell call completion event:", {
+    event: event.event,
+    call_id: callId,
+    metadata: event.call?.metadata,
+    from_number: event.call?.from_number,
+    to_number: event.call?.to_number,
+  })
 
   const metadata = event.call?.metadata
   let business = metadata?.client_id
     ? await db.business.findUnique({
         where: { id: metadata.client_id },
-        include: { subscription: true },
       })
     : null
+  
+  // If no business from client_id, try forwarded_from_number from metadata
   if (!business && metadata?.forwarded_from_number) {
-    const resolved = await resolveClient(metadata.forwarded_from_number)
-    business = resolved ?? null
+    console.info("Trying to resolve by forwarded_from_number:", metadata.forwarded_from_number)
+    // For call completion, we want ANY business with this number (even if PAUSED), 
+    // so we can still log the call. Use direct DB query instead of resolveClient.
+    const normalized = normalizeE164(metadata.forwarded_from_number)
+    if (normalized) {
+      business = await db.business.findFirst({
+        where: { primaryForwardingNumber: normalized },
+      })
+    }
   }
-  if (!business && event.call?.from_number) {
-    const resolved = await resolveClient(event.call.from_number)
-    business = resolved ?? null
-  }
-
+  
+  // Last resort: try to find by to_number (the AI intake number answered)
+  // This won't uniquely identify the business, but log it for debugging
   if (!business) {
-    console.error(`Client not found for call ${callId} (metadata.client_id or forwarded_from)`)
+    console.error(`Client not found for call ${callId}`, {
+      metadata_client_id: metadata?.client_id,
+      metadata_forwarded_from: metadata?.forwarded_from_number,
+      from_number: event.call?.from_number,
+      to_number: event.call?.to_number,
+    })
     return
   }
+  
+  console.info("Resolved business for call:", { callId, businessId: business.id, businessName: business.name })
 
-  const planType = getEffectivePlanType(business.subscription?.planType)
-  const analysis = event.call_analysis || {}
+  const planType = getEffectivePlanType(business.planType)
+  // call_analysis can be at top level (call_analyzed) or nested under event.call
+  const analysis = event.call_analysis || event.call?.call_analysis || {}
   const hasAnalysis = Object.keys(analysis).length > 0
 
   // Missed-call recovery: use whatever we have (call_ended may arrive before call_analysis)
@@ -283,10 +335,11 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
     console.error("CRM forward error:", error)
   }
 
-  const hasActiveSubscription = isSubscriptionActive(business.subscription)
-  const isOnFormalTrial = !hasActiveSubscription && business.trialStartedAt != null
+  const hasActiveSubscription = isSubscriptionActive(business)
+  // Track trial usage for any business without a paid sub (so onboarding-only users see usage too)
+  const isOnTrial = !hasActiveSubscription
 
-  if (isOnFormalTrial) {
+  if (isOnTrial) {
     const updated = await db.business.update({
       where: { id: business.id },
       data: { trialMinutesUsed: { increment: minutes } },

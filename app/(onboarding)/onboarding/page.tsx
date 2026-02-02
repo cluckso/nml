@@ -13,7 +13,6 @@ export default async function OnboardingPage() {
   const business = user.businessId
     ? await db.business.findUnique({
         where: { id: user.businessId },
-        include: { subscription: true },
       })
     : null
 
@@ -21,7 +20,7 @@ export default async function OnboardingPage() {
     redirect("/trial/start")
   }
 
-  const planType = business.subscription?.planType ?? null
+  const planType = business.planType ?? null
   const intakeNumber = getIntakeNumberForIndustry(business.industry)
   const showIntakeNumber = hasIntakeNumberConfigured() && intakeNumber
   // If they just returned from checkout, webhook may not have run yet — still show onboarding

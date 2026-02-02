@@ -168,16 +168,13 @@ export async function reportUsageToStripe(businessId: string, minutes: number) {
   if (!stripe) return
   const business = await db.business.findUnique({
     where: { id: businessId },
-    include: { subscription: true },
   })
 
-  if (!business?.subscription) {
+  if (!business?.planType || !business.stripeSubscriptionId) {
     console.warn(`No subscription found for business ${businessId}`)
     return
   }
-
-  const subscription = business.subscription
-  if (subscription.status !== "ACTIVE") {
+  if (business.subscriptionStatus !== "ACTIVE") {
     console.warn(`Subscription not active for business ${businessId}`)
     return
   }
@@ -185,7 +182,7 @@ export async function reportUsageToStripe(businessId: string, minutes: number) {
   // Get current billing period
   const now = new Date()
   const billingPeriod = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`
-  const includedMinutes = getIncludedMinutes(subscription.planType)
+  const includedMinutes = getIncludedMinutes(business.planType)
 
   // Fetch current usage before adding this call (to compute overage delta)
   const existing = await db.usage.findUnique({
@@ -194,8 +191,8 @@ export async function reportUsageToStripe(businessId: string, minutes: number) {
     },
   })
   const previousTotal = existing?.minutesUsed ?? 0
-  const overageBefore = getOverageMinutes(subscription.planType, previousTotal)
-  const overageAfter = getOverageMinutes(subscription.planType, previousTotal + minutes)
+  const overageBefore = getOverageMinutes(business.planType, previousTotal)
+  const overageAfter = getOverageMinutes(business.planType, previousTotal + minutes)
   const incrementalOverage = Math.max(0, overageAfter - overageBefore)
 
   // Update or create usage record (total minutes for our records)
@@ -222,7 +219,7 @@ export async function reportUsageToStripe(businessId: string, minutes: number) {
   // Report only overage minutes to Stripe (incremental); needs subscription item id for metered price
   if (incrementalOverage > 0) {
     try {
-      const sub = await stripe.subscriptions.retrieve(subscription.stripeSubscriptionId, {
+      const sub = await stripe.subscriptions.retrieve(business.stripeSubscriptionId, {
         expand: ["items.data.price"],
       })
       const overageItem = sub.items.data.find(
@@ -251,14 +248,22 @@ export async function handleStripeWebhook(event: Stripe.Event) {
 
       if (businessId && planType) {
         const stripeSubscriptionId = session.subscription as string
-        await db.subscription.create({
+        const now = new Date()
+        const periodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+        // Store subscription on Business (one row per business)
+        await db.business.update({
+          where: { id: businessId },
           data: {
-            businessId,
-            stripeSubscriptionId,
             planType,
+            stripeSubscriptionId,
+            subscriptionStatus: "ACTIVE",
+            currentPeriodStart: now,
+            currentPeriodEnd: periodEnd,
+            cancelAtPeriodEnd: false,
             status: "ACTIVE",
-            currentPeriodStart: new Date(),
-            currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+            trialStartedAt: null,
+            trialEndsAt: null,
+            trialMinutesUsed: 0,
           },
         })
         // Add metered overage item so we can report usage later; not included at checkout so no upfront charge
@@ -270,16 +275,6 @@ export async function handleStripeWebhook(event: Stripe.Event) {
         } catch (err) {
           console.error("Failed to add metered overage item to subscription:", err)
         }
-        // Reactivate business and clear trial fields (converted to paid)
-        await db.business.update({
-          where: { id: businessId },
-          data: {
-            status: "ACTIVE",
-            trialStartedAt: null,
-            trialEndsAt: null,
-            trialMinutesUsed: 0,
-          },
-        })
       }
       break
     }
@@ -287,10 +282,10 @@ export async function handleStripeWebhook(event: Stripe.Event) {
     case "customer.subscription.updated":
     case "customer.subscription.deleted": {
       const subscription = event.data.object as Stripe.Subscription
-      await db.subscription.update({
+      await db.business.updateMany({
         where: { stripeSubscriptionId: subscription.id },
         data: {
-          status: stripeSubscriptionStatusToDb(subscription.status),
+          subscriptionStatus: stripeSubscriptionStatusToDb(subscription.status),
           currentPeriodStart: new Date(subscription.current_period_start * 1000),
           currentPeriodEnd: new Date(subscription.current_period_end * 1000),
           cancelAtPeriodEnd: subscription.cancel_at_period_end,
@@ -308,20 +303,10 @@ export async function handleStripeWebhook(event: Stripe.Event) {
       // Pause service on payment failure
       const invoice = event.data.object as Stripe.Invoice
       if (invoice.subscription) {
-        const subscription = await db.subscription.findUnique({
+        await db.business.updateMany({
           where: { stripeSubscriptionId: invoice.subscription as string },
+          data: { subscriptionStatus: "PAST_DUE", status: "PAUSED" },
         })
-        if (subscription) {
-          await db.subscription.update({
-            where: { id: subscription.id },
-            data: { status: "PAST_DUE" },
-          })
-          // Optionally pause the business
-          await db.business.update({
-            where: { id: subscription.businessId },
-            data: { status: "PAUSED" },
-          })
-        }
       }
       break
     }

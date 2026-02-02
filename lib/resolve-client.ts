@@ -15,7 +15,6 @@ export async function resolveClient(forwardedFrom: string | null | undefined) {
       primaryForwardingNumber: normalized,
       status: ClientStatus.ACTIVE,
     },
-    include: { subscription: true },
   })
   return business
 }

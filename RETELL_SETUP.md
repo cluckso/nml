@@ -37,14 +37,26 @@ Examples:
 
 **Used for:**
 
-- **Webhook URL:** Retell sends `call_ended` and `call_analysis` events here.
+- **Webhook URL:** Retell sends `call_ended` and `call_analyzed` events here.
 - **RETELL_WEBHOOK_SECRET:** Your app verifies the `x-retell-signature` header. If unset, the app only skips verification in `NODE_ENV=development`.
 
 **Events the app handles:**
 
-- `call_inbound` – resolves client by forwarded-from number (only **ACTIVE** businesses). Returns override_agent_id (shared agent), metadata, dynamic_variables (BUSINESS_NAME / business_name), and **agent_override.begin_message** with a pre-rendered greeting (“Thanks for calling [Business Name]! Who am I speaking with today?”) so the AI always says the real business name instead of a placeholder. If no client or not active (e.g. **PAUSED** ex-trial, unknown number), returns empty `call_inbound` (no override_agent_id) so **Retell rejects the call** — no connection, **no Retell usage**. Ex-trial users who leave call forwarding on do not consume minutes; blocked PAUSED clients are logged for visibility.
-- `call_ended` – creates/updates Call with client_id from metadata, caller_number, forwarded_from_number, ai_number_answered; sends notifications, reports usage, checks trial; sets testCallVerifiedAt when first call completes for that client.
-- `call_analysis` – same as above (analysis may arrive after call_ended).
+- `call_inbound` – resolves client by forwarded-from number (only **ACTIVE** businesses). Returns override_agent_id (shared agent), **metadata** (`client_id`, `forwarded_from_number`) so Retell echoes it back on call_ended/call_analyzed, dynamic_variables, and agent_override.begin_message. If no client or not active, returns empty `call_inbound` so **Retell rejects the call** — no connection, no Retell usage.
+- `call_ended` – creates/updates **Call** (correct business via metadata.client_id or forwarded_from_number), **usage** (trial minutes or Stripe); minimum **1 billable minute per call**; sends notifications; sets testCallVerifiedAt when first call completes for that client.
+- `call_analyzed` – same as call_ended (Retell sends `call_analyzed` with full call + call_analysis; we handle both so we never miss completion).
+
+---
+
+### No call logs or usage on client dashboard?
+
+1. **Webhook URL** – In Retell Dashboard → Webhooks, set URL to exactly your app (e.g. `https://callback-liart.vercel.app/api/webhooks/retell`). Must be HTTPS.
+2. **Secrets in Vercel** – In Vercel → Project → Settings → Environment Variables, set `RETELL_WEBHOOK_SECRET` and `RETELL_API_KEY` for the same environment (Production/Preview) you’re testing. Redeploy after changing env.
+3. **Metadata** – Call logs are tied to the business by **metadata** we send on `call_inbound` (`client_id`, `forwarded_from_number`). Retell must echo this back on `call_ended`/`call_analyzed`. If your Retell webhook config doesn’t pass through metadata, business won’t be found and the call won’t be stored.
+4. **Business status** – Only **ACTIVE** businesses get calls answered and get metadata. If the business is **PAUSED**, call_inbound returns empty and no call is created. In the DB, set `status = 'ACTIVE'` for the business (and ensure `primaryForwardingNumber` is the number that forwards to the AI).
+5. **primaryForwardingNumber** – Must match the number Retell sends as `forwarded_from_number` (or the number that forwards to your intake number). E.164 format (e.g. +16086421459). Check Retell’s webhook payload or logs for the value they send.
+6. **Vercel logs** – In Vercel → Project → Logs (or Deployments → … → View Function Logs), look for “Retell webhook” messages. “Client not found for call” means metadata was missing or business wasn’t resolved. “Missing call_id” means payload shape changed.
+7. **Billable minutes** – Each call is charged at least **1 minute** (rounded up). Usage appears in Billing and in the dashboard trial card.
 
 ---
 
@@ -188,6 +200,62 @@ Retell sends these in the `call_analysis` webhook; the app maps both top-level a
 | Webhook returns 401 “Invalid signature” | `RETELL_WEBHOOK_SECRET` matches the secret in Retell; no extra spaces; Retell is sending the same body your app verifies. |
 | Webhook not called | Webhook URL in Retell is correct and HTTPS; no firewall blocking Retell; deploy is up. |
 | Calls not showing in app | Webhook URL correct; `RETELL_WEBHOOK_SECRET` set in production; logs for `call_ended` / `call_analysis` and any 4xx/5xx from your route. |
+| **AI says "business underscore name"** | See section 10a below. |
+
+---
+
+### 10a. Fixing "business underscore name" greeting
+
+If the AI literally says "business underscore name" instead of the actual business name (e.g. "Thanks for calling business underscore name"), the **shared agent's greeting placeholder isn't being substituted**.
+
+**Root cause:** The shared agent (`RETELL_AGENT_ID`) has a greeting with a placeholder like `{{business_name}}`, but either:
+1. The placeholder key doesn't match what the webhook sends, OR
+2. For **conversation flow** agents, `begin_message` override doesn't replace the start node instruction
+
+**Fix (choose one):**
+
+**Option A: Update the shared agent's greeting to use the correct placeholder**
+
+1. Go to **Retell Dashboard** → **Agents** → select your shared agent (`RETELL_AGENT_ID`).
+2. If it's a **conversation flow** agent:
+   - Edit the **conversation flow** → find the **start node** (usually "Welcome Node").
+   - Change the greeting text to use `{{business_name}}` (lowercase, with underscore):
+     ```
+     Thanks for calling {{business_name}}! Who am I speaking with today?
+     ```
+   - **Save** the conversation flow.
+3. If it's a **Retell LLM** (single/multi prompt) agent:
+   - Edit the agent's **Begin Message** field to:
+     ```
+     Thanks for calling {{business_name}}! Who am I speaking with today?
+     ```
+   - Save the agent.
+4. Test a call — the webhook sends `dynamic_variables: { business_name: "Actual Business Name" }` which Retell substitutes into `{{business_name}}`.
+
+**Option B: Remove the greeting placeholder entirely**
+
+If dynamic variable substitution still doesn't work, remove the placeholder and let the webhook's `begin_message` override handle it:
+
+1. For conversation flow agents:
+   - Edit the start node instruction to be **generic** (no placeholder):
+     ```
+     Thanks for calling! Who am I speaking with today?
+     ```
+   - The webhook sends `agent_override.conversation_flow.begin_message` with the actual business name. Note: this override may not work for all conversation flow configurations — test to confirm.
+
+2. For Retell LLM agents:
+   - Clear the Begin Message field or set it to empty.
+   - The webhook's `agent_override.retell_llm.begin_message` will be used.
+
+**Option C: Create a new shared agent with correct config**
+
+1. Run `npm run create-retell-agents` to create agents per industry (see section 4a).
+2. The generated agents have the business name baked into the flow (not as a placeholder).
+3. For a true shared agent with dynamic names, create a new agent in Retell Dashboard with the greeting set to `{{business_name}}` and set `RETELL_AGENT_ID` to its ID.
+
+**Debugging:**
+
+Check Vercel logs for `Retell inbound response for business:` — this shows the business name being sent. If the name is correct there, the issue is in the Retell Dashboard agent config.
 
 ---
 
