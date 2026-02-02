@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { ArrowRight, CreditCard, Clock, Globe, UserPlus, PhoneForwarded, LayoutDashboard } from "lucide-react"
+import { ArrowRight, CreditCard, Clock, UserPlus, PhoneForwarded, LayoutDashboard, Star, Quote } from "lucide-react"
 
 export default function HomePage() {
   return (
@@ -200,6 +200,63 @@ export default function HomePage() {
               <h3 className="font-semibold mb-2">Service Businesses</h3>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="container mx-auto px-4 py-16">
+        <h2 className="text-3xl font-bold text-center mb-4">What Business Owners Say</h2>
+        <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-12">
+          Local service pros use NeverMissLead to answer every call and capture leads.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <Card className="border-border/50 bg-card/50 backdrop-blur">
+            <CardContent className="pt-6">
+              <div className="flex gap-0.5 text-amber-500 mb-4" aria-hidden>
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-5 w-5 fill-current" />
+                ))}
+              </div>
+              <Quote className="h-8 w-8 text-muted-foreground/40 mb-3" />
+              <p className="text-muted-foreground italic mb-6">
+                &ldquo;Most days I&apos;m inside panels or on ladders and can&apos;t stop to answer the phone. Now every call gets answered and I get the details afterward. It&apos;s taken a lot of pressure off my day.&rdquo;
+              </p>
+              <p className="font-semibold">Mike Reynolds</p>
+              <p className="text-sm text-muted-foreground">Reynolds Electric Co.</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/50 bg-card/50 backdrop-blur">
+            <CardContent className="pt-6">
+              <div className="flex gap-0.5 text-amber-500 mb-4" aria-hidden>
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-5 w-5 fill-current" />
+                ))}
+              </div>
+              <Quote className="h-8 w-8 text-muted-foreground/40 mb-3" />
+              <p className="text-muted-foreground italic mb-6">
+                &ldquo;I didn&apos;t realize how many calls were slipping through until this was set up. One booked job in the first week covered the cost. It just works.&rdquo;
+              </p>
+              <p className="font-semibold">Jason Alvarez</p>
+              <p className="text-sm text-muted-foreground">Alvarez Plumbing & Drain</p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/50 bg-card/50 backdrop-blur">
+            <CardContent className="pt-6">
+              <div className="flex gap-0.5 text-amber-500 mb-4" aria-hidden>
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="h-5 w-5 fill-current" />
+                ))}
+              </div>
+              <Quote className="h-8 w-8 text-muted-foreground/40 mb-3" />
+              <p className="text-muted-foreground italic mb-6">
+                &ldquo;Customers don&apos;t leave voicemails anymore — they call the next shop. This keeps us from losing work when the front desk is busy or after hours.&rdquo;
+              </p>
+              <p className="font-semibold">Tom Bennett</p>
+              <p className="text-sm text-muted-foreground">Bennett Automotive Repair</p>
+            </CardContent>
+          </Card>
         </div>
       </section>
 

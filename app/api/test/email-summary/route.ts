@@ -10,7 +10,7 @@ import { sendEmailNotification } from "@/lib/notifications"
  * and sends one sample email to the business owner.
  *
  * POST /api/test/email-summary
- * Body: { "forwarded_from_number": "+16086421459" } (optional; default +16086421459)
+ * Body: { "forwarded_from_number": "+1..." } (required, or set TEST_EMAIL_FORWARDED_FROM in env)
  *
  * Allowed only in development or when ?secret=TEST_EMAIL_SECRET (or header x-test-secret) is set.
  */
@@ -28,8 +28,13 @@ export async function POST(req: NextRequest) {
   } catch {
     // optional body
   }
-  const forwardedFrom =
-    body.forwarded_from_number ?? process.env.TEST_EMAIL_FORWARDED_FROM ?? "+16086421459"
+  const forwardedFrom = body.forwarded_from_number ?? process.env.TEST_EMAIL_FORWARDED_FROM
+  if (!forwardedFrom) {
+    return NextResponse.json(
+      { error: "Missing forwarded_from_number. Send in body or set TEST_EMAIL_FORWARDED_FROM in env." },
+      { status: 400 }
+    )
+  }
   const normalized = normalizeE164(forwardedFrom) ?? forwardedFrom
 
   const business = await resolveClient(normalized)

@@ -96,6 +96,9 @@ export function OnboardingClient({ planType, initialBusiness, intakeNumber }: On
   }
 
   if (step === "manual-setup") {
+    const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "support@example.com"
+    const supportPhone = process.env.NEXT_PUBLIC_SUPPORT_PHONE ?? null
+    const supportName = process.env.NEXT_PUBLIC_SUPPORT_NAME ?? "Support"
     return (
       <div className="container mx-auto max-w-2xl py-12">
         <div className="rounded-lg border border-border bg-card p-8 text-center shadow-sm">
@@ -104,17 +107,19 @@ export function OnboardingClient({ planType, initialBusiness, intakeNumber }: On
             Your setup requires additional configuration. Our team will help you get started.
           </p>
           <div className="space-y-2">
-            <p className="font-semibold">Contact Steven Steinhoff</p>
+            <p className="font-semibold">Contact {supportName}</p>
             <p>
-              <a href="mailto:ststeinhoff80@gmail.com" className="text-primary hover:underline">
-                ststeinhoff80@gmail.com
+              <a href={`mailto:${supportEmail}`} className="text-primary hover:underline">
+                {supportEmail}
               </a>
             </p>
-            <p>
-              <a href="tel:+16086421459" className="text-primary hover:underline">
-                (608) 642-1459
-              </a>
-            </p>
+            {supportPhone && (
+              <p>
+                <a href={`tel:${supportPhone}`} className="text-primary hover:underline">
+                  {supportPhone.replace(/^\+1/, "").replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3")}
+                </a>
+              </p>
+            )}
           </div>
         </div>
       </div>

@@ -5,6 +5,7 @@ import { normalizeE164 } from "@/lib/normalize-phone"
 import { Industry } from "@prisma/client"
 import { ClientStatus } from "@prisma/client"
 import { isComplexSetup } from "@/lib/industries"
+import { getConfiguredIntakeNumbersE164 } from "@/lib/intake-routing"
 
 export async function POST(req: NextRequest) {
   try {
@@ -61,6 +62,13 @@ export async function POST(req: NextRequest) {
     if (!primaryForwardingNumberNormalized) {
       return NextResponse.json(
         { error: "Primary forwarding number is required (valid US E.164). This is the number that will forward missed calls to us." },
+        { status: 400 }
+      )
+    }
+    const intakeNumbers = getConfiguredIntakeNumbersE164()
+    if (intakeNumbers.length && intakeNumbers.includes(primaryForwardingNumberNormalized)) {
+      return NextResponse.json(
+        { error: "Use your business phone number (the line that forwards to the AI), not the AI intake number. The AI number is shown above for reference — your customers call your business line, which forwards to that number." },
         { status: 400 }
       )
     }

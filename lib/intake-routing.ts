@@ -50,3 +50,15 @@ export function getIntakeNumberForIndustry(industry: Industry | null | undefined
 export function hasIntakeNumberConfigured(): boolean {
   return !!(INTAKE_NUMBER_SERVICE ?? INTAKE_NUMBER_CHILDCARE ?? INTAKE_NUMBER_SHARED)
 }
+
+/** All configured intake numbers (E.164). Used to reject saving an AI number as primaryForwardingNumber. */
+export function getConfiguredIntakeNumbersE164(): string[] {
+  const out: string[] = []
+  const service = normalizeE164(INTAKE_NUMBER_SERVICE)
+  const childcare = normalizeE164(INTAKE_NUMBER_CHILDCARE)
+  const shared = normalizeE164(INTAKE_NUMBER_SHARED)
+  if (service) out.push(service)
+  if (childcare && childcare !== service) out.push(childcare)
+  if (shared && !out.includes(shared)) out.push(shared)
+  return out
+}

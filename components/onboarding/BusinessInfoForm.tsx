@@ -149,7 +149,7 @@ export function BusinessInfoForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="phoneNumber">Business phone number *</Label>
+        <Label htmlFor="phoneNumber">Business phone (the number that forwards to the AI) *</Label>
         <Input
           id="phoneNumber"
           type="tel"
@@ -159,7 +159,7 @@ export function BusinessInfoForm({
           placeholder="(608) 555-1234"
         />
         <p className="text-xs text-muted-foreground">
-          The line you forward to your AI number. One trial per business number.
+          Your business line — the one you set to forward to the AI. Not the AI intake number shown above. One trial per business number.
         </p>
       </div>
 

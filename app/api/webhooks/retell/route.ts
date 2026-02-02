@@ -60,14 +60,22 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ call_inbound: {} })
       }
       const forwardedFromNormalized = normalizeE164(forwardedFrom) ?? forwardedFrom
-      // Business name from the number that forwarded the call (primaryForwardingNumber); Retell uses this for greeting (e.g. {{business_name}} or {{BUSINESS_NAME}})
+      const businessName = String(client.name ?? "").trim() || "our office"
+      // Retell requires dynamic variable values to be strings. Use both keys so {{business_name}} or {{BUSINESS_NAME}} in Dashboard work.
+      const dynamicVars: Record<string, string> = {
+        BUSINESS_NAME: businessName,
+        business_name: businessName,
+      }
+      // Pre-rendered begin message so the greeting always says the real business name (avoids "business underscore name" if Dashboard placeholder isn't substituted)
+      const beginMessage = `Thanks for calling ${businessName}! Who am I speaking with today?`
       return NextResponse.json({
         call_inbound: {
           override_agent_id: agentId,
           metadata: { client_id: client.id, forwarded_from_number: forwardedFromNormalized },
-          dynamic_variables: {
-            BUSINESS_NAME: client.name,
-            business_name: client.name,
+          dynamic_variables: dynamicVars,
+          agent_override: {
+            retell_llm: { begin_message: beginMessage },
+            conversation_flow: { begin_message: beginMessage },
           },
         },
       })
