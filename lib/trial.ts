@@ -1,7 +1,7 @@
 import { db } from "./db"
 import { FREE_TRIAL_MINUTES } from "./plans"
 import { isSubscriptionActive } from "./subscription"
-import { normalizeE164 } from "./normalize-phone"
+import { normalizePhoneToE164 } from "./utils"
 
 export type TrialStatus = {
   isOnTrial: boolean
@@ -77,11 +77,11 @@ export type TrialEligibilityResult =
 export async function checkTrialEligibility(
   businessPhone: string
 ): Promise<TrialEligibilityResult> {
-  const normalized = normalizeE164(businessPhone)
+  const normalized = normalizePhoneToE164(businessPhone)
   if (!normalized) return { eligible: false, reason: "invalid_phone" }
 
   const existing = await db.trialClaim.findUnique({
-    where: { primaryForwardingNumber: normalized },
+    where: { phoneNumber: normalized },
   })
   if (existing) return { eligible: false, reason: "phone_already_used_trial" }
 

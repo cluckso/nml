@@ -1,5 +1,5 @@
 /**
- * E.164 normalization for US numbers (and optional other countries).
+ * E.164 normalization for US numbers.
  * Use everywhere before storing or looking up by phone (forwarding, caller, etc.).
  */
 
@@ -19,19 +19,8 @@ export function normalizeE164(input: string | null | undefined): string | null {
     normalized = `+${US_COUNTRY}${digits}`
   } else if (digits.length === 11 && digits.startsWith(US_COUNTRY)) {
     normalized = `+${digits}`
-  } else if (digits.length > 11 && digits.startsWith(US_COUNTRY)) {
-    normalized = `+${digits.slice(0, 11)}`
-  } else if (digits.length >= 10) {
-    normalized = `+${US_COUNTRY}${digits.slice(-10)}`
   } else {
     return null
   }
   return normalized
-}
-
-/**
- * Validate that a string is non-empty and normalizes to E.164.
- */
-export function isValidE164(input: string | null | undefined): boolean {
-  return normalizeE164(input) != null
 }

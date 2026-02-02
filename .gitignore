@@ -37,7 +37,3 @@ next-env.d.ts
 
 # prisma
 /prisma/migrations
-
-# scripts output
-retell-agents-by-industry.json
-/dist.scripts

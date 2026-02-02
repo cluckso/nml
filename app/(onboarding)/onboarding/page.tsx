@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { redirect } from "next/navigation"
+import { getIntakeNumberForIndustry, hasIntakeNumberConfigured } from "@/lib/intake-routing"
 import { OnboardingClient } from "./OnboardingClient"
 
 export const dynamic = "force-dynamic"
@@ -21,6 +22,8 @@ export default async function OnboardingPage() {
   }
 
   const planType = business.subscription?.planType ?? null
+  const intakeNumber = getIntakeNumberForIndustry(business.industry)
+  const showIntakeNumber = hasIntakeNumberConfigured() && intakeNumber
   // If they just returned from checkout, webhook may not have run yet — still show onboarding
   const initialBusiness = {
     name: business.name,
@@ -31,11 +34,17 @@ export default async function OnboardingPage() {
     serviceAreas: business.serviceAreas?.length ? business.serviceAreas : business.city ? [business.city] : undefined,
     businessHours: business.businessHours as { open: string; close: string; days: string[] } | null,
     departments: business.departments,
-    phoneNumber: business.primaryForwardingNumber ?? undefined,
+    phoneNumber: business.businessLinePhone ?? undefined,
     crmWebhookUrl: business.crmWebhookUrl ?? undefined,
     forwardToEmail: business.forwardToEmail ?? undefined,
     afterHoursEmergencyPhone: business.afterHoursEmergencyPhone ?? undefined,
   }
 
-  return <OnboardingClient planType={planType} initialBusiness={initialBusiness} />
+  return (
+    <OnboardingClient
+      planType={planType}
+      initialBusiness={initialBusiness}
+      intakeNumber={showIntakeNumber ? intakeNumber : null}
+    />
+  )
 }

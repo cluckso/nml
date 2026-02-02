@@ -3,11 +3,14 @@ import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { getEffectivePlanType, FREE_TRIAL_MINUTES } from "@/lib/plans"
 import { getTrialStatus } from "@/lib/trial"
+import { getIntakeNumberForIndustry, hasIntakeNumberConfigured } from "@/lib/intake-routing"
+import { formatPhoneForDisplay } from "@/lib/utils"
 import { PlanType } from "@prisma/client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { BillingPlansWithAgreement } from "@/components/billing/BillingPlansWithAgreement"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { Phone } from "lucide-react"
 
 const PLAN_DETAILS = {
   [PlanType.STARTER]: {
@@ -60,10 +63,29 @@ export default async function BillingPage() {
   const minutesIncluded = isOnTrial ? FREE_TRIAL_MINUTES : (planDetails?.minutes ?? 0)
   const overageMinutes = isOnTrial ? 0 : Math.max(0, minutesUsed - minutesIncluded)
   const overageCost = overageMinutes * 0.2
+  const intakeNumber = getIntakeNumberForIndustry(business?.industry ?? null)
+  const showIntakeNumber = hasIntakeNumberConfigured() && intakeNumber
 
   return (
     <div className="container mx-auto max-w-6xl py-8">
       <h1 className="text-3xl font-bold mb-8">Billing & Usage</h1>
+
+      {showIntakeNumber && (
+        <Card className="mb-6 border-primary/20 bg-primary/5">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Phone className="h-4 w-4" />
+              Forward calls to this AI number
+            </CardTitle>
+            <CardDescription>
+              Set your business line to forward to this number so the AI answers. See <Link href="/docs/faq" className="text-primary underline">Help & FAQ</Link> for carrier steps.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xl font-mono font-semibold">{formatPhoneForDisplay(intakeNumber) || intakeNumber}</p>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <Card>

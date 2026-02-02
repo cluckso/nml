@@ -13,8 +13,7 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "db:studio": "prisma studio",
-    "create-retell-agents": "tsc -p tsconfig.scripts.json && node dist.scripts/scripts/create-retell-agents.js"
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

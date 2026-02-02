@@ -1,66 +1,55 @@
 import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { getEffectivePlanType } from "@/lib/plans"
-import { SettingsClient } from "./SettingsClient"
+import { getIntakeNumberForIndustry, hasIntakeNumberConfigured } from "@/lib/intake-routing"
+import { formatPhoneForDisplay } from "@/lib/utils"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
+import { Phone } from "lucide-react"
+import Link from "next/link"
 
 export default async function SettingsPage() {
   const user = await requireAuth()
-  if (!user.businessId) return <div>Complete onboarding first.</div>
+  const business = user.businessId
+    ? await db.business.findUnique({
+        where: { id: user.businessId },
+      })
+    : null
 
-  const business = await db.business.findUnique({
-    where: { id: user.businessId },
-    include: { subscription: true },
-  })
-  if (!business) return <div>Business not found.</div>
-
-  const planType = getEffectivePlanType(business.subscription?.planType)
-  const isLocalPlus = planType === "LOCAL_PLUS"
-
-  const voiceSettings =
-    business.voiceSettings && typeof business.voiceSettings === "object"
-      ? (business.voiceSettings as { speed?: number; temperature?: number; volume?: number })
-      : null
+  const intakeNumber = getIntakeNumberForIndustry(business?.industry ?? null)
+  const showIntakeNumber = hasIntakeNumberConfigured() && intakeNumber
 
   return (
-    <div className="container mx-auto max-w-4xl py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Settings</h1>
-        <p className="text-muted-foreground">
-          Update your business info, conversation flow, and voice (Local Plus) anytime.
-        </p>
-        {isLocalPlus && (
-          <Badge variant="secondary" className="mt-2">
-            Priority Support
-          </Badge>
-        )}
-      </div>
+    <div className="container mx-auto max-w-2xl py-8">
+      <h1 className="text-3xl font-bold mb-8">Settings</h1>
 
-      <SettingsClient
-        business={{
-          id: business.id,
-          name: business.name,
-          industry: business.industry,
-          primaryForwardingNumber: business.primaryForwardingNumber ?? undefined,
-          address: business.address ?? undefined,
-          city: business.city ?? undefined,
-          state: business.state ?? undefined,
-          zipCode: business.zipCode ?? undefined,
-          serviceAreas: business.serviceAreas,
-          businessHours:
-            business.businessHours && typeof business.businessHours === "object"
-              ? (business.businessHours as { open?: string; close?: string; days?: string[] })
-              : undefined,
-          crmWebhookUrl: business.crmWebhookUrl ?? undefined,
-          forwardToEmail: business.forwardToEmail ?? undefined,
-          afterHoursEmergencyPhone: isLocalPlus ? undefined : (business.afterHoursEmergencyPhone ?? undefined),
-          offersRoadsideService: business.offersRoadsideService ?? undefined,
-          voiceSettings: voiceSettings ?? undefined,
-        }}
-        planType={planType}
-        hasAgent={true}
-      />
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Phone className="h-5 w-5" />
+            AI call number (forward to)
+          </CardTitle>
+          <CardDescription>
+            Forward your business line to this number so the AI answers. Call summaries are sent by email.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {showIntakeNumber ? (
+            <>
+              <p className="text-2xl font-mono font-semibold">{formatPhoneForDisplay(intakeNumber) || intakeNumber}</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Set call forwarding at your carrier to this number. See{" "}
+                <Link href="/docs/faq" className="text-primary underline">
+                  Help & FAQ
+                </Link>{" "}
+                for carrier steps.
+              </p>
+            </>
+          ) : (
+            <p className="text-muted-foreground">
+              Intake number not configured for your account. Contact support or check your dashboard after connecting your call assistant.
+            </p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   )
 }

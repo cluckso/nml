@@ -1,0 +1,37 @@
+{
+  "HVAC": {
+    "agent_id": "agent_44dd39241a690ffdb81c33092f",
+    "conversation_flow_id": "conversation_flow_4a03d753aa9d",
+    "version": 0
+  },
+  "PLUMBING": {
+    "agent_id": "agent_8ff467feb17660ed459976d2c8",
+    "conversation_flow_id": "conversation_flow_842a23720fd1",
+    "version": 0
+  },
+  "AUTO_REPAIR": {
+    "agent_id": "agent_e6dbc1bbc46d046042079be170",
+    "conversation_flow_id": "conversation_flow_26df0a4d7539",
+    "version": 0
+  },
+  "CHILDCARE": {
+    "agent_id": "agent_6ac10e24fdb1412ff25371aadf",
+    "conversation_flow_id": "conversation_flow_481a5009c26b",
+    "version": 0
+  },
+  "ELECTRICIAN": {
+    "agent_id": "agent_8746ffc09782d7a30df0f3c9f6",
+    "conversation_flow_id": "conversation_flow_81b9a0494875",
+    "version": 0
+  },
+  "HANDYMAN": {
+    "agent_id": "agent_8ad20e5d05640d4ea5f2f3aef1",
+    "conversation_flow_id": "conversation_flow_bd7a28bdc253",
+    "version": 0
+  },
+  "GENERIC": {
+    "agent_id": "agent_3d9e4af727ae2d94ee7e993b2a",
+    "conversation_flow_id": "conversation_flow_3819ca38d8f1",
+    "version": 0
+  }
+}

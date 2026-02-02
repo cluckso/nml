@@ -46,10 +46,6 @@ export function BillingPlansWithAgreement({
         </label>
       </div>
 
-      <div className="mb-6 p-4 rounded-lg border bg-muted/30">
-        <p className="text-sm text-muted-foreground">Contact us for CRM setup pricing.</p>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {Object.entries(planDetails).map(([planType, details]) => (
           <div

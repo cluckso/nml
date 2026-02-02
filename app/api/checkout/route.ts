@@ -3,7 +3,8 @@ import { getAuthUserFromRequest } from "@/lib/auth"
 import { createCheckoutSession, stripe } from "@/lib/stripe"
 import { db } from "@/lib/db"
 import { PlanType } from "@prisma/client"
-import { SETUP_FEES, hasCrmSetupAddonAvailable } from "@/lib/plans"
+import { Industry } from "@prisma/client"
+import { SETUP_FEES } from "@/lib/plans"
 import Stripe from "stripe"
 
 /** Plan-first flow: create minimal business so user can checkout before onboarding. */
@@ -19,7 +20,7 @@ export async function POST(req: NextRequest) {
     const user = await getAuthUserFromRequest(req)
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    let body: { planType?: string; addCrmSetup?: boolean }
+    let body: { planType?: string }
     try {
       body = await req.json()
     } catch {
@@ -38,24 +39,30 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const addCrmSetup = Boolean(body.addCrmSetup) && hasCrmSetupAddonAvailable(planType as PlanType)
-
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
 
-    const businessId = user.businessId
+    let businessId = user.businessId
     if (!businessId) {
-      return NextResponse.json(
-        { error: "Complete signup first: start a trial at /trial/start or complete onboarding so we have your primary forwarding number." },
-        { status: 400 }
-      )
+      const business = await db.business.create({
+        data: {
+          name: "My Business",
+          industry: Industry.GENERIC,
+          onboardingComplete: false,
+          users: { connect: { id: user.id } },
+        },
+      })
+      businessId = business.id
+      await db.user.update({
+        where: { id: user.id },
+        data: { businessId },
+      })
     }
 
     const session = await createCheckoutSession(
       businessId,
       planType as PlanType,
       setupFee,
-      appUrl,
-      addCrmSetup
+      appUrl
     )
 
     return NextResponse.json({ url: session.url })

@@ -8,6 +8,9 @@ import { Industry } from "@prisma/client"
 import { isComplexSetup } from "@/lib/industries"
 import { hasIndustryOptimizedAgents } from "@/lib/plans"
 import { PlanType } from "@prisma/client"
+import { formatPhoneForDisplay } from "@/lib/utils"
+import { Phone } from "lucide-react"
+import Link from "next/link"
 
 type OnboardingStep = "industry" | "business-info" | "complete" | "manual-setup"
 
@@ -46,9 +49,11 @@ interface OnboardingClientProps {
     forwardToEmail?: string | null
     afterHoursEmergencyPhone?: string | null
   }
+  /** AI number to forward calls to (by industry); shown on setup steps */
+  intakeNumber?: string | null
 }
 
-export function OnboardingClient({ planType, initialBusiness }: OnboardingClientProps) {
+export function OnboardingClient({ planType, initialBusiness, intakeNumber }: OnboardingClientProps) {
   const router = useRouter()
   const [step, setStep] = useState<OnboardingStep>("industry")
   const [data, setData] = useState<OnboardingData>({})
@@ -121,6 +126,18 @@ export function OnboardingClient({ planType, initialBusiness }: OnboardingClient
       <div className="container mx-auto max-w-2xl py-12">
         <div className="rounded-lg border border-border bg-card p-8 text-center shadow-sm">
           <h1 className="text-2xl font-bold mb-4">Setup Complete!</h1>
+          {intakeNumber && (
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 mb-6 text-left">
+              <p className="text-sm font-semibold flex items-center gap-2 mb-2">
+                <Phone className="h-4 w-4" />
+                Forward your business line to this AI number
+              </p>
+              <p className="text-xl font-mono font-semibold">{formatPhoneForDisplay(intakeNumber) || intakeNumber}</p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Set call forwarding at your carrier to this number. See <Link href="/docs/faq" className="text-primary underline">Help & FAQ</Link> for steps.
+              </p>
+            </div>
+          )}
           <p className="text-muted-foreground">Redirecting to your dashboard...</p>
         </div>
       </div>
@@ -152,6 +169,18 @@ export function OnboardingClient({ planType, initialBusiness }: OnboardingClient
         {step === "business-info" && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Business Information</h2>
+            {intakeNumber && (
+              <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 mb-6 flex items-start gap-3">
+                <Phone className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold">Forward calls to this AI number</p>
+                  <p className="text-lg font-mono font-semibold mt-1">{formatPhoneForDisplay(intakeNumber) || intakeNumber}</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    After saving, set your business line to forward to this number. <Link href="/docs/faq" className="text-primary underline">Help & FAQ</Link>
+                  </p>
+                </div>
+              </div>
+            )}
             <BusinessInfoForm
               initialData={data.businessInfo ?? initialBusiness}
               onSubmit={handleBusinessInfoSubmit}

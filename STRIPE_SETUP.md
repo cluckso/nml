@@ -9,40 +9,6 @@ You need to create the products/prices in Stripe and set env vars so checkout an
 
 ---
 
-## Do I need subscriptions for the products?
-
-**Yes.** Checkout uses `mode: "subscription"`, so the plan prices must be **recurring** (subscription) prices, not one-time. In Stripe: create a product, then add a **recurring** price (e.g. monthly). Use that price ID in `STRIPE_PRICE_STARTER` / `STRIPE_PRICE_PRO` / `STRIPE_PRICE_LOCAL_PLUS`. One-time prices will not work for subscription checkout.
-
----
-
-## Do payment products need metadata?
-
-**No.** This app does **not** use metadata on Stripe **products** or **prices**. It only uses:
-
-- **Checkout session metadata** — set in code when creating the session (`businessId`, `planType`)
-- **Subscription metadata** — set via `subscription_data.metadata` when creating the session
-
-So you do **not** need to add any metadata to your products or prices in the Stripe Dashboard. Just create the product, add a **recurring** price, and put the **Price ID** in `.env`.
-
----
-
-## Quick fix for "Stripe price or product not found"
-
-1. **Stripe Dashboard** → switch to **Test mode** (toggle top-right) → **Products** → **Add product** for each plan.
-2. For each plan add a **recurring** price (USD, monthly, **Licensed**). Create a **metered** price for overage ($0.20, monthly, **Metered**).
-3. Copy each **Price ID** (starts with `price_`) into `.env` or `.env.local`:
-
-```env
-STRIPE_PRICE_STARTER=price_xxxxx    # Basic $99/mo
-STRIPE_PRICE_PRO=price_xxxxx       # Pro $229/mo
-STRIPE_PRICE_LOCAL_PLUS=price_xxxxx # Local Plus $349/mo
-STRIPE_USAGE_PRICE_ID=price_xxxxx  # Overage $0.20/min (metered)
-```
-
-4. Restart the dev server (`npm run dev`) and try Subscribe again. Use **test** keys (`sk_test_...`, `pk_test_...`) and **test** price IDs from Test mode.
-
----
-
 ## 1. Create products and prices in Stripe
 
 ### Option A: Stripe Dashboard
@@ -179,24 +145,11 @@ Use **test** keys and **test** price IDs while developing; switch to **live** wh
 
 ## 6. Checklist
 
-- [ ] Created 3 products with **recurring licensed** prices ($99, $229, $349/month)
+- [ ] Created 3 products with **recurring licensed** prices ($99, $199, $299/month)
 - [ ] Created 1 product with a **recurring metered** price ($0.20, monthly, metered)
-- [ ] Set `STRIPE_PRICE_STARTER`, `STRIPE_PRICE_PRO`, `STRIPE_PRICE_LOCAL_PLUS`, `STRIPE_USAGE_PRICE_ID` in `.env` or `.env.local`
+- [ ] Set `STRIPE_PRICE_STARTER`, `STRIPE_PRICE_PRO`, `STRIPE_PRICE_LOCAL_PLUS`, `STRIPE_USAGE_PRICE_ID` in env
 - [ ] Set `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`
 - [ ] Webhook endpoint added in Stripe with the events above
 - [ ] Test a subscription in test mode and confirm usage appears under the subscription (overage item)
 
 If any price ID is wrong or the overage price is not metered, checkout or usage reporting will fail; double-check those first.
-
----
-
-## Subscription not working? Troubleshooting
-
-| Symptom | What to check |
-|--------|----------------|
-| Checkout errors with "price or product not found" | Price IDs in `.env` must match **recurring** prices in Stripe (Dashboard → Products → each price: type must be **Recurring**, not One time). Use **test** price IDs if you're in test mode. |
-| Checkout completes but subscription never appears in app | The app creates the DB subscription in the **webhook** (`checkout.session.completed`). Ensure: (1) Webhook URL is correct (Dashboard → Developers → Webhooks). (2) `STRIPE_WEBHOOK_SECRET` matches the endpoint’s signing secret. (3) For local dev, run `stripe listen --forward-to localhost:3000/api/webhooks/stripe` and use the printed `whsec_...` as the secret. |
-| "Invalid signature" or webhook returns 400 | Wrong or missing `STRIPE_WEBHOOK_SECRET`; use the secret from the same Stripe mode (test vs live) as your keys. |
-| Subscription created in Stripe but not in DB | Check server logs when the webhook runs. The app needs `businessId` and `planType` from session or subscription metadata (we set both at checkout). If you see "businessId/planType missing", ensure you’re using the app’s checkout flow (not a custom Stripe Checkout that omits metadata). |
-
-Products and prices in Stripe do **not** need metadata. The app attaches `businessId` and `planType` to the **session** and **subscription** when it creates the checkout; the webhook reads those to create the subscription in your DB.

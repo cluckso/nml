@@ -1,7 +1,7 @@
 import Stripe from "stripe"
 import { db } from "./db"
 import { PlanType, SubscriptionStatus } from "@prisma/client"
-import { getIncludedMinutes, getOverageMinutes, hasCrmSetupAddonAvailable, CRM_SETUP_FEE } from "./plans"
+import { getIncludedMinutes, getOverageMinutes } from "./plans"
 
 /** Map Stripe subscription status to our DB SubscriptionStatus (single place for mapping). */
 function stripeSubscriptionStatusToDb(stripeStatus: string): SubscriptionStatus {
@@ -73,8 +73,7 @@ export async function createCheckoutSession(
   businessId: string,
   planType: PlanType,
   setupFee: number,
-  appUrl: string = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-  addCrmSetup: boolean = false
+  appUrl: string = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
 ) {
   if (!stripe) {
     throw new Error("STRIPE_SECRET_KEY is not configured. Add it to .env to enable billing.")
@@ -107,21 +106,6 @@ export async function createCheckoutSession(
           name: "Setup Fee",
         },
         unit_amount: setupFee * 100, // Convert to cents
-      },
-      quantity: 1,
-    })
-  }
-
-  // Add CRM Integration Setup one-time add-on (Pro & Local Plus only)
-  if (addCrmSetup && hasCrmSetupAddonAvailable(planType) && CRM_SETUP_FEE > 0) {
-    lineItems.push({
-      price_data: {
-        currency: "usd",
-        product_data: {
-          name: "CRM Integration Setup",
-          description: "One-time setup: we connect your CRM webhook and verify leads flow through.",
-        },
-        unit_amount: CRM_SETUP_FEE * 100, // cents
       },
       quantity: 1,
     })
@@ -262,19 +246,8 @@ export async function handleStripeWebhook(event: Stripe.Event) {
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session
-      let businessId = session.metadata?.businessId
-      let planType = session.metadata?.planType as PlanType | undefined
-
-      // Fallback: read from subscription metadata (we set subscription_data.metadata at checkout)
-      if ((!businessId || !planType) && session.subscription) {
-        try {
-          const sub = await stripe.subscriptions.retrieve(session.subscription as string)
-          businessId = businessId ?? sub.metadata?.businessId ?? undefined
-          planType = (planType ?? sub.metadata?.planType) as PlanType | undefined
-        } catch (err) {
-          console.error("Failed to fetch subscription for metadata fallback:", err)
-        }
-      }
+      const businessId = session.metadata?.businessId
+      const planType = session.metadata?.planType as PlanType
 
       if (businessId && planType) {
         const stripeSubscriptionId = session.subscription as string
@@ -301,7 +274,7 @@ export async function handleStripeWebhook(event: Stripe.Event) {
         await db.business.update({
           where: { id: businessId },
           data: {
-            status: "ACTIVE",
+            isActive: true,
             trialStartedAt: null,
             trialEndsAt: null,
             trialMinutesUsed: 0,
@@ -346,7 +319,7 @@ export async function handleStripeWebhook(event: Stripe.Event) {
           // Optionally pause the business
           await db.business.update({
             where: { id: subscription.businessId },
-            data: { status: "PAUSED" },
+            data: { isActive: false },
           })
         }
       }

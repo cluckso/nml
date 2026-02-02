@@ -111,67 +111,6 @@ export async function createRetellAgent(
   }
 }
 
-/**
- * Create one Retell agent + conversation flow for a given business type (industry).
- * No phone number is created or attached. Use for bootstrapping per-use-case agents.
- * Prompt uses {{BUSINESS_NAME}} and {{SERVICE_AREAS}} so you can override at runtime via dynamic_variables.
- */
-export async function createAgentAndFlowForIndustry(
-  apiKey: string,
-  industry: Industry,
-  options?: { businessName?: string; serviceAreas?: string[] }
-): Promise<{ agent_id: string; conversation_flow_id: string; version: number }> {
-  const businessName = options?.businessName ?? "{{BUSINESS_NAME}}"
-  const serviceAreas = options?.serviceAreas ?? ["{{SERVICE_AREAS}}"]
-
-  const globalPrompt = generatePrompt(businessName, industry, serviceAreas, {
-    includeAppointmentCapture: true,
-  })
-  const flow = buildConversationFlow(businessName, industry, serviceAreas)
-  const { conversation_flow_id, version } = await createConversationFlow(apiKey, {
-    ...flow,
-    global_prompt: globalPrompt,
-  })
-
-  const agentName = `NML - ${industry}`
-  const agentPayload = {
-    agent_name: agentName,
-    language: "en-US" as const,
-    voice_id: "11labs-Chloe",
-    voice_temperature: 0.98,
-    voice_speed: 0.98,
-    volume: 0.94,
-    max_call_duration_ms: 3600000,
-    interruption_sensitivity: 0.9,
-    response_engine: {
-      type: "conversation-flow" as const,
-      conversation_flow_id,
-      version: version ?? 0,
-    },
-  }
-
-  const response = await fetch(`${RETELL_API_BASE}/create-agent`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(agentPayload),
-  })
-
-  if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`Failed to create Retell agent for ${industry}: ${error}`)
-  }
-
-  const result = await response.json()
-  return {
-    agent_id: result.agent_id,
-    conversation_flow_id,
-    version: version ?? 0,
-  }
-}
-
 /** Purchase a new phone number from Retell and bind it to the agent. */
 async function createPhoneNumber(
   apiKey: string,
@@ -339,7 +278,7 @@ async function getAgent(
   return response.json()
 }
 
-/** PATCH agent (agent_name, voice_*, response_engine). Used only for bootstrap of shared agent. */
+/** PATCH agent (agent_name, voice_*, response_engine). */
 async function updateAgent(
   apiKey: string,
   agentId: string,
@@ -364,6 +303,79 @@ async function updateAgent(
     const error = await response.text()
     throw new Error(`Failed to update Retell agent: ${error}`)
   }
+}
+
+/** Business shape with subscription (from findUnique include). */
+export type BusinessForSync = {
+  name: string
+  industry: Industry
+  serviceAreas: string[]
+  businessHours: unknown
+  departments: string[]
+  afterHoursEmergencyPhone: string | null
+  voiceSettings: unknown
+  retellAgentId: string | null
+  subscription?: { planType: PlanType } | null
+}
+
+/**
+ * Sync Retell agent and its conversation flow to match current business settings.
+ * Call after PATCH /api/business when the business has a retellAgentId.
+ */
+export async function syncRetellAgentFromBusiness(business: BusinessForSync): Promise<void> {
+  const apiKey = process.env.RETELL_API_KEY
+  if (!apiKey || !business.retellAgentId) return
+
+  const agent = await getAgent(apiKey, business.retellAgentId)
+  const flowId = agent.response_engine?.type === "conversation-flow" && agent.response_engine?.conversation_flow_id
+  if (!flowId) {
+    throw new Error("Agent does not use a conversation flow; cannot sync")
+  }
+
+  const planType = business.subscription?.planType
+  const effectivePlan = (await import("./plans")).getEffectivePlanType(planType)
+  const bh = business.businessHours as BusinessHoursInput | null | undefined
+
+  const globalPrompt = generatePrompt(
+    business.name,
+    business.industry,
+    business.serviceAreas,
+    {
+      businessHours: bh ?? undefined,
+      departments: business.departments?.length ? business.departments : undefined,
+      afterHoursEmergencyPhone: business.afterHoursEmergencyPhone ?? undefined,
+      includeAppointmentCapture: hasAppointmentCapture(effectivePlan),
+    }
+  )
+  const flow = buildConversationFlow(business.name, business.industry, business.serviceAreas)
+  const { version } = await updateConversationFlow(apiKey, flowId, {
+    ...flow,
+    global_prompt: globalPrompt,
+  })
+
+  const voiceId = hasBrandedVoice(effectivePlan) ? "11labs-Adam" : "11labs-Chloe"
+  const vs = business.voiceSettings as { speed?: number; temperature?: number; volume?: number } | null | undefined
+  const voiceSpeed =
+    vs != null && typeof vs.speed === "number"
+      ? Math.max(0.5, Math.min(2, 0.5 + vs.speed * 1.5))
+      : 0.98
+  const voiceTemp =
+    vs != null && typeof vs.temperature === "number"
+      ? Math.max(0, Math.min(2, vs.temperature * 2))
+      : 0.98
+  const voiceVol =
+    vs != null && typeof vs.volume === "number"
+      ? Math.max(0, Math.min(2, vs.volume * 2))
+      : 0.94
+
+  await updateAgent(apiKey, business.retellAgentId, {
+    agent_name: business.name,
+    voice_id: voiceId,
+    voice_temperature: voiceTemp,
+    voice_speed: voiceSpeed,
+    volume: voiceVol,
+    response_engine: { type: "conversation-flow", conversation_flow_id: flowId, version },
+  })
 }
 
 function buildConversationFlow(

@@ -14,14 +14,6 @@ export const SETUP_FEES: Record<PlanType, number> = {
   [PlanType.LOCAL_PLUS]: 0,
 }
 
-/** One-time add-on: CRM Integration Setup (USD). Available on Pro & Local Plus. */
-export const CRM_SETUP_FEE = 99
-
-/** Whether the CRM setup add-on can be purchased with this plan (Pro & Local Plus). */
-export function hasCrmSetupAddonAvailable(planType: PlanType): boolean {
-  return planType === PlanType.PRO || planType === PlanType.LOCAL_PLUS
-}
-
 /** Free trial: call minutes cap before first paid subscription */
 export const FREE_TRIAL_MINUTES = 50
 

@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, Loader2 } from "lucide-react"
 import { PlanType } from "@prisma/client"
-import { hasCrmSetupAddonAvailable } from "@/lib/plans"
 
 const PLANS: Record<string, { name: string; price: number; planType: PlanType; popular: boolean }> = {
   Basic: { name: "Basic", price: 99, planType: PlanType.STARTER, popular: false },
@@ -35,7 +34,6 @@ export function PlanCard({
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const plan = PLANS[name]
-  const showCrmNote = plan && hasCrmSetupAddonAvailable(plan.planType)
   if (!plan) return null
 
   const handleGetStarted = async () => {
@@ -83,9 +81,6 @@ export function PlanCard({
         <p className="text-sm text-muted-foreground mt-1">No setup fee</p>
       </CardHeader>
       <CardContent>
-        {showCrmNote && (
-          <p className="mb-4 text-sm text-muted-foreground">Contact us for CRM setup pricing.</p>
-        )}
         <ul className="space-y-3 mb-6">
           {features.map((feature, index) => (
             <li key={index} className="flex items-start gap-2">

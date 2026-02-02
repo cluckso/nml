@@ -63,7 +63,7 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4" id="trial">
         {trial.isOnTrial && (
           <div id="trial-card">
-            <TrialCard trial={trial} hasAgent={hasAgent} compact />
+            <TrialCard trial={trial} hasAgent={hasAgent} />
           </div>
         )}
         <div className={trial.isOnTrial ? "" : "md:col-span-2"} id="setup">
@@ -101,7 +101,7 @@ export default async function DashboardPage() {
           <Button variant="ghost" size="sm">View all</Button>
         </Link>
       </div>
-      <CallLog calls={recentCalls} compact />
+      <CallLog calls={recentCalls} />
     </div>
   )
 }

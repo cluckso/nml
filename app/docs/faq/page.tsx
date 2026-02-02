@@ -294,32 +294,6 @@ export default function DocsFaqPage() {
 
       <Card className="mb-10">
         <CardHeader>
-          <CardTitle>Why is my database empty? (subscriptions, calls, usage)</CardTitle>
-          <CardDescription>
-            These records are created by webhooks and flows, not by the UI alone.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm font-medium">Subscriptions</p>
-          <p className="text-sm text-muted-foreground">
-            Created only when Stripe sends <code className="rounded bg-muted px-1">checkout.session.completed</code> to your webhook after you complete a plan purchase. Ensure <code className="rounded bg-muted px-1">STRIPE_WEBHOOK_SECRET</code> is set, your webhook URL in Stripe points to <code className="rounded bg-muted px-1">/api/webhooks/stripe</code>, and for local dev run: <code className="rounded bg-muted px-1">stripe listen --forward-to localhost:3000/api/webhooks/stripe</code>.
-          </p>
-          <p className="text-sm font-medium">Calls</p>
-          <p className="text-sm text-muted-foreground">
-            Created when Retell sends <code className="rounded bg-muted px-1">call_ended</code> or <code className="rounded bg-muted px-1">call_analysis</code> to <code className="rounded bg-muted px-1">/api/webhooks/retell</code> after a call completes. The app must resolve your business (your dashboard &quot;primary forwarding number&quot; must match the number that forwarded the call to the AI). Set the Retell webhook URL and, in production, <code className="rounded bg-muted px-1">RETELL_WEBHOOK_SECRET</code>.
-          </p>
-          <p className="text-sm font-medium">Usage</p>
-          <p className="text-sm text-muted-foreground">
-            Usage rows are created when a call completes and the business has an <strong>active subscription</strong> (the app reports overage minutes to Stripe). You need both: at least one completed call and an active subscription.
-          </p>
-          <p className="text-sm text-muted-foreground">
-            In development you can check counts and hints at: <code className="rounded bg-muted px-1">GET /api/health/data</code> (dev only, or use <code className="rounded bg-muted px-1">?secret=DATA_STATUS_SECRET</code>).
-          </p>
-        </CardContent>
-      </Card>
-
-      <Card className="mb-10">
-        <CardHeader>
           <CardTitle>Forward your business line to the AI</CardTitle>
           <CardDescription>
             Your AI has its own phone number (shown on your dashboard after you connect). You forward your existing business number to that AI number so the AI answers when customers call you.
