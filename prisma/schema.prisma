@@ -8,6 +8,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum UserRole {
@@ -69,7 +70,8 @@ model Business {
   id                        String        @id @default(cuid())
   name                      String
   industry                  Industry
-  primaryForwardingNumber   String        @unique // E.164; one business per number (trial eligibility)
+  primaryForwardingNumber   String        @unique // E.164; the business's own phone that forwards to AI
+  retellPhoneNumber         String?       @unique // E.164; dedicated Retell number for this business (to_number in webhook)
   stripeCustomerId          String?       @unique
   serviceAreas              String[]      @default([])
   businessHours             Json?         // { open: "09:00", close: "17:00", days: ["monday", "tuesday", ...] }
@@ -106,6 +108,7 @@ model Business {
   usage         Usage[]
 
   @@index([primaryForwardingNumber])
+  @@index([retellPhoneNumber])
   @@index([stripeCustomerId])
   @@index([stripeSubscriptionId])
   @@index([subscriptionStatus])

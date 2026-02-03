@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
-import { resolveClient } from "@/lib/resolve-client"
+import { resolveClient, resolveClientByRetellNumber } from "@/lib/resolve-client"
 import { normalizeE164 } from "@/lib/normalize-phone"
 import {
   sendEmailNotification,
@@ -56,10 +56,23 @@ export async function POST(req: NextRequest) {
         to_number: toNumber,
         from_number: fromNumber,
         forwarded_from: forwardedFrom,
+        to_number_normalized: normalizeE164(toNumber),
         forwarded_from_normalized: normalizeE164(forwardedFrom),
       })
       
-      const client = await resolveClient(forwardedFrom)
+      // Resolution priority:
+      // 1. By to_number (business's dedicated Retell number) - PREFERRED for multi-tenant
+      // 2. By forwarded_from (if carrier provides it) - LEGACY
+      // 3. Fallback to any active business - SINGLE-TENANT mode
+      
+      let client = await resolveClientByRetellNumber(toNumber)
+      let resolutionMethod = client ? "retellPhoneNumber" : null
+      
+      if (!client) {
+        client = await resolveClient(forwardedFrom)
+        resolutionMethod = client ? "primaryForwardingNumber" : null
+      }
+      
       const agentId = getAgentIdForInbound(toNumber)
       
       console.info("Retell call_inbound resolution:", {
@@ -67,9 +80,27 @@ export async function POST(req: NextRequest) {
         clientId: client?.id,
         clientName: client?.name,
         clientStatus: client?.status,
+        resolutionMethod,
         agentId: agentId,
         agentIdConfigured: !!process.env.RETELL_AGENT_ID,
       })
+      
+      // FALLBACK: If no client found, fall back to ANY active business (single-tenant mode)
+      if (!client) {
+        const fallbackClient = await db.business.findFirst({
+          where: { status: ClientStatus.ACTIVE },
+          orderBy: { createdAt: "desc" },
+        })
+        if (fallbackClient) {
+          console.warn("Using fallback business:", {
+            businessId: fallbackClient.id,
+            businessName: fallbackClient.name,
+            reason: "No match by retellPhoneNumber or primaryForwardingNumber - using single-tenant fallback",
+          })
+          client = fallbackClient
+          resolutionMethod = "fallback"
+        }
+      }
       
       if (!client || !agentId) {
         // Block call: no override_agent_id = Retell rejects, so ex-trial/unknown numbers don't use Retell minutes
@@ -254,22 +285,47 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
         where: { id: metadata.client_id },
       })
     : null
+  let resolutionMethod = business ? "metadata.client_id" : null
   
-  // If no business from client_id, try forwarded_from_number from metadata
+  // Try to resolve by to_number (business's dedicated Retell number) - PREFERRED
+  if (!business && event.call?.to_number) {
+    const toNormalized = normalizeE164(event.call.to_number)
+    if (toNormalized) {
+      business = await db.business.findFirst({
+        where: { retellPhoneNumber: toNormalized },
+      })
+      if (business) resolutionMethod = "retellPhoneNumber"
+    }
+  }
+  
+  // Try forwarded_from_number from metadata
   if (!business && metadata?.forwarded_from_number) {
     console.info("Trying to resolve by forwarded_from_number:", metadata.forwarded_from_number)
-    // For call completion, we want ANY business with this number (even if PAUSED), 
-    // so we can still log the call. Use direct DB query instead of resolveClient.
     const normalized = normalizeE164(metadata.forwarded_from_number)
     if (normalized) {
       business = await db.business.findFirst({
         where: { primaryForwardingNumber: normalized },
       })
+      if (business) resolutionMethod = "primaryForwardingNumber"
     }
   }
   
-  // Last resort: try to find by to_number (the AI intake number answered)
-  // This won't uniquely identify the business, but log it for debugging
+  // Fallback: any active business (single-tenant mode)
+  if (!business) {
+    business = await db.business.findFirst({
+      where: { status: ClientStatus.ACTIVE },
+      orderBy: { createdAt: "desc" },
+    })
+    if (business) {
+      resolutionMethod = "fallback"
+      console.warn("Using fallback business for call completion:", {
+        callId,
+        businessId: business.id,
+        businessName: business.name,
+      })
+    }
+  }
+  
   if (!business) {
     console.error(`Client not found for call ${callId}`, {
       metadata_client_id: metadata?.client_id,
@@ -280,7 +336,7 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
     return
   }
   
-  console.info("Resolved business for call:", { callId, businessId: business.id, businessName: business.name })
+  console.info("Resolved business for call:", { callId, businessId: business.id, businessName: business.name, resolutionMethod })
 
   const planType = getEffectivePlanType(business.planType)
   // call_analysis can be at top level (call_analyzed) or nested under event.call

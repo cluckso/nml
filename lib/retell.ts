@@ -111,6 +111,37 @@ export async function createRetellAgent(
   }
 }
 
+/**
+ * Provision a dedicated Retell phone number for a business.
+ * Purchases a number from Retell and binds it to the shared agent.
+ * Returns the E.164 phone number, or null if provisioning fails.
+ */
+export async function provisionRetellNumberForBusiness(areaCode?: number): Promise<string | null> {
+  const apiKey = process.env.RETELL_API_KEY
+  const agentId = process.env.RETELL_AGENT_ID
+  
+  if (!apiKey) {
+    console.error("provisionRetellNumberForBusiness: RETELL_API_KEY not configured")
+    return null
+  }
+  
+  if (!agentId) {
+    console.error("provisionRetellNumberForBusiness: RETELL_AGENT_ID not configured")
+    return null
+  }
+  
+  const effectiveAreaCode = areaCode ?? (process.env.RETELL_DEFAULT_AREA_CODE ? parseInt(process.env.RETELL_DEFAULT_AREA_CODE, 10) : 415)
+  
+  try {
+    const phoneNumber = await createPhoneNumber(apiKey, agentId, effectiveAreaCode)
+    console.info("Provisioned Retell number:", phoneNumber, "for agent:", agentId)
+    return phoneNumber
+  } catch (error) {
+    console.error("Failed to provision Retell number:", error)
+    return null
+  }
+}
+
 /** Purchase a new phone number from Retell and bind it to the agent. */
 async function createPhoneNumber(
   apiKey: string,

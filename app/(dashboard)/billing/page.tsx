@@ -60,8 +60,9 @@ export default async function BillingPage() {
   const minutesIncluded = isOnTrial ? FREE_TRIAL_MINUTES : (planDetails?.minutes ?? 0)
   const overageMinutes = isOnTrial ? 0 : Math.max(0, minutesUsed - minutesIncluded)
   const overageCost = overageMinutes * 0.2
-  const intakeNumber = getIntakeNumberForIndustry(business?.industry ?? null)
-  const showIntakeNumber = hasIntakeNumberConfigured() && intakeNumber
+  // Prefer business's dedicated Retell number, fall back to shared intake number
+  const intakeNumber = business?.retellPhoneNumber || getIntakeNumberForIndustry(business?.industry ?? null)
+  const showIntakeNumber = !!intakeNumber
 
   return (
     <div className="container mx-auto max-w-6xl py-8">

@@ -35,8 +35,9 @@ export default async function DashboardPage() {
 
   const emergencyCalls = recentCalls.filter((c) => c.emergencyFlag).length
   const totalMinutes = stats._sum.minutes || 0
-  const phoneNumber = getIntakeNumberForIndustry(business?.industry ?? null)
-  const hasAgent = hasIntakeNumberConfigured()
+  // Prefer business's dedicated Retell number, fall back to shared intake number
+  const phoneNumber = business?.retellPhoneNumber || getIntakeNumberForIndustry(business?.industry ?? null)
+  const hasAgent = !!(business?.retellPhoneNumber || hasIntakeNumberConfigured())
   const ownerPhone = user.phoneNumber ?? null
 
   return (

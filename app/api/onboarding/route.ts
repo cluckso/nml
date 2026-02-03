@@ -6,6 +6,7 @@ import { Industry } from "@prisma/client"
 import { ClientStatus } from "@prisma/client"
 import { isComplexSetup } from "@/lib/industries"
 import { getConfiguredIntakeNumbersE164 } from "@/lib/intake-routing"
+import { provisionRetellNumberForBusiness } from "@/lib/retell"
 
 export async function POST(req: NextRequest) {
   try {
@@ -126,7 +127,31 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    return NextResponse.json({ success: true, business })
+    // Provision a dedicated Retell phone number for this business (if not already set)
+    // This number is what the business forwards their calls TO, and how we identify them in webhooks
+    let retellPhoneNumber = business.retellPhoneNumber
+    if (!retellPhoneNumber) {
+      console.info("Provisioning Retell number for business:", business.id, business.name)
+      retellPhoneNumber = await provisionRetellNumberForBusiness()
+      
+      if (retellPhoneNumber) {
+        await db.business.update({
+          where: { id: business.id },
+          data: { retellPhoneNumber },
+        })
+        console.info("Assigned Retell number to business:", retellPhoneNumber, business.id)
+      } else {
+        console.warn("Failed to provision Retell number for business:", business.id)
+        // Continue without a dedicated number - will fall back to shared number or single-tenant mode
+      }
+    }
+
+    // Refetch business with the updated retellPhoneNumber
+    const updatedBusiness = await db.business.findUnique({
+      where: { id: business.id },
+    })
+
+    return NextResponse.json({ success: true, business: updatedBusiness })
   } catch (error) {
     console.error("Onboarding error:", error)
     return NextResponse.json(
