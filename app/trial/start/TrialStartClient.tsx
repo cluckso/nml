@@ -11,6 +11,16 @@ export function TrialStartClient() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  async function parseJsonSafe(res: Response): Promise<Record<string, unknown>> {
+    const text = await res.text()
+    if (!text.trim()) return {}
+    try {
+      return JSON.parse(text) as Record<string, unknown>
+    } catch {
+      return {}
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -21,9 +31,13 @@ export function TrialStartClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ businessPhone: businessPhone.trim() }),
       })
-      const eligibilityData = await eligibilityRes.json()
+      const eligibilityData = await parseJsonSafe(eligibilityRes)
       if (!eligibilityRes.ok) {
-        setError(eligibilityData.message || eligibilityData.error || "This number is not eligible for a trial.")
+        setError(
+          (eligibilityData.message as string) ||
+            (eligibilityData.error as string) ||
+            "This number is not eligible for a trial."
+        )
         setLoading(false)
         return
       }
@@ -33,17 +47,20 @@ export function TrialStartClient() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ businessPhone: businessPhone.trim() }),
       })
-      const startData = await startRes.json()
+      const startData = await parseJsonSafe(startRes)
       if (!startRes.ok) {
-        setError(startData.error || "Failed to start trial")
+        setError(
+          (startData.error as string) || "Failed to start trial"
+        )
         setLoading(false)
         return
       }
-      if (startData.url) {
-        window.location.href = startData.url
+      const url = startData.url as string | undefined
+      if (url) {
+        window.location.href = url
         return
       }
-      setError("Missing redirect URL")
+      setError("Missing redirect URL. Please try again or contact support.")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong")
     } finally {
