@@ -1,7 +1,27 @@
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
+/** Set MAINTENANCE_MODE=true or 1 in env to show 503 for all traffic (webhooks and /api/health still work). */
+const MAINTENANCE_HTML = `
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Site temporarily unavailable</title><style>body{font-family:system-ui,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;background:#0a0a0a;color:#e5e5e5;text-align:center;padding:1rem;}h1{font-size:1.5rem;}p{color:#a3a3a3;}</style></head>
+<body><div><h1>Site temporarily unavailable</h1><p>We'll be back shortly. Thanks for your patience.</p></div></body>
+</html>
+`
+
 export async function proxy(request: NextRequest) {
+  const maintenance = process.env.MAINTENANCE_MODE === "true" || process.env.MAINTENANCE_MODE === "1"
+  if (maintenance) {
+    const path = request.nextUrl.pathname
+    const allow = path.startsWith("/api/webhooks") || path === "/api/health"
+    if (!allow) {
+      return new NextResponse(MAINTENANCE_HTML, {
+        status: 503,
+        headers: { "Content-Type": "text/html; charset=utf-8", "Retry-After": "300" },
+      })
+    }
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   })
