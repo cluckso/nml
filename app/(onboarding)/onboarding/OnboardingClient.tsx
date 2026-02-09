@@ -156,7 +156,7 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Welcome to NeverMissLead-AI</h1>
         <p className="text-muted-foreground">
-          Set up your business in a few minutes. {planType ? "You've already chosen your plan." : "You're on the free trial — 50 minutes over 14 days. Upgrade anytime from Billing."}
+          Set up your business in a few minutes. {planType ? "You've already chosen your plan." : "You're on the free trial — 50 minutes or 4 days, whichever comes first. Upgrade anytime from Billing."}
         </p>
       </div>
 

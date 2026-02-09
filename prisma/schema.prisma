@@ -96,7 +96,7 @@ model Business {
   settings                  Json?         // BusinessSettings JSON (greeting, intake fields, notifications, routing, booking, etc.)
   // Trial (one per business; no separate TrialClaim table)
   trialStartedAt            DateTime?     // When trial started
-  trialEndsAt               DateTime?     // trialStartedAt + 14 days
+  trialEndsAt               DateTime?     // trialStartedAt + 4 days
   trialMinutesUsed          Float        @default(0) // Minutes counting toward 50-minute trial cap
   // Subscription (merged from Subscription table; one plan per business)
   planType                  PlanType?
