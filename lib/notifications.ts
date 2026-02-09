@@ -125,13 +125,21 @@ export async function sendSMSNotification(
   }
 
   // Find business owner phone (would need to be stored in user profile)
-  // For now, use a fallback or skip SMS if no phone
   const owner = await import("./db").then((m) => m.db.user.findFirst({
     where: { businessId: business.id },
   }))
 
-  const ownerPhone = (owner as { phoneNumber?: string }).phoneNumber
+  const ownerPhone = (owner as { phoneNumber?: string; smsConsent?: boolean; smsOptedOut?: boolean }).phoneNumber
+  const smsConsent = (owner as { smsConsent?: boolean }).smsConsent
+  const smsOptedOut = (owner as { smsOptedOut?: boolean }).smsOptedOut
+
   if (!owner || !ownerPhone) {
+    return
+  }
+
+  // Respect SMS consent and opt-out status (Twilio toll-free compliance)
+  if (!smsConsent || smsOptedOut) {
+    console.info(`SMS skipped for user ${owner.id}: consent=${smsConsent}, optedOut=${smsOptedOut}`)
     return
   }
 
@@ -150,7 +158,10 @@ export async function sendSMSNotification(
   }
 }
 
-/** Pro+: send SMS confirmation to caller after the call */
+/** Pro+: send SMS confirmation to caller after the call.
+ *  Note: This is a one-time transactional message triggered by the caller's own call.
+ *  Includes opt-out instructions per Twilio toll-free compliance.
+ */
 export async function sendSMSToCaller(
   business: Business,
   callerPhone: string,
@@ -159,7 +170,7 @@ export async function sendSMSToCaller(
   if (!twilioClient || !process.env.TWILIO_PHONE_NUMBER) {
     return
   }
-  const message = `Thanks for calling ${business.name}. We received your information and will reach out shortly.`
+  const message = `Thanks for calling ${business.name}. We received your information and will reach out shortly. Reply STOP to opt out of future texts.`
   try {
     await twilioClient.messages.create({
       body: message,

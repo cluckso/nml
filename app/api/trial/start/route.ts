@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json().catch(() => ({}))
     const businessPhone = body?.businessPhone
+    const smsConsent = body?.smsConsent === true
     if (typeof businessPhone !== "string" || !businessPhone.trim()) {
       return NextResponse.json(
         { error: "Missing businessPhone" },
@@ -77,6 +78,19 @@ export async function POST(req: NextRequest) {
       await db.user.update({
         where: { id: user.id },
         data: { businessId: business.id },
+      })
+    }
+
+    // Persist SMS consent
+    if (smsConsent) {
+      await db.user.update({
+        where: { id: user.id },
+        data: {
+          smsConsent: true,
+          smsConsentAt: new Date(),
+          smsOptedOut: false,
+          smsOptedOutAt: null,
+        },
       })
     }
 

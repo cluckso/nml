@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { X } from "lucide-react"
+import { SmsConsentCheckbox } from "@/components/consent/SmsConsentCheckbox"
 
 const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] as const
 
@@ -17,6 +18,7 @@ interface BusinessInfo {
   serviceAreas: string[]
   phoneNumber?: string
   ownerPhone?: string
+  smsConsent?: boolean
   businessHours?: { open: string; close: string; days: string[] }
   departments?: string[]
   crmWebhookUrl?: string
@@ -50,6 +52,7 @@ export function BusinessInfoForm({
     serviceAreas:
       initialData?.serviceAreas?.length ? initialData.serviceAreas : initialData?.city ? [initialData.city] : [],
     phoneNumber: initialData?.phoneNumber || "",
+    smsConsent: initialData?.smsConsent ?? false,
     businessHours: initialData?.businessHours || { open: "09:00", close: "17:00", days: ["monday", "tuesday", "wednesday", "thursday", "friday"] },
     departments: initialData?.departments || [],
     crmWebhookUrl: initialData?.crmWebhookUrl || "",
@@ -161,6 +164,14 @@ export function BusinessInfoForm({
         <p className="text-xs text-muted-foreground">
           Your business line — the one you set to forward to the AI. Not the AI intake number shown above. One trial per business number.
         </p>
+      </div>
+
+      <div className="rounded-lg border p-4 space-y-2">
+        <SmsConsentCheckbox
+          checked={formData.smsConsent ?? false}
+          onChange={(checked) => setFormData({ ...formData, smsConsent: checked })}
+          businessName={formData.name || "NeverMissLead-AI"}
+        />
       </div>
 
       <div className="space-y-2">

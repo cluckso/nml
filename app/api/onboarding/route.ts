@@ -118,12 +118,16 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    // Update user's businessId and owner phone (optional, for future use)
+    // Update user's businessId, owner phone, and SMS consent
+    const smsConsent = businessInfo.smsConsent === true
     await db.user.update({
       where: { id: user.id },
       data: {
         businessId: business.id,
         phoneNumber: businessInfo.ownerPhone || undefined,
+        ...(smsConsent
+          ? { smsConsent: true, smsConsentAt: new Date(), smsOptedOut: false, smsOptedOutAt: null }
+          : { smsConsent: false, smsConsentAt: null }),
       },
     })
 

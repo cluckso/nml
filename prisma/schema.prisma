@@ -56,6 +56,10 @@ model User {
   email          String   @unique
   supabaseUserId String?  @unique
   phoneNumber    String?  // For SMS notifications to owner
+  smsConsent     Boolean  @default(false)  // User explicitly opted in to receive SMS
+  smsConsentAt   DateTime? // Timestamp of SMS opt-in
+  smsOptedOut    Boolean  @default(false)  // User texted STOP or opted out
+  smsOptedOutAt  DateTime? // Timestamp of opt-out
   role           UserRole @default(CUSTOMER)
   businessId     String?
   business       Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)

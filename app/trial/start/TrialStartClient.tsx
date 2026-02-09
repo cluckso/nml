@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { SmsConsentCheckbox } from "@/components/consent/SmsConsentCheckbox"
 
 export function TrialStartClient() {
   const [businessPhone, setBusinessPhone] = useState("")
+  const [smsConsent, setSmsConsent] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -45,7 +47,7 @@ export function TrialStartClient() {
       const startRes = await fetch("/api/trial/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ businessPhone: businessPhone.trim() }),
+        body: JSON.stringify({ businessPhone: businessPhone.trim(), smsConsent }),
       })
       const startData = await parseJsonSafe(startRes)
       if (!startRes.ok) {
@@ -94,6 +96,11 @@ export function TrialStartClient() {
                 We&apos;ll use it to verify one trial per business.
               </p>
             </div>
+            <SmsConsentCheckbox
+              checked={smsConsent}
+              onChange={setSmsConsent}
+              disabled={loading}
+            />
             {error && (
               <p className="rounded-md bg-destructive/10 p-2 text-sm text-destructive">{error}</p>
             )}
