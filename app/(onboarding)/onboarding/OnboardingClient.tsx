@@ -88,12 +88,18 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newData),
       })
-      if (!response.ok) throw new Error("Failed to save")
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        const msg = typeof data?.error === "string" ? data.error : "Failed to save"
+        const details = data?.details ?? data?.hint ?? ""
+        throw new Error(details ? `${msg}. ${details}` : msg)
+      }
       setStep("complete")
       setTimeout(() => router.push("/dashboard"), 2000)
     } catch (error) {
       console.error("Error saving onboarding:", error)
-      alert("Failed to save. Please try again.")
+      const message = error instanceof Error ? error.message : "Failed to save. Please try again."
+      alert(message)
     }
   }
 

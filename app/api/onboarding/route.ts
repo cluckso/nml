@@ -157,9 +157,25 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: true, business: updatedBusiness })
   } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    const isPrismaOrDb =
+      message.includes("Unknown arg") ||
+      message.includes("does not exist") ||
+      message.includes("column") ||
+      (error as { code?: string }).code === "P2009" ||
+      (error as { code?: string }).code === "P2010"
     console.error("Onboarding error:", error)
+    // In dev or for known DB/schema issues, return a hint so deployers can fix migrations
+    const hint = isPrismaOrDb
+      ? " Database may be missing columns (e.g. run prisma/add_sms_consent.sql). Check server logs for details."
+      : ""
     return NextResponse.json(
-      { error: "Failed to save onboarding data" },
+      {
+        error: "Failed to save onboarding data",
+        ...(process.env.NODE_ENV !== "production" || isPrismaOrDb
+          ? { details: message, hint: hint.trim() }
+          : {}),
+      },
       { status: 500 }
     )
   }
