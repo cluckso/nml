@@ -42,6 +42,7 @@ export default async function OnboardingPage() {
   return (
     <OnboardingClient
       planType={planType}
+      initialIndustry={business?.industry ?? null}
       initialBusiness={initialBusiness}
       intakeNumber={showIntakeNumber ? intakeNumber : null}
     />

@@ -35,6 +35,8 @@ interface OnboardingData {
 
 interface OnboardingClientProps {
   planType: PlanType | null
+  /** Pre-selected industry when user revisits onboarding (e.g. existing business). */
+  initialIndustry?: Industry | null
   initialBusiness?: {
     name?: string
     address?: string
@@ -53,10 +55,10 @@ interface OnboardingClientProps {
   intakeNumber?: string | null
 }
 
-export function OnboardingClient({ planType, initialBusiness, intakeNumber }: OnboardingClientProps) {
+export function OnboardingClient({ planType, initialIndustry, initialBusiness, intakeNumber }: OnboardingClientProps) {
   const router = useRouter()
   const [step, setStep] = useState<OnboardingStep>("industry")
-  const [data, setData] = useState<OnboardingData>({})
+  const [data, setData] = useState<OnboardingData>({ industry: initialIndustry ?? undefined })
 
   const handleIndustrySelect = async (industry: Industry) => {
     setData({ ...data, industry })
@@ -161,10 +163,13 @@ export function OnboardingClient({ planType, initialBusiness, intakeNumber }: On
       <div className="rounded-lg border border-border bg-card p-8 shadow-sm">
         {step === "industry" && (
           <div>
-            <h2 className="text-xl font-semibold mb-4">Select Your Industry</h2>
+            <h2 className="text-xl font-semibold mb-2">Select Your Industry (required)</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Choose the option that best fits your business. This determines which AI agent answers your calls. Select &quot;Other&quot; for the default service number if none of the listed industries apply.
+            </p>
             {planType && hasIndustryOptimizedAgents(planType) && (
               <p className="text-sm text-muted-foreground mb-4">
-                Your plan includes industry-optimized AI agents. Select your business type to use the right prebuilt intake flow.
+                Your plan includes industry-optimized AI agents for the types listed below.
               </p>
             )}
             <IndustrySelector selected={data.industry} onSelect={handleIndustrySelect} />

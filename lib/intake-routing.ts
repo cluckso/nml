@@ -13,11 +13,33 @@ const INTAKE_NUMBER_CHILDCARE =
 const INTAKE_NUMBER_SHARED =
   process.env.NML_SHARED_INTAKE_NUMBER ?? process.env.RETELL_SHARED_NUMBER ?? null
 
-/** Agent ID for service-industry calls. */
+/** Agent ID for service-industry calls (fallback when no industry-specific agent). */
 const AGENT_ID_SERVICE = process.env.RETELL_AGENT_ID ?? null
 
 /** Agent ID for childcare calls. */
 const AGENT_ID_CHILDCARE = process.env.RETELL_AGENT_ID_CHILDCARE ?? null
+
+/** Agent ID per industry (optional). Set RETELL_AGENT_ID_HVAC, RETELL_AGENT_ID_PLUMBING, etc. */
+const AGENT_BY_INDUSTRY: Partial<Record<Industry, string | null>> = {
+  HVAC: process.env.RETELL_AGENT_ID_HVAC ?? null,
+  PLUMBING: process.env.RETELL_AGENT_ID_PLUMBING ?? null,
+  AUTO_REPAIR: process.env.RETELL_AGENT_ID_AUTO_REPAIR ?? null,
+  CHILDCARE: process.env.RETELL_AGENT_ID_CHILDCARE ?? null,
+  ELECTRICIAN: process.env.RETELL_AGENT_ID_ELECTRICIAN ?? null,
+  HANDYMAN: process.env.RETELL_AGENT_ID_HANDYMAN ?? null,
+  GENERIC: process.env.RETELL_AGENT_ID_GENERIC ?? null,
+}
+
+/**
+ * Resolve which Retell agent ID to use for an inbound call based on the business's industry.
+ * Set RETELL_AGENT_ID_<INDUSTRY> (e.g. RETELL_AGENT_ID_HVAC) per industry; fallback to RETELL_AGENT_ID.
+ */
+export function getAgentIdForIndustry(industry: Industry | null | undefined): string | null {
+  if (!industry) return AGENT_ID_SERVICE
+  const id = AGENT_BY_INDUSTRY[industry]
+  if (id) return id
+  return AGENT_ID_SERVICE
+}
 
 /**
  * Resolve which Retell agent ID to use for an inbound call based on the number that was called (to_number).

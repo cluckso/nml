@@ -89,6 +89,7 @@ model Business {
   afterHoursEmergencyPhone  String?       // Pro only: on-call number for after-hours emergencies (not Local Plus)
   offersRoadsideService     Boolean?      // For AUTO_REPAIR: true = collect location for roadside
   voiceSettings             Json?         // Local Plus: { speed?, temperature?, volume? } 0–1 or similar
+  settings                  Json?         // BusinessSettings JSON (greeting, intake fields, notifications, routing, booking, etc.)
   // Trial (one per business; no separate TrialClaim table)
   trialStartedAt            DateTime?     // When trial started
   trialEndsAt               DateTime?     // trialStartedAt + 14 days
@@ -159,4 +160,12 @@ model Usage {
   @@unique([businessId, billingPeriod])
   @@index([businessId])
   @@index([billingPeriod])
+}
+
+/// Pool of Retell numbers released by churned/canceled businesses; reused for new signups instead of buying new.
+model RecycledRetellNumber {
+  id          String   @id @default(cuid())
+  phoneNumber String   @unique // E.164
+  releasedAt  DateTime @default(now())
+  @@index([releasedAt])
 }

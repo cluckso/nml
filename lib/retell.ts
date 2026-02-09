@@ -1,4 +1,5 @@
 import { Industry, PlanType } from "@prisma/client"
+import { db } from "./db"
 import { generatePrompt, BusinessHoursInput } from "./prompts"
 import {
   hasAppointmentCapture,
@@ -112,29 +113,66 @@ export async function createRetellAgent(
 }
 
 /**
+ * Release a business's Retell number into the recycle pool so it can be reused.
+ * Call when a business churns (trial end) or cancels subscription.
+ */
+export async function releaseRetellNumber(businessId: string): Promise<void> {
+  const business = await db.business.findUnique({
+    where: { id: businessId },
+    select: { retellPhoneNumber: true, name: true },
+  })
+  if (!business?.retellPhoneNumber) return
+
+  const number = business.retellPhoneNumber
+  await db.$transaction([
+    db.recycledRetellNumber.upsert({
+      where: { phoneNumber: number },
+      create: { phoneNumber: number },
+      update: { releasedAt: new Date() },
+    }),
+    db.business.update({
+      where: { id: businessId },
+      data: { retellPhoneNumber: null },
+    }),
+  ])
+  console.info("Released Retell number to pool:", number, "business:", business.name)
+}
+
+/**
  * Provision a dedicated Retell phone number for a business.
- * Purchases a number from Retell and binds it to the shared agent.
+ * Tries the recycle pool first (numbers from churned/canceled users); if empty, purchases from Retell.
  * Returns the E.164 phone number, or null if provisioning fails.
  */
 export async function provisionRetellNumberForBusiness(areaCode?: number): Promise<string | null> {
+  const recycled = await db.recycledRetellNumber.findFirst({
+    orderBy: { releasedAt: "asc" },
+  })
+  if (recycled) {
+    await db.recycledRetellNumber.delete({
+      where: { id: recycled.id },
+    })
+    console.info("Reused recycled Retell number:", recycled.phoneNumber)
+    return recycled.phoneNumber
+  }
+
   const apiKey = process.env.RETELL_API_KEY
   const agentId = process.env.RETELL_AGENT_ID
-  
+
   if (!apiKey) {
     console.error("provisionRetellNumberForBusiness: RETELL_API_KEY not configured")
     return null
   }
-  
+
   if (!agentId) {
     console.error("provisionRetellNumberForBusiness: RETELL_AGENT_ID not configured")
     return null
   }
-  
+
   const effectiveAreaCode = areaCode ?? (process.env.RETELL_DEFAULT_AREA_CODE ? parseInt(process.env.RETELL_DEFAULT_AREA_CODE, 10) : 415)
-  
+
   try {
     const phoneNumber = await createPhoneNumber(apiKey, agentId, effectiveAreaCode)
-    console.info("Provisioned Retell number:", phoneNumber, "for agent:", agentId)
+    console.info("Provisioned new Retell number:", phoneNumber, "for agent:", agentId)
     return phoneNumber
   } catch (error) {
     console.error("Failed to provision Retell number:", error)

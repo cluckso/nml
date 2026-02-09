@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { AudioExamples } from "@/components/marketing/AudioExamples"
 import { ArrowRight, CreditCard, Clock, UserPlus, PhoneForwarded, LayoutDashboard, Star, Quote } from "lucide-react"
 
 export default function HomePage() {
@@ -26,7 +27,7 @@ export default function HomePage() {
           <div className="flex flex-wrap gap-4 justify-center mb-10">
             <Link href="/sign-up">
               <Button size="lg" className="gap-2 text-base px-8">
-                Start Free Trial — 50 Minutes, 14 Days
+                Start Free Trial — 50 Min or 4 Days
                 <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>
@@ -170,6 +171,9 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Audio examples — add clips in config/audio-examples.ts or NEXT_PUBLIC_AUDIO_EXAMPLE_* env */}
+      <AudioExamples />
+
       {/* Who It's For */}
       <section className="bg-muted/50 py-16 border-y border-border/50">
         <div className="container mx-auto px-4">
@@ -265,11 +269,11 @@ export default function HomePage() {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-4">Start Capturing Every Call</h2>
           <p className="text-lg mb-8 opacity-90">
-            50 free trial minutes, 14 days. Card required to start — no charge until you upgrade. 5-minute setup.
+            50 free trial minutes or 4 days, whichever comes first. Card required to start — no charge until you upgrade. 5-minute setup.
           </p>
           <Link href="/sign-up">
             <Button size="lg" variant="secondary" className="gap-2 bg-white text-primary hover:bg-white/90">
-              Start Free Trial — 50 Minutes, 14 Days
+              Start Free Trial — 50 Min or 4 Days
               <ArrowRight className="h-5 w-5" />
             </Button>
           </Link>

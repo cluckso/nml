@@ -69,13 +69,20 @@ Examples:
 | **Industry routing (two numbers)** | | |
 | `NML_INTAKE_NUMBER_SERVICE` or `RETELL_INTAKE_SERVICE` | Yes* | E.164 of the **service-industry** intake number (HVAC, plumbing, electrician, handyman, auto repair, generic). Clients in these industries forward to this number. |
 | `NML_INTAKE_NUMBER_CHILDCARE` or `RETELL_INTAKE_CHILDCARE` | Yes* | E.164 of the **childcare** intake number. Childcare clients forward to this number. |
-| `RETELL_AGENT_ID` | Yes | Retell agent ID for **service-industry** calls (used when call comes in to the service intake number). |
-| `RETELL_AGENT_ID_CHILDCARE` | Yes* | Retell agent ID for **childcare** calls (used when call comes in to the childcare intake number). Omit if you only use one agent. |
+| `RETELL_AGENT_ID` | Yes | Retell agent ID used when no industry-specific agent is set. Fallback for all industries. |
+| `RETELL_AGENT_ID_CHILDCARE` | No | Childcare agent (also used when **to_number** is the childcare intake number). |
+| **One agent per industry** | | Optional. If set, the app uses the business's industry to pick the agent (overrides number-based routing). |
+| `RETELL_AGENT_ID_HVAC` | No | Agent for HVAC businesses. |
+| `RETELL_AGENT_ID_PLUMBING` | No | Agent for plumbing. |
+| `RETELL_AGENT_ID_AUTO_REPAIR` | No | Agent for auto repair. |
+| `RETELL_AGENT_ID_ELECTRICIAN` | No | Agent for electricians. |
+| `RETELL_AGENT_ID_HANDYMAN` | No | Agent for handyman. |
+| `RETELL_AGENT_ID_GENERIC` | No | Agent for generic / other. |
 | **Legacy (single number)** | | |
 | `NML_SHARED_INTAKE_NUMBER` or `RETELL_SHARED_NUMBER` | No | Fallback single intake number if industry-specific numbers are not set. |
 | `RETELL_API_BASE` | No | API base URL (default `https://api.retellai.com`). |
 
-\* Use either industry-specific vars (service + childcare) or the legacy shared number. The webhook picks the agent by **to_number**: calls to the service number use `RETELL_AGENT_ID`; calls to the childcare number use `RETELL_AGENT_ID_CHILDCARE`. The dashboard shows each business the intake number for their industry.
+\* Use either industry-specific intake numbers (service + childcare) or the legacy shared number. The webhook picks the agent by **business industry first** (if `RETELL_AGENT_ID_<INDUSTRY>` is set), then by to_number, then `RETELL_AGENT_ID`. The dashboard shows each business the intake number for their industry.
 
 Add these to:
 

@@ -1,10 +1,11 @@
 import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { getIntakeNumberForIndustry, hasIntakeNumberConfigured } from "@/lib/intake-routing"
+import { getIntakeNumberForIndustry } from "@/lib/intake-routing"
 import { formatPhoneForDisplay } from "@/lib/utils"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Phone } from "lucide-react"
 import Link from "next/link"
+import { SettingsClient } from "@/components/settings/SettingsClient"
 
 export default async function SettingsPage() {
   const user = await requireAuth()
@@ -14,42 +15,34 @@ export default async function SettingsPage() {
       })
     : null
 
-  const intakeNumber = getIntakeNumberForIndustry(business?.industry ?? null)
-  const showIntakeNumber = hasIntakeNumberConfigured() && intakeNumber
+  const intakeNumber = business?.retellPhoneNumber || getIntakeNumberForIndustry(business?.industry ?? null)
 
   return (
-    <div className="container mx-auto max-w-2xl py-8">
-      <h1 className="text-3xl font-bold mb-8">Settings</h1>
+    <div className="container mx-auto max-w-5xl py-8 px-4">
+      <h1 className="text-3xl font-bold mb-6">Settings</h1>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Phone className="h-5 w-5" />
+      {/* AI Number Card */}
+      <Card className="mb-6">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Phone className="h-4 w-4" />
             AI call number (forward to)
           </CardTitle>
           <CardDescription>
-            Forward your business line to this number so the AI answers. Call summaries are sent by email.
+            Forward your business line to this number so the AI answers.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {showIntakeNumber ? (
-            <>
-              <p className="text-2xl font-mono font-semibold">{formatPhoneForDisplay(intakeNumber) || intakeNumber}</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Set call forwarding at your carrier to this number. See{" "}
-                <Link href="/docs/faq" className="text-primary underline">
-                  Help & FAQ
-                </Link>{" "}
-                for carrier steps.
-              </p>
-            </>
+          {intakeNumber ? (
+            <p className="text-xl font-mono font-semibold">{formatPhoneForDisplay(intakeNumber) || intakeNumber}</p>
           ) : (
-            <p className="text-muted-foreground">
-              The AI forward-to number is not configured for this app yet. Your admin needs to set one of these in the server environment: <code className="rounded bg-muted px-1">NML_INTAKE_NUMBER_SERVICE</code>, <code className="rounded bg-muted px-1">NML_INTAKE_NUMBER_CHILDCARE</code>, or <code className="rounded bg-muted px-1">NML_SHARED_INTAKE_NUMBER</code> (the Retell number that receives forwarded calls). Then redeploy. Contact support if you need help.
-            </p>
+            <p className="text-muted-foreground text-sm">Not configured yet.</p>
           )}
         </CardContent>
       </Card>
+
+      {/* Full settings panel */}
+      <SettingsClient />
     </div>
   )
 }

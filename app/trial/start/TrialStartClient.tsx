@@ -72,9 +72,9 @@ export function TrialStartClient() {
     <div className="container mx-auto max-w-md py-12">
       <Card>
         <CardHeader>
-          <CardTitle>Start your 14-day trial — 50 free call minutes</CardTitle>
+          <CardTitle>Start your free trial — 50 minutes or 4 days</CardTitle>
           <CardDescription>
-            No charge until you upgrade. Add your business phone and payment method to start. One trial per business number.
+            Trial ends at 50 call minutes or 4 days, whichever comes first. No charge until you upgrade. Add your business phone and payment method to start. One trial per business number.
           </CardDescription>
         </CardHeader>
         <CardContent>

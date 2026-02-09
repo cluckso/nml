@@ -9,11 +9,13 @@ import {
   forwardToCrm,
 } from "@/lib/notifications"
 import { reportUsageToStripe } from "@/lib/stripe"
+import { releaseRetellNumber } from "@/lib/retell"
 import { isSubscriptionActive } from "@/lib/subscription"
-import { hasSmsToCallers, hasCrmForwarding, hasLeadTagging, getEffectivePlanType, FREE_TRIAL_MINUTES, MAX_CALL_DURATION_SECONDS, toBillableMinutes } from "@/lib/plans"
+import { hasSmsToCallers, hasCrmForwarding, hasLeadTagging, getEffectivePlanType, FREE_TRIAL_MINUTES, TRIAL_DAYS, MAX_CALL_DURATION_SECONDS, toBillableMinutes } from "@/lib/plans"
 import { rateLimit } from "@/lib/rate-limit"
-import { getAgentIdForInbound } from "@/lib/intake-routing"
+import { getAgentIdForInbound, getAgentIdForIndustry } from "@/lib/intake-routing"
 import { ClientStatus } from "@prisma/client"
+import { mergeWithDefaults, type BusinessSettings } from "@/lib/business-settings"
 import crypto from "crypto"
 
 export async function POST(req: NextRequest) {
@@ -73,18 +75,6 @@ export async function POST(req: NextRequest) {
         resolutionMethod = client ? "primaryForwardingNumber" : null
       }
       
-      const agentId = getAgentIdForInbound(toNumber)
-      
-      console.info("Retell call_inbound resolution:", {
-        clientFound: !!client,
-        clientId: client?.id,
-        clientName: client?.name,
-        clientStatus: client?.status,
-        resolutionMethod,
-        agentId: agentId,
-        agentIdConfigured: !!process.env.RETELL_AGENT_ID,
-      })
-      
       // FALLBACK: If no client found, fall back to ANY active business (single-tenant mode)
       if (!client) {
         const fallbackClient = await db.business.findFirst({
@@ -102,6 +92,22 @@ export async function POST(req: NextRequest) {
         }
       }
       
+      // Agent: prefer industry-specific (RETELL_AGENT_ID_HVAC, etc.), else number-based, else RETELL_AGENT_ID
+      const agentId = client
+        ? (getAgentIdForIndustry(client.industry) ?? getAgentIdForInbound(toNumber))
+        : getAgentIdForInbound(toNumber)
+      
+      console.info("Retell call_inbound resolution:", {
+        clientFound: !!client,
+        clientId: client?.id,
+        clientName: client?.name,
+        clientIndustry: client?.industry,
+        clientStatus: client?.status,
+        resolutionMethod,
+        agentId: agentId,
+        agentIdConfigured: !!process.env.RETELL_AGENT_ID,
+      })
+      
       if (!client || !agentId) {
         // Block call: no override_agent_id = Retell rejects, so ex-trial/unknown numbers don't use Retell minutes
         const normalizedFrom = normalizeE164(forwardedFrom)
@@ -117,24 +123,24 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ call_inbound: {} })
       }
       const forwardedFromNormalized = normalizeE164(forwardedFrom) ?? forwardedFrom
-      const businessName = String(client.name ?? "").trim() || "our office"
+      const settings = mergeWithDefaults((client as any).settings as Partial<BusinessSettings> | null)
+      const businessName = settings.greeting.businessNamePronunciation || String(client.name ?? "").trim() || "our office"
       
-      // CRITICAL: Dynamic variables substitute {{variable}} placeholders in the Retell agent's greeting.
-      // The shared agent's conversation flow start node must use {{business_name}} (exactly this key).
-      // We send multiple case variations to handle any Dashboard config.
+      // Dynamic variables for agent placeholder substitution
       const dynamicVars: Record<string, string> = {
-        // Exact match for {{business_name}} (lowercase with underscore)
         business_name: businessName,
-        // Common variations that might be in the Dashboard
         BUSINESS_NAME: businessName,
         businessName: businessName,
         BusinessName: businessName,
         name: businessName,
         Name: businessName,
+        tone: settings.greeting.tone,
       }
       
-      // Pre-rendered begin_message for agent_override (works for retell_llm agents, may not work for conversation_flow)
-      const beginMessage = `Thanks for calling ${businessName}! Who am I speaking with today?`
+      // Greeting: use custom greeting if set, else default
+      const beginMessage = settings.greeting.customGreeting
+        ? settings.greeting.customGreeting.replace(/\[business\]/gi, businessName)
+        : `Thanks for calling ${businessName}! Who am I speaking with today?`
       
       const response = {
         call_inbound: {
@@ -143,11 +149,11 @@ export async function POST(req: NextRequest) {
             client_id: client.id, 
             forwarded_from_number: forwardedFromNormalized,
             resolved_business_name: businessName,
+            tone: settings.greeting.tone,
+            question_depth: settings.questionDepth,
+            after_hours_behavior: settings.availability.afterHoursBehavior,
           },
           dynamic_variables: dynamicVars,
-          // agent_override: for retell_llm agents, begin_message overrides the greeting.
-          // For conversation_flow agents, begin_message may NOT override the start node instruction;
-          // in that case, ensure the shared agent's start node uses {{business_name}} placeholder.
           agent_override: {
             retell_llm: { 
               begin_message: beginMessage,
@@ -418,23 +424,42 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
     })
   }
 
-  // Notifications: email + SMS to owner; SMS to caller (Pro+); CRM forward (Pro+)
-  try {
-    const notifies = [
-      sendEmailNotification(business, call, structuredIntake as any),
-      sendSMSNotification(business, call, structuredIntake as any),
-    ]
-    if (hasSmsToCallers(planType) && structuredIntake.phone) {
-      notifies.push(sendSMSToCaller(business, structuredIntake.phone, structuredIntake as any))
+  // Notifications: respect business notification settings
+  const callSettings = mergeWithDefaults((business as any).settings as Partial<BusinessSettings> | null)
+  const notifPrefs = callSettings.notifications
+  const isEmergency = structuredIntake.emergency
+  const shouldNotify = notifPrefs.emergencyOnlyAlerts ? isEmergency : true
+
+  if (shouldNotify) {
+    try {
+      const notifies: Promise<any>[] = []
+      if (notifPrefs.emailAlerts) {
+        notifies.push(sendEmailNotification(business, call, structuredIntake as any))
+      }
+      if (notifPrefs.smsAlerts) {
+        notifies.push(sendSMSNotification(business, call, structuredIntake as any))
+      }
+      if (hasSmsToCallers(planType) && structuredIntake.phone) {
+        notifies.push(sendSMSToCaller(business, structuredIntake.phone, structuredIntake as any))
+      }
+      await Promise.all(notifies)
+    } catch (error) {
+      console.error("Notification error:", error)
     }
-    await Promise.all(notifies)
-  } catch (error) {
-    console.error("Notification error:", error)
   }
 
   try {
     if (hasCrmForwarding(planType)) {
       await forwardToCrm(business, call, structuredIntake as any)
+      // Also send to Zapier if configured
+      const zapierUrl = callSettings.crm.zapierWebhookUrl
+      if (zapierUrl) {
+        await fetch(zapierUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ business: { id: business.id, name: business.name }, call, intake: structuredIntake }),
+        }).catch((e) => console.error("Zapier webhook error:", e))
+      }
     }
   } catch (error) {
     console.error("CRM forward error:", error)
@@ -445,11 +470,19 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
   const isOnTrial = !hasActiveSubscription
 
   if (isOnTrial) {
+    const now = new Date()
+    const trialEndsAtDefault = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000)
+    const updateData: { trialMinutesUsed: { increment: number }; trialStartedAt?: Date; trialEndsAt?: Date } = {
+      trialMinutesUsed: { increment: minutes },
+    }
+    if (!business.trialStartedAt) {
+      updateData.trialStartedAt = now
+      updateData.trialEndsAt = trialEndsAtDefault
+    }
     const updated = await db.business.update({
       where: { id: business.id },
-      data: { trialMinutesUsed: { increment: minutes } },
+      data: updateData,
     })
-    const now = new Date()
     const exhausted = updated.trialMinutesUsed >= FREE_TRIAL_MINUTES
     const expired = updated.trialEndsAt != null && now > updated.trialEndsAt
     if (exhausted || expired) {
@@ -457,6 +490,7 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
         where: { id: business.id },
         data: { status: "PAUSED" },
       })
+      await releaseRetellNumber(business.id)
     }
   } else if (hasActiveSubscription) {
     try {

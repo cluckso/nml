@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { getCurrentUser } from "@/lib/auth"
 import { PricingPlansWithAgreement } from "@/components/pricing/PricingPlansWithAgreement"
+import { AudioExamples } from "@/components/marketing/AudioExamples"
 import { Button } from "@/components/ui/button"
 
 const PLANS = [
@@ -66,11 +67,11 @@ export default async function PricingPage() {
         )}
       </div>
 
-      {/* Free Trial — primary CTA: 50 minutes, 14 days, card required */}
+      {/* Free Trial — primary CTA: 50 minutes or 4 days, whichever first */}
       <div className="max-w-2xl mx-auto mb-12 p-8 rounded-xl border-2 border-primary/20 bg-primary/5 text-center">
-        <h2 className="text-2xl font-bold mb-2">Free trial: 50 minutes, 14 days</h2>
+        <h2 className="text-2xl font-bold mb-2">Free trial: 50 minutes or 4 days</h2>
         <p className="text-muted-foreground mb-4">
-          50 call minutes to try real AI answering. Card required to start — we won&apos;t charge until you upgrade. One trial per business number.
+          Trial ends when you use 50 call minutes or 4 days pass, whichever comes first. Card required to start — we won&apos;t charge until you upgrade. One trial per business number.
         </p>
         <p className="text-sm text-muted-foreground mb-6">
           No overage during trial. Service pauses when minutes are used or when the trial ends. Upgrade to any plan to continue.
@@ -85,6 +86,8 @@ export default async function PricingPage() {
           </Button>
         )}
       </div>
+
+      <AudioExamples />
 
       <PricingPlansWithAgreement plans={PLANS} isLoggedIn={isLoggedIn} />
 

@@ -73,7 +73,7 @@ describe("getTrialStatus", () => {
     vi.mocked(db.business.findUnique).mockResolvedValue({
       id: "b4",
       trialMinutesUsed: null,
-      trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+      trialEndsAt: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
       subscription: null,
     } as any)
     const result = await getTrialStatus("b4")

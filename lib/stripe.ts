@@ -1,7 +1,8 @@
 import Stripe from "stripe"
 import { db } from "./db"
 import { PlanType, SubscriptionStatus } from "@prisma/client"
-import { getIncludedMinutes, getOverageMinutes } from "./plans"
+import { getIncludedMinutes, getOverageMinutes, TRIAL_DAYS } from "./plans"
+import { releaseRetellNumber } from "./retell"
 
 /** Map Stripe subscription status to our DB SubscriptionStatus (single place for mapping). */
 function stripeSubscriptionStatusToDb(stripeStatus: string): SubscriptionStatus {
@@ -243,8 +244,23 @@ export async function handleStripeWebhook(event: Stripe.Event) {
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session
-      const businessId = session.metadata?.businessId
-      const planType = session.metadata?.planType as PlanType
+      const businessId = session.metadata?.businessId as string | undefined
+      const planType = session.metadata?.planType as PlanType | undefined
+
+      // Trial flow: setup mode (card on file, no plan) — start trial window
+      if (businessId && session.mode === "setup" && !planType) {
+        const now = new Date()
+        const trialEndsAt = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000)
+        await db.business.update({
+          where: { id: businessId },
+          data: {
+            trialStartedAt: now,
+            trialEndsAt,
+            status: "ACTIVE",
+          },
+        })
+        break
+      }
 
       if (businessId && planType) {
         const stripeSubscriptionId = session.subscription as string
@@ -282,15 +298,24 @@ export async function handleStripeWebhook(event: Stripe.Event) {
     case "customer.subscription.updated":
     case "customer.subscription.deleted": {
       const subscription = event.data.object as Stripe.Subscription
+      const newStatus = stripeSubscriptionStatusToDb(subscription.status)
+      const businesses = await db.business.findMany({
+        where: { stripeSubscriptionId: subscription.id },
+        select: { id: true },
+      })
       await db.business.updateMany({
         where: { stripeSubscriptionId: subscription.id },
         data: {
-          subscriptionStatus: stripeSubscriptionStatusToDb(subscription.status),
+          subscriptionStatus: newStatus,
           currentPeriodStart: new Date(subscription.current_period_start * 1000),
           currentPeriodEnd: new Date(subscription.current_period_end * 1000),
           cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          ...(newStatus === "CANCELED" ? { status: "PAUSED" as const } : {}),
         },
       })
+      for (const b of businesses) {
+        if (newStatus === "CANCELED") await releaseRetellNumber(b.id)
+      }
       break
     }
 
