@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
@@ -63,8 +64,15 @@ export function Nav() {
     <nav className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <Link href="/" className="text-xl font-bold text-foreground">
-            NeverMissLead-AI
+          <Link href="/" className="flex items-center gap-2 text-foreground">
+            <Image
+              src="/logo.png"
+              alt="NeverMissLead"
+              width={160}
+              height={40}
+              className="h-8 w-auto"
+              priority
+            />
           </Link>
           {businessName && (
             <span className="text-sm text-muted-foreground border-l border-border/60 pl-3 font-medium truncate max-w-[200px] sm:max-w-[280px]" title={businessName}>

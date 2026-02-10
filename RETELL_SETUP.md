@@ -42,7 +42,14 @@ Examples:
 
 **Events the app handles:**
 
-- `call_inbound` – resolves client by forwarded-from number (only **ACTIVE** businesses). Returns override_agent_id (shared agent), **metadata** (`client_id`, `forwarded_from_number`) so Retell echoes it back on call_ended/call_analyzed, dynamic_variables, and agent_override.begin_message. If no client or not active, returns empty `call_inbound` so **Retell rejects the call** — no connection, no Retell usage.
+- `call_inbound` – resolves client by forwarded-from number (only **ACTIVE** businesses). Returns override_agent_id (shared agent), **metadata** (`client_id`, `forwarded_from_number`) so Retell echoes it back on call_ended/call_analyzed, **dynamic_variables** (see below), and **agent_override** (begin_message, voice_speed, interruption_sensitivity, max_call_duration_ms, model_temperature). If no client or not active, returns empty `call_inbound` so **Retell rejects the call** — no connection, no Retell usage.
+
+**Settings → Retell (per call):** When a business has saved settings (Dashboard → Settings), the app sends them to Retell on every inbound call so the agent behavior matches:
+
+- **agent_override:** `begin_message` (custom greeting), `voice_speed`, `interruption_sensitivity`, `max_call_duration_ms`, `model_temperature` (from voice/conciseness).
+- **dynamic_variables:** `business_name`, `tone`, `question_depth`, `after_hours_behavior`, `voice_style`, `voice_gender`, `intake_fields`, `intake_template`, `booking_*`, `lead_tags`, `priority_rules`, `always_say`, `never_say`, `compliance_phrases`, `max_call_length_minutes`, `question_retry_count`, `emergency_forward`, `spam_handling`, etc.
+
+To have the Retell agent *use* these, reference them in your agent’s prompt in the Retell dashboard (e.g. “Use a {{tone}} tone”, “Only collect: {{intake_fields}}”, “Keep calls under {{max_call_length_minutes}} minutes”).
 - `call_ended` – creates/updates **Call** (correct business via metadata.client_id or forwarded_from_number), **usage** (trial minutes or Stripe); minimum **1 billable minute per call**; sends notifications; sets testCallVerifiedAt when first call completes for that client.
 - `call_analyzed` – same as call_ended (Retell sends `call_analyzed` with full call + call_analysis; we handle both so we never miss completion).
 
@@ -57,6 +64,18 @@ Examples:
 5. **primaryForwardingNumber** – Must match the number Retell sends as `forwarded_from_number` (or the number that forwards to your intake number). E.164 format (e.g. +16086421459). Check Retell’s webhook payload or logs for the value they send.
 6. **Vercel logs** – In Vercel → Project → Logs (or Deployments → … → View Function Logs), look for “Retell webhook” messages. “Client not found for call” means metadata was missing or business wasn’t resolved. “Missing call_id” means payload shape changed.
 7. **Billable minutes** – Each call is charged at least **1 minute** (rounded up). Usage appears in Billing and in the dashboard trial card.
+
+---
+
+### Caller hears unavailable tone (call not connected)?
+
+When the app returns **no** `override_agent_id` in the `call_inbound` response, Retell **rejects** the call and the caller typically hears an unavailable tone or disconnect. Check the following:
+
+1. **RETELL_AGENT_ID (required)** – In Vercel (or your host) → Environment Variables, set `RETELL_AGENT_ID` to a valid Retell agent ID (e.g. from `npx tsx scripts/setup-retell-agents.ts`). If this is missing, the webhook returns empty `call_inbound` and the call is rejected.
+2. **Inbound webhook URL** – In Retell Dashboard → Phone Numbers → select the number → **Inbound** / **Webhook**: set the URL to `https://<your-domain>/api/webhooks/retell`. Enable “Inbound Webhook” and leave “Inbound Call Agent” unset (or set only as fallback). If the webhook URL is wrong or the request never reaches your app, Retell may disconnect after timeout.
+3. **Webhook signature** – If your app returns **401** (invalid signature), Retell may retry then give up. Set `RETELL_WEBHOOK_SECRET` (or `RETELL_API_KEY`) in env so verification succeeds. In development, verification is skipped if the secret is missing.
+4. **Business and number mapping** – The app finds a business by: (a) **to_number** = `Business.retellPhoneNumber` (the number being called), or (b) **forwarded_from_number** = `Business.primaryForwardingNumber`, or (c) fallback = any ACTIVE business. If you’re calling a number that isn’t stored as `retellPhoneNumber` for any business and there’s no ACTIVE business for fallback, the app returns empty `call_inbound`. Fix: complete onboarding so the business has a Retell number assigned, or ensure at least one business has `status = 'ACTIVE'`.
+5. **Logs** – In Vercel → Logs, search for **“Retell inbound rejected”**. The log will say whether the cause is “No agent ID configured” or “No business found for this call”.
 
 ---
 
@@ -106,27 +125,31 @@ So in Retell you don’t need to manually create agents or flows; the app create
 
 ---
 
-## 4a. Tool: Create agents and flows per business type (optional)
+## 4a. Set up agents via API with correct variable formatting (recommended)
 
-You can **programmatically create one Retell agent and conversation flow per industry** (HVAC, PLUMBING, AUTO_REPAIR, CHILDCARE, ELECTRICIAN, HANDYMAN, GENERIC). Use this to bootstrap per–use-case agents or to generate flows/prompts for testing.
+You can **create one Retell agent per industry via the API** so that prompts and flow nodes use **`{{variable_name}}`** placeholders. The inbound webhook then supplies these per call from saved business settings (e.g. `{{business_name}}`, `{{tone}}`, `{{question_depth}}`).
 
 **What it does**
 
-- For each `Industry` value, calls the Retell API to create a **conversation flow** (nodes + global prompt) and an **agent** that uses that flow.
-- Does **not** create or attach phone numbers.
-- Prompts use placeholders `{{BUSINESS_NAME}}` and `{{SERVICE_AREAS}}` so you can override at runtime via `dynamic_variables` if needed.
+- Creates one **conversation flow** per industry (HVAC, PLUMBING, AUTO_REPAIR, CHILDCARE, ELECTRICIAN, HANDYMAN, GENERIC) with a **global prompt template** that references `{{business_name}}`, `{{tone}}`, `{{question_depth}}`, `{{after_hours_behavior}}`, `{{max_call_length_minutes}}`, etc.
+- Flow node text uses `{{business_name}}` and `{{Name}}` (caller name) so each call gets the right context from the webhook **dynamic_variables**.
+- Creates one **agent** per industry and prints the env vars to add (`RETELL_AGENT_ID`, `RETELL_AGENT_ID_HVAC`, etc.).
+
+**Variable reference**
+
+- Single source of truth: **`lib/retell-agent-template.ts`** (`RETELL_DYNAMIC_VARIABLE_NAMES`, `RETELL_GLOBAL_PROMPT_TEMPLATE`).
+- The webhook in `app/api/webhooks/retell/route.ts` sends the same variable names in `dynamic_variables` on every `call_inbound`. Use **double curly braces** in Retell prompts: `{{business_name}}`, `{{tone}}`, `{{service_areas}}`, etc.
 
 **How to run**
 
-1. Set `RETELL_API_KEY` in `.env` or `.env.local` (or export it).
-2. From the project root: `npm run create-retell-agents` (compiles the script with `tsc` then runs it with Node; no extra tools needed).
-3. The script prints each industry's `agent_id`, `conversation_flow_id`, and `version`, and writes **`retell-agents-by-industry.json`** in the project root (gitignored).
+1. Set `RETELL_API_KEY` in `.env` or `.env.local`.
+2. From the project root: **`npx tsx scripts/setup-retell-agents.ts`**
+3. Copy the printed `RETELL_AGENT_ID=...` and `RETELL_AGENT_ID_<INDUSTRY>=...` lines into your env.
 
 **Using the result**
 
-- Pick one agent (e.g. for your shared intake) and set `RETELL_AGENT_ID` to its `agent_id`.
-- Attach your shared intake phone number to that agent in the Retell dashboard (or via their API).
-- The same logic lives in `lib/retell.ts`: `createAgentAndFlowForIndustry(apiKey, industry, options?)` if you want to call it from other scripts or APIs.
+- Add the printed env vars to `.env.local` or Vercel. Attach your intake phone number(s) to the desired agent(s) in the Retell dashboard (or via API).
+- On each inbound call, the app sends `dynamic_variables` and `agent_override` (e.g. `begin_message`, `voice_speed`, `max_call_duration_ms`) so saved settings modify the agent without editing the saved agent in Retell.
 
 ---
 

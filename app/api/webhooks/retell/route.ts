@@ -109,7 +109,18 @@ export async function POST(req: NextRequest) {
       })
       
       if (!client || !agentId) {
-        // Block call: no override_agent_id = Retell rejects, so ex-trial/unknown numbers don't use Retell minutes
+        // Block call: no override_agent_id = Retell rejects → caller hears unavailable / disconnect
+        const reason = !agentId
+          ? "No agent ID configured (set RETELL_AGENT_ID or RETELL_AGENT_ID_<INDUSTRY> in env)"
+          : "No business found for this call (to_number not in retellPhoneNumber, forwarded_from not in primaryForwardingNumber, and no ACTIVE fallback business)"
+        console.warn("Retell inbound rejected — caller will hear unavailable:", {
+          reason,
+          to_number: toNumber,
+          from_number: fromNumber,
+          forwarded_from: forwardedFrom,
+          clientFound: !!client,
+          agentIdConfigured: !!process.env.RETELL_AGENT_ID,
+        })
         const normalizedFrom = normalizeE164(forwardedFrom)
         if (normalizedFrom) {
           const paused = await db.business.findFirst({
@@ -125,8 +136,16 @@ export async function POST(req: NextRequest) {
       const forwardedFromNormalized = normalizeE164(forwardedFrom) ?? forwardedFrom
       const settings = mergeWithDefaults((client as any).settings as Partial<BusinessSettings> | null)
       const businessName = settings.greeting.businessNamePronunciation || String(client.name ?? "").trim() || "our office"
-      
-      // Dynamic variables for agent placeholder substitution
+
+      // Greeting: use custom greeting if set, else default
+      const beginMessage = settings.greeting.customGreeting
+        ? settings.greeting.customGreeting.replace(/\[business\]/gi, businessName)
+        : `Thanks for calling ${businessName}! Who am I speaking with today?`
+
+      // Dynamic variables for agent placeholder substitution — all saved settings that can affect agent behavior
+      const serviceAreas = Array.isArray((client as { serviceAreas?: string[] }).serviceAreas)
+        ? (client as { serviceAreas: string[] }).serviceAreas.join(", ")
+        : ""
       const dynamicVars: Record<string, string> = {
         business_name: businessName,
         BUSINESS_NAME: businessName,
@@ -134,19 +153,70 @@ export async function POST(req: NextRequest) {
         BusinessName: businessName,
         name: businessName,
         Name: businessName,
+        service_areas: serviceAreas,
         tone: settings.greeting.tone,
+        question_depth: settings.questionDepth,
+        after_hours_behavior: settings.availability.afterHoursBehavior,
+        voice_style: settings.greeting.voiceStyle ?? "",
+        voice_gender: settings.greeting.voiceGender ?? "",
+        // Intake: which fields to collect (agent prompt can use these)
+        intake_fields: JSON.stringify(settings.intakeFields),
+        intake_template: settings.intakeTemplate ?? "generic",
+        // Booking
+        booking_ask_appointment: String(settings.booking.askForAppointment),
+        booking_offer_time_windows: String(settings.booking.offerTimeWindows),
+        booking_exact_slot: settings.booking.exactSlotVsPreference,
+        booking_min_notice_hours: String(settings.booking.minNoticeHours),
+        booking_same_day_allowed: String(settings.booking.sameDayAllowed),
+        booking_emergency_override: String(settings.booking.emergencyOverride),
+        // Lead tags (for classification instructions)
+        lead_tags: settings.leadTags.customTags.join(", "),
+        priority_rules: JSON.stringify(settings.leadTags.priorityRules),
+        // Voice & brand (instruction hints for LLM)
+        always_say: settings.voiceBrand.alwaysSay.join("; "),
+        never_say: settings.voiceBrand.neverSay.join("; "),
+        compliance_phrases: settings.voiceBrand.compliancePhrases.join("; "),
+        // AI behavior (so agent can respect limits)
+        max_call_length_minutes: String(settings.aiBehavior.maxCallLengthMinutes),
+        question_retry_count: String(settings.aiBehavior.questionRetryCount),
+        escalate_after_retries: String(settings.aiBehavior.escalateToHumanAfterRetries),
+        // Call routing hints
+        emergency_forward: String(settings.callRouting.emergencyForward),
+        emergency_forward_number: settings.callRouting.emergencyForwardNumber ?? "",
+        spam_handling: settings.callRouting.spamHandling,
       }
-      
-      // Greeting: use custom greeting if set, else default
-      const beginMessage = settings.greeting.customGreeting
-        ? settings.greeting.customGreeting.replace(/\[business\]/gi, businessName)
-        : `Thanks for calling ${businessName}! Who am I speaking with today?`
-      
+
+      // Agent override: per-call overrides so saved settings modify Retell agent without editing the saved agent
+      const agentOverride: {
+        agent?: Record<string, unknown>
+        retell_llm?: { begin_message: string; model_temperature?: number }
+        conversation_flow?: { begin_message: string; model_temperature?: number }
+      } = {
+        retell_llm: { begin_message: beginMessage },
+        conversation_flow: { begin_message: beginMessage },
+      }
+
+      // Voice speed: Retell typically 0.5–2; we store 0–1 in voiceBrand.speed → map to 0.75–1.5
+      const voiceSpeed = 0.75 + (settings.voiceBrand.speed ?? 0.5) * 0.75
+      agentOverride.agent = {
+        voice_speed: Math.round(voiceSpeed * 100) / 100,
+        interruption_sensitivity: settings.aiBehavior.interruptTolerance ?? 0.5,
+        max_call_duration_ms: Math.min(
+          Math.max(60_000, (settings.aiBehavior.maxCallLengthMinutes ?? 10) * 60 * 1000),
+          3600000
+        ), // 1 min–60 min cap
+      }
+
+      // Optional: model_temperature from voice/conciseness (0–1 → typical 0.2–0.8)
+      const temperature = 0.2 + (settings.voiceBrand.conciseness ?? 0.5) * 0.6
+      agentOverride.retell_llm!.model_temperature = Math.round(temperature * 100) / 100
+      agentOverride.conversation_flow!.model_temperature = agentOverride.retell_llm.model_temperature
+
       const response = {
         call_inbound: {
           override_agent_id: agentId,
-          metadata: { 
-            client_id: client.id, 
+          metadata: {
+            client_id: client.id,
             forwarded_from_number: forwardedFromNormalized,
             resolved_business_name: businessName,
             tone: settings.greeting.tone,
@@ -154,14 +224,7 @@ export async function POST(req: NextRequest) {
             after_hours_behavior: settings.availability.afterHoursBehavior,
           },
           dynamic_variables: dynamicVars,
-          agent_override: {
-            retell_llm: { 
-              begin_message: beginMessage,
-            },
-            conversation_flow: { 
-              begin_message: beginMessage,
-            },
-          },
+          agent_override: agentOverride,
         },
       }
       
@@ -450,7 +513,12 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
 
   try {
     if (hasCrmForwarding(planType)) {
-      await forwardToCrm(business, call, structuredIntake as any)
+      const crmWebhookUrl = business.crmWebhookUrl ?? callSettings.crm.crmWebhookUrl ?? null
+      await forwardToCrm(
+        { ...business, crmWebhookUrl, forwardToEmail: business.forwardToEmail ?? null },
+        call,
+        structuredIntake as any
+      )
       // Also send to Zapier if configured
       const zapierUrl = callSettings.crm.zapierWebhookUrl
       if (zapierUrl) {

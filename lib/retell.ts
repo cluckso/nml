@@ -6,6 +6,7 @@ import {
   hasBrandedVoice,
   hasMultiDepartment,
 } from "./plans"
+import { RETELL_GLOBAL_PROMPT_TEMPLATE } from "./retell-agent-template"
 
 const RETELL_API_BASE = process.env.RETELL_API_BASE ?? "https://api.retellai.com"
 
@@ -778,5 +779,96 @@ function buildGenericFlow(businessName: string): any {
         instruction: { type: "prompt", text: `Thanks {{Name}}. We'll be in touch. Thank you for calling ${businessName}.` },
       },
     ],
+  }
+}
+
+// ─── Template agents (for API setup with {{variable}} formatting) ─────────────────────────────
+
+/**
+ * Build a conversation flow whose prompts use {{business_name}}, {{Name}}, etc.
+ * Used when creating agents via API so each inbound call gets values from the webhook dynamic_variables.
+ */
+export function buildTemplateConversationFlow(industry: Industry): {
+  start_node_id: string
+  start_speaker: "agent"
+  nodes: any[]
+} {
+  const placeholder = "{{business_name}}"
+  switch (industry) {
+    case Industry.AUTO_REPAIR:
+      return buildTemplateFlowFromExisting(buildAutoRepairFlow(placeholder))
+    case Industry.CHILDCARE:
+      return buildTemplateFlowFromExisting(buildChildcareFlow(placeholder))
+    case Industry.GENERIC:
+      return buildTemplateFlowFromExisting(buildGenericFlow(placeholder))
+    case Industry.HVAC:
+    case Industry.PLUMBING:
+    case Industry.ELECTRICIAN:
+    case Industry.HANDYMAN:
+    default:
+      return buildTemplateFlowFromExisting(buildPropertyServiceFlow(placeholder, ["{{service_areas}}"]))
+  }
+}
+
+function buildTemplateFlowFromExisting(flow: { start_node_id: string; start_speaker: string; nodes: any[] }) {
+  return {
+    start_node_id: flow.start_node_id,
+    start_speaker: flow.start_speaker as "agent",
+    nodes: flow.nodes,
+  }
+}
+
+/**
+ * Create one Retell conversation flow + agent for an industry using the template global prompt
+ * and flow nodes that use {{business_name}}, {{tone}}, etc. Set the returned agent_id in env
+ * (e.g. RETELL_AGENT_ID or RETELL_AGENT_ID_HVAC).
+ */
+export async function createTemplateAgentForIndustry(
+  apiKey: string,
+  industry: Industry,
+  options?: { agentName?: string; voiceId?: string }
+): Promise<{ agent_id: string; conversation_flow_id: string; version: number }> {
+  const flow = buildTemplateConversationFlow(industry)
+  const { conversation_flow_id, version } = await createConversationFlow(apiKey, {
+    ...flow,
+    global_prompt: RETELL_GLOBAL_PROMPT_TEMPLATE,
+  })
+
+  const agentName = options?.agentName ?? `NeverMissLead ${industry}`
+  const voiceId = options?.voiceId ?? "11labs-Chloe"
+
+  const response = await fetch(`${RETELL_API_BASE}/create-agent`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      agent_name: agentName,
+      language: "en-US",
+      voice_id: voiceId,
+      voice_temperature: 0.98,
+      voice_speed: 0.98,
+      volume: 0.94,
+      max_call_duration_ms: 3600000,
+      interruption_sensitivity: 0.9,
+      response_engine: {
+        type: "conversation-flow",
+        conversation_flow_id,
+        version: version ?? 0,
+      },
+    }),
+  })
+
+  if (!response.ok) {
+    const err = await response.text()
+    throw new Error(`Retell create-agent failed: ${err}`)
+  }
+
+  const result = await response.json()
+  return {
+    agent_id: result.agent_id,
+    conversation_flow_id,
+    version: result.response_engine?.version ?? version ?? 0,
   }
 }

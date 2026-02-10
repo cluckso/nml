@@ -8,7 +8,27 @@ import Link from "next/link"
 import { SettingsClient } from "@/components/settings/SettingsClient"
 
 export default async function SettingsPage() {
-  const user = await requireAuth()
+  let user
+  try {
+    user = await requireAuth()
+  } catch (err) {
+    console.error("Settings page auth error:", err)
+    const msg = err instanceof Error ? err.message : ""
+    const isSchema = /column|Unknown arg|does not exist/i.test(msg)
+    if (isSchema) {
+      return (
+        <div className="container mx-auto max-w-2xl py-12 px-4 text-center">
+          <h1 className="text-xl font-semibold mb-2">Configuration update required</h1>
+          <p className="text-muted-foreground mb-4">
+            The database is missing recent updates. Please run the migration <code className="text-sm bg-muted px-1 rounded">prisma/add_sms_consent.sql</code> in your database (e.g. Supabase SQL editor), then refresh.
+          </p>
+          <Link href="/dashboard" className="text-primary underline">Back to dashboard</Link>
+        </div>
+      )
+    }
+    throw err
+  }
+
   const business = user.businessId
     ? await db.business.findUnique({
         where: { id: user.businessId },
