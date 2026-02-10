@@ -92,9 +92,9 @@ export async function POST(req: NextRequest) {
         }
       }
       
-      // Agent: prefer industry-specific (RETELL_AGENT_ID_HVAC, etc.), else number-based, else RETELL_AGENT_ID
+      // Agent: prefer business's dedicated agent (one per business), else industry/env fallback for legacy
       const agentId = client
-        ? (getAgentIdForIndustry(client.industry) ?? getAgentIdForInbound(toNumber))
+        ? (client.retellAgentId ?? getAgentIdForIndustry(client.industry) ?? getAgentIdForInbound(toNumber))
         : getAgentIdForInbound(toNumber)
       
       console.info("Retell call_inbound resolution:", {
@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
       if (!client || !agentId) {
         // Block call: no override_agent_id = Retell rejects → caller hears unavailable / disconnect
         const reason = !agentId
-          ? "No agent ID configured (set RETELL_AGENT_ID or RETELL_AGENT_ID_<INDUSTRY> in env)"
+          ? "No agent ID (business has no retellAgentId and RETELL_AGENT_ID / RETELL_AGENT_ID_<INDUSTRY> not set)"
           : "No business found for this call (to_number not in retellPhoneNumber, forwarded_from not in primaryForwardingNumber, and no ACTIVE fallback business)"
         console.warn("Retell inbound rejected — caller will hear unavailable:", {
           reason,

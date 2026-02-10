@@ -76,6 +76,7 @@ model Business {
   industry                  Industry
   primaryForwardingNumber   String        @unique // E.164; the business's own phone that forwards to AI
   retellPhoneNumber         String?       @unique // E.164; dedicated Retell number for this business (to_number in webhook)
+  retellAgentId             String?       // Dedicated Retell agent for this business (one agent per business)
   stripeCustomerId          String?       @unique
   serviceAreas              String[]      @default([])
   businessHours             Json?         // { open: "09:00", close: "17:00", days: ["monday", "tuesday", ...] }

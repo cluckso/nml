@@ -113,6 +113,155 @@ export async function createRetellAgent(
   }
 }
 
+/** Same as CreateAgentRequest; used when provisioning agent+number from onboarding. */
+export interface BusinessForProvisioning {
+  name: string
+  industry: Industry
+  serviceAreas: string[]
+  planType?: PlanType | null
+  businessHours?: BusinessHoursInput
+  departments?: string[]
+  afterHoursEmergencyPhone?: string | null
+}
+
+/**
+ * Create a Retell agent (and flow) for a business without assigning a phone number.
+ * Used by provisionAgentAndNumberForBusiness to create one agent per business.
+ */
+export async function createRetellAgentOnly(
+  data: CreateAgentRequest | BusinessForProvisioning
+): Promise<string> {
+  const apiKey = process.env.RETELL_API_KEY
+  if (!apiKey) throw new Error("RETELL_API_KEY is not configured")
+
+  const name = "businessName" in data ? data.businessName : data.name
+  const globalPrompt = generatePrompt(
+    name,
+    data.industry,
+    data.serviceAreas,
+    {
+      businessHours: data.businessHours ?? undefined,
+      departments: data.departments?.length ? data.departments : undefined,
+      afterHoursEmergencyPhone: data.afterHoursEmergencyPhone ?? undefined,
+      includeAppointmentCapture: data.planType ? hasAppointmentCapture(data.planType) : false,
+    }
+  )
+
+  const flow = buildConversationFlow(name, data.industry, data.serviceAreas)
+  const { conversation_flow_id, version } = await createConversationFlow(apiKey, {
+    ...flow,
+    global_prompt: globalPrompt,
+  })
+
+  const voiceId =
+    data.planType && hasBrandedVoice(data.planType) ? "11labs-Adam" : "11labs-Chloe"
+  const agentPayload = {
+    agent_name: name,
+    language: "en-US" as const,
+    voice_id: voiceId,
+    voice_temperature: 0.98,
+    voice_speed: 0.98,
+    volume: 0.94,
+    max_call_duration_ms: 3600000,
+    interruption_sensitivity: 0.9,
+    response_engine: {
+      type: "conversation-flow" as const,
+      conversation_flow_id,
+      version: version ?? 0,
+    },
+  }
+
+  const response = await fetch(`${RETELL_API_BASE}/create-agent`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(agentPayload),
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`Failed to create Retell agent: ${error}`)
+  }
+
+  const result = await response.json()
+  return result.agent_id
+}
+
+/**
+ * Create a dedicated Retell agent for the business and assign a phone number (recycled or new).
+ * Use this in onboarding so each business gets a unique agent and number.
+ * Returns { agent_id, phone_number } or null if provisioning fails.
+ */
+export async function provisionAgentAndNumberForBusiness(
+  business: BusinessForProvisioning,
+  areaCode?: number
+): Promise<{ agent_id: string; phone_number: string } | null> {
+  const apiKey = process.env.RETELL_API_KEY
+  if (!apiKey) {
+    console.error("provisionAgentAndNumberForBusiness: RETELL_API_KEY not configured")
+    return null
+  }
+
+  const request: CreateAgentRequest = {
+    businessName: business.name,
+    industry: business.industry,
+    serviceAreas: business.serviceAreas,
+    planType: business.planType ?? undefined,
+    businessHours: business.businessHours,
+    departments: business.departments ?? [],
+    afterHoursEmergencyPhone: business.afterHoursEmergencyPhone ?? undefined,
+  }
+
+  let agent_id: string
+  try {
+    agent_id = await createRetellAgentOnly(request)
+  } catch (err) {
+    console.error("provisionAgentAndNumberForBusiness: createRetellAgentOnly failed:", err)
+    return null
+  }
+
+  const effectiveAreaCode =
+    areaCode ?? (process.env.RETELL_DEFAULT_AREA_CODE ? parseInt(process.env.RETELL_DEFAULT_AREA_CODE, 10) : 415)
+
+  // Prefer recycled number; otherwise purchase a new one
+  const recycled = await db.recycledRetellNumber.findFirst({
+    orderBy: { releasedAt: "asc" },
+  })
+
+  let phone_number: string
+  if (recycled) {
+    await db.recycledRetellNumber.delete({ where: { id: recycled.id } })
+    try {
+      await updatePhoneNumber(apiKey, recycled.phoneNumber, agent_id)
+      phone_number = recycled.phoneNumber
+      console.info("Reused recycled Retell number for new agent:", phone_number, "agent:", agent_id)
+    } catch (err) {
+      console.error("Failed to attach recycled number to new agent, re-adding to pool:", err)
+      await db.recycledRetellNumber.create({
+        data: { phoneNumber: recycled.phoneNumber },
+      })
+      try {
+        phone_number = await createPhoneNumber(apiKey, agent_id, effectiveAreaCode)
+      } catch (createErr) {
+        console.error("createPhoneNumber fallback failed:", createErr)
+        return null
+      }
+    }
+  } else {
+    try {
+      phone_number = await createPhoneNumber(apiKey, agent_id, effectiveAreaCode)
+      console.info("Provisioned new Retell number for business agent:", phone_number, "agent:", agent_id)
+    } catch (err) {
+      console.error("provisionAgentAndNumberForBusiness: createPhoneNumber failed:", err)
+      return null
+    }
+  }
+
+  return { agent_id, phone_number }
+}
+
 /**
  * Release a business's Retell number into the recycle pool so it can be reused.
  * Call when a business churns (trial end) or cancels subscription.
@@ -120,7 +269,7 @@ export async function createRetellAgent(
 export async function releaseRetellNumber(businessId: string): Promise<void> {
   const business = await db.business.findUnique({
     where: { id: businessId },
-    select: { retellPhoneNumber: true, name: true },
+    select: { retellPhoneNumber: true, retellAgentId: true, name: true },
   })
   if (!business?.retellPhoneNumber) return
 
@@ -133,7 +282,7 @@ export async function releaseRetellNumber(businessId: string): Promise<void> {
     }),
     db.business.update({
       where: { id: businessId },
-      data: { retellPhoneNumber: null },
+      data: { retellPhoneNumber: null, retellAgentId: null },
     }),
   ])
   console.info("Released Retell number to pool:", number, "business:", business.name)

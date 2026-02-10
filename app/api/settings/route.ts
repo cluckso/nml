@@ -9,6 +9,7 @@ import {
   type SettingsSection,
 } from "@/lib/business-settings"
 import { getEffectivePlanType } from "@/lib/plans"
+import { syncRetellAgentFromBusiness } from "@/lib/retell"
 
 /** GET /api/settings — return current business settings (merged with defaults). */
 export async function GET(req: NextRequest) {
@@ -71,6 +72,30 @@ export async function PATCH(req: NextRequest) {
       where: { id: user.businessId },
       data: { settings: updated as any },
     })
+
+    // Sync per-business Retell agent so saved settings (greeting, tone, etc.) apply to the agent
+    const businessForSync = await db.business.findUnique({
+      where: { id: user.businessId },
+      select: {
+        name: true,
+        industry: true,
+        serviceAreas: true,
+        businessHours: true,
+        departments: true,
+        afterHoursEmergencyPhone: true,
+        voiceSettings: true,
+        retellAgentId: true,
+        planType: true,
+      },
+    })
+    if (businessForSync?.retellAgentId) {
+      try {
+        await syncRetellAgentFromBusiness(businessForSync)
+      } catch (err) {
+        console.error("Settings PATCH: syncRetellAgentFromBusiness failed:", err)
+        // Still return 200; settings were saved
+      }
+    }
 
     return NextResponse.json({ settings: updated })
   } catch (error) {
