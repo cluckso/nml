@@ -59,6 +59,7 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
   const router = useRouter()
   const [step, setStep] = useState<OnboardingStep>("industry")
   const [data, setData] = useState<OnboardingData>({ industry: initialIndustry ?? undefined })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleIndustrySelect = async (industry: Industry) => {
     setData({ ...data, industry })
@@ -82,6 +83,7 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
       setStep("manual-setup")
       return
     }
+    setIsSubmitting(true)
     try {
       const response = await fetch("/api/onboarding", {
         method: "POST",
@@ -100,6 +102,8 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
       console.error("Error saving onboarding:", error)
       const message = error instanceof Error ? error.message : "Failed to save. Please try again."
       alert(message)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -202,6 +206,7 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
               onSubmit={handleBusinessInfoSubmit}
               onBack={() => setStep("industry")}
               planType={planType}
+              disabled={isSubmitting}
             />
           </div>
         )}

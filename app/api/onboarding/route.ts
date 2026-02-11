@@ -131,9 +131,15 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    // Provision a dedicated Retell agent + phone number for this business (one agent per business)
-    let retellPhoneNumber = business.retellPhoneNumber
-    let retellAgentId = business.retellAgentId
+    // Provision a dedicated Retell agent + phone number for this business (one agent per business).
+    // Re-fetch before provisioning to avoid creating 2 agents/numbers on double-submit or retry.
+    const fresh = await db.business.findUnique({
+      where: { id: business.id },
+      select: { retellAgentId: true, retellPhoneNumber: true },
+    })
+    let retellPhoneNumber = fresh?.retellPhoneNumber ?? business.retellPhoneNumber
+    let retellAgentId = fresh?.retellAgentId ?? business.retellAgentId
+
     if (!retellAgentId || !retellPhoneNumber) {
       console.info("Provisioning Retell agent and number for business:", business.id, business.name)
       const provisioned = await provisionAgentAndNumberForBusiness({
@@ -147,16 +153,26 @@ export async function POST(req: NextRequest) {
       })
 
       if (provisioned) {
-        retellAgentId = provisioned.agent_id
-        retellPhoneNumber = provisioned.phone_number
-        await db.business.update({
+        // Check again in case a concurrent request already saved (avoid overwriting with a second set).
+        const beforeUpdate = await db.business.findUnique({
           where: { id: business.id },
-          data: { retellAgentId, retellPhoneNumber },
+          select: { retellAgentId: true, retellPhoneNumber: true },
         })
-        console.info("Assigned Retell agent and number to business:", retellAgentId, retellPhoneNumber, business.id)
+        if (beforeUpdate?.retellAgentId && beforeUpdate?.retellPhoneNumber) {
+          retellAgentId = beforeUpdate.retellAgentId
+          retellPhoneNumber = beforeUpdate.retellPhoneNumber
+          console.info("Retell already assigned by concurrent request, skipping save:", business.id)
+        } else {
+          retellAgentId = provisioned.agent_id
+          retellPhoneNumber = provisioned.phone_number
+          await db.business.update({
+            where: { id: business.id },
+            data: { retellAgentId, retellPhoneNumber },
+          })
+          console.info("Assigned Retell agent and number to business:", retellAgentId, retellPhoneNumber, business.id)
+        }
       } else {
         console.warn("Failed to provision Retell agent/number for business:", business.id)
-        // Continue without - will fall back to shared agent/number or single-tenant mode
       }
     }
 

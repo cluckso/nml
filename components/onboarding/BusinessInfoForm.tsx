@@ -32,6 +32,8 @@ interface BusinessInfoFormProps {
   onBack?: () => void
   /** Plan type from subscription — only show Pro/Local Plus fields when relevant */
   planType?: "STARTER" | "PRO" | "LOCAL_PLUS" | null
+  /** Disable submit (e.g. while saving) to prevent double-submit */
+  disabled?: boolean
 }
 
 export function BusinessInfoForm({
@@ -39,6 +41,7 @@ export function BusinessInfoForm({
   onSubmit,
   onBack,
   planType = null,
+  disabled = false,
 }: BusinessInfoFormProps) {
   const showProFeatures = planType === "PRO" || planType === "LOCAL_PLUS"
   const showLocalPlusFeatures = false
@@ -63,9 +66,7 @@ export function BusinessInfoForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!formData.serviceAreas.length) {
-      return
-    }
+    if (disabled || !formData.serviceAreas.length) return
     onSubmit(formData)
   }
 
@@ -303,8 +304,8 @@ export function BusinessInfoForm({
             Back
           </Button>
         )}
-        <Button type="submit" className="flex-1">
-          Continue
+        <Button type="submit" className="flex-1" disabled={disabled}>
+          {disabled ? "Saving…" : "Continue"}
         </Button>
       </div>
     </form>
