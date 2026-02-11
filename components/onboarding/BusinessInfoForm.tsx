@@ -171,7 +171,7 @@ export function BusinessInfoForm({
         <SmsConsentCheckbox
           checked={formData.smsConsent ?? false}
           onChange={(checked) => setFormData({ ...formData, smsConsent: checked })}
-          businessName={formData.name || "NeverMissLead-AI"}
+          businessName={formData.name || "CallGrabbr"}
         />
       </div>
 

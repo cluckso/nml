@@ -1,6 +1,6 @@
-# NeverMissLead Dashboard (Flutter)
+# CallGrabbr Dashboard (Flutter)
 
-Mobile dashboard app for NeverMissLead — sign in with your account, view usage stats, and recent calls.
+Mobile dashboard app for CallGrabbr — sign in with your account, view usage stats, and recent calls.
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ Mobile dashboard app for NeverMissLead — sign in with your account, view usage
 
 2. **Generate platform folders** (if you cloned without them)
    ```bash
-   flutter create . --project-name nevermisslead_dashboard
+   flutter create . --project-name callgrabbr_dashboard
    ```
 
 3. **Configure environment**

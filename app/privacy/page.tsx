@@ -2,8 +2,8 @@ import type { Metadata } from "next"
 import Link from "next/link"
 
 export const metadata: Metadata = {
-  title: "Privacy Policy - NeverMissLead-AI",
-  description: "Privacy policy for NeverMissLead-AI.",
+  title: "Privacy Policy - CallGrabbr",
+  description: "Privacy policy for CallGrabbr.",
 }
 
 export default function PrivacyPage() {
@@ -18,7 +18,7 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-xl font-semibold text-foreground mb-2">1. Introduction</h2>
           <p>
-            NeverMissLead-AI (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) provides AI-powered call answering and lead intake services for businesses. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website and services.
+            CallGrabbr (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;) provides AI-powered call answering and lead intake services for businesses. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our website and services.
           </p>
         </section>
 
@@ -77,7 +77,7 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-xl font-semibold text-foreground mb-2">8. SMS / Text Messaging</h2>
           <p className="mb-2">
-            If you opt in to receive SMS/text messages from NeverMissLead-AI, you agree to receive automated text messages at the phone number you provided. These messages may include:
+            If you opt in to receive SMS/text messages from CallGrabbr, you agree to receive automated text messages at the phone number you provided. These messages may include:
           </p>
           <ul className="list-disc pl-6 space-y-1 mt-2">
             <li>Call notifications and lead alerts</li>

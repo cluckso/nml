@@ -6,14 +6,14 @@ interface SmsConsentCheckboxProps {
   checked: boolean
   onChange: (checked: boolean) => void
   disabled?: boolean
-  /** Business name shown in disclosure (use "NeverMissLead-AI" for sign-up, actual name for onboarding) */
+  /** Business name shown in disclosure (use "CallGrabbr" for sign-up, actual name for onboarding) */
   businessName?: string
 }
 
 /**
  * Twilio toll-free verification compliant SMS opt-in checkbox.
  * Shows clear disclosure of:
- * - Who is sending messages (NeverMissLead-AI on behalf of the business)
+ * - Who is sending messages (CallGrabbr on behalf of the business)
  * - What messages they'll receive
  * - Message frequency
  * - Data rates may apply
@@ -24,7 +24,7 @@ export function SmsConsentCheckbox({
   checked,
   onChange,
   disabled,
-  businessName = "NeverMissLead-AI",
+  businessName = "CallGrabbr",
 }: SmsConsentCheckboxProps) {
   return (
     <div className="space-y-1">

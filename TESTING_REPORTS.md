@@ -66,6 +66,6 @@ Without `?businessId=...`, it sends to **all** Local Plus businesses (same as cr
 | Variable            | Purpose |
 |---------------------|--------|
 | `RESEND_API_KEY`    | Required for sending (Resend dashboard). |
-| `RESEND_FROM_EMAIL` | Optional. From address (e.g. verified domain). Default: `NeverMissLead-AI <notifications@nevermisslead.ai>`. |
+| `RESEND_FROM_EMAIL` | Optional. From address (e.g. verified domain). Default: `CallGrabbr <notifications@callgrabbr.com>`. |
 | `RESEND_TEST_TO`    | Optional. In test mode, send the report to this email instead of the business owner. **Use your Resend account email** when you don’t have a verified domain (Resend only allows sending to that address in sandbox). |
 | `CRON_SECRET`       | Required for non-test calls; set when using cron or production-like testing. |

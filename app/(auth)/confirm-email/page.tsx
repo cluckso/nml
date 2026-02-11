@@ -50,7 +50,7 @@ function ConfirmEmailContent() {
             <p className="font-medium text-foreground mb-1">What to do next</p>
             <ol className="list-decimal list-inside space-y-1">
               <li>Open your email inbox{email ? ` for ${email}` : ""}.</li>
-              <li>Find the message from NeverMissLead-AI (subject: &quot;Confirm your signup&quot; or similar).</li>
+              <li>Find the message from CallGrabbr (subject: &quot;Confirm your signup&quot; or similar).</li>
               <li>Click the confirmation link in that email.</li>
               <li>You&apos;ll be signed in and can start your free trial or set up your business.</li>
             </ol>

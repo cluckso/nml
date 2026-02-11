@@ -164,7 +164,7 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
   return (
     <div className="container mx-auto max-w-4xl py-12">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Welcome to NeverMissLead-AI</h1>
+        <h1 className="text-3xl font-bold mb-2">Welcome to CallGrabbr</h1>
         <p className="text-muted-foreground">
           Set up your business in a few minutes. {planType ? "You've already chosen your plan." : "You're on the free trial — 50 minutes or 4 days, whichever comes first. Upgrade anytime from Billing."}
         </p>

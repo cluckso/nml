@@ -64,7 +64,7 @@ function SignInContent() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Sign In</CardTitle>
-          <CardDescription>Sign in to your NeverMissLead-AI account</CardDescription>
+          <CardDescription>Sign in to your CallGrabbr account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignIn} className="space-y-4">

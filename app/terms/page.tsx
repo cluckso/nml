@@ -2,8 +2,8 @@ import type { Metadata } from "next"
 import Link from "next/link"
 
 export const metadata: Metadata = {
-  title: "Terms of Service - NeverMissLead-AI",
-  description: "Terms of service for NeverMissLead-AI.",
+  title: "Terms of Service - CallGrabbr",
+  description: "Terms of service for CallGrabbr.",
 }
 
 export default function TermsPage() {
@@ -18,14 +18,14 @@ export default function TermsPage() {
         <section>
           <h2 className="text-xl font-semibold text-foreground mb-2">1. Acceptance</h2>
           <p>
-            By creating an account, subscribing, or using NeverMissLead-AI (&quot;Service,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;), you agree to these Terms of Service (&quot;Terms&quot;). If you do not agree, do not use the Service. By completing a subscription purchase, you confirm that you have read, understood, and agree to these Terms and our Privacy Policy.
+            By creating an account, subscribing, or using CallGrabbr (&quot;Service,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;), you agree to these Terms of Service (&quot;Terms&quot;). If you do not agree, do not use the Service. By completing a subscription purchase, you confirm that you have read, understood, and agree to these Terms and our Privacy Policy.
           </p>
         </section>
 
         <section>
           <h2 className="text-xl font-semibold text-foreground mb-2">2. Description of Service</h2>
           <p>
-            NeverMissLead-AI provides AI-powered call answering, lead intake, call summaries, and related features for businesses. We use third-party providers (e.g., telephony, AI, payments) to deliver the Service. We reserve the right to modify, suspend, or discontinue features with reasonable notice where practicable.
+            CallGrabbr provides AI-powered call answering, lead intake, call summaries, and related features for businesses. We use third-party providers (e.g., telephony, AI, payments) to deliver the Service. We reserve the right to modify, suspend, or discontinue features with reasonable notice where practicable.
           </p>
         </section>
 
@@ -53,7 +53,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-xl font-semibold text-foreground mb-2">6. SMS / Text Messaging</h2>
           <p className="mb-2">
-            By opting in to SMS notifications during account signup, trial registration, or onboarding, you consent to receive automated text messages from NeverMissLead-AI at the phone number you provided. Messages may include call notifications, lead alerts, account updates, and trial/billing reminders.
+            By opting in to SMS notifications during account signup, trial registration, or onboarding, you consent to receive automated text messages from CallGrabbr at the phone number you provided. Messages may include call notifications, lead alerts, account updates, and trial/billing reminders.
           </p>
           <p className="mt-2">
             <strong className="text-foreground">Frequency:</strong> Message frequency varies based on call volume and account activity.

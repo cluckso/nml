@@ -8,7 +8,7 @@
 
 2. **Create a New Application**
    - Click "Create Application"
-   - Choose a name (e.g., "NeverMissLead-AI")
+   - Choose a name (e.g., "CallGrabbr")
    - Select authentication methods (Email/Password is fine for now)
    - Click "Create Application"
 

@@ -1,4 +1,4 @@
-# Stripe Setup for NeverMissLead-AI
+# Stripe Setup for CallGrabbr
 
 Your app uses Stripe for:
 
@@ -16,7 +16,7 @@ You need to create the products/prices in Stripe and set env vars so checkout an
 1. **Stripe Dashboard** → **Products** → **Add product**
 
 2. **Basic**
-   - Name: `Basic` (or "NeverMissLead Basic")
+   - Name: `Basic` (or "CallGrabbr Basic")
    - Add a **recurring** price:
      - **Price:** $99.00 USD
      - **Billing period:** Monthly

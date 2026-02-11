@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
       // Opt out the user
       await optOutByPhone(normalized)
       return twimlResponse(
-        "You have been unsubscribed from NeverMissLead-AI messages. You will not receive any more texts. Reply START to re-subscribe."
+        "You have been unsubscribed from CallGrabbr messages. You will not receive any more texts. Reply START to re-subscribe."
       )
     }
 
@@ -60,13 +60,13 @@ export async function POST(req: NextRequest) {
       // Re-opt-in the user
       await optInByPhone(normalized)
       return twimlResponse(
-        "You have been re-subscribed to NeverMissLead-AI messages. Reply STOP to unsubscribe. Msg & data rates may apply."
+        "You have been re-subscribed to CallGrabbr messages. Reply STOP to unsubscribe. Msg & data rates may apply."
       )
     }
 
     if (body === "HELP" || body === "INFO") {
       return twimlResponse(
-        "NeverMissLead-AI: Call alerts & lead notifications. Reply STOP to opt out. Msg & data rates may apply. For help, visit nevermisslead.ai or email support."
+        "CallGrabbr: Call alerts & lead notifications. Reply STOP to opt out. Msg & data rates may apply. For help, visit callgrabbr.com or email support."
       )
     }
 

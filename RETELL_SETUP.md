@@ -1,4 +1,4 @@
-# Retell Setup for NeverMissLead-AI
+# Retell Setup for CallGrabbr
 
 This app uses [Retell AI](https://www.retellai.com/) with a **shared agent and one intake number**. All clients forward their missed calls to the same number; the app routes each call to the correct client by the **forwarded-from** number. Call events (call_inbound, call_ended, call_analysis) are sent to your app via webhooks.
 

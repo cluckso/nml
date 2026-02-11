@@ -1,6 +1,6 @@
 # Flutter Dashboard App
 
-A Flutter mobile app for the NeverMissLead dashboard lives in **`dashboard_app/`**.
+A Flutter mobile app for the CallGrabbr dashboard lives in **`dashboard_app/`**.
 
 ## What was added
 
@@ -23,7 +23,7 @@ A Flutter mobile app for the NeverMissLead dashboard lives in **`dashboard_app/`
    ```bash
    cd dashboard_app
    flutter pub get
-   flutter create . --project-name nevermisslead_dashboard   # if platform folders are missing
+   flutter create . --project-name callgrabbr_dashboard   # if platform folders are missing
    flutter run --dart-define=API_BASE_URL=https://YOUR_APP.vercel.app --dart-define=SUPABASE_URL=https://YOUR_PROJECT.supabase.co --dart-define=SUPABASE_ANON_KEY=your-anon-key
    ```
 3. Use the same Supabase URL and anon key as in your Next.js app (e.g. from `.env`: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`).

@@ -67,7 +67,7 @@ export function Nav() {
           <Link href="/" className="flex items-center gap-2 text-foreground">
             <Image
               src="/icon.png"
-              alt="NeverMissLead"
+              alt="CallGrabbr"
               width={40}
               height={40}
               className="h-9 w-9 rounded-lg"

@@ -1,5 +1,5 @@
-name: nevermisslead_dashboard
-description: NeverMissLead dashboard app — view calls, usage, and billing.
+name: callgrabbr_dashboard
+description: CallGrabbr dashboard app — view calls, usage, and billing.
 publish_to: 'none'
 version: 1.0.0+1
 

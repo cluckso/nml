@@ -14,11 +14,11 @@ void main() async {
       anonKey: supabaseAnonKey,
     );
   }
-  runApp(const NeverMissLeadDashboardApp());
+  runApp(const CallGrabbrDashboardApp());
 }
 
-class NeverMissLeadDashboardApp extends StatelessWidget {
-  const NeverMissLeadDashboardApp({super.key});
+class CallGrabbrDashboardApp extends StatelessWidget {
+  const CallGrabbrDashboardApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,7 @@ class NeverMissLeadDashboardApp extends StatelessWidget {
         Provider<ApiService>(create: (_) => ApiService(auth)),
       ],
       child: MaterialApp(
-        title: 'NeverMissLead Dashboard',
+        title: 'CallGrabbr Dashboard',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
           useMaterial3: true,

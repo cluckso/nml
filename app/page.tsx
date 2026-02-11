@@ -29,13 +29,13 @@ export default function HomePage() {
             AI call answering for local service businesses
           </div>
           <h1 className="text-5xl md:text-6xl font-bold mb-4 tracking-tight">
-            NeverMissLead — AI That Answers Every Call and Books the Job
+            CallGrabbr — AI That Answers Every Call and Books the Job
           </h1>
           <p className="text-2xl font-semibold text-foreground/90 mb-4">
             Never miss another paying customer
           </p>
           <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
-            When you don&apos;t answer, they call the next company. NeverMissLead answers every call,
+            When you don&apos;t answer, they call the next company. CallGrabbr answers every call,
             captures the lead, and sends you the job details instantly — 24/7. No voicemail. No hold
             music. No lost revenue.
           </p>
@@ -368,7 +368,7 @@ export default function HomePage() {
       <section className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center mb-4">What Business Owners Say</h2>
         <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-12">
-          Local service pros use NeverMissLead to answer every call and capture leads.
+          Local service pros use CallGrabbr to answer every call and capture leads.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           <Card className="border-border/50 bg-card/50 backdrop-blur">
@@ -435,7 +435,7 @@ export default function HomePage() {
           </p>
           <Link href="/sign-up">
             <Button size="lg" variant="secondary" className="gap-2 bg-white text-primary hover:bg-white/90">
-              Activate NeverMissLead
+              Activate CallGrabbr
               <ArrowRight className="h-5 w-5" />
             </Button>
           </Link>

@@ -10,7 +10,7 @@ const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KE
 /** From address for report emails. Use RESEND_FROM_EMAIL in .env for testing (e.g. onboarding@resend.dev). */
 const REPORT_FROM =
   process.env.RESEND_FROM_EMAIL ||
-  "NeverMissLead-AI <notifications@nevermisslead.ai>"
+  "CallGrabbr <notifications@callgrabbr.com>"
 
 export type SendWeeklyReportOptions = {
   test?: boolean
@@ -141,7 +141,7 @@ export async function sendWeeklyReportForBusiness(
           ${revenueSection}
 
           <p style="margin-top: 30px; color: #6b7280; font-size: 14px;">
-            NeverMissLead-AI – ${frequencyLabel} report
+            CallGrabbr – ${frequencyLabel} report
           </p>
         </div>
       </body>

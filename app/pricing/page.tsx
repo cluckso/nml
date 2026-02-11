@@ -50,7 +50,7 @@ export default async function PricingPage() {
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">NeverMissLead — Pricing</h1>
+        <h1 className="text-4xl font-bold mb-4">CallGrabbr — Pricing</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
           Simple, usage-based pricing built for service businesses.
         </p>

@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button"
 
 export const metadata = {
-  title: "Help & FAQ - NeverMissLead-AI",
+  title: "Help & FAQ - CallGrabbr",
   description:
     "How to forward your business line to your AI call assistant. Step-by-step instructions by carrier.",
 }
@@ -142,7 +142,7 @@ const CARRIERS = [
           "Go to **voice.google.com** and sign in.",
           "Click the **gear icon (Settings)** in the top right.",
           "Under **Account**, open **Linked numbers**.",
-          "Click **+ New linked number** and enter your **AI assistant’s number** (the one from your NeverMissLead-AI dashboard).",
+          "Click **+ New linked number** and enter your **AI assistant’s number** (the one from your CallGrabbr dashboard).",
           "Click **Send code** and verify via text or call.",
           "Once linked, calls to your Google Voice number will also ring/forward to your AI number (and any other linked devices).",
           "To stop: go to **Settings** → **Linked numbers** and remove the AI number (click the X).",

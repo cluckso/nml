@@ -3,9 +3,9 @@ import Link from "next/link"
 import { PublicSmsOptInForm } from "@/components/consent/PublicSmsOptInForm"
 
 export const metadata: Metadata = {
-  title: "SMS Opt-In & Messaging Terms - NeverMissLead-AI",
+  title: "SMS Opt-In & Messaging Terms - CallGrabbr",
   description:
-    "SMS opt-in form and messaging terms for NeverMissLead-AI. Subscribe to call alerts and account notifications.",
+    "SMS opt-in form and messaging terms for CallGrabbr. Subscribe to call alerts and account notifications.",
 }
 
 /**
@@ -30,7 +30,7 @@ export default function SmsTermsPage() {
             Program Description
           </h2>
           <p>
-            NeverMissLead-AI provides AI-powered call answering and lead intake
+            CallGrabbr provides AI-powered call answering and lead intake
             for businesses. When you opt in to our SMS program, you will receive
             automated text messages related to:
           </p>
@@ -63,7 +63,7 @@ export default function SmsTermsPage() {
                 className="mt-1 rounded"
               />
               <span className="text-sm text-foreground">
-                I agree to receive SMS/text messages from NeverMissLead-AI
+                I agree to receive SMS/text messages from CallGrabbr
                 regarding call alerts, lead notifications, and account updates.
               </span>
             </label>
@@ -88,7 +88,7 @@ export default function SmsTermsPage() {
             The checkbox is <strong>not pre-checked</strong>. You must
             affirmatively select it before proceeding. Opting in is{" "}
             <strong>not required</strong> to purchase any service from
-            NeverMissLead-AI.
+            CallGrabbr.
           </p>
         </section>
 
@@ -181,13 +181,13 @@ export default function SmsTermsPage() {
             Contact
           </h2>
           <p>
-            NeverMissLead-AI
+            CallGrabbr
             <br />
-            Email: support@nevermisslead-ai.com
+            Email: support@callgrabbr.com
             <br />
             Website:{" "}
             <Link href="/" className="text-primary underline">
-              nevermisslead-ai.com
+              callgrabbr.com
             </Link>
           </p>
         </section>

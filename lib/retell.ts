@@ -1010,7 +1010,7 @@ export async function createTemplateAgentForIndustry(
     global_prompt: RETELL_GLOBAL_PROMPT_TEMPLATE,
   })
 
-  const agentName = options?.agentName ?? `NeverMissLead ${industry}`
+  const agentName = options?.agentName ?? `CallGrabbr ${industry}`
   const voiceId = options?.voiceId ?? "11labs-Chloe"
 
   const response = await fetch(`${RETELL_API_BASE}/create-agent`, {

@@ -1,4 +1,4 @@
-# Twilio Setup for NeverMissLead-AI
+# Twilio Setup for CallGrabbr
 
 Your app uses Twilio to send SMS:
 

@@ -39,7 +39,7 @@ export function PublicSmsOptInForm() {
     <section className="rounded-xl border-2 border-primary/20 bg-primary/5 p-6 mb-8">
       <h2 className="text-xl font-semibold text-foreground mb-1">SMS Opt-In</h2>
       <p className="text-sm text-muted-foreground mb-4">
-        Subscribe to receive SMS from NeverMissLead-AI (call alerts, lead notifications, account updates).
+        Subscribe to receive SMS from CallGrabbr (call alerts, lead notifications, account updates).
       </p>
 
       {status === "success" ? (
@@ -70,7 +70,7 @@ export function PublicSmsOptInForm() {
               required
             />
             <span className="text-sm">
-              I agree to receive SMS/text messages from NeverMissLead-AI regarding call alerts, lead notifications, and account updates.
+              I agree to receive SMS/text messages from CallGrabbr regarding call alerts, lead notifications, and account updates.
               Message and data rates may apply. Reply <strong>STOP</strong> to opt out, <strong>HELP</strong> for help.
               This consent is not a condition of purchase. I have read the{" "}
               <Link href="/privacy" className="text-primary underline">Privacy Policy</Link> and{" "}

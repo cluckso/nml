@@ -8,7 +8,7 @@ import { Nav } from "@/components/nav"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "NeverMissLead-AI - Never Miss Another Call",
+  title: "CallGrabbr - Never Miss Another Call",
   description: "AI-powered call answering and lead intake for local service businesses",
   icons: {
     icon: "/icon.png",

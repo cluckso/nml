@@ -98,7 +98,7 @@ export async function sendEmailNotification(
           ` : ""}
 
           <p style="margin-top: 30px; color: #6b7280; font-size: 14px;">
-            This is an automated notification from NeverMissLead-AI
+            This is an automated notification from CallGrabbr
           </p>
         </div>
       </body>
@@ -107,7 +107,7 @@ export async function sendEmailNotification(
 
   try {
     await resend.emails.send({
-      from: "NeverMissLead-AI <notifications@nevermisslead.ai>",
+      from: "CallGrabbr <notifications@callgrabbr.com>",
       to: toEmail,
       subject,
       html,
@@ -195,7 +195,7 @@ export async function forwardToCrm(
   intake: StructuredIntake
 ) {
   const payload = {
-    source: "nevermisslead-ai",
+    source: "callgrabbr",
     businessId: business.id,
     businessName: business.name,
     callId: call.id,
@@ -227,11 +227,11 @@ export async function forwardToCrm(
   if (business.forwardToEmail && resend) {
     try {
       await resend.emails.send({
-        from: "NeverMissLead-AI <notifications@nevermisslead.ai>",
+        from: "CallGrabbr <notifications@callgrabbr.com>",
         to: business.forwardToEmail,
         subject: `Lead: ${intake.name || "Unknown"} - ${business.name}`,
         html: `
-          <p>New lead from NeverMissLead-AI:</p>
+          <p>New lead from CallGrabbr:</p>
           <pre>${JSON.stringify(payload, null, 2)}</pre>
         `,
       })
