@@ -1,23 +1,27 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { PublicSmsOptInForm } from "@/components/consent/PublicSmsOptInForm"
 
 export const metadata: Metadata = {
-  title: "SMS Terms & Opt-In - NeverMissLead-AI",
+  title: "SMS Opt-In & Messaging Terms - NeverMissLead-AI",
   description:
-    "SMS messaging terms, opt-in disclosure, and consent information for NeverMissLead-AI.",
+    "SMS opt-in form and messaging terms for NeverMissLead-AI. Subscribe to call alerts and account notifications.",
 }
 
 /**
- * Public page that demonstrates the SMS opt-in workflow for Twilio toll-free verification.
- * Twilio reviewers need a publicly accessible URL showing how users consent to receive SMS.
+ * Public page with live SMS opt-in form and terms for Twilio toll-free verification.
+ * The URL must lead directly to the opt-in workflow (form) and be publicly accessible.
  */
 export default function SmsTermsPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl">
-      <h1 className="text-3xl font-bold mb-2">SMS Messaging Terms</h1>
-      <p className="text-sm text-muted-foreground mb-8">
+      <h1 className="text-3xl font-bold mb-2">SMS Opt-In & Messaging Terms</h1>
+      <p className="text-sm text-muted-foreground mb-6">
         Last updated: {new Date().toLocaleDateString("en-US")}
       </p>
+
+      {/* Opt-in form first so the URL leads directly to consent collection (Twilio requirement) */}
+      <PublicSmsOptInForm />
 
       <div className="prose prose-sm max-w-none space-y-8 text-muted-foreground">
         {/* ---------- Program Description ---------- */}
