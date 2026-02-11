@@ -307,6 +307,12 @@ interface RetellCallAnalysis {
     lead_tag?: string
     appointment_preference?: string
     department?: string
+    vehicle_year?: string
+    vehicle_make?: string
+    vehicle_model?: string
+    year?: string
+    make?: string
+    model?: string
   }
   summary?: string
   call_summary?: string
@@ -413,15 +419,20 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
   const hasAnalysis = Object.keys(analysis).length > 0
 
   // Missed-call recovery: use whatever we have (call_ended may arrive before call_analysis)
+  const ev = analysis.extracted_variables || {}
   const structuredIntake = {
-    name: analysis.caller_name || analysis.extracted_variables?.name,
-    phone: analysis.caller_phone || analysis.extracted_variables?.phone || event.call?.from_number,
-    address: analysis.service_address || analysis.extracted_variables?.address,
-    city: analysis.city || analysis.extracted_variables?.city,
-    issue_description: analysis.issue_description || analysis.extracted_variables?.issue_description,
+    name: analysis.caller_name || ev.name,
+    phone: analysis.caller_phone || ev.phone || event.call?.from_number,
+    address: analysis.service_address || ev.address,
+    city: analysis.city || ev.city,
+    issue_description: analysis.issue_description || ev.issue_description,
     emergency: detectEmergency(analysis),
-    appointment_preference: analysis.extracted_variables?.appointment_preference,
-    department: analysis.extracted_variables?.department,
+    appointment_preference: ev.appointment_preference,
+    department: ev.department,
+    // Auto repair: vehicle info for itemized report
+    vehicle_year: ev.vehicle_year ?? ev.year,
+    vehicle_make: ev.vehicle_make ?? ev.make,
+    vehicle_model: ev.vehicle_model ?? ev.model,
   }
   const leadTag = detectLeadTag(analysis, structuredIntake.emergency)
   const summary =
@@ -443,15 +454,14 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
     where: { retellCallId: callId },
   })
 
-  const callerNumber = event.call?.from_number ? normalizeE164(event.call.from_number) ?? event.call.from_number : undefined
-  const forwardedFromNumber = metadata?.forwarded_from_number ? normalizeE164(metadata.forwarded_from_number) ?? metadata.forwarded_from_number : undefined
+  const fromNumber = event.call?.from_number ? normalizeE164(event.call.from_number) ?? event.call.from_number : undefined
   const aiNumberAnswered = event.call?.to_number ? normalizeE164(event.call.to_number) ?? event.call.to_number : undefined
+  const callerPhone = fromNumber || structuredIntake.phone || undefined
 
   const callData = {
     duration,
     minutes,
-    callerNumber,
-    forwardedFromNumber,
+    callerPhone,
     aiNumberAnswered,
     transcript: analysis.transcript || event.call?.transcript || undefined,
     summary: summary || undefined,
@@ -461,7 +471,6 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
     department: structuredIntake.department || undefined,
     appointmentRequest: appointmentRequest as any,
     callerName: structuredIntake.name || undefined,
-    callerPhone: structuredIntake.phone || undefined,
     issueDescription: structuredIntake.issue_description || undefined,
     missedCallRecovery: !!missedCallRecovery,
   }

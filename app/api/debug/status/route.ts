@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
         retellCallId: true,
         createdAt: true,
         businessId: true,
-        forwardedFromNumber: true,
+        callerPhone: true,
       },
     })
     
@@ -49,7 +49,7 @@ export async function GET(req: NextRequest) {
         id: recentCall.id,
         retellCallId: recentCall.retellCallId,
         createdAt: recentCall.createdAt,
-        forwardedFromNumber: recentCall.forwardedFromNumber,
+        callerPhone: recentCall.callerPhone,
       } : null,
       env: envStatus,
       timestamp: new Date().toISOString(),

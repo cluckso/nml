@@ -3,6 +3,10 @@ import { db } from "@/lib/db"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { notFound } from "next/navigation"
+import {
+  CallItemizedReport,
+  buildCallItemizedProps,
+} from "@/components/calls/CallItemizedReport"
 
 export default async function CallDetailPage({
   params,
@@ -27,7 +31,18 @@ export default async function CallDetailPage({
     notFound()
   }
 
-  const intake = call.structuredIntake as any
+  const intake = call.structuredIntake as import("@/components/calls/CallItemizedReport").StructuredIntake | null
+  const appointmentRequest = call.appointmentRequest as
+    | { notes?: string; preferredDays?: string; preferredTime?: string }
+    | null
+  const itemizedProps = buildCallItemizedProps({
+    createdAt: call.createdAt,
+    callerName: call.callerName,
+    callerPhone: call.callerPhone,
+    issueDescription: call.issueDescription,
+    structuredIntake: intake,
+    appointmentRequest,
+  })
 
   return (
     <div className="container mx-auto max-w-4xl py-8">
@@ -43,38 +58,15 @@ export default async function CallDetailPage({
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Caller Information</CardTitle>
+            <CardTitle>Lead summary</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Itemized information from this call
+            </p>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <div>
-              <span className="font-semibold">Name:</span> {call.callerName || "Not provided"}
-            </div>
-            <div>
-              <span className="font-semibold">Phone:</span> {call.callerPhone || "Not provided"}
-            </div>
-            {intake?.address && (
-              <div>
-                <span className="font-semibold">Address:</span> {intake.address}
-              </div>
-            )}
-            {intake?.city && (
-              <div>
-                <span className="font-semibold">City:</span> {intake.city}
-              </div>
-            )}
+          <CardContent>
+            <CallItemizedReport {...itemizedProps} />
           </CardContent>
         </Card>
-
-        {call.issueDescription && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Issue Description</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>{call.issueDescription}</p>
-            </CardContent>
-          </Card>
-        )}
 
         {call.transcript && (
           <Card>
@@ -89,14 +81,17 @@ export default async function CallDetailPage({
 
         <Card>
           <CardHeader>
-            <CardTitle>Call Details</CardTitle>
+            <CardTitle>Call details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2">
             <div>
-              <span className="font-semibold">Duration:</span> {Math.floor(call.minutes)} minutes {Math.round((call.minutes % 1) * 60)} seconds
+              <span className="font-semibold">Duration:</span>{" "}
+              {Math.floor(call.minutes)} minutes{" "}
+              {Math.round((call.minutes % 1) * 60)} seconds
             </div>
             <div>
-              <span className="font-semibold">Date:</span> {new Date(call.createdAt).toLocaleString()}
+              <span className="font-semibold">Date:</span>{" "}
+              {new Date(call.createdAt).toLocaleString()}
             </div>
             <div>
               <span className="font-semibold">Call ID:</span> {call.retellCallId}

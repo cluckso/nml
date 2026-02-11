@@ -47,4 +47,9 @@ CREATE TABLE IF NOT EXISTS "RecycledRetellNumber" (
 );
 CREATE INDEX IF NOT EXISTS "RecycledRetellNumber_releasedAt_idx" ON "RecycledRetellNumber"("releasedAt");
 
+-- ─── 8. Call: drop redundant phone columns (keep callerPhone only) ───────────
+DROP INDEX IF EXISTS "Call_forwardedFromNumber_idx";
+ALTER TABLE "Call" DROP COLUMN IF EXISTS "callerNumber";
+ALTER TABLE "Call" DROP COLUMN IF EXISTS "forwardedFromNumber";
+
 -- Done. Re-run onboarding; the "RecycledRetellNumber does not exist" error should be gone.

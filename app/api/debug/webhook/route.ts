@@ -41,8 +41,7 @@ export async function GET(req: NextRequest) {
           select: {
             id: true,
             retellCallId: true,
-            callerNumber: true,
-            forwardedFromNumber: true,
+            callerPhone: true,
             aiNumberAnswered: true,
             duration: true,
             minutes: true,

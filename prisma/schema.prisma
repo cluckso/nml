@@ -125,9 +125,8 @@ model Call {
   retellCallId          String    @unique
   businessId            String
   business              Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  callerNumber          String?   // E.164 caller (Retell from_number)
-  forwardedFromNumber   String?   // E.164 number that forwarded (client line); routing key
-  aiNumberAnswered      String?   // E.164 shared intake number (Retell to_number)
+  callerPhone           String?   // E.164 caller (from_number; fallback to intake phone)
+  aiNumberAnswered      String?   // E.164 number that was called (Retell to_number)
   duration              Int       // Duration in seconds
   minutes               Float     // Duration in minutes (for billing)
   transcript            String?
@@ -138,14 +137,12 @@ model Call {
   department            String?   // Local Plus: which department was requested
   appointmentRequest    Json?     // Pro+: { preferredDays?, preferredTime?, notes? }
   callerName            String?
-  callerPhone           String?
   issueDescription      String?
   missedCallRecovery    Boolean   @default(false) // True if call ended early but we captured partial info
   createdAt             DateTime  @default(now())
 
   @@index([businessId])
   @@index([retellCallId])
-  @@index([forwardedFromNumber])
   @@index([createdAt])
   @@index([emergencyFlag])
   @@index([leadTag])
