@@ -225,31 +225,39 @@ export async function provisionAgentAndNumberForBusiness(
   const effectiveAreaCode =
     areaCode ?? (process.env.RETELL_DEFAULT_AREA_CODE ? parseInt(process.env.RETELL_DEFAULT_AREA_CODE, 10) : 415)
 
-  // Prefer recycled number; otherwise purchase a new one
-  const recycled = await db.recycledRetellNumber.findFirst({
-    orderBy: { releasedAt: "asc" },
-  })
-
-  let phone_number: string
-  if (recycled) {
-    await db.recycledRetellNumber.delete({ where: { id: recycled.id } })
-    try {
-      await updatePhoneNumber(apiKey, recycled.phoneNumber, agent_id)
-      phone_number = recycled.phoneNumber
-      console.info("Reused recycled Retell number for new agent:", phone_number, "agent:", agent_id)
-    } catch (err) {
-      console.error("Failed to attach recycled number to new agent, re-adding to pool:", err)
-      await db.recycledRetellNumber.create({
-        data: { phoneNumber: recycled.phoneNumber },
+  // Claim recycled numbers atomically (one per transaction) and try to attach to this agent.
+  // If attach fails (e.g. number still bound in Retell), put it back and try the next recycled number.
+  let phone_number: string | null = null
+  const maxRecycledAttempts = 20
+  for (let attempt = 0; attempt < maxRecycledAttempts; attempt++) {
+    const claimed = await db.$transaction(async (tx) => {
+      const row = await tx.recycledRetellNumber.findFirst({
+        orderBy: { releasedAt: "asc" },
       })
-      try {
-        phone_number = await createPhoneNumber(apiKey, agent_id, effectiveAreaCode)
-      } catch (createErr) {
-        console.error("createPhoneNumber fallback failed:", createErr)
-        return null
+      if (!row) return null
+      await tx.recycledRetellNumber.delete({ where: { id: row.id } })
+      return row
+    })
+    if (!claimed) {
+      if (attempt === 0) {
+        console.info("Recycled pool empty, purchasing new Retell number for agent:", agent_id)
       }
+      break
     }
-  } else {
+    try {
+      await updatePhoneNumber(apiKey, claimed.phoneNumber, agent_id)
+      phone_number = claimed.phoneNumber
+      console.info("Reused recycled Retell number for new agent:", phone_number, "agent:", agent_id)
+      break
+    } catch (err) {
+      console.warn("Failed to attach recycled number to agent, re-adding to pool and trying next:", claimed.phoneNumber, err)
+      await db.recycledRetellNumber.create({
+        data: { phoneNumber: claimed.phoneNumber },
+      })
+    }
+  }
+
+  if (!phone_number) {
     try {
       phone_number = await createPhoneNumber(apiKey, agent_id, effectiveAreaCode)
       console.info("Provisioned new Retell number for business agent:", phone_number, "agent:", agent_id)
