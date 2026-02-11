@@ -66,11 +66,11 @@ export function Nav() {
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-2 text-foreground">
             <Image
-              src="/logo.png"
+              src="/icon.png"
               alt="NeverMissLead"
-              width={160}
+              width={40}
               height={40}
-              className="h-8 w-auto"
+              className="h-9 w-9 rounded-lg"
               priority
             />
           </Link>
