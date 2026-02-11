@@ -7,17 +7,18 @@ import { notFound } from "next/navigation"
 export default async function CallDetailPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const { id } = await params
   const user = await requireAuth()
-  
+
   if (!user.businessId) {
     notFound()
   }
 
   const call = await db.call.findFirst({
     where: {
-      id: params.id,
+      id,
       businessId: user.businessId,
     },
   })

@@ -466,6 +466,7 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
     missedCallRecovery: !!missedCallRecovery,
   }
 
+  const isNewCall = !existingCall
   const call = existingCall
     ? await db.call.update({
         where: { id: existingCall.id },
@@ -478,6 +479,9 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
           ...callData,
         },
       })
+
+  // Only run the rest once per call. Retell may send call_ended more than once; idempotency avoids double usage and duplicate notifications.
+  if (!isNewCall) return
 
   // Mark testCallVerifiedAt when we receive a completed call for this client (forwarded_from matched)
   if (!business.testCallVerifiedAt) {
@@ -534,7 +538,6 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
   }
 
   const hasActiveSubscription = isSubscriptionActive(business)
-  // Track trial usage for any business without a paid sub (so onboarding-only users see usage too)
   const isOnTrial = !hasActiveSubscription
 
   if (isOnTrial) {
