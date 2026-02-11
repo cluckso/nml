@@ -90,13 +90,14 @@ Then continue intake normally.`,
 - Primary focus is vehicle-based intake
 - Collect:
   - Caller name and phone number
-  - Vehicle year, make, model
   - Reason for the call (issue, maintenance, status check)
+  - Vehicle year, make, model
 - If asking about an existing repair, ask when the vehicle was dropped off
 - If asking about an appointment, capture preference only
 - Do NOT provide diagnostics or pricing`,
 
     CHILDCARE: `Industry-specific instructions:
+- Ask if they are calling about a child already enrolled, or are they looking to enroll a new child, or other call reason
 - Collect parent/guardian name and contact info
 - Ask child age or age range
 - Ask what type of care they’re looking for

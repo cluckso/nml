@@ -86,11 +86,13 @@ export async function PATCH(req: NextRequest) {
         voiceSettings: true,
         retellAgentId: true,
         planType: true,
+        settings: true,
       },
     })
     if (businessForSync?.retellAgentId) {
       try {
-        await syncRetellAgentFromBusiness(businessForSync)
+        const mergedSettings = mergeWithDefaults(businessForSync.settings as Partial<BusinessSettings> | null)
+        await syncRetellAgentFromBusiness(businessForSync, mergedSettings)
       } catch (err) {
         console.error("Settings PATCH: syncRetellAgentFromBusiness failed:", err)
         // Still return 200; settings were saved

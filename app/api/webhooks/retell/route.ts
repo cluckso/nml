@@ -304,8 +304,12 @@ interface RetellCallAnalysis {
     address?: string
     city?: string
     issue_description?: string
+    reason_for_call?: string
+    reason?: string
     lead_tag?: string
     appointment_preference?: string
+    availability?: string
+    preferred_time?: string
     department?: string
     vehicle_year?: string
     vehicle_make?: string
@@ -420,23 +424,74 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
 
   // Missed-call recovery: use whatever we have (call_ended may arrive before call_analysis)
   const ev = analysis.extracted_variables || {}
-  const structuredIntake = {
+  const a = analysis as Record<string, unknown>
+
+  // Reason for call: multiple possible keys from Retell (issue_description, reason_for_call, reason, etc.)
+  const evAny = ev as Record<string, string | undefined>
+  const issueDescription =
+    analysis.issue_description ||
+    ev.issue_description ||
+    ev.reason_for_call ||
+    ev.reason ||
+    evAny.call_reason ||
+    (typeof a.reason_for_call === "string" ? a.reason_for_call : null) ||
+    (typeof a.reason === "string" ? a.reason : null)
+
+  // Appointment/availability: preference, availability, preferred_time, etc.
+  const appointmentPreference =
+    ev.appointment_preference ||
+    ev.availability ||
+    ev.preferred_time ||
+    evAny.appointment_availability ||
+    evAny.preferred_days ||
+    (typeof a.appointment_preference === "string" ? a.appointment_preference : null) ||
+    (typeof a.availability === "string" ? a.availability : null)
+
+  // Vehicle (auto repair): year, make, model — from ev or top-level analysis
+  const vehicleYear =
+    ev.vehicle_year ?? ev.year ?? (typeof a.vehicle_year === "string" ? a.vehicle_year : null) ?? (typeof a.year === "string" ? a.year : null)
+  const vehicleMake =
+    ev.vehicle_make ?? ev.make ?? (typeof a.vehicle_make === "string" ? a.vehicle_make : null) ?? (typeof a.make === "string" ? a.make : null)
+  const vehicleModel =
+    ev.vehicle_model ?? ev.model ?? (typeof a.vehicle_model === "string" ? a.vehicle_model : null) ?? (typeof a.model === "string" ? a.model : null)
+
+  const emergency = detectEmergency(analysis)
+  const structuredIntake: Record<string, unknown> = {
     name: analysis.caller_name || ev.name,
     phone: analysis.caller_phone || ev.phone || event.call?.from_number,
     address: analysis.service_address || ev.address,
     city: analysis.city || ev.city,
-    issue_description: analysis.issue_description || ev.issue_description,
-    emergency: detectEmergency(analysis),
-    appointment_preference: ev.appointment_preference,
+    issue_description: issueDescription,
+    emergency,
+    appointment_preference: appointmentPreference,
     department: ev.department,
-    // Auto repair: vehicle info for itemized report
-    vehicle_year: ev.vehicle_year ?? ev.year,
-    vehicle_make: ev.vehicle_make ?? ev.make,
-    vehicle_model: ev.vehicle_model ?? ev.model,
+    vehicle_year: vehicleYear,
+    vehicle_make: vehicleMake,
+    vehicle_model: vehicleModel,
   }
-  const leadTag = detectLeadTag(analysis, structuredIntake.emergency)
+
+  // Merge any other string values from extracted_variables so we don't miss custom extraction keys
+  for (const [k, v] of Object.entries(ev)) {
+    if (typeof v === "string" && v.trim() && structuredIntake[k] == null) {
+      structuredIntake[k] = v
+    }
+  }
+
   const summary =
     analysis.summary || analysis.call_summary || (analysis.transcript ? String(analysis.transcript).slice(0, 500) : null)
+  const transcriptStr = analysis.transcript || event.call?.transcript
+
+  // Fallback: if no issue_description but we have summary or transcript, use it so lead report isn't empty
+  if (!structuredIntake.issue_description && (summary || transcriptStr)) {
+    const fallback = typeof summary === "string" && summary.trim()
+      ? summary.trim().slice(0, 500)
+      : typeof transcriptStr === "string"
+        ? transcriptStr.trim().slice(0, 500)
+        : null
+    if (fallback) structuredIntake.issue_description = fallback
+  }
+
+  const leadTag = detectLeadTag(analysis, emergency)
   const appointmentRequest = structuredIntake.appointment_preference
     ? { preferredDays: undefined as string | undefined, preferredTime: undefined as string | undefined, notes: String(structuredIntake.appointment_preference) }
     : undefined
@@ -456,7 +511,7 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
 
   const fromNumber = event.call?.from_number ? normalizeE164(event.call.from_number) ?? event.call.from_number : undefined
   const aiNumberAnswered = event.call?.to_number ? normalizeE164(event.call.to_number) ?? event.call.to_number : undefined
-  const callerPhone = fromNumber || structuredIntake.phone || undefined
+  const callerPhone: string | undefined = (fromNumber || (typeof structuredIntake.phone === "string" ? structuredIntake.phone : undefined)) ?? undefined
 
   const callData = {
     duration,
@@ -466,12 +521,12 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
     transcript: analysis.transcript || event.call?.transcript || undefined,
     summary: summary || undefined,
     structuredIntake: structuredIntake as any,
-    emergencyFlag: structuredIntake.emergency,
+    emergencyFlag: emergency,
     leadTag: hasLeadTagging(planType) ? leadTag : undefined,
-    department: structuredIntake.department || undefined,
+    department: typeof structuredIntake.department === "string" ? structuredIntake.department : undefined,
     appointmentRequest: appointmentRequest as any,
-    callerName: structuredIntake.name || undefined,
-    issueDescription: structuredIntake.issue_description || undefined,
+    callerName: typeof structuredIntake.name === "string" ? structuredIntake.name : undefined,
+    issueDescription: typeof structuredIntake.issue_description === "string" ? structuredIntake.issue_description : undefined,
     missedCallRecovery: !!missedCallRecovery,
   }
 
@@ -515,8 +570,9 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
       if (notifPrefs.smsAlerts) {
         notifies.push(sendSMSNotification(business, call, structuredIntake as any))
       }
-      if (hasSmsToCallers(planType) && structuredIntake.phone) {
-        notifies.push(sendSMSToCaller(business, structuredIntake.phone, structuredIntake as any))
+      const intakePhone = typeof structuredIntake.phone === "string" ? structuredIntake.phone : null
+      if (hasSmsToCallers(planType) && intakePhone) {
+        notifies.push(sendSMSToCaller(business, intakePhone, structuredIntake as any))
       }
       await Promise.all(notifies)
     } catch (error) {

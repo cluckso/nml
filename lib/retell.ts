@@ -537,11 +537,21 @@ export type BusinessForSync = {
   planType: PlanType | null
 }
 
+/** Settings passed from dashboard (greeting, tone, question depth) used to personalize the synced agent. */
+export type SyncSettings = {
+  greeting?: { customGreeting?: string | null; tone?: string }
+  questionDepth?: string
+}
+
 /**
  * Sync Retell agent and its conversation flow to match current business settings.
- * Call after PATCH /api/business when the business has a retellAgentId.
+ * Call after PATCH /api/settings or PATCH /api/business when the business has a retellAgentId.
+ * When `settings` is provided (e.g. from mergeWithDefaults), custom greeting, tone, and question depth are applied to the flow and global prompt.
  */
-export async function syncRetellAgentFromBusiness(business: BusinessForSync): Promise<void> {
+export async function syncRetellAgentFromBusiness(
+  business: BusinessForSync,
+  settings?: SyncSettings | null
+): Promise<void> {
   const apiKey = process.env.RETELL_API_KEY
   if (!apiKey || !business.retellAgentId) return
 
@@ -555,7 +565,7 @@ export async function syncRetellAgentFromBusiness(business: BusinessForSync): Pr
   const effectivePlan = (await import("./plans")).getEffectivePlanType(planType)
   const bh = business.businessHours as BusinessHoursInput | null | undefined
 
-  const globalPrompt = generatePrompt(
+  let globalPrompt = generatePrompt(
     business.name,
     business.industry,
     business.serviceAreas,
@@ -566,7 +576,24 @@ export async function syncRetellAgentFromBusiness(business: BusinessForSync): Pr
       includeAppointmentCapture: hasAppointmentCapture(effectivePlan),
     }
   )
-  const flow = buildConversationFlow(business.name, business.industry, business.serviceAreas)
+  if (settings?.greeting?.tone || settings?.questionDepth) {
+    const parts: string[] = []
+    if (settings.greeting?.tone) parts.push(`Use a ${settings.greeting.tone} tone.`)
+    if (settings.questionDepth) parts.push(`Question depth: ${settings.questionDepth}.`)
+    if (parts.length) globalPrompt = globalPrompt + "\n\n" + parts.join(" ")
+  }
+
+  let flow = buildConversationFlow(business.name, business.industry, business.serviceAreas)
+  const customGreeting = settings?.greeting?.customGreeting?.trim()
+  if (customGreeting) {
+    const startText = customGreeting.replace(/\[business\]/gi, business.name).trimEnd() + "\n"
+    const startNodeId = flow.start_node_id
+    const node = flow.nodes?.find((n: { id: string }) => n.id === startNodeId)
+    if (node?.instruction?.type === "static_text") {
+      node.instruction = { type: "static_text", text: startText }
+    }
+  }
+
   const { version } = await updateConversationFlow(apiKey, flowId, {
     ...flow,
     global_prompt: globalPrompt,

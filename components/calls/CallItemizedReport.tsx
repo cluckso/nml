@@ -8,12 +8,19 @@ export type StructuredIntake = {
   address?: string | null
   city?: string | null
   issue_description?: string | null
+  reason_for_call?: string | null
+  reason?: string | null
   appointment_preference?: string | null
+  availability?: string | null
+  preferred_time?: string | null
   department?: string | null
   vehicle_year?: string | null
   vehicle_make?: string | null
   vehicle_model?: string | null
   vehicle?: string | null
+  year?: string | null
+  make?: string | null
+  model?: string | null
   [key: string]: string | null | undefined
 }
 
@@ -146,18 +153,31 @@ export function buildCallItemizedProps(
   const availability =
     (typeof appt?.notes === "string" && appt.notes.trim()) ||
     (typeof intake?.appointment_preference === "string" && intake.appointment_preference.trim()) ||
+    (typeof intake?.availability === "string" && intake.availability.trim()) ||
+    (typeof intake?.preferred_time === "string" && intake.preferred_time.trim()) ||
     [appt?.preferredDays, appt?.preferredTime].filter(Boolean).join(", ") ||
     null
+
+  const reasonForCall =
+    call.issueDescription?.trim() ||
+    intake?.issue_description?.trim() ||
+    intake?.reason_for_call?.trim() ||
+    intake?.reason?.trim() ||
+    null
+
+  const vehicleYear = intake?.vehicle_year?.trim() || intake?.year?.trim() || null
+  const vehicleMake = intake?.vehicle_make?.trim() || intake?.make?.trim() || null
+  const vehicleModel = intake?.vehicle_model?.trim() || intake?.model?.trim() || null
 
   return {
     time: call.createdAt,
     name: call.callerName?.trim() || intake?.name?.trim() || null,
     contactNumber: call.callerPhone?.trim() || intake?.phone?.trim() || null,
-    reasonForCall: call.issueDescription?.trim() || intake?.issue_description?.trim() || null,
+    reasonForCall: reasonForCall || null,
     availabilityForAppt: availability || null,
-    vehicleYear: intake?.vehicle_year?.trim() || null,
-    vehicleMake: intake?.vehicle_make?.trim() || null,
-    vehicleModel: intake?.vehicle_model?.trim() || null,
+    vehicleYear,
+    vehicleMake,
+    vehicleModel,
     address: intake?.address?.trim() || null,
     city: intake?.city?.trim() || null,
   }
