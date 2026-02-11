@@ -25,17 +25,21 @@ export async function sendEmailNotification(
   intake: StructuredIntake
 ) {
   if (!resend) {
-    console.warn("Resend API key not configured")
+    console.warn("[Notifications] Email skipped: RESEND_API_KEY not configured")
     return
   }
 
-  // Find business owner email
   const owner = await import("./db").then((m) => m.db.user.findFirst({
     where: { businessId: business.id },
   }))
 
   if (!owner) {
-    console.error("No owner found for business")
+    console.error("[Notifications] Email skipped: no owner user for business", business.id)
+    return
+  }
+  const toEmail = (owner as { email?: string }).email
+  if (!toEmail) {
+    console.error("[Notifications] Email skipped: owner has no email", owner.id)
     return
   }
 
@@ -104,12 +108,12 @@ export async function sendEmailNotification(
   try {
     await resend.emails.send({
       from: "NeverMissLead-AI <notifications@nevermisslead.ai>",
-      to: owner.email,
+      to: toEmail,
       subject,
       html,
     })
   } catch (error) {
-    console.error("Email send error:", error)
+    console.error("[Notifications] Email send error:", error)
     throw error
   }
 }
@@ -120,11 +124,10 @@ export async function sendSMSNotification(
   intake: StructuredIntake
 ) {
   if (!twilioClient || !process.env.TWILIO_PHONE_NUMBER) {
-    console.warn("Twilio not configured")
+    console.warn("[Notifications] SMS skipped: Twilio not configured (TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_PHONE_NUMBER)")
     return
   }
 
-  // Find business owner phone (would need to be stored in user profile)
   const owner = await import("./db").then((m) => m.db.user.findFirst({
     where: { businessId: business.id },
   }))
@@ -133,13 +136,16 @@ export async function sendSMSNotification(
   const smsConsent = (owner as { smsConsent?: boolean }).smsConsent
   const smsOptedOut = (owner as { smsOptedOut?: boolean }).smsOptedOut
 
-  if (!owner || !ownerPhone) {
+  if (!owner) {
+    console.error("[Notifications] SMS skipped: no owner for business", business.id)
     return
   }
-
-  // Respect SMS consent and opt-out status (Twilio toll-free compliance)
+  if (!ownerPhone) {
+    console.info("[Notifications] SMS skipped: owner has no phone number set. Set it in Settings → Notifications.")
+    return
+  }
   if (!smsConsent || smsOptedOut) {
-    console.info(`SMS skipped for user ${owner.id}: consent=${smsConsent}, optedOut=${smsOptedOut}`)
+    console.info("[Notifications] SMS skipped: consent=" + smsConsent + ", optedOut=" + smsOptedOut)
     return
   }
 

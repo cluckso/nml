@@ -50,6 +50,8 @@ export function SettingsClient() {
   const [settings, setSettings] = useState<BusinessSettings | null>(null)
   const [allowed, setAllowed] = useState<SettingsSection[]>([])
   const [planType, setPlanType] = useState<PlanType | null>(null)
+  const [notificationPhone, setNotificationPhone] = useState<string | null>(null)
+  const [smsConsent, setSmsConsent] = useState(false)
   const [activeTab, setActiveTab] = useState<SettingsSection>("greeting")
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -64,6 +66,8 @@ export function SettingsClient() {
           setSettings(d.settings)
           setAllowed(d.allowedSections)
           setPlanType(d.planType)
+          setNotificationPhone(d.notificationPhone ?? null)
+          setSmsConsent(d.smsConsent ?? false)
         } else setError(d.error)
       })
       .catch(() => setError("Failed to load settings"))
@@ -71,19 +75,22 @@ export function SettingsClient() {
   }, [])
 
   const save = useCallback(
-    async (section: SettingsSection, data: unknown) => {
+    async (section: SettingsSection, data: unknown, extra?: Record<string, unknown>) => {
       setSaving(true)
       setSaved(false)
       setError(null)
       try {
+        const body = extra ? { [section]: data, ...extra } : { [section]: data }
         const res = await fetch("/api/settings", {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ [section]: data }),
+          body: JSON.stringify(body),
         })
         const d = await res.json()
         if (res.ok) {
           setSettings(d.settings)
+          if (d.notificationPhone !== undefined) setNotificationPhone(d.notificationPhone)
+          if (d.smsConsent !== undefined) setSmsConsent(d.smsConsent)
           setSaved(true)
           setTimeout(() => setSaved(false), 2000)
         } else setError(d.error)
@@ -145,7 +152,15 @@ export function SettingsClient() {
             {activeTab === "greeting" && <GreetingSection value={settings.greeting} onSave={(v) => save("greeting", v)} saving={saving} />}
             {activeTab === "intakeFields" && <IntakeFieldsSection value={settings.intakeFields} onSave={(v) => save("intakeFields", v)} saving={saving} />}
             {activeTab === "availability" && <AvailabilitySection value={settings.availability} onSave={(v) => save("availability", v)} saving={saving} />}
-            {activeTab === "notifications" && <NotificationsSection value={settings.notifications} onSave={(v) => save("notifications", v)} saving={saving} />}
+            {activeTab === "notifications" && (
+              <NotificationsSection
+                value={settings.notifications}
+                notificationPhone={notificationPhone}
+                smsConsent={smsConsent}
+                onSave={(v, extra) => save("notifications", v, extra)}
+                saving={saving}
+              />
+            )}
             {activeTab === "callRouting" && <CallRoutingSection value={settings.callRouting} onSave={(v) => save("callRouting", v)} saving={saving} />}
             {activeTab === "missedCallRecovery" && <MissedCallRecoverySection value={settings.missedCallRecovery} onSave={(v) => save("missedCallRecovery", v)} saving={saving} />}
             {activeTab === "intakeTemplate" && <IntakeTemplateSection value={settings.intakeTemplate} onSave={(v) => save("intakeTemplate", v)} saving={saving} />}
@@ -358,20 +373,88 @@ function AvailabilitySection({ value, onSave, saving }: { value: AvailabilitySet
   )
 }
 
-function NotificationsSection({ value, onSave, saving }: { value: NotificationSettings; onSave: (v: NotificationSettings) => void; saving: boolean }) {
+function NotificationsSection({
+  value,
+  notificationPhone: initialPhone,
+  smsConsent: initialConsent,
+  onSave,
+  saving,
+}: {
+  value: NotificationSettings
+  notificationPhone: string | null
+  smsConsent: boolean
+  onSave: (v: NotificationSettings, extra?: { notificationPhone?: string; smsConsent?: boolean }) => void
+  saving: boolean
+}) {
   const [d, setD] = useState(value)
+  const [phone, setPhone] = useState(initialPhone ?? "")
+  const [consent, setConsent] = useState(initialConsent)
+  const [testStatus, setTestStatus] = useState<{ email?: string; sms?: string } | null>(null)
+
+  useEffect(() => {
+    setPhone(initialPhone ?? "")
+    setConsent(initialConsent)
+  }, [initialPhone, initialConsent])
+
+  const handleSave = () => {
+    onSave(d, { notificationPhone: phone.trim() || undefined, smsConsent: consent })
+  }
+
+  const runTest = async (type: "email" | "sms" | "both") => {
+    setTestStatus(null)
+    try {
+      const res = await fetch("/api/notifications/test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type }),
+      })
+      const data = await res.json()
+      if (res.ok && data.results) setTestStatus(data.results)
+      else setTestStatus({ sms: data.error || "Request failed", email: data.error || "Request failed" })
+    } catch {
+      setTestStatus({ email: "Request failed", sms: "Request failed" })
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Notification Settings</CardTitle>
-        <CardDescription>How you receive call alerts.</CardDescription>
+        <CardDescription>How you receive call alerts. Set your phone and enable SMS consent to get text alerts.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label>Phone number for SMS alerts</Label>
+          <Input
+            type="tel"
+            placeholder="+1 (608) 642-1459"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground">E.164 format (e.g. +16086421459). Used for text alerts when a call is received.</p>
+        </div>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="rounded" />
+          I agree to receive SMS alerts at this number (required for text notifications)
+        </label>
         <Toggle label="SMS alerts" checked={d.smsAlerts} onChange={(v) => setD({ ...d, smsAlerts: v })} />
         <Toggle label="Email alerts" checked={d.emailAlerts} onChange={(v) => setD({ ...d, emailAlerts: v })} />
         <Toggle label="Emergency-only alerts" checked={d.emergencyOnlyAlerts} onChange={(v) => setD({ ...d, emergencyOnlyAlerts: v })} description="Only notify for emergency calls." />
         <Toggle label="Daily digest" checked={d.dailyDigest} onChange={(v) => setD({ ...d, dailyDigest: v })} description="One summary email per day instead of per call." />
-        <SaveBtn saving={saving} onClick={() => onSave(d)} />
+        <SaveBtn saving={saving} onClick={handleSave} />
+        <div className="pt-2 border-t space-y-2">
+          <Label>Test notifications</Label>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => runTest("email")}>Send test email</Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => runTest("sms")}>Send test SMS</Button>
+          </div>
+          {testStatus && (
+            <div className="text-sm text-muted-foreground">
+              {testStatus.email != null && <p>Email: {testStatus.email === "sent" ? "Sent. Check your inbox." : testStatus.email}</p>}
+              {testStatus.sms != null && <p>SMS: {testStatus.sms === "sent" ? "Sent. Check your phone." : testStatus.sms}</p>}
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   )
