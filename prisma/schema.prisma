@@ -5,9 +5,11 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// Use pooler URL (port 6543, ?pgbouncer=true) for DATABASE_URL at runtime to avoid "MaxClientsInSessionMode".
+// Use direct URL (port 5432) for DIRECT_URL (migrations only). See DATABASE.md.
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 

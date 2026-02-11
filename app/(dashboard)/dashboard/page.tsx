@@ -1,6 +1,6 @@
 import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { getTrialStatus } from "@/lib/trial"
+import { getTrialStatus, type TrialStatus } from "@/lib/trial"
 import { getIntakeNumberForIndustry, hasIntakeNumberConfigured } from "@/lib/intake-routing"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CallLog } from "@/components/calls/CallLog"
@@ -11,27 +11,62 @@ import { Button } from "@/components/ui/button"
 
 export default async function DashboardPage() {
   const user = await requireAuth()
-  
+
   if (!user.businessId) {
     return <div>Please complete onboarding</div>
   }
 
-  const [business, recentCalls, stats, trial] = await Promise.all([
-    db.business.findUnique({
-      where: { id: user.businessId },
-    }),
-    db.call.findMany({
-      where: { businessId: user.businessId },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-    }),
-    db.call.aggregate({
-      where: { businessId: user.businessId },
-      _count: true,
-      _sum: { minutes: true },
-    }),
-    getTrialStatus(user.businessId),
-  ])
+  const defaultTrial: TrialStatus = {
+    isOnTrial: false,
+    minutesUsed: 0,
+    minutesRemaining: 50,
+    isExhausted: false,
+    isExpired: false,
+    trialEndsAt: null,
+    daysRemaining: 0,
+  }
+  let business: Awaited<ReturnType<typeof db.business.findUnique>> = null
+  let recentCalls: Awaited<ReturnType<typeof db.call.findMany>> = []
+  let stats: { _count: number; _sum: { minutes: number | null } } = { _count: 0, _sum: { minutes: 0 } }
+  let trial: TrialStatus = defaultTrial
+
+  try {
+    ;[business, recentCalls, stats, trial] = await Promise.all([
+      db.business.findUnique({
+        where: { id: user.businessId },
+      }),
+      db.call.findMany({
+        where: { businessId: user.businessId },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+      }),
+      db.call.aggregate({
+        where: { businessId: user.businessId },
+        _count: true,
+        _sum: { minutes: true },
+      }),
+      getTrialStatus(user.businessId),
+    ])
+  } catch (err) {
+    console.error("Dashboard page data fetch error:", err)
+    return (
+      <div className="container mx-auto max-w-7xl py-4 px-4">
+        <Card className="border-destructive/50">
+          <CardHeader>
+            <CardTitle>Unable to load dashboard</CardTitle>
+            <CardDescription>
+              There was a problem loading your data. This is often due to a temporary database connection limit — try again in a moment. If it keeps happening, ensure your app uses the Transaction pooler (port 6543) for the database. See DATABASE.md.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link href="/dashboard">
+              <Button variant="outline">Retry</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   const emergencyCalls = recentCalls.filter((c) => c.emergencyFlag).length
   const totalMinutes = stats._sum.minutes || 0

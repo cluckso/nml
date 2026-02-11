@@ -64,8 +64,12 @@ export async function GET(req: NextRequest) {
     })
   } catch (error) {
     console.error("Dashboard API error:", error)
+    const message = error instanceof Error ? error.message : "Failed to load dashboard"
     return NextResponse.json(
-      { error: "Failed to load dashboard" },
+      {
+        error: "Failed to load dashboard",
+        ...(process.env.NODE_ENV === "development" && { detail: message }),
+      },
       { status: 500 }
     )
   }
