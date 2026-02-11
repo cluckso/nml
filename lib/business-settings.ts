@@ -32,8 +32,13 @@ export interface NotificationSettings {
   dailyDigest: boolean
 }
 
+/** Ring time (seconds) before AI answers — lets you pick up first if you want */
+export type RingBeforeAnswerSeconds = 0 | 5 | 10 | 15
+
 /** Call routing rules */
 export interface CallRoutingSettings {
+  /** Seconds to ring before connecting to the AI (0 = answer immediately). Configurable in dashboard. */
+  ringBeforeAnswerSeconds: RingBeforeAnswerSeconds
   emergencyForward: boolean
   emergencyForwardNumber: string | null
   vipCallerList: string[] // E.164 numbers that get forwarded
@@ -179,6 +184,7 @@ export const DEFAULT_SETTINGS: BusinessSettings = {
     dailyDigest: false,
   },
   callRouting: {
+    ringBeforeAnswerSeconds: 0,
     emergencyForward: false,
     emergencyForwardNumber: null,
     vipCallerList: [],

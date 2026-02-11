@@ -196,9 +196,14 @@ export async function POST(req: NextRequest) {
         conversation_flow: { begin_message: beginMessage },
       }
 
+      // Ring time before connecting to agent (0, 5, 10, 15 sec) — configurable in dashboard
+      const ringBeforeAnswerSeconds = settings.callRouting.ringBeforeAnswerSeconds ?? 0
+      const ringDurationMs = Math.min(15, Math.max(0, ringBeforeAnswerSeconds)) * 1000
+
       // Voice speed: Retell typically 0.5–2; we store 0–1 in voiceBrand.speed → map to 0.75–1.5
       const voiceSpeed = 0.75 + (settings.voiceBrand.speed ?? 0.5) * 0.75
       agentOverride.agent = {
+        ...(ringDurationMs > 0 ? { ring_duration_ms: ringDurationMs } : {}),
         voice_speed: Math.round(voiceSpeed * 100) / 100,
         interruption_sensitivity: settings.aiBehavior.interruptTolerance ?? 0.5,
         max_call_duration_ms: Math.min(

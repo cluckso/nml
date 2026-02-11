@@ -296,19 +296,15 @@ export default function DocsFaqPage() {
         <CardHeader>
           <CardTitle>Forward your business line to the AI</CardTitle>
           <CardDescription>
-            Your AI has its own phone number (shown on your dashboard after you connect). You forward your existing business number to that AI number so the AI answers when customers call you.
+            Your AI has its own phone number (shown on your dashboard after you connect). Forward your existing business number to that AI number so the AI answers when customers call you.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm font-medium">Can I have the AI answer only when I don&apos;t pick up?</p>
-          <p className="text-sm text-muted-foreground">
-            Yes. That&apos;s controlled by your phone carrier, not the app. Use <strong>conditional</strong> or <strong>no-answer</strong> forwarding (e.g. &quot;forward when unanswered&quot; or &quot;after 4–5 rings&quot;) instead of &quot;forward all.&quot; Then your phone rings first; if you don&apos;t answer, the call goes to the AI. Check your carrier&apos;s steps below for &quot;conditional forwarding&quot; or &quot;forward when busy/no answer.&quot;
-          </p>
           <ol className="list-decimal list-inside space-y-2 text-sm">
-            <li>Get your <strong>AI number</strong> from the dashboard (after clicking &quot;Connect to my call assistant&quot;).</li>
-            <li>Use the steps below for <strong>your carrier</strong> and enter that AI number as the &quot;forward to&quot; number.</li>
-            <li>If you want the AI only when you don&apos;t answer, choose <strong>conditional</strong> or <strong>no-answer</strong> forwarding, not &quot;always forward.&quot;</li>
-            <li>Save the settings and test by calling your business line from another phone.</li>
+            <li>Get your <strong>AI number</strong> from the dashboard (after you connect your call assistant).</li>
+            <li>Use the steps below for <strong>your carrier</strong> to set up <strong>call forwarding</strong> to that AI number.</li>
+            <li>Configure <strong>ring time</strong> in the dashboard: go to <strong>Settings → Call Routing</strong> and choose how many seconds (0, 5, 10, or 15) the line rings before the AI answers. That gives you time to pick up first if you want.</li>
+            <li>Save and test by calling your business line from another phone.</li>
           </ol>
           <Link href="/dashboard">
             <Button variant="outline">Go to Dashboard</Button>
@@ -336,7 +332,9 @@ export default function DocsFaqPage() {
               </summary>
               <div className="px-4 pb-4 pt-0 border-t">
                 <div className="space-y-6 pt-4">
-                  {carrier.steps.map((step, i) => (
+                  {carrier.steps
+                    .filter((step) => !step.method.toLowerCase().includes("conditional"))
+                    .map((step, i) => (
                     <div key={i}>
                       <h3 className="text-sm font-semibold text-muted-foreground mb-2">
                         {step.method}
@@ -368,7 +366,7 @@ export default function DocsFaqPage() {
         <CardHeader>
           <CardTitle className="text-base">Don’t see your carrier?</CardTitle>
           <CardDescription>
-            Most carriers use *72 (forward all) and *73 or *720 (turn off). Check your carrier’s support site for &quot;call forwarding&quot; or &quot;conditional forwarding.&quot; If you use another VoIP (e.g. Vonage, Ooma), look for Call Forwarding or Forward to external number in the account or app settings.
+            Most carriers use *72 (forward all) and *73 or *720 (turn off). Check your carrier’s support site for &quot;call forwarding.&quot; If you use another VoIP (e.g. Vonage, Ooma), look for Call Forwarding or Forward to external number in the account or app settings.
           </CardDescription>
         </CardHeader>
       </Card>

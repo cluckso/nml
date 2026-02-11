@@ -15,6 +15,7 @@ import type {
   GreetingSettings,
   NotificationSettings,
   CallRoutingSettings,
+  RingBeforeAnswerSeconds,
   MissedCallRecoverySettings,
   AvailabilitySettings,
   BookingSettings,
@@ -460,15 +461,37 @@ function NotificationsSection({
   )
 }
 
+const RING_OPTIONS: { value: RingBeforeAnswerSeconds; label: string }[] = [
+  { value: 0, label: "0 seconds (answer immediately)" },
+  { value: 5, label: "5 seconds" },
+  { value: 10, label: "10 seconds" },
+  { value: 15, label: "15 seconds" },
+]
+
 function CallRoutingSection({ value, onSave, saving }: { value: CallRoutingSettings; onSave: (v: CallRoutingSettings) => void; saving: boolean }) {
   const [d, setD] = useState(value)
   return (
     <Card>
       <CardHeader>
         <CardTitle>Call Routing</CardTitle>
-        <CardDescription>Rules for routing special calls.</CardDescription>
+        <CardDescription>Rules for routing special calls. Set how long the line rings before the AI answers.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label>Ring time before AI answers</Label>
+          <select
+            className="w-full rounded border border-input bg-background px-3 py-2 text-sm"
+            value={d.ringBeforeAnswerSeconds ?? 0}
+            onChange={(e) => setD({ ...d, ringBeforeAnswerSeconds: Number(e.target.value) as RingBeforeAnswerSeconds })}
+          >
+            {RING_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+          <p className="text-xs text-muted-foreground">
+            Gives you time to pick up first. After this many seconds, the AI will answer if the call isn’t picked up.
+          </p>
+        </div>
         <Toggle label="Forward emergencies" checked={d.emergencyForward} onChange={(v) => setD({ ...d, emergencyForward: v })} description="Immediately forward emergency calls to a phone number." />
         {d.emergencyForward && (
           <div className="space-y-2 pl-6">
