@@ -17,7 +17,18 @@ export interface StructuredIntake {
   emergency?: boolean
   appointment_preference?: string
   department?: string
+  vehicle_year?: string
+  vehicle_make?: string
+  vehicle_model?: string
+  year?: string
+  make?: string
+  model?: string
+  availability?: string
+  preferred_time?: string
 }
+
+/** SMS character cutoff: 160 = 1 segment (GSM-7). With emoji (UCS-2) = 70/segment. We truncate to stay under 160 when possible. */
+const SMS_MAX_CHARS = 160
 
 export async function sendEmailNotification(
   business: Business,
@@ -149,11 +160,43 @@ export async function sendSMSNotification(
     return
   }
 
-  const emergencyPrefix = intake.emergency ? "🚨 EMERGENCY: " : ""
-  const summary = (call as { summary?: string }).summary
-  const summarySnippet = summary?.trim() ? summary.trim().replace(/\s+/g, " ").slice(0, 200) : ""
-  const base = `${emergencyPrefix}New call from ${intake.name || "Unknown"}. ${intake.issue_description ? `Issue: ${intake.issue_description.substring(0, 80)}` : ""} Call back: ${intake.phone || "N/A"}`
-  const message = summarySnippet ? `${base}\n\nSummary: ${summarySnippet}` : base
+  const appt = (call as { appointmentRequest?: { preferredDays?: string; preferredTime?: string; notes?: string } }).appointmentRequest
+  const apptStr =
+    appt?.notes?.trim() ||
+    [appt?.preferredDays, appt?.preferredTime].filter(Boolean).join(" ") ||
+    intake.appointment_preference?.trim() ||
+    intake.availability?.trim() ||
+    intake.preferred_time?.trim() ||
+    ""
+
+  const vehicleYear = intake.vehicle_year?.trim() || intake.year?.trim() || ""
+  const vehicleMake = intake.vehicle_make?.trim() || intake.make?.trim() || ""
+  const vehicleModel = intake.vehicle_model?.trim() || intake.model?.trim() || ""
+  const vehicle = [vehicleYear, vehicleMake, vehicleModel].filter(Boolean).join(" ") || ""
+
+  const caller = `${intake.name || "Unknown"} ${intake.phone || "N/A"}`.trim()
+  const issue = (intake.issue_description || "").trim()
+
+  const lines: string[] = []
+  lines.push(`Caller: ${caller}`)
+  if (vehicle) lines.push(`Vehicle: ${vehicle}`)
+  if (apptStr) lines.push(`Appt set: ${apptStr}`)
+  lines.push(`Issue: ${issue || "—"}`)
+
+  let message = lines.join("\n")
+  if (intake.emergency) message = `🚨 EMERGENCY\n${message}`
+
+  if (message.length > SMS_MAX_CHARS) {
+    const over = message.length - SMS_MAX_CHARS
+    const lastLine = lines[lines.length - 1]
+    if (lastLine.startsWith("Issue:") && over > 0 && issue.length > 10) {
+      const maxIssue = Math.max(10, issue.length - over - 1)
+      lines[lines.length - 1] = `Issue: ${issue.slice(0, maxIssue)}…`
+      message = lines.join("\n")
+      if (intake.emergency) message = `🚨 EMERGENCY\n${message}`
+    }
+    if (message.length > SMS_MAX_CHARS) message = message.slice(0, SMS_MAX_CHARS)
+  }
 
   try {
     await twilioClient.messages.create({

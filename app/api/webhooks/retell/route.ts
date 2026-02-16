@@ -17,6 +17,8 @@ import { getAgentIdForInbound, getAgentIdForIndustry } from "@/lib/intake-routin
 import { ClientStatus } from "@prisma/client"
 import { mergeWithDefaults, type BusinessSettings } from "@/lib/business-settings"
 import { buildAgentOverride } from "@/lib/agent-override"
+import { hasActionableInfo, isLikelySpam, isKnownSpamOrTestNumber } from "@/lib/call-filter"
+import { isSpamByTwilioLookup } from "@/lib/twilio-lookup"
 import crypto from "crypto"
 
 export async function POST(req: NextRequest) {
@@ -62,6 +64,16 @@ export async function POST(req: NextRequest) {
         to_number_normalized: normalizeE164(toNumber),
         forwarded_from_normalized: normalizeE164(forwardedFrom),
       })
+
+      if (isKnownSpamOrTestNumber(fromNumber)) {
+        console.info("Retell inbound rejected: known spam/test number", { from_number: fromNumber })
+        return NextResponse.json({ call_inbound: {} })
+      }
+
+      if (await isSpamByTwilioLookup(fromNumber)) {
+        console.info("Retell inbound rejected: Twilio Lookup marked spam", { from_number: fromNumber })
+        return NextResponse.json({ call_inbound: {} })
+      }
       
       // Resolution priority:
       // 1. By to_number (business's dedicated Retell number) - PREFERRED for multi-tenant
@@ -502,7 +514,20 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
   const callSettings = mergeWithDefaults((business as any).settings as Partial<BusinessSettings> | null)
   const notifPrefs = callSettings.notifications
   const isEmergency = structuredIntake.emergency
-  const shouldNotify = notifPrefs.emergencyOnlyAlerts ? isEmergency : true
+  const shouldNotifyByPrefs = notifPrefs.emergencyOnlyAlerts ? isEmergency : true
+
+  const intakeForFilter = structuredIntake as { name?: string; phone?: string; address?: string; city?: string; issue_description?: string; vehicle_year?: string; vehicle_make?: string; vehicle_model?: string; year?: string; make?: string; model?: string; appointment_preference?: string; availability?: string; preferred_time?: string }
+  const callForFilter = { duration: call.duration, callerPhone: call.callerPhone }
+  const hasInfo = hasActionableInfo(intakeForFilter, callForFilter)
+  const likelySpam = isLikelySpam(intakeForFilter, callForFilter)
+
+  const shouldNotify = shouldNotifyByPrefs && hasInfo && !likelySpam
+  if (!hasInfo) {
+    console.info("[Notifications] Skipped: no actionable info captured", { callId, duration: call.duration })
+  }
+  if (likelySpam) {
+    console.info("[Notifications] Skipped: likely spam", { callId, duration: call.duration, callerPhone: call.callerPhone })
+  }
 
   if (shouldNotify) {
     try {

@@ -10,6 +10,7 @@ const PLANS = [
     description: "Missed call capture and alerts",
     features: [
       "Missed call capture",
+      "Spam call filtering",
       "SMS summary",
       "Lead email notification",
     ],
@@ -19,6 +20,7 @@ const PLANS = [
     description: "24/7 answering and booking",
     features: [
       "24/7 answering",
+      "Spam call filtering",
       "Appointment booking",
       "SMS follow-up",
       "Basic CRM export",
@@ -29,6 +31,7 @@ const PLANS = [
     description: "Custom scripts and reporting",
     features: [
       "Custom scripts",
+      "Spam call filtering",
       "Multi-location",
       "Reporting dashboard",
     ],

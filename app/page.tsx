@@ -81,6 +81,7 @@ export default function HomePage() {
         <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto list-none">
           {[
             "Answers your business phone instantly",
+            "Filters spam and robocall numbers before answering",
             "Talks naturally with callers",
             "Captures name, phone, service need, urgency",
             "Books appointments or sends qualified leads",
@@ -196,6 +197,7 @@ export default function HomePage() {
                   "Urgency level",
                   "Preferred time",
                   "Call summary",
+                  "Spam numbers blocked automatically",
                   "Recording (optional)",
                 ].map((item, i) => (
                   <li key={i} className="flex items-center gap-2">
@@ -242,6 +244,7 @@ export default function HomePage() {
                 {[
                   "~75–120 calls/month",
                   "24/7 call answering",
+                  "Spam call filtering",
                   "Name, phone, reason captured",
                   "Email summaries",
                   "No setup fee",
@@ -261,6 +264,7 @@ export default function HomePage() {
               <CardContent className="space-y-2">
                 {[
                   "~225–360 calls/month",
+                  "Spam call filtering",
                   "Industry intake flows",
                   "Appointment + emergency logic",
                   "CRM + SMS notifications",
@@ -281,6 +285,7 @@ export default function HomePage() {
               <CardContent className="space-y-2">
                 {[
                   "~450–720 calls/month",
+                  "Spam call filtering",
                   "Branded AI voice",
                   "After-hours emergency handling",
                   "Weekly usage reports",

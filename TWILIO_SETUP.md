@@ -76,6 +76,18 @@ For getting started, a single number and the three env vars above are enough.
 
 ---
 
+## 7. Optional: Block spam calls (Twilio Lookup + Nomorobo)
+
+To block 10-digit numbers marked as spam/robocallers **before** the AI answers:
+
+1. In Twilio Console go to **Add-ons** → **Lookup Add-ons** → install **Nomorobo** (spam score).
+2. Leave the add-on name as `nomorobo_spamscore`.
+3. Add to `.env`: `FILTER_SPAM_VIA_TWILIO=true`
+
+When enabled, each inbound call triggers a Lookup + Nomorobo check. Numbers with spam score 1 are rejected (no answer, no Retell usage). Costs per lookup. If the lookup fails, calls are allowed (fail open).
+
+---
+
 ## Checklist
 
 - [ ] Twilio account created
