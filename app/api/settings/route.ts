@@ -3,6 +3,7 @@ import { getAuthUserFromRequest } from "@/lib/auth"
 import { db } from "@/lib/db"
 import {
   mergeWithDefaults,
+  mergeSectionInto,
   getAllowedSections,
   isSectionAllowed,
   type BusinessSettings,
@@ -102,12 +103,38 @@ export async function PATCH(req: NextRequest) {
     }
 
     const current = mergeWithDefaults(business.settings as Partial<BusinessSettings> | null)
-    const updated = sectionKeys.length ? { ...current, ...Object.fromEntries(sectionKeys.map((k) => [k, body[k]])) } : current
+    const updated: BusinessSettings = sectionKeys.length
+      ? (sectionKeys.reduce(
+          (acc, k) => {
+            const cur = acc[k as keyof BusinessSettings]
+            const incoming = body[k]
+            if (incoming === undefined) return acc
+            if (
+              typeof cur === "object" &&
+              cur !== null &&
+              !Array.isArray(cur) &&
+              typeof incoming === "object" &&
+              incoming !== null &&
+              !Array.isArray(incoming)
+            ) {
+              return { ...acc, [k]: mergeSectionInto(cur as unknown as Record<string, unknown>, incoming as Record<string, unknown>) }
+            }
+            return { ...acc, [k]: incoming }
+          },
+          { ...current }
+        ) as BusinessSettings)
+      : current
 
     await db.business.update({
       where: { id: user.businessId },
       data: { settings: updated as any },
     })
+
+    const verified = await db.business.findUnique({
+      where: { id: user.businessId },
+      select: { settings: true },
+    })
+    const verifiedSettings = mergeWithDefaults(verified?.settings as Partial<BusinessSettings> | null)
 
     // Sync per-business Retell agent so saved settings (greeting, tone, etc.) apply to the agent
     const businessForSync = await db.business.findUnique({
@@ -135,7 +162,10 @@ export async function PATCH(req: NextRequest) {
       }
     }
 
-    const out: { settings: typeof updated; notificationPhone?: string | null; smsConsent?: boolean } = { settings: updated }
+    const out: { settings: BusinessSettings; verified?: boolean; notificationPhone?: string | null; smsConsent?: boolean } = {
+      settings: verifiedSettings,
+      verified: true,
+    }
     if (notificationPhone !== undefined || smsConsent !== undefined) {
       const updatedUser = await db.user.findUnique({
         where: { id: user.id },

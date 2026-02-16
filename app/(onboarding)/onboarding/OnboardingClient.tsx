@@ -45,6 +45,7 @@ interface OnboardingClientProps {
     zipCode?: string
     serviceAreas?: string[]
     phoneNumber?: string
+    ownerPhone?: string
     businessHours?: { open: string; close: string; days: string[] } | null
     departments?: string[]
     crmWebhookUrl?: string | null

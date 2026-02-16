@@ -150,7 +150,10 @@ export async function sendSMSNotification(
   }
 
   const emergencyPrefix = intake.emergency ? "🚨 EMERGENCY: " : ""
-  const message = `${emergencyPrefix}New call from ${intake.name || "Unknown"}. ${intake.issue_description ? `Issue: ${intake.issue_description.substring(0, 100)}` : ""} Call back: ${intake.phone || "N/A"}`
+  const summary = (call as { summary?: string }).summary
+  const summarySnippet = summary?.trim() ? summary.trim().replace(/\s+/g, " ").slice(0, 200) : ""
+  const base = `${emergencyPrefix}New call from ${intake.name || "Unknown"}. ${intake.issue_description ? `Issue: ${intake.issue_description.substring(0, 80)}` : ""} Call back: ${intake.phone || "N/A"}`
+  const message = summarySnippet ? `${base}\n\nSummary: ${summarySnippet}` : base
 
   try {
     await twilioClient.messages.create({

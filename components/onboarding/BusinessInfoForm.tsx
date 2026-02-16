@@ -55,6 +55,7 @@ export function BusinessInfoForm({
     serviceAreas:
       initialData?.serviceAreas?.length ? initialData.serviceAreas : initialData?.city ? [initialData.city] : [],
     phoneNumber: initialData?.phoneNumber || "",
+    ownerPhone: initialData?.ownerPhone || "",
     smsConsent: initialData?.smsConsent ?? false,
     businessHours: initialData?.businessHours || { open: "09:00", close: "17:00", days: ["monday", "tuesday", "wednesday", "thursday", "friday"] },
     departments: initialData?.departments || [],
@@ -164,6 +165,20 @@ export function BusinessInfoForm({
         />
         <p className="text-xs text-muted-foreground">
           Your business line — the one you set to forward to the AI. Not the AI intake number shown above. One trial per business number.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="ownerPhone">SMS reports contact number</Label>
+        <Input
+          id="ownerPhone"
+          type="tel"
+          value={formData.ownerPhone || ""}
+          onChange={(e) => setFormData({ ...formData, ownerPhone: e.target.value })}
+          placeholder="(608) 555-9999"
+        />
+        <p className="text-xs text-muted-foreground">
+          Where to receive SMS call summaries. Your personal or business phone. Changeable in Settings → Notifications.
         </p>
       </div>
 

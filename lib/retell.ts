@@ -545,10 +545,11 @@ export type BusinessForSync = {
   planType: PlanType | null
 }
 
-/** Settings passed from dashboard (greeting, tone, question depth) used to personalize the synced agent. */
+/** Settings passed from dashboard (greeting, tone, question depth, voice) used to personalize the synced agent. */
 export type SyncSettings = {
   greeting?: { customGreeting?: string | null; tone?: string }
   questionDepth?: string
+  voiceBrand?: { speed?: number; conciseness?: number }
 }
 
 /**
@@ -609,14 +610,19 @@ export async function syncRetellAgentFromBusiness(
 
   const voiceId = hasBrandedVoice(effectivePlan) ? "11labs-Adam" : "11labs-Chloe"
   const vs = business.voiceSettings as { speed?: number; temperature?: number; volume?: number } | null | undefined
+  const voiceBrand = settings?.voiceBrand
   const voiceSpeed =
-    vs != null && typeof vs.speed === "number"
-      ? Math.max(0.5, Math.min(2, 0.5 + vs.speed * 1.5))
-      : 0.98
+    voiceBrand != null && typeof voiceBrand.speed === "number"
+      ? Math.max(0.5, Math.min(2, 0.75 + voiceBrand.speed * 0.75))
+      : vs != null && typeof vs.speed === "number"
+        ? Math.max(0.5, Math.min(2, 0.5 + vs.speed * 1.5))
+        : 0.98
   const voiceTemp =
-    vs != null && typeof vs.temperature === "number"
-      ? Math.max(0, Math.min(2, vs.temperature * 2))
-      : 0.98
+    voiceBrand != null && typeof voiceBrand.conciseness === "number"
+      ? Math.max(0, Math.min(2, 0.2 + voiceBrand.conciseness * 0.6))
+      : vs != null && typeof vs.temperature === "number"
+        ? Math.max(0, Math.min(2, vs.temperature * 2))
+        : 0.98
   const voiceVol =
     vs != null && typeof vs.volume === "number"
       ? Math.max(0, Math.min(2, vs.volume * 2))

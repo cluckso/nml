@@ -24,6 +24,7 @@ export default async function OnboardingPage() {
   const intakeNumber = getIntakeNumberForIndustry(business.industry)
   const showIntakeNumber = hasIntakeNumberConfigured() && intakeNumber
   // If they just returned from checkout, webhook may not have run yet — still show onboarding
+  const ownerPhone = (user as { phoneNumber?: string | null }).phoneNumber ?? undefined
   const initialBusiness = {
     name: business.name,
     address: business.address ?? undefined,
@@ -34,6 +35,7 @@ export default async function OnboardingPage() {
     businessHours: business.businessHours as { open: string; close: string; days: string[] } | null,
     departments: business.departments,
     phoneNumber: business.primaryForwardingNumber ?? undefined,
+    ownerPhone,
     crmWebhookUrl: business.crmWebhookUrl ?? undefined,
     forwardToEmail: business.forwardToEmail ?? undefined,
     afterHoursEmergencyPhone: business.afterHoursEmergencyPhone ?? undefined,

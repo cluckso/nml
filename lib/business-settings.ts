@@ -349,6 +349,29 @@ export const SECTION_MIN_TIER: Record<SettingsSection, PlanType> = {
 
 // ─── MERGE HELPER ────────────────────────────────────────────────────────
 
+/** Deep-merge a section update into current settings (avoids wiping sibling fields on partial updates). */
+export function mergeSectionInto<T extends Record<string, unknown>>(
+  current: T,
+  update: Partial<T> | null | undefined
+): T {
+  if (!update || typeof update !== "object") return current
+  const out = { ...current }
+  for (const k of Object.keys(update) as (keyof T)[]) {
+    const v = update[k]
+    if (v === undefined) continue
+    const cur = current[k]
+    if (typeof v === "object" && v !== null && !Array.isArray(v) && typeof cur === "object" && cur !== null && !Array.isArray(cur)) {
+      ;(out as Record<string, unknown>)[k as string] = mergeSectionInto(
+        cur as Record<string, unknown>,
+        v as Record<string, unknown>
+      )
+    } else {
+      ;(out as Record<string, unknown>)[k as string] = v
+    }
+  }
+  return out
+}
+
 /** Deep-merge saved settings over defaults so new fields always exist. */
 export function mergeWithDefaults(saved: Partial<BusinessSettings> | null | undefined): BusinessSettings {
   if (!saved) return { ...DEFAULT_SETTINGS }

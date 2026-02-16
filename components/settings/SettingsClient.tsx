@@ -58,6 +58,16 @@ export function SettingsClient() {
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [agentPreview, setAgentPreview] = useState<{ summary?: { ringBeforeAnswerSeconds: number; tone?: string; questionDepth?: string }; ringDurationMs?: number } | null>(null)
+
+  const refreshAgentPreview = useCallback(() => {
+    fetch("/api/settings/agent-preview")
+      .then(async (r) => {
+        const d = await r.json()
+        if (r.ok) setAgentPreview(d)
+      })
+      .catch(() => setAgentPreview(null))
+  }, [])
 
   useEffect(() => {
     fetch("/api/settings")
@@ -69,11 +79,12 @@ export function SettingsClient() {
           setPlanType(d.planType)
           setNotificationPhone(d.notificationPhone ?? null)
           setSmsConsent(d.smsConsent ?? false)
+          refreshAgentPreview()
         } else setError(d.error)
       })
       .catch(() => setError("Failed to load settings"))
       .finally(() => setLoading(false))
-  }, [])
+  }, [refreshAgentPreview])
 
   const save = useCallback(
     async (section: SettingsSection, data: unknown, extra?: Record<string, unknown>) => {
@@ -94,6 +105,7 @@ export function SettingsClient() {
           if (d.smsConsent !== undefined) setSmsConsent(d.smsConsent)
           setSaved(true)
           setTimeout(() => setSaved(false), 2000)
+          refreshAgentPreview()
         } else setError(d.error)
       } catch {
         setError("Failed to save")
@@ -101,7 +113,7 @@ export function SettingsClient() {
         setSaving(false)
       }
     },
-    []
+    [refreshAgentPreview]
   )
 
   if (loading) return <div className="py-12 text-center text-muted-foreground">Loading settings...</div>
@@ -144,7 +156,12 @@ export function SettingsClient() {
       {/* Main */}
       <div className="flex-1 min-w-0">
         {error && <p className="text-sm text-destructive mb-4">{error}</p>}
-        {saved && <p className="text-sm text-emerald-600 mb-4">Settings saved.</p>}
+        {saved && <p className="text-sm text-emerald-600 mb-4">Settings saved and verified.</p>}
+        <AgentPreviewCard
+          agentPreview={agentPreview}
+          onRefresh={refreshAgentPreview}
+          onSettingsLoad={settings !== null}
+        />
 
         {isLocked(activeTab) ? (
           <LockedSection section={activeTab} />
@@ -177,6 +194,50 @@ export function SettingsClient() {
         )}
       </div>
     </div>
+  )
+}
+
+// ─── AGENT PREVIEW ───────────────────────────────────────────────────────
+
+function AgentPreviewCard({
+  agentPreview,
+  onRefresh,
+  onSettingsLoad,
+}: {
+  agentPreview: { summary?: { ringBeforeAnswerSeconds?: number; tone?: string; questionDepth?: string }; ringDurationMs?: number } | null
+  onRefresh: () => void
+  onSettingsLoad: boolean
+}) {
+  if (!onSettingsLoad) return null
+  const summary = agentPreview?.summary
+  return (
+    <Card className="mb-6 border-dashed">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base flex items-center justify-between gap-2">
+          <span>Agent config preview</span>
+          <Button variant="ghost" size="sm" onClick={onRefresh} className="h-8 text-xs">
+            Verify
+          </Button>
+        </CardTitle>
+        <CardDescription>
+          Shows what will be sent to the AI on each call. Use &quot;Verify&quot; to confirm your settings are applied.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="text-sm">
+        {summary ? (
+          <ul className="space-y-1 text-muted-foreground">
+            <li>Ring before answer: {summary.ringBeforeAnswerSeconds ?? 0} sec</li>
+            <li>Tone: {summary.tone ?? "—"}</li>
+            <li>Question depth: {summary.questionDepth ?? "—"}</li>
+            {agentPreview?.ringDurationMs != null && agentPreview.ringDurationMs > 0 && (
+              <li className="text-emerald-600">Ring delay applied: {agentPreview.ringDurationMs}ms</li>
+            )}
+          </ul>
+        ) : (
+          <p className="text-muted-foreground">Click &quot;Verify&quot; to see what the agent will use.</p>
+        )}
+      </CardContent>
+    </Card>
   )
 }
 

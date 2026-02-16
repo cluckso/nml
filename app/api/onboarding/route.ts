@@ -118,13 +118,15 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    // Update user's businessId, owner phone, and SMS consent
+    // Update user's businessId, SMS reports contact number, and SMS consent
     const smsConsent = businessInfo.smsConsent === true
+    const ownerPhoneRaw = typeof businessInfo.ownerPhone === "string" ? businessInfo.ownerPhone.trim() : ""
+    const ownerPhoneNormalized = ownerPhoneRaw ? (normalizeE164(ownerPhoneRaw) ?? ownerPhoneRaw) : null
     await db.user.update({
       where: { id: user.id },
       data: {
         businessId: business.id,
-        phoneNumber: businessInfo.ownerPhone || undefined,
+        phoneNumber: ownerPhoneNormalized ?? undefined,
         ...(smsConsent
           ? { smsConsent: true, smsConsentAt: new Date(), smsOptedOut: false, smsOptedOutAt: null }
           : { smsConsent: false, smsConsentAt: null }),
