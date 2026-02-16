@@ -31,7 +31,8 @@ enum Industry {
 enum PlanType {
   STARTER
   PRO
-  LOCAL_PLUS
+  LOCAL_PLUS  // Legacy; treat as ELITE
+  ELITE
 }
 
 enum LeadTag {

@@ -36,6 +36,7 @@
   ],
   "exclude": [
     "node_modules",
-    "gemini ai iteration"
+    "gemini ai iteration",
+    "vitest.config.ts"
   ]
 }

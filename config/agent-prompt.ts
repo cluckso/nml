@@ -47,9 +47,9 @@ Then continue intake normally.`,
   departmentsBlockTemplate:
     "\n\nIf multiple departments exist ({{DEPARTMENTS}}), ask which one they need and store it as \"department\".",
 
-  /** Optional appointment preference capture */
+  /** Optional appointment/booking capture — only when caller explicitly asks */
   appointmentBlockTemplate:
-    "\n\nIf the caller asks about scheduling, collect preferred day(s) and time range only (morning/afternoon). Store as appointment_preference.",
+    "\n\nAPPOINTMENT BOOKING (only when caller explicitly asks to schedule):\n- If booking_only_offer_when_asked is true, do NOT offer scheduling unless the caller asks. Most callers get intake only.\n- When they ask: collect preferred day(s) and time range. Timeslots come from business hours in {{booking_slot_duration_minutes}}-min increments.\n- Slot length: if caller describes a specific job (e.g. oil change, engine work), match against {{booking_service_time_rules}} and use that many minutes. If unknown or \"evaluation\", use {{booking_evaluation_minutes}} min. Otherwise use {{booking_default_minutes}} min.\n- Store as appointment_preference. Include appointment_type (evaluation | job_type) and duration_minutes when known.",
 
   /** Lead tagging */
   tagBlockTemplate:
@@ -93,7 +93,7 @@ Then continue intake normally.`,
   - Reason for the call (issue, maintenance, status check)
   - Vehicle year, make, model
 - If asking about an existing repair, ask when the vehicle was dropped off
-- If asking about an appointment, capture preference only
+- If caller explicitly asks to schedule: use service_time_rules for slot length (e.g. oil change 30 min, engine work 4 hours). If they don't know what needs fixing, use evaluation slot. Only offer scheduling when they ask.
 - Do NOT provide diagnostics or pricing`,
 
     CHILDCARE: `Industry-specific instructions:

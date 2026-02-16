@@ -14,20 +14,26 @@ import { Phone } from "lucide-react"
 
 const PLAN_DETAILS = {
   [PlanType.STARTER]: {
-    name: "Basic",
+    name: "Starter",
     price: 99,
     minutes: 300,
     setupFee: 0,
   },
   [PlanType.PRO]: {
     name: "Pro",
-    price: 229,
+    price: 149,
     minutes: 900,
     setupFee: 0,
   },
   [PlanType.LOCAL_PLUS]: {
-    name: "Local Plus",
-    price: 349,
+    name: "Elite",
+    price: 249,
+    minutes: 1800,
+    setupFee: 0,
+  },
+  [PlanType.ELITE]: {
+    name: "Elite",
+    price: 249,
     minutes: 1800,
     setupFee: 0,
   },
@@ -104,7 +110,7 @@ export default async function BillingPage() {
               <div className="space-y-2">
                 <p className="text-2xl font-bold">Free trial</p>
                 <p className="text-sm text-muted-foreground">
-                  You&apos;re on a 4-day trial — 50 free call minutes (whichever comes first). Upgrade anytime to keep your number and continue.
+                  Free trial: 50 call minutes or 4 days. Upgrade to Starter, Pro, or Elite when you&apos;re ready.
                 </p>
                 {(trial.isExhausted || trial.isExpired) && (
                   <Button asChild className="mt-2">
@@ -172,7 +178,11 @@ export default async function BillingPage() {
         <CardContent>
           <BillingPlansWithAgreement
             currentPlan={currentPlan}
-            planDetails={PLAN_DETAILS}
+            planDetails={{
+              [PlanType.STARTER]: PLAN_DETAILS[PlanType.STARTER],
+              [PlanType.PRO]: PLAN_DETAILS[PlanType.PRO],
+              [PlanType.ELITE]: PLAN_DETAILS[PlanType.ELITE],
+            }}
           />
         </CardContent>
       </Card>

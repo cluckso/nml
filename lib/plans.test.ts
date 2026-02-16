@@ -58,6 +58,7 @@ describe("getIncludedMinutes", () => {
     expect(getIncludedMinutes(PlanType.STARTER)).toBe(300)
     expect(getIncludedMinutes(PlanType.PRO)).toBe(900)
     expect(getIncludedMinutes(PlanType.LOCAL_PLUS)).toBe(1800)
+    expect(getIncludedMinutes(PlanType.ELITE)).toBe(1800)
   })
 })
 

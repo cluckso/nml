@@ -27,8 +27,8 @@ export default async function AdminPage() {
     .filter((b) => b.subscriptionStatus === "ACTIVE")
     .reduce((sum, b) => {
       const planPrice = b.planType === PlanType.STARTER ? 99
-        : b.planType === PlanType.PRO ? 199
-        : b.planType === PlanType.LOCAL_PLUS ? 299
+        : b.planType === PlanType.PRO ? 149
+        : (b.planType === PlanType.ELITE || b.planType === PlanType.LOCAL_PLUS) ? 249
         : 0
       return sum + planPrice
     }, 0)

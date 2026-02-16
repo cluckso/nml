@@ -432,8 +432,11 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
   }
 
   const leadTag = detectLeadTag(analysis, emergency)
-  const appointmentRequest = structuredIntake.appointment_preference
-    ? { preferredDays: undefined as string | undefined, preferredTime: undefined as string | undefined, notes: String(structuredIntake.appointment_preference) }
+  const apptPref = structuredIntake.appointment_preference
+  const appointmentRequest = apptPref
+    ? typeof apptPref === "object" && apptPref !== null
+      ? (apptPref as object)
+      : { preferredDays: undefined, preferredTime: undefined, notes: String(apptPref) }
     : undefined
 
   // Duration from Retell timestamps only (server-side; never trust client). Clamp to prevent abuse.

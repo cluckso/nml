@@ -28,6 +28,7 @@ import type {
 } from "@/lib/business-settings"
 import { SECTION_LABELS, SECTION_MIN_TIER } from "@/lib/business-settings"
 import { PlanType } from "@prisma/client"
+import { PhoneInputWithCountry } from "@/components/ui/phone-input-with-country"
 
 const TABS: { section: SettingsSection; tier: "starter" | "pro" | "local_plus" }[] = [
   { section: "greeting", tier: "starter" },
@@ -53,6 +54,7 @@ export function SettingsClient() {
   const [planType, setPlanType] = useState<PlanType | null>(null)
   const [notificationPhone, setNotificationPhone] = useState<string | null>(null)
   const [smsConsent, setSmsConsent] = useState(false)
+  const [businessPhone, setBusinessPhone] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<SettingsSection>("greeting")
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -79,6 +81,7 @@ export function SettingsClient() {
           setPlanType(d.planType)
           setNotificationPhone(d.notificationPhone ?? null)
           setSmsConsent(d.smsConsent ?? false)
+          setBusinessPhone(d.businessPhone ?? null)
           refreshAgentPreview()
         } else setError(d.error)
       })
@@ -174,6 +177,7 @@ export function SettingsClient() {
               <NotificationsSection
                 value={settings.notifications}
                 notificationPhone={notificationPhone}
+                businessPhone={businessPhone}
                 smsConsent={smsConsent}
                 onSave={(v, extra) => save("notifications", v, extra)}
                 saving={saving}
@@ -286,12 +290,12 @@ function LockedSection({ section }: { section: SettingsSection }) {
           {SECTION_LABELS[section]}
         </CardTitle>
         <CardDescription>
-          This feature requires the {tier === PlanType.PRO ? "Pro" : "Local Plus"} plan.
+          This feature requires the {tier === PlanType.PRO ? "Pro" : "Elite"} plan.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Link href="/billing">
-          <Button variant="outline">Upgrade to {tier === PlanType.PRO ? "Pro" : "Local Plus"}</Button>
+          <Button variant="outline">Upgrade to {tier === PlanType.PRO ? "Pro" : "Elite"}</Button>
         </Link>
       </CardContent>
     </Card>
@@ -438,28 +442,40 @@ function AvailabilitySection({ value, onSave, saving }: { value: AvailabilitySet
 function NotificationsSection({
   value,
   notificationPhone: initialPhone,
+  businessPhone,
   smsConsent: initialConsent,
   onSave,
   saving,
 }: {
   value: NotificationSettings
   notificationPhone: string | null
+  businessPhone: string | null
   smsConsent: boolean
   onSave: (v: NotificationSettings, extra?: { notificationPhone?: string; smsConsent?: boolean }) => void
   saving: boolean
 }) {
   const [d, setD] = useState(value)
   const [phone, setPhone] = useState(initialPhone ?? "")
+  const [sameAsBusiness, setSameAsBusiness] = useState(
+    !!businessPhone && (initialPhone ?? "") === businessPhone
+  )
   const [consent, setConsent] = useState(initialConsent)
   const [testStatus, setTestStatus] = useState<{ email?: string; sms?: string } | null>(null)
 
   useEffect(() => {
     setPhone(initialPhone ?? "")
+    setSameAsBusiness(!!businessPhone && (initialPhone ?? "") === businessPhone)
     setConsent(initialConsent)
-  }, [initialPhone, initialConsent])
+  }, [initialPhone, initialConsent, businessPhone])
+
+  const handleSameAsBusinessChange = (checked: boolean) => {
+    setSameAsBusiness(checked)
+    if (checked && businessPhone) setPhone(businessPhone)
+  }
 
   const handleSave = () => {
-    onSave(d, { notificationPhone: phone.trim() || undefined, smsConsent: consent })
+    const finalPhone = sameAsBusiness && businessPhone ? businessPhone : phone.trim() || undefined
+    onSave(d, { notificationPhone: finalPhone, smsConsent: consent })
   }
 
   const runTest = async (type: "email" | "sms" | "both") => {
@@ -487,13 +503,25 @@ function NotificationsSection({
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label>Phone number for SMS alerts</Label>
-          <Input
-            type="tel"
-            placeholder="+1 (608) 642-1459"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+          {businessPhone && (
+            <label className="flex items-center gap-2 text-sm mb-2">
+              <input
+                type="checkbox"
+                checked={sameAsBusiness}
+                onChange={(e) => handleSameAsBusinessChange(e.target.checked)}
+                className="rounded"
+              />
+              Same as business number
+            </label>
+          )}
+          <PhoneInputWithCountry
+            value={sameAsBusiness && businessPhone ? businessPhone : phone}
+            onChange={setPhone}
+            placeholder="(608) 642-1459"
+            aria-label="Phone number for SMS alerts"
+            disabled={sameAsBusiness}
           />
-          <p className="text-xs text-muted-foreground">E.164 format (e.g. +16086421459). Used for text alerts when a call is received.</p>
+          <p className="text-xs text-muted-foreground">Used for text alerts when a call is received. Choose country code, then enter your number.</p>
         </div>
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="rounded" />
@@ -652,28 +680,72 @@ function QuestionDepthSection({ value, onSave, saving }: { value: QuestionDepth;
 
 function BookingSection({ value, onSave, saving }: { value: BookingSettings; onSave: (v: BookingSettings) => void; saving: boolean }) {
   const [d, setD] = useState(value)
+  const [newJobType, setNewJobType] = useState("")
+  const [newJobMinutes, setNewJobMinutes] = useState("")
+  const rules = d.serviceTimeByJobType ?? []
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Booking Controls</CardTitle>
-        <CardDescription>Appointment logic for calls.</CardDescription>
+        <CardTitle>Booking & Appointments</CardTitle>
+        <CardDescription>AI collects info and schedules within your timeslots. Only offered when caller explicitly asks.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Toggle label="Ask for appointment?" checked={d.askForAppointment} onChange={(v) => setD({ ...d, askForAppointment: v })} />
-        <Toggle label="Offer time windows?" checked={d.offerTimeWindows} onChange={(v) => setD({ ...d, offerTimeWindows: v })} />
-        <div className="space-y-2">
-          <Label>Slot precision</Label>
-          <select className="w-full rounded border border-input bg-background px-3 py-2 text-sm" value={d.exactSlotVsPreference} onChange={(e) => setD({ ...d, exactSlotVsPreference: e.target.value as "exact" | "preference" })}>
-            <option value="exact">Exact time slot</option>
-            <option value="preference">Preference only</option>
-          </select>
-        </div>
-        <div className="space-y-2">
-          <Label>Minimum notice (hours)</Label>
-          <Input type="number" min={0} value={d.minNoticeHours} onChange={(e) => setD({ ...d, minNoticeHours: parseInt(e.target.value) || 0 })} />
-        </div>
-        <Toggle label="Allow same-day" checked={d.sameDayAllowed} onChange={(v) => setD({ ...d, sameDayAllowed: v })} />
-        <Toggle label="Emergency override (bypass rules)" checked={d.emergencyOverride} onChange={(v) => setD({ ...d, emergencyOverride: v })} />
+        <Toggle label="Enable appointment booking" checked={d.askForAppointment} onChange={(v) => setD({ ...d, askForAppointment: v })} />
+        {d.askForAppointment && (
+          <>
+            <Toggle label="Only offer when caller asks" checked={d.onlyOfferWhenAsked ?? true} onChange={(v) => setD({ ...d, onlyOfferWhenAsked: v })} description="Most callers get intake only. Scheduling only if they ask." />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Default slot (minutes)</Label>
+                <Input type="number" min={15} max={480} value={d.defaultAppointmentMinutes ?? 60} onChange={(e) => setD({ ...d, defaultAppointmentMinutes: parseInt(e.target.value) || 60 })} />
+                <p className="text-xs text-muted-foreground">When job type is known</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Evaluation slot (minutes)</Label>
+                <Input type="number" min={15} max={120} value={d.evaluationAppointmentMinutes ?? 30} onChange={(e) => setD({ ...d, evaluationAppointmentMinutes: parseInt(e.target.value) || 30 })} />
+                <p className="text-xs text-muted-foreground">When caller doesn&apos;t know what needs fixing</p>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Slot duration (minutes)</Label>
+              <Input type="number" min={15} max={120} value={d.slotDurationMinutes ?? 30} onChange={(e) => setD({ ...d, slotDurationMinutes: parseInt(e.target.value) || 30 })} />
+              <p className="text-xs text-muted-foreground">Timeslots from business hours (e.g. 30 = 9:00, 9:30, 10:00…)</p>
+            </div>
+            <div className="space-y-2">
+              <Label>Service time by job type (optional)</Label>
+              <p className="text-xs text-muted-foreground">E.g. oil change 30 min, engine work 240 min. Caller must describe the job.</p>
+              <div className="space-y-2">
+                {rules.map((r, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <span className="text-sm font-medium">{r.jobType}</span>
+                    <span className="text-muted-foreground">→</span>
+                    <span className="text-sm">{r.minutes} min</span>
+                    <button type="button" onClick={() => setD({ ...d, serviceTimeByJobType: rules.filter((_, j) => j !== i) })} className="text-xs text-destructive hover:underline">Remove</button>
+                  </div>
+                ))}
+                <div className="flex gap-2">
+                  <Input placeholder="e.g. oil change" value={newJobType} onChange={(e) => setNewJobType(e.target.value)} className="flex-1" />
+                  <Input type="number" placeholder="min" value={newJobMinutes} onChange={(e) => setNewJobMinutes(e.target.value)} className="w-20" />
+                  <Button size="sm" variant="outline" onClick={() => { if (newJobType.trim() && newJobMinutes) { setD({ ...d, serviceTimeByJobType: [...rules, { jobType: newJobType.trim().toLowerCase(), minutes: parseInt(newJobMinutes) || 30 }] }); setNewJobType(""); setNewJobMinutes("") } }}>Add</Button>
+                </div>
+              </div>
+            </div>
+            <Toggle label="Offer time windows?" checked={d.offerTimeWindows} onChange={(v) => setD({ ...d, offerTimeWindows: v })} />
+            <div className="space-y-2">
+              <Label>Slot precision</Label>
+              <select className="w-full rounded border border-input bg-background px-3 py-2 text-sm" value={d.exactSlotVsPreference} onChange={(e) => setD({ ...d, exactSlotVsPreference: e.target.value as "exact" | "preference" })}>
+                <option value="exact">Exact time slot</option>
+                <option value="preference">Preference only</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label>Minimum notice (hours)</Label>
+              <Input type="number" min={0} value={d.minNoticeHours} onChange={(e) => setD({ ...d, minNoticeHours: parseInt(e.target.value) || 0 })} />
+            </div>
+            <Toggle label="Allow same-day" checked={d.sameDayAllowed} onChange={(v) => setD({ ...d, sameDayAllowed: v })} />
+            <Toggle label="Emergency override (bypass rules)" checked={d.emergencyOverride} onChange={(v) => setD({ ...d, emergencyOverride: v })} />
+          </>
+        )}
         <SaveBtn saving={saving} onClick={() => onSave(d)} />
       </CardContent>
     </Card>

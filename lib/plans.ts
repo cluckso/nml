@@ -1,10 +1,21 @@
 import { PlanType } from "@prisma/client"
 
+/** Pro or Elite tier (Elite includes LOCAL_PLUS for legacy). */
+function isProOrElite(planType: PlanType | null | undefined): boolean {
+  return planType === PlanType.PRO || planType === PlanType.ELITE || planType === PlanType.LOCAL_PLUS
+}
+
+/** Elite tier only (custom scripts, multi-location, reporting). */
+function isEliteTier(planType: PlanType | null | undefined): boolean {
+  return planType === PlanType.ELITE || planType === PlanType.LOCAL_PLUS
+}
+
 /** Included call minutes per plan per month */
 export const INCLUDED_MINUTES: Record<PlanType, number> = {
   [PlanType.STARTER]: 300,
   [PlanType.PRO]: 900,
   [PlanType.LOCAL_PLUS]: 1800,
+  [PlanType.ELITE]: 1800,
 }
 
 /** One-time setup fee per plan (USD) — no setup fees */
@@ -12,6 +23,7 @@ export const SETUP_FEES: Record<PlanType, number> = {
   [PlanType.STARTER]: 0,
   [PlanType.PRO]: 0,
   [PlanType.LOCAL_PLUS]: 0,
+  [PlanType.ELITE]: 0,
 }
 
 /** Free trial: call minutes cap before first paid subscription */
@@ -20,11 +32,12 @@ export const FREE_TRIAL_MINUTES = 50
 /** Free trial: validity window in days (trial ends at 4 days or 50 minutes, whichever comes first) */
 export const TRIAL_DAYS = 4
 
-/** Monthly price per plan (USD) */
+/** Monthly price per plan (USD) — Starter $99, Pro $149, Elite $249 */
 export const MONTHLY_PRICES: Record<PlanType, number> = {
   [PlanType.STARTER]: 99,
-  [PlanType.PRO]: 229,
-  [PlanType.LOCAL_PLUS]: 349,
+  [PlanType.PRO]: 149,
+  [PlanType.LOCAL_PLUS]: 249,
+  [PlanType.ELITE]: 249,
 }
 
 /** Overage rate per minute (USD) */
@@ -51,63 +64,64 @@ export function getOverageMinutes(planType: PlanType, minutesUsed: number): numb
   return Math.max(0, minutesUsed - getIncludedMinutes(planType))
 }
 
-/** Whether plan has industry-optimized / prebuilt agents (Pro+); user selects business type, system links prebuilt intake flow */
+/** Whether plan has industry-optimized / prebuilt agents (Pro+) */
 export function hasIndustryOptimizedAgents(planType: PlanType): boolean {
-  return planType === PlanType.PRO || planType === PlanType.LOCAL_PLUS
+  return isProOrElite(planType)
 }
 
-/** Whether plan has appointment request capture (Pro+) */
+/** Whether plan has appointment booking (Pro+) */
 export function hasAppointmentCapture(planType: PlanType): boolean {
-  return planType === PlanType.PRO || planType === PlanType.LOCAL_PLUS
+  return isProOrElite(planType)
 }
 
-/** Whether plan sends SMS confirmation to callers (Pro+) */
+/** Whether plan sends SMS follow-up to callers (Pro+) */
 export function hasSmsToCallers(planType: PlanType): boolean {
-  return planType === PlanType.PRO || planType === PlanType.LOCAL_PLUS
+  return isProOrElite(planType)
 }
 
-/** Whether plan has email/CRM forwarding (Pro+) */
+/** Whether plan has CRM / email export (Pro+) */
 export function hasCrmForwarding(planType: PlanType): boolean {
-  return planType === PlanType.PRO || planType === PlanType.LOCAL_PLUS
+  return isProOrElite(planType)
 }
 
-/** Whether plan has lead tagging: emergency, estimate, follow-up (Pro+) */
+/** Whether plan has lead tagging (Pro+) */
 export function hasLeadTagging(planType: PlanType): boolean {
-  return planType === PlanType.PRO || planType === PlanType.LOCAL_PLUS
+  return isProOrElite(planType)
 }
 
-/** Whether plan has multi-department logic (removed from Local Plus; reserved for future) */
+/** Whether plan has multi-location (Elite) */
 export function hasMultiDepartment(planType: PlanType): boolean {
-  return false
+  return isEliteTier(planType)
 }
 
-/** Whether plan gets weekly usage & lead reports (Local Plus) */
+/** Whether plan gets weekly usage & lead reports — reporting dashboard (Elite) */
 export function hasWeeklyReports(planType: PlanType): boolean {
-  return planType === PlanType.LOCAL_PLUS
+  return isEliteTier(planType)
 }
 
-/** Whether plan has fully branded AI voice + voice sliders (Local Plus) */
+/** Whether plan has custom scripts / voice branding (Elite) */
 export function hasBrandedVoice(planType: PlanType): boolean {
-  return planType === PlanType.LOCAL_PLUS
+  return isEliteTier(planType)
 }
 
 /** Whether plan shows urgency/emergency flags in dashboard (Pro+) */
 export function hasUrgencyFlags(planType: PlanType): boolean {
-  return planType === PlanType.PRO || planType === PlanType.LOCAL_PLUS
+  return isProOrElite(planType)
 }
 
-/** Whether plan has priority support (Local Plus; replaces multi-department & after-hours) */
+/** Whether plan has priority support (Elite) */
 export function hasPrioritySupport(planType: PlanType): boolean {
-  return planType === PlanType.LOCAL_PLUS
+  return isEliteTier(planType)
 }
 
 /**
- * In development, returns LOCAL_PLUS so all features are enabled for testing.
- * In production, returns the actual plan (or STARTER if none).
+ * In development, returns ELITE so all features are enabled for testing.
+ * In production, returns the actual plan (or STARTER if none). LOCAL_PLUS is treated as ELITE for display.
  */
 export function getEffectivePlanType(planType: PlanType | null | undefined): PlanType {
   if (process.env.NODE_ENV === "development") {
-    return PlanType.LOCAL_PLUS
+    return PlanType.ELITE
   }
+  if (planType === PlanType.LOCAL_PLUS) return PlanType.ELITE
   return planType ?? PlanType.STARTER
 }

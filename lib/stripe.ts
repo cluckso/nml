@@ -35,6 +35,7 @@ export const STRIPE_PRODUCTS = {
   STARTER: process.env.STRIPE_PRODUCT_STARTER || "prod_starter",
   PRO: process.env.STRIPE_PRODUCT_PRO || "prod_pro",
   LOCAL_PLUS: process.env.STRIPE_PRODUCT_LOCAL_PLUS || "prod_local_plus",
+  ELITE: process.env.STRIPE_PRODUCT_ELITE || "prod_elite",
 }
 
 // Metered usage price ID for overages ($0.20/min)
@@ -144,10 +145,12 @@ function getProductIdForPlan(planType: PlanType): string {
       return STRIPE_PRODUCTS.PRO
     case PlanType.LOCAL_PLUS:
       return STRIPE_PRODUCTS.LOCAL_PLUS
+    case PlanType.ELITE:
+      return STRIPE_PRODUCTS.ELITE
   }
 }
 
-const PLACEHOLDER_IDS = ["price_starter", "price_pro", "price_local_plus", "price_usage"]
+const PLACEHOLDER_IDS = ["price_starter", "price_pro", "price_local_plus", "price_elite", "price_usage"]
 
 // Monthly price IDs only (STRIPE_PRICE_*). Annual: STRIPE_PRICE_*_ANNUAL for future use.
 function getPriceIdForPlan(planType: PlanType): string {
@@ -155,8 +158,10 @@ function getPriceIdForPlan(planType: PlanType): string {
     [PlanType.STARTER]: process.env.STRIPE_PRICE_STARTER,
     [PlanType.PRO]: process.env.STRIPE_PRICE_PRO,
     [PlanType.LOCAL_PLUS]: process.env.STRIPE_PRICE_LOCAL_PLUS,
+    [PlanType.ELITE]: process.env.STRIPE_PRICE_ELITE,
   }
-  const id = priceIds[planType] || (planType === "STARTER" ? "price_starter" : planType === "PRO" ? "price_pro" : "price_local_plus")
+  const fallback = planType === "STARTER" ? "price_starter" : planType === "PRO" ? "price_pro" : planType === "ELITE" ? "price_elite" : "price_local_plus"
+  const id = priceIds[planType] ?? fallback
   if (PLACEHOLDER_IDS.includes(id) || !id.startsWith("price_")) {
     throw new Error(
       `Stripe price ID for ${planType} is not set. Set STRIPE_PRICE_${planType} in .env (value must start with price_)`

@@ -9,9 +9,9 @@ import { Check, Loader2 } from "lucide-react"
 import { PlanType } from "@prisma/client"
 
 const PLANS: Record<string, { name: string; price: number; planType: PlanType; popular: boolean }> = {
-  Basic: { name: "Basic", price: 99, planType: PlanType.STARTER, popular: false },
-  Pro: { name: "Pro", price: 229, planType: PlanType.PRO, popular: true },
-  "Local Plus": { name: "Local Plus", price: 349, planType: PlanType.LOCAL_PLUS, popular: false },
+  Starter: { name: "Starter", price: 99, planType: PlanType.STARTER, popular: false },
+  Pro: { name: "Pro", price: 149, planType: PlanType.PRO, popular: true },
+  Elite: { name: "Elite", price: 249, planType: PlanType.ELITE, popular: false },
 }
 
 export function PlanCard({
@@ -103,7 +103,7 @@ export function PlanCard({
                   Redirecting…
                 </>
               ) : (
-                "Choose plan & continue"
+                "Choose plan"
               )}
             </Button>
             {!agreedToLegal && (

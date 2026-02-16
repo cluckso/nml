@@ -74,9 +74,9 @@ export function TrialStartClient() {
     <div className="container mx-auto max-w-md py-12">
       <Card>
         <CardHeader>
-          <CardTitle>Start your free trial — 50 minutes or 4 days</CardTitle>
+          <CardTitle>Start your free trial — no card required</CardTitle>
           <CardDescription>
-            Trial ends at 50 call minutes or 4 days, whichever comes first. No charge until you upgrade. Add your business phone and payment method to start. One trial per business number.
+            Trial: 50 call minutes or 4 days, whichever comes first. No charge until you choose a plan. Add your business phone to start. One trial per business number.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -105,10 +105,10 @@ export function TrialStartClient() {
               <p className="rounded-md bg-destructive/10 p-2 text-sm text-destructive">{error}</p>
             )}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Starting…" : "Continue — add card next"}
+              {loading ? "Starting…" : "Start free trial"}
             </Button>
             <p className="text-xs text-muted-foreground text-center">
-              Add a card on the next step — we won&apos;t charge you until you choose a plan after your trial.
+              You&apos;ll set up your business next. We&apos;ll ask for payment only when you pick a plan.
             </p>
           </form>
         </CardContent>

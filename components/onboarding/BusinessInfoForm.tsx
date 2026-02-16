@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { X } from "lucide-react"
 import { SmsConsentCheckbox } from "@/components/consent/SmsConsentCheckbox"
+import { PhoneInputWithCountry } from "@/components/ui/phone-input-with-country"
 
 const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] as const
 
@@ -31,7 +32,7 @@ interface BusinessInfoFormProps {
   onSubmit: (data: BusinessInfo) => void
   onBack?: () => void
   /** Plan type from subscription — only show Pro/Local Plus fields when relevant */
-  planType?: "STARTER" | "PRO" | "LOCAL_PLUS" | null
+  planType?: "STARTER" | "PRO" | "LOCAL_PLUS" | "ELITE" | null
   /** Disable submit (e.g. while saving) to prevent double-submit */
   disabled?: boolean
 }
@@ -43,7 +44,7 @@ export function BusinessInfoForm({
   planType = null,
   disabled = false,
 }: BusinessInfoFormProps) {
-  const showProFeatures = planType === "PRO" || planType === "LOCAL_PLUS"
+  const showProFeatures = planType === "PRO" || planType === "LOCAL_PLUS" || planType === "ELITE"
   const showLocalPlusFeatures = false
   const showAfterHoursEmergency = planType === "PRO"
   const [formData, setFormData] = useState<BusinessInfo>({
@@ -64,11 +65,16 @@ export function BusinessInfoForm({
     afterHoursEmergencyPhone: initialData?.afterHoursEmergencyPhone || "",
   })
   const [serviceAreaInput, setServiceAreaInput] = useState("")
+  const [sameAsBusinessPhone, setSameAsBusinessPhone] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (disabled || !formData.serviceAreas.length) return
-    onSubmit(formData)
+    const data = { ...formData }
+    if (sameAsBusinessPhone && formData.phoneNumber?.trim()) {
+      data.ownerPhone = formData.phoneNumber
+    }
+    onSubmit(data)
   }
 
   const addServiceArea = () => {
@@ -170,12 +176,28 @@ export function BusinessInfoForm({
 
       <div className="space-y-2">
         <Label htmlFor="ownerPhone">SMS reports contact number</Label>
-        <Input
+        {formData.phoneNumber?.trim() && (
+          <label className="flex items-center gap-2 text-sm mb-2">
+            <input
+              type="checkbox"
+              checked={sameAsBusinessPhone}
+              onChange={(e) => {
+                const checked = e.target.checked
+                setSameAsBusinessPhone(checked)
+                setFormData({ ...formData, ownerPhone: checked ? formData.phoneNumber || "" : formData.ownerPhone || "" })
+              }}
+              className="rounded"
+            />
+            Same as business number
+          </label>
+        )}
+        <PhoneInputWithCountry
           id="ownerPhone"
-          type="tel"
-          value={formData.ownerPhone || ""}
-          onChange={(e) => setFormData({ ...formData, ownerPhone: e.target.value })}
-          placeholder="(608) 555-9999"
+          value={sameAsBusinessPhone ? (formData.phoneNumber || "") : (formData.ownerPhone || "")}
+          onChange={(v) => setFormData({ ...formData, ownerPhone: v })}
+          placeholder="(415) 555-9999"
+          aria-label="SMS reports contact number"
+          disabled={sameAsBusinessPhone}
         />
         <p className="text-xs text-muted-foreground">
           Where to receive SMS call summaries. Your personal or business phone. Changeable in Settings → Notifications.

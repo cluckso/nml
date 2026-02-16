@@ -145,18 +145,29 @@ export function buildCallItemizedProps(
     callerPhone: string | null
     issueDescription: string | null
     structuredIntake?: StructuredIntake | null
-    appointmentRequest?: { notes?: string | null; preferredDays?: string | null; preferredTime?: string | null } | null
+    appointmentRequest?: {
+      notes?: string | null
+      preferredDays?: string | null
+      preferredTime?: string | null
+      appointment_type?: string | null
+      duration_minutes?: number | null
+    } | null
   }
 ): CallItemizedReportProps {
   const intake = call.structuredIntake
-  const appt = call.appointmentRequest
-  const availability =
+  const appt = call.appointmentRequest as { notes?: string; preferredDays?: string; preferredTime?: string; appointment_type?: string; duration_minutes?: number } | null | undefined
+  const baseAvailability =
     (typeof appt?.notes === "string" && appt.notes.trim()) ||
     (typeof intake?.appointment_preference === "string" && intake.appointment_preference.trim()) ||
     (typeof intake?.availability === "string" && intake.availability.trim()) ||
     (typeof intake?.preferred_time === "string" && intake.preferred_time.trim()) ||
     [appt?.preferredDays, appt?.preferredTime].filter(Boolean).join(", ") ||
     null
+  const slotParts: string[] = []
+  if (appt?.appointment_type) slotParts.push(appt.appointment_type)
+  if (appt?.duration_minutes != null) slotParts.push(`${appt.duration_minutes} min`)
+  const slotInfo = slotParts.length ? ` (${slotParts.join(", ")})` : ""
+  const availability = baseAvailability ? baseAvailability + slotInfo : null
 
   const reasonForCall =
     call.issueDescription?.trim() ||

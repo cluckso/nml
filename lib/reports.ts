@@ -165,11 +165,11 @@ export async function sendWeeklyReportForBusiness(
   return true
 }
 
-/** Send weekly reports to all Local Plus businesses (call from cron) */
+/** Send weekly reports to all Elite (and legacy Local Plus) businesses (call from cron) */
 export async function sendAllWeeklyReports(): Promise<{ sent: number; skipped: number }> {
   const businesses = await db.business.findMany({
     where: {
-      planType: PlanType.LOCAL_PLUS,
+      planType: { in: [PlanType.ELITE, PlanType.LOCAL_PLUS] },
       subscriptionStatus: "ACTIVE",
     },
     select: { id: true },

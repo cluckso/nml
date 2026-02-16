@@ -67,14 +67,30 @@ export type IntakeTemplate = "hvac" | "plumbing" | "auto_repair" | "childcare" |
 /** Smart question depth — Pro+ */
 export type QuestionDepth = "fast" | "standard" | "deep"
 
+/** Service time by job type — e.g. oil change 30 min, engine work 4 hours */
+export interface ServiceTimeRule {
+  jobType: string // e.g. "oil change", "engine work", "tire rotation"
+  minutes: number
+}
+
 /** Booking controls — Pro+ */
 export interface BookingSettings {
   askForAppointment: boolean
+  /** Only offer scheduling when caller explicitly asks. Most callers get intake only; evaluation slot used when asked. */
+  onlyOfferWhenAsked: boolean
+  /** Default slot length (minutes) when job type is known but not in serviceTimeByJobType */
+  defaultAppointmentMinutes: number
+  /** Evaluation slot length (minutes) — for callers who don't know what needs fixing. Used only when explicitly asked. */
+  evaluationAppointmentMinutes: number
+  /** Slot duration (minutes) — timeslots derived from business hours, e.g. 30 = 9:00, 9:30, 10:00... */
+  slotDurationMinutes: number
   offerTimeWindows: boolean
   exactSlotVsPreference: "exact" | "preference"
   minNoticeHours: number
   sameDayAllowed: boolean
   emergencyOverride: boolean
+  /** Optional: job-type-specific slot lengths. E.g. oil change 30 min, engine work 240 min. */
+  serviceTimeByJobType: ServiceTimeRule[]
 }
 
 /** Lead tag config — Pro+ */
@@ -199,11 +215,22 @@ export const DEFAULT_SETTINGS: BusinessSettings = {
   questionDepth: "standard",
   booking: {
     askForAppointment: false,
+    onlyOfferWhenAsked: true,
+    defaultAppointmentMinutes: 60,
+    evaluationAppointmentMinutes: 30,
+    slotDurationMinutes: 30,
     offerTimeWindows: false,
     exactSlotVsPreference: "preference",
     minNoticeHours: 2,
     sameDayAllowed: true,
     emergencyOverride: true,
+    serviceTimeByJobType: [
+      { jobType: "oil change", minutes: 30 },
+      { jobType: "tire rotation", minutes: 30 },
+      { jobType: "brake job", minutes: 60 },
+      { jobType: "engine work", minutes: 240 },
+      { jobType: "evaluation", minutes: 30 },
+    ],
   },
   leadTags: {
     customTags: ["emergency", "estimate", "follow_up", "general"],
@@ -285,7 +312,7 @@ const PRO_SECTIONS: SettingsSection[] = [
   "crm",
 ]
 
-const LOCAL_PLUS_SECTIONS: SettingsSection[] = [
+const ELITE_SECTIONS: SettingsSection[] = [
   ...PRO_SECTIONS,
   "departments",
   "voiceBrand",
@@ -295,8 +322,9 @@ const LOCAL_PLUS_SECTIONS: SettingsSection[] = [
 
 export function getAllowedSections(planType: PlanType | null | undefined): SettingsSection[] {
   switch (planType) {
+    case PlanType.ELITE:
     case PlanType.LOCAL_PLUS:
-      return LOCAL_PLUS_SECTIONS
+      return ELITE_SECTIONS
     case PlanType.PRO:
       return PRO_SECTIONS
     case PlanType.STARTER:
@@ -328,7 +356,7 @@ export const SECTION_LABELS: Record<SettingsSection, string> = {
   reporting: "Report Customization",
 }
 
-/** Which tier unlocks a section (for upgrade prompts) */
+/** Which tier unlocks a section (for upgrade prompts). Elite = custom scripts, multi-location, reporting. */
 export const SECTION_MIN_TIER: Record<SettingsSection, PlanType> = {
   greeting: PlanType.STARTER,
   intakeFields: PlanType.STARTER,
@@ -341,10 +369,10 @@ export const SECTION_MIN_TIER: Record<SettingsSection, PlanType> = {
   booking: PlanType.PRO,
   leadTags: PlanType.PRO,
   crm: PlanType.PRO,
-  departments: PlanType.LOCAL_PLUS,
-  voiceBrand: PlanType.LOCAL_PLUS,
-  aiBehavior: PlanType.LOCAL_PLUS,
-  reporting: PlanType.LOCAL_PLUS,
+  departments: PlanType.ELITE,
+  voiceBrand: PlanType.ELITE,
+  aiBehavior: PlanType.ELITE,
+  reporting: PlanType.ELITE,
 }
 
 // ─── MERGE HELPER ────────────────────────────────────────────────────────

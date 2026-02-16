@@ -2,27 +2,20 @@ import { NextRequest, NextResponse } from "next/server"
 import { getAuthUserFromRequest } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { checkTrialEligibility } from "@/lib/trial"
-import { createStripeCustomerForTrial, createTrialSetupSession, stripe } from "@/lib/stripe"
+import { TRIAL_DAYS } from "@/lib/plans"
 import { Industry } from "@prisma/client"
 import { ClientStatus } from "@prisma/client"
 
 /**
  * POST /api/trial/start
- * Body: { businessPhone: string }
- * Creates or updates business with that phone, creates Stripe setup session (card on file, no charge), returns { url }.
+ * Body: { businessPhone: string, smsConsent?: boolean }
+ * No card required. Creates or updates business, starts trial (50 min or 4 days), redirects to onboarding.
  */
 export async function POST(req: NextRequest) {
   try {
     const user = await getAuthUserFromRequest(req)
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-    }
-
-    if (!stripe) {
-      return NextResponse.json(
-        { error: "Billing is not configured. Set STRIPE_SECRET_KEY in your environment." },
-        { status: 503 }
-      )
     }
 
     const body = await req.json().catch(() => ({}))
@@ -50,7 +43,7 @@ export async function POST(req: NextRequest) {
     }
 
     const normalizedPhone = eligibility.normalizedPhone
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+    const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/$/, "")
 
     let business = user.businessId
       ? await db.business.findUnique({
@@ -81,7 +74,21 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // Persist SMS consent
+    if (!business) {
+      return NextResponse.json({ error: "Business not found" }, { status: 500 })
+    }
+
+    const now = new Date()
+    const trialEndsAt = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000)
+    await db.business.update({
+      where: { id: business.id },
+      data: {
+        trialStartedAt: now,
+        trialEndsAt,
+        status: ClientStatus.ACTIVE,
+      },
+    })
+
     if (smsConsent) {
       await db.user.update({
         where: { id: user.id },
@@ -94,28 +101,7 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    if (!business) {
-      return NextResponse.json({ error: "Business not found" }, { status: 500 })
-    }
-
-    let stripeCustomerId = business.stripeCustomerId
-    if (!stripeCustomerId) {
-      const email = user.email || undefined
-      if (!email) {
-        return NextResponse.json(
-          { error: "Account email is required to start a trial." },
-          { status: 400 }
-        )
-      }
-      stripeCustomerId = await createStripeCustomerForTrial(email)
-      await db.business.update({
-        where: { id: business.id },
-        data: { stripeCustomerId },
-      })
-    }
-
-    const session = await createTrialSetupSession(business.id, stripeCustomerId, appUrl)
-    return NextResponse.json({ url: session.url ?? null })
+    return NextResponse.json({ url: `${appUrl}/onboarding` })
   } catch (error) {
     console.error("Trial start error:", error)
     return NextResponse.json(
