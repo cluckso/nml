@@ -68,7 +68,8 @@ export async function createTrialSetupSession(
     success_url: `${baseUrl}/onboarding?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${baseUrl}/trial/start`,
     metadata: { businessId },
-  })
+    branding_settings: { display_name: "CallGrabbr" },
+  } as Stripe.Checkout.SessionCreateParams)
 }
 
 export async function createCheckoutSession(
@@ -132,7 +133,8 @@ export async function createCheckoutSession(
         planType,
       },
     },
-  })
+    branding_settings: { display_name: "CallGrabbr" },
+  } as Stripe.Checkout.SessionCreateParams)
 
   return session
 }
