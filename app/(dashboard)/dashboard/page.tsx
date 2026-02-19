@@ -8,6 +8,7 @@ import { SetupAICard } from "@/components/dashboard/SetupAICard"
 import { TrialCard } from "@/components/dashboard/TrialCard"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { Phone, Clock, AlertTriangle, ChevronRight } from "lucide-react"
 
 export default async function DashboardPage() {
   const user = await requireAuth()
@@ -76,15 +77,19 @@ export default async function DashboardPage() {
   const ownerPhone = user.phoneNumber ?? null
 
   return (
-    <div className="container mx-auto max-w-7xl py-4 px-4">
-      {/* Control board header: one line */}
-      <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <h1 className="text-xl font-bold">
-          Dashboard <span className="text-muted-foreground font-normal">— {business?.name}</span>
-        </h1>
-        <div className="flex items-center gap-2">
+    <div className="container mx-auto max-w-7xl py-6 px-4">
+      {/* Header */}
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">{business?.name}</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">Dashboard</p>
+        </div>
+        <nav className="flex items-center gap-1">
           <Link href="/calls">
-            <Button variant="ghost" size="sm">Calls</Button>
+            <Button variant="ghost" size="sm" className="gap-2">
+              <Phone className="h-4 w-4" />
+              Calls
+            </Button>
           </Link>
           <Link href="/billing">
             <Button variant="ghost" size="sm">Billing</Button>
@@ -92,11 +97,11 @@ export default async function DashboardPage() {
           <Link href="/settings">
             <Button variant="ghost" size="sm">Settings</Button>
           </Link>
-        </div>
+        </nav>
       </div>
 
-      {/* Top row: Trial (if on trial) + Setup — side by side to fit one screen */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4" id="trial">
+      {/* Top row: Trial (if on trial) + Setup */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6" id="trial">
         {trial.isOnTrial && (
           <div id="trial-card">
             <TrialCard trial={trial} hasAgent={hasAgent} />
@@ -114,27 +119,57 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Stats row: 3 compact cards */}
-      <div className="grid grid-cols-3 gap-3 mb-4">
-        <Card className="py-3 px-4">
-          <p className="text-xs text-muted-foreground uppercase tracking-wide">Calls</p>
-          <p className="text-2xl font-bold">{stats._count}</p>
+      {/* Stats row */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <Card className="border-border/80 bg-card">
+          <CardContent className="pt-5 pb-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-primary/10 p-2.5">
+                <Phone className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Total calls</p>
+                <p className="text-2xl font-bold tracking-tight">{stats._count}</p>
+              </div>
+            </div>
+          </CardContent>
         </Card>
-        <Card className="py-3 px-4">
-          <p className="text-xs text-muted-foreground uppercase tracking-wide">Minutes</p>
-          <p className="text-2xl font-bold">{Math.ceil(totalMinutes)}</p>
+        <Card className="border-border/80 bg-card">
+          <CardContent className="pt-5 pb-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-primary/10 p-2.5">
+                <Clock className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Minutes used</p>
+                <p className="text-2xl font-bold tracking-tight">{Math.ceil(totalMinutes)}</p>
+              </div>
+            </div>
+          </CardContent>
         </Card>
-        <Card className="py-3 px-4">
-          <p className="text-xs text-muted-foreground uppercase tracking-wide">Urgent</p>
-          <p className="text-2xl font-bold text-destructive">{emergencyCalls}</p>
+        <Card className="border-border/80 bg-card">
+          <CardContent className="pt-5 pb-5">
+            <div className="flex items-center gap-3">
+              <div className="rounded-lg bg-destructive/10 p-2.5">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Urgent</p>
+                <p className="text-2xl font-bold tracking-tight text-destructive">{emergencyCalls}</p>
+              </div>
+            </div>
+          </CardContent>
         </Card>
       </div>
 
-      {/* Recent calls: compact strip */}
-      <div className="flex items-center justify-between gap-2 mb-2">
-        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Recent Calls</h2>
+      {/* Recent calls */}
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <h2 className="text-base font-semibold">Recent calls</h2>
         <Link href="/calls">
-          <Button variant="ghost" size="sm">View all</Button>
+          <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground hover:text-foreground">
+            View all
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </Link>
       </div>
       <CallLog calls={recentCalls} />

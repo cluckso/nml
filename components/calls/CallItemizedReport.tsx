@@ -67,21 +67,21 @@ function formatPhone(phone: string | null): string {
 function Row({ label, value }: { label: string; value: string | null | undefined }) {
   const display = value?.trim() || "—"
   return (
-    <tr className="border-b border-border last:border-b-0">
-      <td className="py-2.5 pr-4 align-top text-sm font-medium text-muted-foreground whitespace-nowrap w-[40%]">
+    <tr className="border-b border-border/80 last:border-b-0">
+      <td className="py-3 pr-6 align-top text-sm font-medium text-muted-foreground whitespace-nowrap w-[36%]">
         {label}
       </td>
-      <td className="py-2.5 text-sm text-foreground">{display}</td>
+      <td className="py-3 text-sm text-foreground leading-relaxed">{display}</td>
     </tr>
   )
 }
 
 function SectionHeader({ title }: { title: string }) {
   return (
-    <tr className="border-b border-border bg-muted/40">
+    <tr className="border-b border-border bg-muted/30">
       <td
         colSpan={2}
-        className="py-2 px-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground"
+        className="py-2.5 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
       >
         {title}
       </td>
@@ -105,12 +105,12 @@ export function CallItemizedReport({
   const hasAddress = address?.trim() || city?.trim()
 
   return (
-    <div className="rounded-lg border border-border bg-card overflow-hidden">
+    <div className="rounded-lg border border-border bg-muted/20 overflow-hidden">
       <table className="w-full text-left border-collapse">
         <tbody>
           <Row label="Time" value={formatTime(time)} />
           <Row label="Name" value={name} />
-          <Row label="Contact Number" value={formatPhone(contactNumber)} />
+          <Row label="Contact" value={formatPhone(contactNumber)} />
 
           {hasVehicle && (
             <>
@@ -121,8 +121,8 @@ export function CallItemizedReport({
             </>
           )}
 
-          <Row label="Reason for Call" value={reasonForCall} />
-          <Row label="Availability for Appt" value={availabilityForAppt} />
+          <Row label="Reason for call" value={reasonForCall} />
+          <Row label="Appointment preference" value={availabilityForAppt} />
 
           {hasAddress && (
             <>

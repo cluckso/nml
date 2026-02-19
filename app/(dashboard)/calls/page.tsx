@@ -48,25 +48,35 @@ export default async function CallsPage({
 
   const totalPages = Math.ceil(total / limit)
 
+  const buildPageUrl = (p: number) => {
+    const params = new URLSearchParams()
+    if (search) params.set("search", search)
+    if (emergencyOnly) params.set("emergency", "true")
+    params.set("page", String(p))
+    return `/calls?${params.toString()}`
+  }
+
   return (
-    <div className="container mx-auto max-w-7xl py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Call Log</h1>
-        <p className="text-muted-foreground">View and manage all your calls</p>
+    <div className="container mx-auto max-w-7xl py-6 px-4">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold tracking-tight">Calls</h1>
+        <p className="text-muted-foreground text-sm mt-0.5">
+          Name, time, reason, and appointment preference for each call
+        </p>
       </div>
 
       <form method="get" className="mb-6 flex flex-wrap gap-4 items-end">
-        <label className="flex flex-col gap-1">
-          <span className="text-sm text-muted-foreground">Search</span>
+        <label className="flex flex-col gap-1.5">
+          <span className="text-sm font-medium text-muted-foreground">Search</span>
           <input
             name="search"
             type="search"
-            placeholder="Name, phone, or issue..."
+            placeholder="Name, phone, or reason..."
             defaultValue={searchParams.search}
-            className="flex h-9 w-64 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors"
+            className="flex h-10 w-72 rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
           />
         </label>
-        <label className="flex items-center gap-2">
+        <label className="flex items-center gap-2 cursor-pointer">
           <input
             name="emergency"
             type="checkbox"
@@ -74,9 +84,12 @@ export default async function CallsPage({
             defaultChecked={emergencyOnly}
             className="rounded border-input"
           />
-          <span className="text-sm">Emergency only</span>
+          <span className="text-sm">Urgent only</span>
         </label>
-        <button type="submit" className="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90">
+        <button
+          type="submit"
+          className="inline-flex items-center justify-center rounded-lg text-sm font-medium h-10 px-4 bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+        >
           Filter
         </button>
       </form>
@@ -84,20 +97,22 @@ export default async function CallsPage({
       <CallLog calls={calls} />
 
       {totalPages > 1 && (
-        <div className="mt-6 flex items-center gap-4 text-sm text-muted-foreground">
-          <span>
-            Page {page} of {totalPages} ({total} calls)
+        <div className="mt-6 flex flex-wrap items-center gap-4 text-sm">
+          <span className="text-muted-foreground">
+            Page {page} of {totalPages} · {total} calls
           </span>
-          {page > 1 && (
-            <a href={`/calls?${new URLSearchParams({ ...(search && { search }), ...(emergencyOnly && { emergency: "true" }), page: String(page - 1) })}`} className="text-primary hover:underline">
-              Previous
-            </a>
-          )}
-          {page < totalPages && (
-            <a href={`/calls?${new URLSearchParams({ ...(search && { search }), ...(emergencyOnly && { emergency: "true" }), page: String(page + 1) })}`} className="text-primary hover:underline">
-              Next
-            </a>
-          )}
+          <div className="flex gap-4">
+            {page > 1 && (
+              <a href={buildPageUrl(page - 1)} className="text-primary hover:underline font-medium">
+                Previous
+              </a>
+            )}
+            {page < totalPages && (
+              <a href={buildPageUrl(page + 1)} className="text-primary hover:underline font-medium">
+                Next
+              </a>
+            )}
+          </div>
         </div>
       )}
     </div>

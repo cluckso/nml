@@ -230,17 +230,12 @@ function verifyRetellSignature(body: string, signature: string): boolean {
   if (sigLower === hexLower) return true
   if (signature === base64Sig) return true
   
-  // Log for debugging (remove after fixing)
-  console.warn("Retell signature mismatch", {
-    receivedSig: signature.slice(0, 20) + "...",
-    expectedHex: hexSig.slice(0, 20) + "...",
-    expectedBase64: base64Sig.slice(0, 20) + "...",
-    bodyPreview: body.slice(0, 100) + "...",
-  })
-  
-  // TEMPORARY: Allow all requests while debugging (remove this in production!)
-  console.warn("ALLOWING REQUEST DESPITE SIGNATURE MISMATCH - REMOVE THIS IN PRODUCTION")
-  return true
+  if (process.env.NODE_ENV === "development") {
+    console.warn("Retell signature mismatch (dev only - rejecting in production)", {
+      receivedSig: signature.slice(0, 20) + "...",
+    })
+  }
+  return false
 }
 
 /** Minimal shape for Retell call_ended / call_analysis webhook payload. */
