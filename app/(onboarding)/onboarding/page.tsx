@@ -1,7 +1,6 @@
 import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { redirect } from "next/navigation"
-import { getIntakeNumberForIndustry, hasIntakeNumberConfigured } from "@/lib/intake-routing"
 import { OnboardingClient } from "./OnboardingClient"
 
 export const dynamic = "force-dynamic"
@@ -21,9 +20,7 @@ export default async function OnboardingPage() {
   }
 
   const planType = business.planType ?? null
-  const intakeNumber = getIntakeNumberForIndustry(business.industry)
-  const showIntakeNumber = hasIntakeNumberConfigured() && intakeNumber
-  // If they just returned from checkout, webhook may not have run yet — still show onboarding
+  // Forward-to number is not shown during onboarding; it appears on the dashboard after agent creation.
   const ownerPhone = (user as { phoneNumber?: string | null }).phoneNumber ?? undefined
   const initialBusiness = {
     name: business.name,
@@ -46,7 +43,7 @@ export default async function OnboardingPage() {
       planType={planType}
       initialIndustry={business?.industry ?? null}
       initialBusiness={initialBusiness}
-      intakeNumber={showIntakeNumber ? intakeNumber : null}
+      intakeNumber={null}
     />
   )
 }

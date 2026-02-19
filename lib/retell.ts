@@ -3,7 +3,6 @@ import { db } from "./db"
 import { generatePrompt, BusinessHoursInput } from "./prompts"
 import {
   hasAppointmentCapture,
-  hasBrandedVoice,
   hasMultiDepartment,
 } from "./plans"
 import { RETELL_GLOBAL_PROMPT_TEMPLATE } from "./retell-agent-template"
@@ -47,8 +46,7 @@ export async function createRetellAgent(
     global_prompt: globalPrompt,
   })
 
-  // Local Plus: use a distinct "branded" voice; others use default
-  const voiceId = data.planType && hasBrandedVoice(data.planType) ? "11labs-Adam" : "11labs-Chloe"
+  const voiceId = "11labs-Chloe"
 
   const agentPayload = {
     agent_name: data.businessName,
@@ -153,8 +151,7 @@ export async function createRetellAgentOnly(
     global_prompt: globalPrompt,
   })
 
-  const voiceId =
-    data.planType && hasBrandedVoice(data.planType) ? "11labs-Adam" : "11labs-Chloe"
+  const voiceId = "11labs-Chloe"
   const agentPayload = {
     agent_name: name,
     language: "en-US" as const,
@@ -547,7 +544,7 @@ export type BusinessForSync = {
 
 /** Settings passed from dashboard (greeting, tone, question depth, voice) used to personalize the synced agent. */
 export type SyncSettings = {
-  greeting?: { customGreeting?: string | null; tone?: string }
+  greeting?: { customGreeting?: string | null; tone?: string; voiceGender?: "male" | "female" | null }
   questionDepth?: string
   voiceBrand?: { speed?: number; conciseness?: number }
 }
@@ -608,7 +605,9 @@ export async function syncRetellAgentFromBusiness(
     global_prompt: globalPrompt,
   })
 
-  const voiceId = hasBrandedVoice(effectivePlan) ? "11labs-Adam" : "11labs-Chloe"
+  // Voice: male = Ethan, female/Auto = Chloe (default)
+  const voiceGender = settings?.greeting?.voiceGender
+  const voiceId = voiceGender === "male" ? "11labs-Ethan" : "11labs-Chloe"
   const vs = business.voiceSettings as { speed?: number; temperature?: number; volume?: number } | null | undefined
   const voiceBrand = settings?.voiceBrand
   const voiceSpeed =

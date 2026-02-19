@@ -314,13 +314,26 @@ function GreetingSection({ value, onSave, saving }: { value: GreetingSettings; o
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label>Business name pronunciation</Label>
+          <Label>Business name pronunciation <span className="text-muted-foreground font-normal">(optional)</span></Label>
           <Input placeholder="e.g. 'Mc-Gee Plumming'" value={d.businessNamePronunciation ?? ""} onChange={(e) => setD({ ...d, businessNamePronunciation: e.target.value || null })} />
           <p className="text-xs text-muted-foreground">Phonetic spelling so the AI says your name correctly.</p>
         </div>
         <div className="space-y-2">
           <Label>Custom greeting</Label>
           <textarea className="w-full rounded border border-input bg-background px-3 py-2 text-sm min-h-[80px]" placeholder="Thanks for calling [business]! How can I help you today?" value={d.customGreeting ?? ""} onChange={(e) => setD({ ...d, customGreeting: e.target.value || null })} />
+          <p className="text-xs text-muted-foreground">Leave blank for the default. Use [business] to insert your business name.</p>
+          {(d.customGreeting ?? "").trim() && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground -ml-2"
+              onClick={() => onSave({ ...d, customGreeting: null })}
+              disabled={saving}
+            >
+              Use default greeting
+            </Button>
+          )}
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">

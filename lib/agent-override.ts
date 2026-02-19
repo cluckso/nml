@@ -67,8 +67,16 @@ export function buildAgentOverride(
   const voiceSpeed = 0.75 + (settings.voiceBrand.speed ?? 0.5) * 0.75
   const temperature = 0.2 + (settings.voiceBrand.conciseness ?? 0.5) * 0.6
 
+  // Voice: male = Ethan, female/Auto = Chloe (default)
+  const voiceGender = settings.greeting.voiceGender
+  const voiceId =
+    voiceGender === "male"
+      ? "11labs-Ethan"
+      : "11labs-Chloe"
+
   const agentOverride = {
     agent: {
+      voice_id: voiceId,
       ...(ringDurationMs > 0 ? { ring_duration_ms: Math.round(ringDurationMs) } : {}),
       voice_speed: Math.round(voiceSpeed * 100) / 100,
       interruption_sensitivity: settings.aiBehavior.interruptTolerance ?? 0.5,
