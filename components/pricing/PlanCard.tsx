@@ -10,8 +10,8 @@ import { PlanType } from "@prisma/client"
 
 const PLANS: Record<string, { name: string; price: number; planType: PlanType; popular: boolean }> = {
   Starter: { name: "Starter", price: 99, planType: PlanType.STARTER, popular: false },
-  Pro: { name: "Pro", price: 149, planType: PlanType.PRO, popular: true },
-  Elite: { name: "Elite", price: 249, planType: PlanType.ELITE, popular: false },
+  Growth: { name: "Growth", price: 229, planType: PlanType.PRO, popular: true },
+  Scale: { name: "Scale", price: 349, planType: PlanType.ELITE, popular: false },
 }
 
 export function PlanCard({

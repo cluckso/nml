@@ -22,7 +22,7 @@ Open **SQL Editor** and run the script in `supabase/cron_weekly_reports.sql`.
 
 **Before running**, replace:
 
-- `YOUR_APP_URL` → your app URL (e.g. `https://yourapp.vercel.app`), no trailing slash
+- `YOUR_APP_URL` → `https://www.callgrabbr.com` (no trailing slash)
 - `YOUR_CRON_SECRET` → same value as `CRON_SECRET` in your Next.js app env
 
 Example after replacement:
@@ -33,7 +33,7 @@ SELECT cron.schedule(
   '0 9 * * 1',
   $$
   SELECT net.http_post(
-    url := 'https://yourapp.vercel.app/api/reports/weekly',
+    url := 'https://www.callgrabbr.com/api/reports/weekly',
     body := '{}'::jsonb,
     headers := jsonb_build_object(
       'Content-Type', 'application/json',

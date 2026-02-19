@@ -147,7 +147,7 @@ export function SettingsClient() {
                 <span className="truncate">{SECTION_LABELS[section]}</span>
                 {locked && (
                   <Badge variant="outline" className="ml-auto text-[10px] px-1 py-0">
-                    {tier === "pro" ? "Pro" : "Local+"}
+                    {tier === "pro" ? "Growth" : "Scale"}
                   </Badge>
                 )}
               </button>
@@ -290,12 +290,12 @@ function LockedSection({ section }: { section: SettingsSection }) {
           {SECTION_LABELS[section]}
         </CardTitle>
         <CardDescription>
-          This feature requires the {tier === PlanType.PRO ? "Pro" : "Elite"} plan.
+          This feature requires the {tier === PlanType.PRO ? "Growth" : "Scale"} plan.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Link href="/billing">
-          <Button variant="outline">Upgrade to {tier === PlanType.PRO ? "Pro" : "Elite"}</Button>
+          <Button variant="outline">Upgrade to {tier === PlanType.PRO ? "Growth" : "Scale"}</Button>
         </Link>
       </CardContent>
     </Card>

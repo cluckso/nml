@@ -110,10 +110,10 @@ export async function sendEmailNotification(
             <div style="background: #ecfdf5; padding: 15px; border-radius: 8px; margin: 20px 0;">
               <h2 style="margin-top: 0;">Summary</h2>
               <p style="white-space: pre-wrap;">${truncateSummaryForEmail((call as { summary?: string }).summary)}</p>
-              <p style="font-size: 13px; color: #6b7280;">View full transcript in your <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://app.callgrabbr.com"}/calls">dashboard</a>.</p>
+              <p style="font-size: 13px; color: #6b7280;">View full transcript in your <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://www.callgrabbr.com"}/calls">dashboard</a>.</p>
             </div>
           ` : call.transcript ? `
-            <p style="font-size: 13px; color: #6b7280;">View full transcript in your <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://app.callgrabbr.com"}/calls">dashboard</a>.</p>
+            <p style="font-size: 13px; color: #6b7280;">View full transcript in your <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://www.callgrabbr.com"}/calls">dashboard</a>.</p>
           ` : ""}
 
           <p style="margin-top: 30px; color: #6b7280; font-size: 14px;">

@@ -34,7 +34,7 @@ export function FlowSelector({
       <div className="space-y-2">
         <Label>Conversation flow</Label>
         <p className="text-sm text-muted-foreground">
-          Basic plans use the simple name / number / reason flow. Pro and Local Plus can choose an industry flow.
+          Starter plans use the simple name / number / reason flow. Growth and Scale can choose an industry flow.
         </p>
       </div>
 
@@ -63,7 +63,7 @@ export function FlowSelector({
                       <span className="font-medium text-muted-foreground">{flow.label}</span>
                       <Link href="/billing">
                         <Button variant="link" size="sm" className="p-0 h-auto text-primary">
-                          Upgrade to Pro
+                          Upgrade to Growth
                         </Button>
                       </Link>
                     </>

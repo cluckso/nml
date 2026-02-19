@@ -6,7 +6,7 @@
 --    CREATE EXTENSION IF NOT EXISTS pg_net WITH SCHEMA extensions;
 --
 -- 2. Replace placeholders below with your values:
---    - YOUR_APP_URL: e.g. https://yourapp.vercel.app (no trailing slash)
+--    - YOUR_APP_URL: https://www.callgrabbr.com (no trailing slash)
 --    - YOUR_CRON_SECRET: same value as CRON_SECRET in your app env
 
 SELECT cron.schedule(

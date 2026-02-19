@@ -2,7 +2,7 @@
 
 Your app uses Stripe for:
 
-- **Recurring plans:** Basic ($99/mo), Pro ($229/mo), Local Plus ($349/mo)
+- **Recurring plans:** Starter ($99/mo), Growth ($229/mo), Scale ($349/mo)
 - **Overage:** $0.20/min after included minutes (reported as metered usage)
 
 You need to create the products/prices in Stripe and set env vars so checkout and usage reporting work.
@@ -108,7 +108,7 @@ Use **test** keys and **test** price IDs while developing; switch to **live** wh
 
 2. **Endpoint URL:**  
    `https://your-domain.com/api/webhooks/stripe`  
-   (e.g. `https://yourapp.vercel.app/api/webhooks/stripe`)
+   (e.g. `https://www.callgrabbr.com/api/webhooks/stripe`)
 
 3. **Events to send:** subscribe at least to:
    - `checkout.session.completed`

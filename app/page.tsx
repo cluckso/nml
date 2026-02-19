@@ -60,7 +60,7 @@ export default function HomePage() {
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
                 <CreditCard className="h-4 w-4" />
               </span>
-              Card required to start — no charge until you upgrade
+              No card required to start
             </span>
             <span className="inline-flex items-center gap-2">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
@@ -445,7 +445,7 @@ export default function HomePage() {
             </Button>
           </Link>
           <p className="mt-6 text-sm opacity-80">
-            50 free trial minutes or 4 days. Card required — no charge until you upgrade.
+            50 free trial minutes or 4 days. No card required.
           </p>
         </div>
       </section>

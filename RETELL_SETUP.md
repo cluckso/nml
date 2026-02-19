@@ -26,7 +26,7 @@ Your app receives Retell events at:
 
 Examples:
 
-- Production: `https://yourapp.vercel.app/api/webhooks/retell`
+- Production: `https://www.callgrabbr.com/api/webhooks/retell`
 - Local (with tunnel): `https://your-ngrok-url.ngrok.io/api/webhooks/retell`
 
 | Task | Where | What to do |
@@ -57,7 +57,7 @@ To have the Retell agent *use* these, reference them in your agent’s prompt in
 
 ### No call logs or usage on client dashboard?
 
-1. **Webhook URL** – In Retell Dashboard → Webhooks, set URL to exactly your app (e.g. `https://callback-liart.vercel.app/api/webhooks/retell`). Must be HTTPS.
+1. **Webhook URL** – In Retell Dashboard → Webhooks, set URL to exactly your app (e.g. `https://www.callgrabbr.com/api/webhooks/retell`). Must be HTTPS.
 2. **Secrets in Vercel** – In Vercel → Project → Settings → Environment Variables, set `RETELL_WEBHOOK_SECRET` and `RETELL_API_KEY` for the same environment (Production/Preview) you’re testing. Redeploy after changing env.
 3. **Metadata** – Call logs are tied to the business by **metadata** we send on `call_inbound` (`client_id`, `forwarded_from_number`). Retell must echo this back on `call_ended`/`call_analyzed`. If your Retell webhook config doesn’t pass through metadata, business won’t be found and the call won’t be stored.
 4. **Business status** – Only **ACTIVE** businesses get calls answered and get metadata. If the business is **PAUSED**, call_inbound returns empty and no call is created. In the DB, set `status = 'ACTIVE'` for the business (and ensure `primaryForwardingNumber` is the number that forwards to the AI).

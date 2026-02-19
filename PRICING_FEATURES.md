@@ -9,7 +9,7 @@ Overage on all plans: $0.20/min after included minutes.
 ## Free Trial (All Plans)
 
 - **50 free call minutes** or **4 days**, whichever comes first
-- Card required to start — no charge until you upgrade
+- No card required to start
 - One trial per business phone number
 - No setup fee
 - No overage during trial
@@ -20,7 +20,7 @@ Designed so businesses can test real calls—not demos.
 
 ---
 
-## Basic — $99/month
+## Starter — $99/month
 
 *Best for solo operators & small shops*
 
@@ -36,7 +36,7 @@ Designed so businesses can test real calls—not demos.
 
 ---
 
-## Pro — $229/month
+## Growth — $229/month
 
 *Best for growing service businesses*
 
@@ -52,7 +52,7 @@ Designed so businesses can test real calls—not demos.
 
 ---
 
-## Local Plus — $349/month
+## Scale — $349/month
 
 *Built for high-volume, multi-department trades*
 
@@ -72,6 +72,6 @@ Designed so businesses can test real calls—not demos.
 
 - Minute-based trial ensures fairness and real value delivery
 - No setup fees reduce friction and increase conversion
-- Industry-optimized Pro agents feel "custom" without custom labor
+- Industry-optimized Growth agents feel "custom" without custom labor
 - Clear upgrade ladder based on call volume and complexity
 - Consistent overage rate keeps pricing transparent

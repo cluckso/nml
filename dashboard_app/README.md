@@ -23,11 +23,11 @@ Mobile dashboard app for CallGrabbr — sign in with your account, view usage st
 
 3. **Configure environment**
    - Get your **Supabase URL** and **anon key** from [Supabase Dashboard → Settings → API](https://supabase.com/dashboard/project/_/settings/api).
-   - Set your **API base URL** (Next.js app), e.g. `https://your-app.vercel.app` or `http://localhost:3000` for local.
+   - Set your **API base URL** (Next.js app): `https://www.callgrabbr.com` (or `http://localhost:3000` for local dev).
 
    Run with Dart defines:
    ```bash
-   flutter run --dart-define=API_BASE_URL=https://your-app.vercel.app --dart-define=SUPABASE_URL=https://xxx.supabase.co --dart-define=SUPABASE_ANON_KEY=your-anon-key
+   flutter run --dart-define=API_BASE_URL=https://www.callgrabbr.com --dart-define=SUPABASE_URL=https://xxx.supabase.co --dart-define=SUPABASE_ANON_KEY=your-anon-key
    ```
 
    Or use a `.env` and a package like `flutter_dotenv` and pass these into your app.
@@ -51,7 +51,7 @@ Cookie-based auth (browser) continues to work; no change for the web app.
 
 ```bash
 cd dashboard_app
-flutter run --dart-define=API_BASE_URL=https://your-app.vercel.app --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...
+flutter run --dart-define=API_BASE_URL=https://www.callgrabbr.com --dart-define=SUPABASE_URL=... --dart-define=SUPABASE_ANON_KEY=...
 ```
 
 For a specific device:

@@ -1,11 +1,11 @@
 import { PlanType } from "@prisma/client"
 
-/** Pro or Elite tier (Elite includes LOCAL_PLUS for legacy). */
+/** Growth or Scale tier (Scale includes LOCAL_PLUS for legacy). */
 function isProOrElite(planType: PlanType | null | undefined): boolean {
   return planType === PlanType.PRO || planType === PlanType.ELITE || planType === PlanType.LOCAL_PLUS
 }
 
-/** Elite tier only (custom scripts, multi-location, reporting). */
+/** Scale tier only (custom scripts, multi-location, reporting). */
 function isEliteTier(planType: PlanType | null | undefined): boolean {
   return planType === PlanType.ELITE || planType === PlanType.LOCAL_PLUS
 }
@@ -32,12 +32,12 @@ export const FREE_TRIAL_MINUTES = 50
 /** Free trial: validity window in days (trial ends at 4 days or 50 minutes, whichever comes first) */
 export const TRIAL_DAYS = 4
 
-/** Monthly price per plan (USD) — Starter $99, Pro $149, Elite $249 */
+/** Monthly price per plan (USD) — Starter $99, Growth $229, Scale $349 */
 export const MONTHLY_PRICES: Record<PlanType, number> = {
   [PlanType.STARTER]: 99,
-  [PlanType.PRO]: 149,
-  [PlanType.LOCAL_PLUS]: 249,
-  [PlanType.ELITE]: 249,
+  [PlanType.PRO]: 229,
+  [PlanType.LOCAL_PLUS]: 349,
+  [PlanType.ELITE]: 349,
 }
 
 /** Overage rate per minute (USD) */
@@ -64,52 +64,52 @@ export function getOverageMinutes(planType: PlanType, minutesUsed: number): numb
   return Math.max(0, minutesUsed - getIncludedMinutes(planType))
 }
 
-/** Whether plan has industry-optimized / prebuilt agents (Pro+) */
+/** Whether plan has industry-optimized / prebuilt agents (Growth+) */
 export function hasIndustryOptimizedAgents(planType: PlanType): boolean {
   return isProOrElite(planType)
 }
 
-/** Whether plan has appointment booking (Pro+) */
+/** Whether plan has appointment booking (Growth+) */
 export function hasAppointmentCapture(planType: PlanType): boolean {
   return isProOrElite(planType)
 }
 
-/** Whether plan sends SMS follow-up to callers (Pro+) */
+/** Whether plan sends SMS follow-up to callers (Growth+) */
 export function hasSmsToCallers(planType: PlanType): boolean {
   return isProOrElite(planType)
 }
 
-/** Whether plan has CRM / email export (Pro+) */
+/** Whether plan has CRM / email export (Growth+) */
 export function hasCrmForwarding(planType: PlanType): boolean {
   return isProOrElite(planType)
 }
 
-/** Whether plan has lead tagging (Pro+) */
+/** Whether plan has lead tagging (Growth+) */
 export function hasLeadTagging(planType: PlanType): boolean {
   return isProOrElite(planType)
 }
 
-/** Whether plan has multi-location (Elite) */
+/** Whether plan has multi-location (Scale) */
 export function hasMultiDepartment(planType: PlanType): boolean {
   return isEliteTier(planType)
 }
 
-/** Whether plan gets weekly usage & lead reports — reporting dashboard (Elite) */
+/** Whether plan gets weekly usage & lead reports — reporting dashboard (Scale) */
 export function hasWeeklyReports(planType: PlanType): boolean {
   return isEliteTier(planType)
 }
 
-/** Whether plan has custom scripts / voice branding (Elite) */
+/** Whether plan has custom scripts / voice branding (Scale) */
 export function hasBrandedVoice(planType: PlanType): boolean {
   return isEliteTier(planType)
 }
 
-/** Whether plan shows urgency/emergency flags in dashboard (Pro+) */
+/** Whether plan shows urgency/emergency flags in dashboard (Growth+) */
 export function hasUrgencyFlags(planType: PlanType): boolean {
   return isProOrElite(planType)
 }
 
-/** Whether plan has priority support (Elite) */
+/** Whether plan has priority support (Scale) */
 export function hasPrioritySupport(planType: PlanType): boolean {
   return isEliteTier(planType)
 }

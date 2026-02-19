@@ -17,7 +17,7 @@ const PLANS = [
     ],
   },
   {
-    name: "Pro",
+    name: "Growth",
     description: "24/7 answering and booking",
     features: [
       "24/7 answering",
@@ -28,7 +28,7 @@ const PLANS = [
     ],
   },
   {
-    name: "Elite",
+    name: "Scale",
     description: "Custom scripts and reporting",
     features: [
       "Custom scripts",
@@ -81,7 +81,7 @@ export default async function PricingPage() {
             50 call minutes or 4 days, whichever comes first. We won&apos;t charge until you choose a plan. One trial per business number.
           </p>
           <p className="text-sm text-muted-foreground mb-6">
-            Set up your business and try the AI. Upgrade to Starter, Pro, or Elite when you&apos;re ready.
+            Set up your business and try the AI. Upgrade to Starter, Growth, or Scale when you&apos;re ready.
           </p>
           {isLoggedIn ? (
             <Button size="lg" asChild>
