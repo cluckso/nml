@@ -142,6 +142,7 @@ model Call {
   callerName            String?
   issueDescription      String?
   missedCallRecovery    Boolean   @default(false) // True if call ended early but we captured partial info
+  notificationSent       Boolean   @default(false) // True after email/SMS summary sent (once per call)
   createdAt             DateTime  @default(now())
 
   @@index([businessId])

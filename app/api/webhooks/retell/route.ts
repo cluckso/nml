@@ -507,9 +507,6 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
         },
       })
 
-  // Only run the rest once per call. Retell may send call_ended more than once; idempotency avoids double usage and duplicate notifications.
-  if (!isNewCall) return
-
   // Mark testCallVerifiedAt when we receive a completed call for this client (forwarded_from matched)
   if (!business.testCallVerifiedAt) {
     await db.business.update({
@@ -518,7 +515,8 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
     })
   }
 
-  // Notifications: respect business notification settings
+  // Notifications: send at most once per call. Retell sends call_ended first (no analysis), then call_analyzed (full analysis).
+  // We send when we have actionable info and haven't sent yet — so we send on call_analyzed if we skipped on call_ended.
   const callSettings = mergeWithDefaults((business as any).settings as Partial<BusinessSettings> | null)
   const notifPrefs = callSettings.notifications
   const isEmergency = structuredIntake.emergency
@@ -535,12 +533,20 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
   const hasInfo = hasActionableInfo(intakeForFilter, callForFilter)
   const likelySpam = isLikelySpam(intakeForFilter, callForFilter)
 
-  const shouldNotify = shouldNotifyByPrefs && hasInfo && !likelySpam
+  const alreadySent = (call as { notificationSent?: boolean }).notificationSent === true
+  const shouldNotify = shouldNotifyByPrefs && hasInfo && !likelySpam && !alreadySent
+
+  if (!shouldNotifyByPrefs) {
+    console.info("[Notifications] Skipped: emergencyOnlyAlerts is on and call is not emergency", { callId })
+  }
   if (!hasInfo) {
     console.info("[Notifications] Skipped: no actionable info captured", { callId, duration: call.duration, callerPhone: call.callerPhone })
   }
   if (likelySpam) {
     console.info("[Notifications] Skipped: likely spam", { callId, duration: call.duration, callerPhone: call.callerPhone })
+  }
+  if (alreadySent) {
+    console.info("[Notifications] Skipped: already sent for this call", { callId })
   }
 
   if (shouldNotify) {
@@ -558,6 +564,11 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
         notifies.push(sendSMSToCaller(business, intakePhone, intakeForNotification))
       }
       await Promise.all(notifies)
+      await db.call.update({
+        where: { id: call.id },
+        data: { notificationSent: true },
+      })
+      console.info("[Notifications] Sent", { callId, businessId: business.id, email: notifPrefs.emailAlerts, sms: notifPrefs.smsAlerts })
     } catch (error) {
       console.error("Notification error:", error)
     }
@@ -584,6 +595,9 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
   } catch (error) {
     console.error("CRM forward error:", error)
   }
+
+  // Only count usage and trial minutes once per call (first event that creates the record)
+  if (!isNewCall) return
 
   const hasActiveSubscription = isSubscriptionActive(business)
   const isOnTrial = !hasActiveSubscription
