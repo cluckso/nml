@@ -263,7 +263,7 @@ export const DEFAULT_SETTINGS: BusinessSettings = {
   },
   aiBehavior: {
     interruptTolerance: 0.5,
-    maxCallLengthMinutes: 10,
+    maxCallLengthMinutes: 7,
     questionRetryCount: 2,
     escalateToHumanAfterRetries: false,
   },

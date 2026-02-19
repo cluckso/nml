@@ -74,15 +74,18 @@ export function buildAgentOverride(
       ? "11labs-Ethan"
       : "11labs-Chloe"
 
+  // Max call duration: 7 minutes (420000 ms)
+  const MAX_CALL_DURATION_MS = 7 * 60 * 1000
+
   const agentOverride = {
     agent: {
       voice_id: voiceId,
-      ...(ringDurationMs > 0 ? { ring_duration_ms: Math.round(ringDurationMs) } : {}),
+      ring_duration_ms: Math.round(ringDurationMs),
       voice_speed: Math.round(voiceSpeed * 100) / 100,
       interruption_sensitivity: settings.aiBehavior.interruptTolerance ?? 0.5,
       max_call_duration_ms: Math.min(
-        Math.max(60_000, (settings.aiBehavior.maxCallLengthMinutes ?? 10) * 60 * 1000),
-        3600000
+        Math.max(60_000, (settings.aiBehavior.maxCallLengthMinutes ?? 7) * 60 * 1000),
+        MAX_CALL_DURATION_MS
       ),
     },
     retell_llm: {

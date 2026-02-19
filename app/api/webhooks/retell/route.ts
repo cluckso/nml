@@ -165,8 +165,7 @@ export async function POST(req: NextRequest) {
       const response = {
         call_inbound: {
           override_agent_id: agentId,
-          // Ring delay: doc says agent_override.agent.ring_duration_ms; also send at top level in case inbound handler reads it here
-          ...(ringDurationMs > 0 ? { ring_duration_ms: Math.round(ringDurationMs) } : {}),
+          ring_duration_ms: Math.round(ringDurationMs),
           metadata: {
             client_id: client.id,
             forwarded_from_number: forwardedFromNormalized,
@@ -511,14 +510,20 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
   const isEmergency = structuredIntake.emergency
   const shouldNotifyByPrefs = notifPrefs.emergencyOnlyAlerts ? isEmergency : true
 
-  const intakeForFilter = structuredIntake as { name?: string; phone?: string; address?: string; city?: string; issue_description?: string; vehicle_year?: string; vehicle_make?: string; vehicle_model?: string; year?: string; make?: string; model?: string; appointment_preference?: string; availability?: string; preferred_time?: string }
+  // Ensure intake has callback number from call when analysis didn't provide it (e.g. call_ended before call_analysis)
+  const intakeForNotify = { ...structuredIntake } as Record<string, unknown>
+  if (!intakeForNotify.phone && call.callerPhone) {
+    intakeForNotify.phone = call.callerPhone
+  }
+
+  const intakeForFilter = intakeForNotify as { name?: string; phone?: string; address?: string; city?: string; issue_description?: string; vehicle_year?: string; vehicle_make?: string; vehicle_model?: string; year?: string; make?: string; model?: string; appointment_preference?: string; availability?: string; preferred_time?: string }
   const callForFilter = { duration: call.duration, callerPhone: call.callerPhone }
   const hasInfo = hasActionableInfo(intakeForFilter, callForFilter)
   const likelySpam = isLikelySpam(intakeForFilter, callForFilter)
 
   const shouldNotify = shouldNotifyByPrefs && hasInfo && !likelySpam
   if (!hasInfo) {
-    console.info("[Notifications] Skipped: no actionable info captured", { callId, duration: call.duration })
+    console.info("[Notifications] Skipped: no actionable info captured", { callId, duration: call.duration, callerPhone: call.callerPhone })
   }
   if (likelySpam) {
     console.info("[Notifications] Skipped: likely spam", { callId, duration: call.duration, callerPhone: call.callerPhone })
@@ -527,15 +532,16 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
   if (shouldNotify) {
     try {
       const notifies: Promise<any>[] = []
+      const intakeForNotification = intakeForNotify as import("@/lib/notifications").StructuredIntake
       if (notifPrefs.emailAlerts) {
-        notifies.push(sendEmailNotification(business, call, structuredIntake as any))
+        notifies.push(sendEmailNotification(business, call, intakeForNotification))
       }
       if (notifPrefs.smsAlerts) {
-        notifies.push(sendSMSNotification(business, call, structuredIntake as any))
+        notifies.push(sendSMSNotification(business, call, intakeForNotification))
       }
-      const intakePhone = typeof structuredIntake.phone === "string" ? structuredIntake.phone : null
+      const intakePhone = typeof intakeForNotify.phone === "string" ? intakeForNotify.phone : null
       if (hasSmsToCallers(planType) && intakePhone) {
-        notifies.push(sendSMSToCaller(business, intakePhone, structuredIntake as any))
+        notifies.push(sendSMSToCaller(business, intakePhone, intakeForNotification))
       }
       await Promise.all(notifies)
     } catch (error) {

@@ -9,6 +9,9 @@ import { RETELL_GLOBAL_PROMPT_TEMPLATE } from "./retell-agent-template"
 
 const RETELL_API_BASE = process.env.RETELL_API_BASE ?? "https://api.retellai.com"
 
+/** Standard model for all conversation flows: gpt-5-mini (create + update). */
+const RETELL_MODEL_CHOICE = { model: "gpt-5-mini" as const, type: "cascading" as const }
+
 export interface CreateAgentRequest {
   businessName: string
   industry: Industry
@@ -47,6 +50,7 @@ export async function createRetellAgent(
   })
 
   const voiceId = "11labs-Chloe"
+  const MAX_CALL_DURATION_MS = 7 * 60 * 1000 // 7 minutes
 
   const agentPayload = {
     agent_name: data.businessName,
@@ -55,7 +59,8 @@ export async function createRetellAgent(
     voice_temperature: 0.98,
     voice_speed: 0.98,
     volume: 0.94,
-    max_call_duration_ms: 3600000, // 1 hour
+    max_call_duration_ms: MAX_CALL_DURATION_MS,
+    ring_duration_ms: 0,
     interruption_sensitivity: 0.9,
     response_engine: {
       type: "conversation-flow" as const,
@@ -152,6 +157,7 @@ export async function createRetellAgentOnly(
   })
 
   const voiceId = "11labs-Chloe"
+  const MAX_CALL_DURATION_MS = 7 * 60 * 1000 // 7 minutes
   const agentPayload = {
     agent_name: name,
     language: "en-US" as const,
@@ -159,7 +165,8 @@ export async function createRetellAgentOnly(
     voice_temperature: 0.98,
     voice_speed: 0.98,
     volume: 0.94,
-    max_call_duration_ms: 3600000,
+    max_call_duration_ms: MAX_CALL_DURATION_MS,
+    ring_duration_ms: 0,
     interruption_sensitivity: 0.9,
     response_engine: {
       type: "conversation-flow" as const,
@@ -419,7 +426,8 @@ async function createConversationFlow(
   flow: { nodes: any[]; start_node_id: string; start_speaker: string; global_prompt?: string }
 ): Promise<{ conversation_flow_id: string; version: number }> {
   const body = {
-    model_choice: { model: "gpt-4.1", type: "cascading" },
+    model_choice: RETELL_MODEL_CHOICE,
+    flex_mode: true,
     nodes: flow.nodes,
     start_speaker: flow.start_speaker as "agent",
     start_node_id: flow.start_node_id,
@@ -454,7 +462,8 @@ async function updateConversationFlow(
   flow: { nodes: any[]; start_node_id: string; start_speaker: string; global_prompt?: string }
 ): Promise<{ version: number }> {
   const body = {
-    model_choice: { model: "gpt-4.1", type: "cascading" },
+    model_choice: RETELL_MODEL_CHOICE,
+    flex_mode: true,
     nodes: flow.nodes,
     start_speaker: flow.start_speaker as "agent",
     start_node_id: flow.start_node_id,
@@ -502,7 +511,7 @@ async function getAgent(
   return response.json()
 }
 
-/** PATCH agent (agent_name, voice_*, response_engine). */
+/** PATCH agent (agent_name, voice_*, max_call_duration_ms, ring_duration_ms, response_engine). */
 async function updateAgent(
   apiKey: string,
   agentId: string,
@@ -512,6 +521,8 @@ async function updateAgent(
     voice_temperature?: number
     voice_speed?: number
     volume?: number
+    max_call_duration_ms?: number
+    ring_duration_ms?: number
     response_engine?: { type: "conversation-flow"; conversation_flow_id: string; version: number }
   }
 ): Promise<void> {
@@ -542,11 +553,13 @@ export type BusinessForSync = {
   planType: PlanType | null
 }
 
-/** Settings passed from dashboard (greeting, tone, question depth, voice) used to personalize the synced agent. */
+/** Settings passed from dashboard (greeting, tone, question depth, voice, call routing) used to personalize the synced agent. */
 export type SyncSettings = {
   greeting?: { customGreeting?: string | null; tone?: string; voiceGender?: "male" | "female" | null }
   questionDepth?: string
   voiceBrand?: { speed?: number; conciseness?: number }
+  callRouting?: { ringBeforeAnswerSeconds?: number }
+  aiBehavior?: { maxCallLengthMinutes?: number }
 }
 
 /**
@@ -627,12 +640,20 @@ export async function syncRetellAgentFromBusiness(
       ? Math.max(0, Math.min(2, vs.volume * 2))
       : 0.94
 
+  const MAX_CALL_DURATION_MS = 7 * 60 * 1000
+  const ringBeforeAnswerSeconds = settings?.callRouting?.ringBeforeAnswerSeconds ?? 0
+  const ringDurationMs = Math.min(15, Math.max(0, ringBeforeAnswerSeconds)) * 1000
+  const maxCallMinutes = Math.min(7, Math.max(1, settings?.aiBehavior?.maxCallLengthMinutes ?? 7))
+  const maxCallDurationMs = maxCallMinutes * 60 * 1000
+
   await updateAgent(apiKey, business.retellAgentId, {
     agent_name: business.name,
     voice_id: voiceId,
     voice_temperature: voiceTemp,
     voice_speed: voiceSpeed,
     volume: voiceVol,
+    max_call_duration_ms: maxCallDurationMs,
+    ring_duration_ms: ringDurationMs,
     response_engine: { type: "conversation-flow", conversation_flow_id: flowId, version },
   })
 }
@@ -701,9 +722,9 @@ function buildPropertyServiceFlow(businessName: string, serviceAreas: string[]):
         id: "collect-issue",
         type: "conversation",
         name: "Ask Issue Details",
-        instruction: { type: "prompt", text: `Please describe the issue in as much detail as you can.` },
+        instruction: { type: "prompt", text: `Ask the caller to describe the issue. If they give a vague or one-word answer (e.g. "a problem", "something's wrong", "help"), politely ask one follow-up for more detail (e.g. "Can you tell me a bit more about what's going on?" or "What exactly is happening?"). Only move on when you have a clear, actionable description.` },
         edges: [
-          { id: "edge-6", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "If user is done" } },
+          { id: "edge-6", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "If user gave enough detail and is done describing" } },
           { id: "edge-7", destination_node_id: "emergency-flag", transition_condition: { type: "prompt", prompt: "If urgent or emergency, e.g. flooding, no heat, gas smell, burst pipe, no power, sparks" } },
         ],
       },
@@ -802,9 +823,9 @@ function buildAutoRepairFlow(businessName: string): any {
         id: "collect-reason",
         type: "conversation",
         name: "Reason for Call",
-        instruction: { type: "prompt", text: `What can we help you with today — a new issue, maintenance, checking on an existing repair, or scheduling?` },
+        instruction: { type: "prompt", text: `Ask what we can help with today — new issue, maintenance, checking on an existing repair, or scheduling. If they give a vague answer (e.g. "car trouble", "something's wrong"), politely ask for a bit more detail (e.g. "What exactly is going on with the vehicle?" or "Is it a specific repair, or are you checking on one we're already working on?"). Only move on when you have a clear reason.` },
         edges: [
-          { id: "edge-4a", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "If new issue or maintenance" } },
+          { id: "edge-4a", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "If new issue or maintenance and enough detail" } },
           { id: "edge-4b", destination_node_id: "collect-dropoff", transition_condition: { type: "prompt", prompt: "If checking on existing repair or status" } },
           { id: "edge-4c", destination_node_id: "collect-appointment-pref", transition_condition: { type: "prompt", prompt: "If scheduling or appointment" } },
         ],
@@ -936,8 +957,8 @@ function buildGenericFlow(businessName: string): any {
         id: "collect-name",
         type: "conversation",
         name: "Collect Name",
-        instruction: { type: "prompt", text: `Thanks {{Name}}. What can we help you with today?` },
-        edges: [{ id: "edge-2", destination_node_id: "collect-contact", transition_condition: { type: "prompt", prompt: "User described reason for calling" } }],
+        instruction: { type: "prompt", text: `Thanks {{Name}}. What can we help you with today? If they give a vague or one-word answer (e.g. "a question", "something", "help"), politely ask one follow-up (e.g. "Can you tell me a bit more about what you need?"). Only move on when you have a clear reason for the call.` },
+        edges: [{ id: "edge-2", destination_node_id: "collect-contact", transition_condition: { type: "prompt", prompt: "User described reason for calling with enough detail" } }],
       },
       {
         id: "collect-contact",
@@ -1039,7 +1060,8 @@ export async function createTemplateAgentForIndustry(
       voice_temperature: 0.98,
       voice_speed: 0.98,
       volume: 0.94,
-      max_call_duration_ms: 3600000,
+      max_call_duration_ms: 7 * 60 * 1000,
+      ring_duration_ms: 0,
       interruption_sensitivity: 0.9,
       response_engine: {
         type: "conversation-flow",

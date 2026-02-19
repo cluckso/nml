@@ -914,7 +914,7 @@ function AiBehaviorSection({ value, onSave, saving }: { value: AiBehaviorSetting
         <Slider label="Interrupt tolerance" value={d.interruptTolerance} onChange={(v) => setD({ ...d, interruptTolerance: v })} />
         <div className="space-y-2">
           <Label>Max call length (minutes)</Label>
-          <Input type="number" min={1} max={60} value={d.maxCallLengthMinutes} onChange={(e) => setD({ ...d, maxCallLengthMinutes: parseInt(e.target.value) || 10 })} />
+          <Input type="number" min={1} max={7} value={d.maxCallLengthMinutes} onChange={(e) => setD({ ...d, maxCallLengthMinutes: Math.min(7, Math.max(1, parseInt(e.target.value) || 7)) })} />
         </div>
         <div className="space-y-2">
           <Label>Question retry count</Label>

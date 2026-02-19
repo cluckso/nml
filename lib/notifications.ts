@@ -30,6 +30,18 @@ export interface StructuredIntake {
 /** SMS character cutoff: 160 = 1 segment (GSM-7). With emoji (UCS-2) = 70/segment. We truncate to stay under 160 when possible. */
 const SMS_MAX_CHARS = 160
 
+/** Truncate summary to key points only (no full transcript in email). ~320 chars, break at sentence. */
+function truncateSummaryForEmail(summary: string | null | undefined): string {
+  if (!summary?.trim()) return ""
+  const s = summary.trim()
+  if (s.length <= 320) return s
+  const slice = s.slice(0, 320)
+  const lastPeriod = slice.lastIndexOf(".")
+  const lastNewline = slice.lastIndexOf("\n")
+  const breakAt = lastPeriod >= 200 ? lastPeriod + 1 : lastNewline >= 200 ? lastNewline + 1 : 320
+  return slice.slice(0, breakAt).trim() + (breakAt < s.length ? "…" : "")
+}
+
 export async function sendEmailNotification(
   business: Business,
   call: Call,
@@ -97,15 +109,11 @@ export async function sendEmailNotification(
           ${(call as { summary?: string }).summary ? `
             <div style="background: #ecfdf5; padding: 15px; border-radius: 8px; margin: 20px 0;">
               <h2 style="margin-top: 0;">Summary</h2>
-              <p style="white-space: pre-wrap;">${(call as { summary?: string }).summary}</p>
+              <p style="white-space: pre-wrap;">${truncateSummaryForEmail((call as { summary?: string }).summary)}</p>
+              <p style="font-size: 13px; color: #6b7280;">View full transcript in your <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://app.callgrabbr.com"}/calls">dashboard</a>.</p>
             </div>
-          ` : ""}
-
-          ${call.transcript ? `
-            <div style="background: #f9fafb; padding: 15px; border-radius: 8px; margin: 20px 0;">
-              <h2 style="margin-top: 0;">Transcript</h2>
-              <p style="white-space: pre-wrap;">${call.transcript}</p>
-            </div>
+          ` : call.transcript ? `
+            <p style="font-size: 13px; color: #6b7280;">View full transcript in your <a href="${process.env.NEXT_PUBLIC_APP_URL || "https://app.callgrabbr.com"}/calls">dashboard</a>.</p>
           ` : ""}
 
           <p style="margin-top: 30px; color: #6b7280; font-size: 14px;">
@@ -139,9 +147,19 @@ export async function sendSMSNotification(
     return
   }
 
-  const owner = await import("./db").then((m) => m.db.user.findFirst({
-    where: { businessId: business.id },
-  }))
+  // Prefer a user who has notification phone + SMS consent (the one who set up alerts)
+  const db = await import("./db").then((m) => m.db)
+  let owner = await db.user.findFirst({
+    where: {
+      businessId: business.id,
+      phoneNumber: { not: null },
+      smsConsent: true,
+      smsOptedOut: false,
+    },
+  })
+  if (!owner) {
+    owner = await db.user.findFirst({ where: { businessId: business.id } })
+  }
 
   const ownerPhone = (owner as { phoneNumber?: string; smsConsent?: boolean; smsOptedOut?: boolean }).phoneNumber
   const smsConsent = (owner as { smsConsent?: boolean }).smsConsent
@@ -151,7 +169,7 @@ export async function sendSMSNotification(
     console.error("[Notifications] SMS skipped: no owner for business", business.id)
     return
   }
-  if (!ownerPhone) {
+  if (!ownerPhone?.trim()) {
     console.info("[Notifications] SMS skipped: owner has no phone number set. Set it in Settings → Notifications.")
     return
   }
@@ -175,12 +193,17 @@ export async function sendSMSNotification(
   const vehicle = [vehicleYear, vehicleMake, vehicleModel].filter(Boolean).join(" ") || ""
 
   const caller = `${intake.name || "Unknown"} ${intake.phone || "N/A"}`.trim()
-  const issue = (intake.issue_description || "").trim()
+  // Keep SMS to key points only — no full transcript; cap issue to brief summary (80 chars)
+  const rawIssue = (intake.issue_description || "").trim()
+  const issue =
+    rawIssue.length <= 80
+      ? rawIssue
+      : rawIssue.slice(0, 77).trim() + "…"
 
   const lines: string[] = []
   lines.push(`Caller: ${caller}`)
   if (vehicle) lines.push(`Vehicle: ${vehicle}`)
-  if (apptStr) lines.push(`Appt set: ${apptStr}`)
+  if (apptStr) lines.push(`Appt: ${apptStr}`)
   lines.push(`Issue: ${issue || "—"}`)
 
   let message = lines.join("\n")
@@ -204,8 +227,9 @@ export async function sendSMSNotification(
       from: process.env.TWILIO_PHONE_NUMBER!,
       to: ownerPhone,
     })
+    console.info("[Notifications] SMS sent to owner", { businessId: business.id, to: ownerPhone })
   } catch (error) {
-    console.error("SMS send error:", error)
+    console.error("[Notifications] SMS send error:", error)
     throw error
   }
 }
