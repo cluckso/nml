@@ -144,17 +144,17 @@ export async function POST(req: NextRequest) {
 
     if (!retellAgentId || !retellPhoneNumber) {
       console.info("Provisioning Retell agent and number for business:", business.id, business.name)
-      const provisioned = await provisionAgentAndNumberForBusiness({
-        name: business.name,
-        industry: business.industry,
-        serviceAreas: business.serviceAreas,
-        planType: business.planType ?? undefined,
-        businessHours: business.businessHours as { open?: string; close?: string; days?: string[] } | undefined,
-        departments: business.departments ?? [],
-        afterHoursEmergencyPhone: business.afterHoursEmergencyPhone ?? undefined,
-      })
+      try {
+        const provisioned = await provisionAgentAndNumberForBusiness({
+          name: business.name,
+          industry: business.industry,
+          serviceAreas: business.serviceAreas,
+          planType: business.planType ?? undefined,
+          businessHours: business.businessHours as { open?: string; close?: string; days?: string[] } | undefined,
+          departments: business.departments ?? [],
+          afterHoursEmergencyPhone: business.afterHoursEmergencyPhone ?? undefined,
+        })
 
-      if (provisioned) {
         // Check again in case a concurrent request already saved (avoid overwriting with a second set).
         const beforeUpdate = await db.business.findUnique({
           where: { id: business.id },
@@ -173,8 +173,8 @@ export async function POST(req: NextRequest) {
           })
           console.info("Assigned Retell agent and number to business:", retellAgentId, retellPhoneNumber, business.id)
         }
-      } else {
-        console.warn("Failed to provision Retell agent/number for business:", business.id)
+      } catch (err) {
+        console.error("Failed to provision Retell agent/number for business:", business.id, err instanceof Error ? err.message : err)
       }
     }
 

@@ -159,13 +159,12 @@ export async function POST(req: NextRequest) {
         serviceAreas
       )
       if (ringDurationMs > 0) {
-        console.info("Retell call_inbound: applying ring_duration_ms", ringDurationMs, "from settings.callRouting.ringBeforeAnswerSeconds")
+        console.info("Retell call_inbound: ring delay", ringDurationMs, "ms from settings.callRouting.ringBeforeAnswerSeconds")
       }
 
       const response = {
         call_inbound: {
           override_agent_id: agentId,
-          ring_duration_ms: Math.round(ringDurationMs),
           metadata: {
             client_id: client.id,
             forwarded_from_number: forwardedFromNormalized,

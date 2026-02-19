@@ -77,17 +77,22 @@ export function buildAgentOverride(
   // Max call duration: 7 minutes (420000 ms)
   const MAX_CALL_DURATION_MS = 7 * 60 * 1000
 
+  const agentFields: Record<string, unknown> = {
+    voice_id: voiceId,
+    voice_speed: Math.round(voiceSpeed * 100) / 100,
+    interruption_sensitivity: settings.aiBehavior.interruptTolerance ?? 0.5,
+    max_call_duration_ms: Math.min(
+      Math.max(60_000, (settings.aiBehavior.maxCallLengthMinutes ?? 7) * 60 * 1000),
+      MAX_CALL_DURATION_MS
+    ),
+  }
+  // ring_duration_ms valid range [5000, 90000]; omit when outside range (0 = answer immediately)
+  if (ringDurationMs >= 5000 && ringDurationMs <= 90000) {
+    agentFields.ring_duration_ms = Math.round(ringDurationMs)
+  }
+
   const agentOverride = {
-    agent: {
-      voice_id: voiceId,
-      ring_duration_ms: Math.round(ringDurationMs),
-      voice_speed: Math.round(voiceSpeed * 100) / 100,
-      interruption_sensitivity: settings.aiBehavior.interruptTolerance ?? 0.5,
-      max_call_duration_ms: Math.min(
-        Math.max(60_000, (settings.aiBehavior.maxCallLengthMinutes ?? 7) * 60 * 1000),
-        MAX_CALL_DURATION_MS
-      ),
-    },
+    agent: agentFields,
     retell_llm: {
       begin_message: beginMessage,
       model_temperature: Math.round(temperature * 100) / 100,

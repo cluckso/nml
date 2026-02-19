@@ -43,20 +43,22 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    const provisioned = await provisionAgentAndNumberForBusiness({
-      name: business.name,
-      industry: business.industry,
-      serviceAreas: business.serviceAreas,
-      planType: business.planType ?? undefined,
-      businessHours: business.businessHours as { open?: string; close?: string; days?: string[] } | undefined,
-      departments: business.departments ?? [],
-      afterHoursEmergencyPhone: business.afterHoursEmergencyPhone ?? undefined,
-    })
-
-    if (!provisioned) {
-      console.error("POST /api/agents: provisioning failed for business", business.id)
+    let provisioned: { agent_id: string; phone_number: string }
+    try {
+      provisioned = await provisionAgentAndNumberForBusiness({
+        name: business.name,
+        industry: business.industry,
+        serviceAreas: business.serviceAreas,
+        planType: business.planType ?? undefined,
+        businessHours: business.businessHours as { open?: string; close?: string; days?: string[] } | undefined,
+        departments: business.departments ?? [],
+        afterHoursEmergencyPhone: business.afterHoursEmergencyPhone ?? undefined,
+      })
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      console.error("POST /api/agents: provisioning failed for business", business.id, msg)
       return NextResponse.json(
-        { error: "We couldn't set up your AI line right now. Please try again in a moment." },
+        { error: `Could not set up your AI line: ${msg}` },
         { status: 503 }
       )
     }
@@ -72,9 +74,10 @@ export async function POST(req: NextRequest) {
       message: "Forward your business line to the number below.",
     })
   } catch (error) {
-    console.error("Agents API error:", error)
+    const msg = error instanceof Error ? error.message : String(error)
+    console.error("Agents API error:", msg)
     return NextResponse.json(
-      { error: "Something went wrong. Please try again." },
+      { error: `Something went wrong: ${msg}` },
       { status: 500 }
     )
   }

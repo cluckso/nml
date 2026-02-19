@@ -60,7 +60,6 @@ export async function createRetellAgent(
     voice_speed: 0.98,
     volume: 0.94,
     max_call_duration_ms: MAX_CALL_DURATION_MS,
-    ring_duration_ms: 0,
     interruption_sensitivity: 0.9,
     response_engine: {
       type: "conversation-flow" as const,
@@ -69,6 +68,7 @@ export async function createRetellAgent(
     },
   }
 
+  console.info("createRetellAgent: creating agent for", data.businessName)
   const response = await fetch(`${RETELL_API_BASE}/create-agent`, {
     method: "POST",
     headers: {
@@ -80,7 +80,8 @@ export async function createRetellAgent(
 
   if (!response.ok) {
     const error = await response.text()
-    throw new Error(`Failed to create Retell agent: ${error}`)
+    console.error("createRetellAgent: Retell returned", response.status, error)
+    throw new Error(`Failed to create Retell agent (${response.status}): ${error}`)
   }
 
   const result = await response.json()
@@ -166,7 +167,6 @@ export async function createRetellAgentOnly(
     voice_speed: 0.98,
     volume: 0.94,
     max_call_duration_ms: MAX_CALL_DURATION_MS,
-    ring_duration_ms: 0,
     interruption_sensitivity: 0.9,
     response_engine: {
       type: "conversation-flow" as const,
@@ -175,6 +175,7 @@ export async function createRetellAgentOnly(
     },
   }
 
+  console.info("createRetellAgentOnly: creating agent for", name)
   const response = await fetch(`${RETELL_API_BASE}/create-agent`, {
     method: "POST",
     headers: {
@@ -186,7 +187,8 @@ export async function createRetellAgentOnly(
 
   if (!response.ok) {
     const error = await response.text()
-    throw new Error(`Failed to create Retell agent: ${error}`)
+    console.error("createRetellAgentOnly: Retell returned", response.status, error)
+    throw new Error(`Failed to create Retell agent (${response.status}): ${error}`)
   }
 
   const result = await response.json()
@@ -196,16 +198,15 @@ export async function createRetellAgentOnly(
 /**
  * Create a dedicated Retell agent for the business and assign a phone number (recycled or new).
  * Use this in onboarding so each business gets a unique agent and number.
- * Returns { agent_id, phone_number } or null if provisioning fails.
+ * Returns { agent_id, phone_number } or throws with a descriptive message.
  */
 export async function provisionAgentAndNumberForBusiness(
   business: BusinessForProvisioning,
   areaCode?: number
-): Promise<{ agent_id: string; phone_number: string } | null> {
+): Promise<{ agent_id: string; phone_number: string }> {
   const apiKey = process.env.RETELL_API_KEY
   if (!apiKey) {
-    console.error("provisionAgentAndNumberForBusiness: RETELL_API_KEY not configured")
-    return null
+    throw new Error("RETELL_API_KEY not configured")
   }
 
   const request: CreateAgentRequest = {
@@ -218,19 +219,12 @@ export async function provisionAgentAndNumberForBusiness(
     afterHoursEmergencyPhone: business.afterHoursEmergencyPhone ?? undefined,
   }
 
-  let agent_id: string
-  try {
-    agent_id = await createRetellAgentOnly(request)
-  } catch (err) {
-    console.error("provisionAgentAndNumberForBusiness: createRetellAgentOnly failed:", err)
-    return null
-  }
+  const agent_id = await createRetellAgentOnly(request)
 
   const effectiveAreaCode =
     areaCode ?? (process.env.RETELL_DEFAULT_AREA_CODE ? parseInt(process.env.RETELL_DEFAULT_AREA_CODE, 10) : 415)
 
   // Claim recycled numbers atomically (one per transaction) and try to attach to this agent.
-  // If attach fails (e.g. number still bound in Retell), put it back and try the next recycled number.
   let phone_number: string | null = null
   const maxRecycledAttempts = 20
   for (let attempt = 0; attempt < maxRecycledAttempts; attempt++) {
@@ -254,7 +248,7 @@ export async function provisionAgentAndNumberForBusiness(
       console.info("Reused recycled Retell number for new agent:", phone_number, "agent:", agent_id)
       break
     } catch (err) {
-      console.warn("Failed to attach recycled number to agent, re-adding to pool and trying next:", claimed.phoneNumber, err)
+      console.warn("Failed to attach recycled number to agent, re-adding to pool:", claimed.phoneNumber, err)
       await db.recycledRetellNumber.create({
         data: { phoneNumber: claimed.phoneNumber },
       })
@@ -262,13 +256,8 @@ export async function provisionAgentAndNumberForBusiness(
   }
 
   if (!phone_number) {
-    try {
-      phone_number = await createPhoneNumber(apiKey, agent_id, effectiveAreaCode)
-      console.info("Provisioned new Retell number for business agent:", phone_number, "agent:", agent_id)
-    } catch (err) {
-      console.error("provisionAgentAndNumberForBusiness: createPhoneNumber failed:", err)
-      return null
-    }
+    phone_number = await createPhoneNumber(apiKey, agent_id, effectiveAreaCode)
+    console.info("Provisioned new Retell number for business agent:", phone_number, "agent:", agent_id)
   }
 
   return { agent_id, phone_number }
@@ -348,45 +337,40 @@ async function createPhoneNumber(
   agentId: string,
   areaCode: number
 ): Promise<string> {
-  const body: Record<string, unknown> = {
+  const body = {
     inbound_agent_id: agentId,
     outbound_agent_id: agentId,
     area_code: areaCode,
     country_code: "US",
   }
 
-  // Try v2 then non-versioned (Retell may use api.retellai.com/v2 for phone number)
-  const bases = ["https://api.retellai.com/v2", RETELL_API_BASE]
-  const seen = new Set<string>()
-  let lastError: string | null = null
+  console.info("createPhoneNumber: purchasing number for agent", agentId, "area code", areaCode)
+  const response = await fetch(`${RETELL_API_BASE}/create-phone-number`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(body),
+  })
 
-  for (const base of bases) {
-    const url = `${base}/create-phone-number`
-    if (seen.has(url)) continue
-    seen.add(url)
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify(body),
-    })
-    const text = await response.text()
-    if (response.ok) {
-      try {
-        const result = JSON.parse(text) as { phone_number?: string }
-        if (result.phone_number) return result.phone_number
-      } catch {
-        // ignore parse error
-      }
-      lastError = "Response missing phone_number"
-      continue
-    }
-    lastError = text || `HTTP ${response.status}`
+  const text = await response.text()
+  if (!response.ok) {
+    console.error("createPhoneNumber: Retell returned", response.status, text)
+    throw new Error(`Failed to create Retell phone number (${response.status}): ${text}`)
   }
 
-  throw new Error(`Failed to create Retell phone number: ${lastError}`)
+  let result: { phone_number?: string }
+  try {
+    result = JSON.parse(text)
+  } catch {
+    throw new Error("createPhoneNumber: invalid JSON response from Retell")
+  }
+
+  if (!result.phone_number) {
+    throw new Error("createPhoneNumber: response missing phone_number field")
+  }
+  return result.phone_number
 }
 
 /** Attach an already-purchased Retell phone number to an agent via PATCH update-phone-number. */
@@ -400,24 +384,23 @@ async function updatePhoneNumber(
     outbound_agent_id: agentId,
   }
   const encoded = encodeURIComponent(phoneNumber)
-  const bases = ["https://api.retellai.com/v2", RETELL_API_BASE]
-  let lastError: string | null = null
+  const url = `${RETELL_API_BASE}/update-phone-number/${encoded}`
+  console.info("updatePhoneNumber:", phoneNumber, "→ agent", agentId)
 
-  for (const base of bases) {
-    const url = `${base}/update-phone-number/${encoded}`
-    const response = await fetch(url, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify(body),
-    })
-    if (response.ok) return
-    lastError = await response.text()
+  const response = await fetch(url, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify(body),
+  })
+
+  if (!response.ok) {
+    const error = await response.text()
+    console.error("updatePhoneNumber: Retell returned", response.status, error)
+    throw new Error(`Failed to update Retell phone number (${response.status}): ${error}`)
   }
-
-  throw new Error(`Failed to update Retell phone number: ${lastError}`)
 }
 
 /** Create a conversation flow via Retell API; returns conversation_flow_id and version for use in create-agent. */
@@ -434,6 +417,7 @@ async function createConversationFlow(
     global_prompt: flow.global_prompt ?? undefined,
   }
 
+  console.info("createConversationFlow: creating flow with", body.nodes?.length ?? 0, "nodes")
   const response = await fetch(`${RETELL_API_BASE}/create-conversation-flow`, {
     method: "POST",
     headers: {
@@ -445,7 +429,8 @@ async function createConversationFlow(
 
   if (!response.ok) {
     const error = await response.text()
-    throw new Error(`Failed to create Retell conversation flow: ${error}`)
+    console.error("createConversationFlow: Retell returned", response.status, error)
+    throw new Error(`Failed to create Retell conversation flow (${response.status}): ${error}`)
   }
 
   const result = await response.json()
@@ -526,17 +511,27 @@ async function updateAgent(
     response_engine?: { type: "conversation-flow"; conversation_flow_id: string; version: number }
   }
 ): Promise<void> {
+  const cleaned = { ...payload }
+  // ring_duration_ms valid range on agent is [5000, 90000]; omit if outside range
+  if (cleaned.ring_duration_ms != null && (cleaned.ring_duration_ms < 5000 || cleaned.ring_duration_ms > 90000)) {
+    delete cleaned.ring_duration_ms
+  }
+  // max_call_duration_ms valid range [60000, 7200000]
+  if (cleaned.max_call_duration_ms != null && (cleaned.max_call_duration_ms < 60000 || cleaned.max_call_duration_ms > 7200000)) {
+    delete cleaned.max_call_duration_ms
+  }
+
   const response = await fetch(`${RETELL_API_BASE}/update-agent/${agentId}`, {
     method: "PATCH",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(cleaned),
   })
   if (!response.ok) {
     const error = await response.text()
-    throw new Error(`Failed to update Retell agent: ${error}`)
+    throw new Error(`Failed to update Retell agent (${response.status}): ${error}`)
   }
 }
 
@@ -640,9 +635,6 @@ export async function syncRetellAgentFromBusiness(
       ? Math.max(0, Math.min(2, vs.volume * 2))
       : 0.94
 
-  const MAX_CALL_DURATION_MS = 7 * 60 * 1000
-  const ringBeforeAnswerSeconds = settings?.callRouting?.ringBeforeAnswerSeconds ?? 0
-  const ringDurationMs = Math.min(15, Math.max(0, ringBeforeAnswerSeconds)) * 1000
   const maxCallMinutes = Math.min(7, Math.max(1, settings?.aiBehavior?.maxCallLengthMinutes ?? 7))
   const maxCallDurationMs = maxCallMinutes * 60 * 1000
 
@@ -653,7 +645,6 @@ export async function syncRetellAgentFromBusiness(
     voice_speed: voiceSpeed,
     volume: voiceVol,
     max_call_duration_ms: maxCallDurationMs,
-    ring_duration_ms: ringDurationMs,
     response_engine: { type: "conversation-flow", conversation_flow_id: flowId, version },
   })
 }
@@ -1061,7 +1052,6 @@ export async function createTemplateAgentForIndustry(
       voice_speed: 0.98,
       volume: 0.94,
       max_call_duration_ms: 7 * 60 * 1000,
-      ring_duration_ms: 0,
       interruption_sensitivity: 0.9,
       response_engine: {
         type: "conversation-flow",
