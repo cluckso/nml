@@ -200,11 +200,9 @@ export function BusinessInfoForm({
           disabled={sameAsBusinessPhone}
         />
         <p className="text-xs text-muted-foreground">
-          Where to receive SMS call summaries. Your personal or business phone. Changeable in Settings → Notifications.
+          Where to receive SMS call summaries. Your personal or business phone. Changeable later in Settings → Notifications.
         </p>
-      </div>
-
-      <div className="rounded-lg border p-4 space-y-2">
+        <p className="text-xs font-medium text-foreground mt-2">SMS alerts (one-time agreement)</p>
         <SmsConsentCheckbox
           checked={formData.smsConsent ?? false}
           onChange={(checked) => setFormData({ ...formData, smsConsent: checked })}

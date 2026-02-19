@@ -5,11 +5,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { SmsConsentCheckbox } from "@/components/consent/SmsConsentCheckbox"
 
 export function TrialStartClient() {
   const [businessPhone, setBusinessPhone] = useState("")
-  const [smsConsent, setSmsConsent] = useState(false)
+  // SMS consent is collected in one place only: onboarding (BusinessInfoForm)
+  const smsConsent = false
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -96,11 +96,9 @@ export function TrialStartClient() {
                 We&apos;ll use it to verify one trial per business.
               </p>
             </div>
-            <SmsConsentCheckbox
-              checked={smsConsent}
-              onChange={setSmsConsent}
-              disabled={loading}
-            />
+            <p className="text-xs text-muted-foreground">
+              You&apos;ll agree to SMS call alerts in the next step (setup).
+            </p>
             {error && (
               <p className="rounded-md bg-destructive/10 p-2 text-sm text-destructive">{error}</p>
             )}

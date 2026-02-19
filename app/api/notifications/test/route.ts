@@ -59,7 +59,9 @@ export async function POST(req: NextRequest) {
       results.email = "sent"
     } catch (err) {
       console.error("Test email error:", err)
-      results.email = err instanceof Error ? err.message : "Failed to send"
+      const msg = err instanceof Error ? err.message : "Failed to send"
+      results.email = msg
+      // Common causes: RESEND_API_KEY missing in production; Resend domain not verified (use RESEND_FROM_EMAIL=onboarding@resend.dev to test); email in spam
     }
   }
 

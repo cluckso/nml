@@ -488,7 +488,8 @@ function NotificationsSection({
 
   const handleSave = () => {
     const finalPhone = sameAsBusiness && businessPhone ? businessPhone : phone.trim() || undefined
-    onSave(d, { notificationPhone: finalPhone, smsConsent: consent })
+    // Only update phone; SMS consent is set once during onboarding, not here
+    onSave(d, { notificationPhone: finalPhone })
   }
 
   const runTest = async (type: "email" | "sms" | "both") => {
@@ -511,7 +512,7 @@ function NotificationsSection({
     <Card>
       <CardHeader>
         <CardTitle>Notification Settings</CardTitle>
-        <CardDescription>How you receive call alerts. Set your phone and enable SMS consent to get text alerts.</CardDescription>
+        <CardDescription>How you receive call alerts. Set your phone for text alerts. SMS consent is set once during setup.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
@@ -535,11 +536,10 @@ function NotificationsSection({
             disabled={sameAsBusiness}
           />
           <p className="text-xs text-muted-foreground">Used for text alerts when a call is received. Choose country code, then enter your number.</p>
+          {consent && (
+            <p className="text-xs text-muted-foreground">You agreed to SMS alerts during setup.</p>
+          )}
         </div>
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="rounded" />
-          I agree to receive SMS alerts at this number (required for text notifications)
-        </label>
         <Toggle label="SMS alerts" checked={d.smsAlerts} onChange={(v) => setD({ ...d, smsAlerts: v })} />
         <Toggle label="Email alerts" checked={d.emailAlerts} onChange={(v) => setD({ ...d, emailAlerts: v })} />
         <Toggle label="Emergency-only alerts" checked={d.emergencyOnlyAlerts} onChange={(v) => setD({ ...d, emergencyOnlyAlerts: v })} description="Only notify for emergency calls." />
@@ -553,10 +553,15 @@ function NotificationsSection({
           </div>
           {testStatus && (
             <div className="text-sm text-muted-foreground">
-              {testStatus.email != null && <p>Email: {testStatus.email === "sent" ? "Sent. Check your inbox." : testStatus.email}</p>}
-              {testStatus.sms != null && <p>SMS: {testStatus.sms === "sent" ? "Sent. Check your phone." : testStatus.sms}</p>}
+              {testStatus.email != null && (
+                <p>Email: {testStatus.email === "sent" ? "Sent. Check your inbox (and spam)." : <span className="text-destructive">{testStatus.email}</span>}</p>
+              )}
+              {testStatus.sms != null && (
+                <p>SMS: {testStatus.sms === "sent" ? "Sent. Check your phone." : <span className="text-destructive">{testStatus.sms}</span>}</p>
+              )}
             </div>
           )}
+          <p className="text-xs text-muted-foreground">If test says &quot;sent&quot; but you don&apos;t get the email: check spam, and ensure your Resend domain is verified or set RESEND_FROM_EMAIL in your host env.</p>
         </div>
       </CardContent>
     </Card>

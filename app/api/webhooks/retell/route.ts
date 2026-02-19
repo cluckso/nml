@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { verify } from "retell-sdk"
 import { db } from "@/lib/db"
 import { resolveClient, resolveClientByRetellNumber } from "@/lib/resolve-client"
 import { normalizeE164 } from "@/lib/normalize-phone"
@@ -19,7 +20,9 @@ import { mergeWithDefaults, type BusinessSettings } from "@/lib/business-setting
 import { buildAgentOverride } from "@/lib/agent-override"
 import { hasActionableInfo, isLikelySpam, isKnownSpamOrTestNumber } from "@/lib/call-filter"
 import { isSpamByTwilioLookup } from "@/lib/twilio-lookup"
-import crypto from "crypto"
+
+/** Retell expects 204 No Content on success. Use 200 + body only for call_inbound (required) and test/ping. */
+const RETELL_SUCCESS = new NextResponse(null, { status: 204 })
 
 export async function POST(req: NextRequest) {
   try {
@@ -30,7 +33,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 })
     }
 
-    const signature = req.headers.get("x-retell-signature")
+    const signature = req.headers.get("x-retell-signature") ?? ""
     const body = await req.text()
 
     // Retell dashboard "Test" often sends minimal/no signature — accept so Test button passes
@@ -40,11 +43,18 @@ export async function POST(req: NextRequest) {
       body === "null" ||
       /^\s*\{\s*"event"\s*:\s*"(ping|webhook_ping|test)"\s*\}\s*$/i.test(body)
     if (isTestOrPing) {
-      return NextResponse.json({ received: true })
+      return RETELL_SUCCESS
     }
 
-    if (!verifyRetellSignature(body, signature || "")) {
-      console.warn("Retell webhook signature invalid — ensure RETELL_API_KEY has the webhook badge in Retell dashboard")
+    const apiKey = process.env.RETELL_WEBHOOK_SECRET || process.env.RETELL_API_KEY
+    if (!apiKey) {
+      console.warn("Retell webhook: RETELL_API_KEY not set")
+      return NextResponse.json({ error: "Webhook not configured" }, { status: 500 })
+    }
+
+    const valid = await verify(body, apiKey, signature)
+    if (!valid) {
+      console.warn("Retell webhook signature invalid — use an API key with the webhook badge in Retell dashboard")
       return NextResponse.json(
         { error: "Invalid signature. Use an API key with the webhook badge in Retell." },
         { status: 401 }
@@ -200,9 +210,10 @@ export async function POST(req: NextRequest) {
     // Retell sends call_ended and call_analyzed (not call_analysis). Handle both so we never miss completion events.
     if (event.event === "call_ended" || event.event === "call_analysis" || event.event === "call_analyzed") {
       await handleCallCompletion(event)
+      return RETELL_SUCCESS
     }
 
-    return NextResponse.json({ received: true })
+    return RETELL_SUCCESS
   } catch (error) {
     console.error("Retell webhook error:", error)
     return NextResponse.json({ error: "Webhook processing failed" }, { status: 500 })
@@ -212,43 +223,6 @@ export async function POST(req: NextRequest) {
 interface RetellInboundEvent {
   event: "call_inbound"
   call_inbound?: { from_number?: string; to_number?: string }
-}
-
-function verifyRetellSignature(body: string, signature: string): boolean {
-  // Retell uses the API key (with webhook badge) for signature verification, NOT a separate secret.
-  // Try RETELL_WEBHOOK_SECRET first (if user set it), then fall back to RETELL_API_KEY.
-  const secret = process.env.RETELL_WEBHOOK_SECRET || process.env.RETELL_API_KEY
-  
-  if (!secret) {
-    console.warn("No RETELL_WEBHOOK_SECRET or RETELL_API_KEY set for signature verification")
-    // In development, allow without signature
-    return process.env.NODE_ENV === "development"
-  }
-
-  if (!signature) {
-    console.warn("No x-retell-signature header in request")
-    return process.env.NODE_ENV === "development"
-  }
-
-  // Try multiple signature formats since Retell's format may vary
-  // Format 1: HMAC-SHA256 with hex encoding (common)
-  const hexSig = crypto.createHmac("sha256", secret).update(body).digest("hex")
-  // Format 2: HMAC-SHA256 with base64 encoding
-  const base64Sig = crypto.createHmac("sha256", secret).update(body).digest("base64")
-  
-  // Compare using constant-time comparison
-  const sigLower = signature.toLowerCase()
-  const hexLower = hexSig.toLowerCase()
-  
-  if (sigLower === hexLower) return true
-  if (signature === base64Sig) return true
-  
-  if (process.env.NODE_ENV === "development") {
-    console.warn("Retell signature mismatch (dev only - rejecting in production)", {
-      receivedSig: signature.slice(0, 20) + "...",
-    })
-  }
-  return false
 }
 
 /** Minimal shape for Retell call_ended / call_analysis webhook payload. */

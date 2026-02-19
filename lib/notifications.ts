@@ -42,14 +42,20 @@ function truncateSummaryForEmail(summary: string | null | undefined): string {
   return slice.slice(0, breakAt).trim() + (breakAt < s.length ? "…" : "")
 }
 
+/** From address: use RESEND_FROM_EMAIL for testing (e.g. onboarding@resend.dev); otherwise notifications@callgrabbr.com (domain must be verified in Resend). */
+const EMAIL_FROM = process.env.RESEND_FROM_EMAIL?.trim()
+  ? `CallGrabbr <${process.env.RESEND_FROM_EMAIL.trim()}>`
+  : "CallGrabbr <notifications@callgrabbr.com>"
+
 export async function sendEmailNotification(
   business: Business,
   call: Call,
   intake: StructuredIntake
 ) {
   if (!resend) {
-    console.warn("[Notifications] Email skipped: RESEND_API_KEY not configured")
-    return
+    const msg = "RESEND_API_KEY not configured"
+    console.warn("[Notifications] Email skipped:", msg)
+    throw new Error(msg)
   }
 
   const owner = await import("./db").then((m) => m.db.user.findFirst({
@@ -57,13 +63,15 @@ export async function sendEmailNotification(
   }))
 
   if (!owner) {
-    console.error("[Notifications] Email skipped: no owner user for business", business.id)
-    return
+    const msg = "No owner user for business"
+    console.error("[Notifications] Email skipped:", msg, business.id)
+    throw new Error(msg)
   }
   const toEmail = (owner as { email?: string }).email
   if (!toEmail) {
-    console.error("[Notifications] Email skipped: owner has no email", owner.id)
-    return
+    const msg = "Owner has no email"
+    console.error("[Notifications] Email skipped:", msg, owner.id)
+    throw new Error(msg)
   }
 
   const emergencyBadge = intake.emergency ? "🚨 EMERGENCY" : ""
@@ -124,16 +132,18 @@ export async function sendEmailNotification(
     </html>
   `
 
-  try {
-    await resend.emails.send({
-      from: "CallGrabbr <notifications@callgrabbr.com>",
-      to: toEmail,
-      subject,
-      html,
-    })
-  } catch (error) {
-    console.error("[Notifications] Email send error:", error)
-    throw error
+  const { data, error } = await resend.emails.send({
+    from: EMAIL_FROM,
+    to: toEmail,
+    subject,
+    html,
+  })
+  if (error) {
+    const msg = typeof error === "object" && error !== null && "message" in error
+      ? String((error as { message?: unknown }).message)
+      : String(error)
+    console.error("[Notifications] Email send error:", msg, error)
+    throw new Error(msg || "Resend send failed")
   }
 }
 
@@ -297,7 +307,7 @@ export async function forwardToCrm(
   if (business.forwardToEmail && resend) {
     try {
       await resend.emails.send({
-        from: "CallGrabbr <notifications@callgrabbr.com>",
+        from: EMAIL_FROM,
         to: business.forwardToEmail,
         subject: `Lead: ${intake.name || "Unknown"} - ${business.name}`,
         html: `
