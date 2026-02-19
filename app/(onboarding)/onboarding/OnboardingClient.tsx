@@ -98,7 +98,10 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
         throw new Error(details ? `${msg}. ${details}` : msg)
       }
       setStep("complete")
-      setTimeout(() => router.push("/dashboard"), 2000)
+      if (data.provisioningFailed) {
+        alert("Your info was saved. We couldn't set up your AI line just yet — click Connect on the dashboard to try again.")
+      }
+      setTimeout(() => router.push("/dashboard"), data.provisioningFailed ? 500 : 2000)
     } catch (error) {
       console.error("Error saving onboarding:", error)
       const message = error instanceof Error ? error.message : "Failed to save. Please try again."

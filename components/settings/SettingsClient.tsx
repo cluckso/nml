@@ -597,7 +597,12 @@ function CallRoutingSection({ value, onSave, saving }: { value: CallRoutingSetti
         <Toggle label="Forward emergencies" checked={d.emergencyForward} onChange={(v) => setD({ ...d, emergencyForward: v })} description="Immediately forward emergency calls to a phone number." />
         {d.emergencyForward && (
           <div className="space-y-2 pl-6">
-            <Label>Forward to number</Label>
+            <div className="flex items-center gap-2">
+              <Label>Forward to number</Label>
+              <Link href="/docs/faq" className="text-sm text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+                Help
+              </Link>
+            </div>
             <Input type="tel" placeholder="+1 (555) 123-4567" value={d.emergencyForwardNumber ?? ""} onChange={(e) => setD({ ...d, emergencyForwardNumber: e.target.value || null })} />
           </div>
         )}

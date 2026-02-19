@@ -183,7 +183,12 @@ export async function POST(req: NextRequest) {
       where: { id: business.id },
     })
 
-    return NextResponse.json({ success: true, business: updatedBusiness })
+    const provisioningFailed = !!(updatedBusiness && !updatedBusiness.retellAgentId && !updatedBusiness.retellPhoneNumber)
+    return NextResponse.json({
+      success: true,
+      business: updatedBusiness,
+      ...(provisioningFailed ? { provisioningFailed: true } : {}),
+    })
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
     const isPrismaOrDb =

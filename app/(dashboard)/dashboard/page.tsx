@@ -1,7 +1,6 @@
 import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { getTrialStatus, type TrialStatus } from "@/lib/trial"
-import { getIntakeNumberForIndustry, hasIntakeNumberConfigured } from "@/lib/intake-routing"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CallLog } from "@/components/calls/CallLog"
 import { SetupAICard } from "@/components/dashboard/SetupAICard"
@@ -71,9 +70,9 @@ export default async function DashboardPage() {
 
   const emergencyCalls = recentCalls.filter((c) => c.emergencyFlag).length
   const totalMinutes = stats._sum.minutes || 0
-  // Prefer business's dedicated Retell number, fall back to shared intake number
-  const phoneNumber = business?.retellPhoneNumber || getIntakeNumberForIndustry(business?.industry ?? null)
-  const hasAgent = !!(business?.retellPhoneNumber || hasIntakeNumberConfigured())
+  // Only "connected" when this business has its own dedicated agent + number
+  const hasAgent = !!(business?.retellAgentId && business?.retellPhoneNumber)
+  const phoneNumber = business?.retellPhoneNumber ?? null
   const ownerPhone = user.phoneNumber ?? null
 
   return (
