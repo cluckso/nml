@@ -32,12 +32,12 @@ export const FREE_TRIAL_MINUTES = 50
 /** Free trial: validity window in days (trial ends at 4 days or 50 minutes, whichever comes first) */
 export const TRIAL_DAYS = 4
 
-/** Monthly price per plan (USD) — Starter $99, Growth $229, Scale $349 */
+/** Monthly price per plan (USD) — Starter $99, Growth $149, Scale $249 */
 export const MONTHLY_PRICES: Record<PlanType, number> = {
   [PlanType.STARTER]: 99,
-  [PlanType.PRO]: 229,
-  [PlanType.LOCAL_PLUS]: 349,
-  [PlanType.ELITE]: 349,
+  [PlanType.PRO]: 149,
+  [PlanType.LOCAL_PLUS]: 249,
+  [PlanType.ELITE]: 249,
 }
 
 /** Overage rate per minute (USD) */

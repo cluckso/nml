@@ -36,7 +36,7 @@ Designed so businesses can test real calls—not demos.
 
 ---
 
-## Growth — $229/month
+## Growth — $149/month
 
 *Best for growing service businesses*
 
@@ -52,7 +52,7 @@ Designed so businesses can test real calls—not demos.
 
 ---
 
-## Scale — $349/month
+## Scale — $249/month
 
 *Built for high-volume, multi-department trades*
 

@@ -258,7 +258,7 @@ export default function HomePage() {
             </Card>
             <Card className="border-primary/50 bg-primary/5 border-2">
               <CardHeader>
-                <CardTitle>Growth — $229/mo</CardTitle>
+                <CardTitle>Growth — $149/mo</CardTitle>
                 <p className="text-sm text-muted-foreground font-normal">Best for growing shops</p>
               </CardHeader>
               <CardContent className="space-y-2">
@@ -279,7 +279,7 @@ export default function HomePage() {
             </Card>
             <Card className="border-border/50 bg-card/50">
               <CardHeader>
-                <CardTitle>Scale — $349/mo</CardTitle>
+                <CardTitle>Scale — $249/mo</CardTitle>
                 <p className="text-sm text-muted-foreground font-normal">Best for high-volume trades</p>
               </CardHeader>
               <CardContent className="space-y-2">

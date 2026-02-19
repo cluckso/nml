@@ -2,7 +2,7 @@
 
 Your app uses Stripe for:
 
-- **Recurring plans:** Starter ($99/mo), Growth ($229/mo), Scale ($349/mo)
+- **Recurring plans:** Starter ($99/mo), Growth ($149/mo), Scale ($249/mo)
 - **Overage:** $0.20/min after included minutes (reported as metered usage)
 
 You need to create the products/prices in Stripe and set env vars so checkout and usage reporting work.
@@ -24,15 +24,15 @@ You need to create the products/prices in Stripe and set env vars so checkout an
    - Copy the **Price ID** (starts with `price_`) → use as `STRIPE_PRICE_STARTER`
    - Copy the **Product ID** (starts with `prod_`) → optional for `STRIPE_PRODUCT_STARTER`
 
-3. **Pro**
-   - New product, name: `Pro`
-   - Recurring price: $229.00 USD, monthly, licensed
+3. **Growth**
+   - New product, name: `Growth`
+   - Recurring price: $149.00 USD, monthly, licensed
    - Copy Price ID → `STRIPE_PRICE_PRO`
    - Copy Product ID → optional `STRIPE_PRODUCT_PRO`
 
-4. **Local Plus**
-   - New product, name: `Local Plus`
-   - Recurring price: $349.00 USD, monthly, licensed
+4. **Scale**
+   - New product, name: `Scale`
+   - Recurring price: $249.00 USD, monthly, licensed
    - Copy Price ID → `STRIPE_PRICE_LOCAL_PLUS`
    - Copy Product ID → optional `STRIPE_PRODUCT_LOCAL_PLUS`
 
@@ -60,9 +60,9 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 
 # Price IDs (from step 1)
-STRIPE_PRICE_STARTER=price_xxxxx       # Basic $99/mo
-STRIPE_PRICE_PRO=price_xxxxx          # Pro $229/mo
-STRIPE_PRICE_LOCAL_PLUS=price_xxxxx   # Local Plus $349/mo
+STRIPE_PRICE_STARTER=price_xxxxx       # Starter $99/mo
+STRIPE_PRICE_PRO=price_xxxxx          # Growth $149/mo
+STRIPE_PRICE_LOCAL_PLUS=price_xxxxx   # Scale $249/mo
 STRIPE_USAGE_PRICE_ID=price_xxxxx     # Overage $0.20/min (metered)
 
 # Optional product IDs (used only if you reference them in code)

@@ -21,19 +21,19 @@ const PLAN_DETAILS = {
   },
   [PlanType.PRO]: {
     name: "Growth",
-    price: 229,
+    price: 149,
     minutes: 900,
     setupFee: 0,
   },
   [PlanType.LOCAL_PLUS]: {
     name: "Scale",
-    price: 349,
+    price: 249,
     minutes: 1800,
     setupFee: 0,
   },
   [PlanType.ELITE]: {
     name: "Scale",
-    price: 349,
+    price: 249,
     minutes: 1800,
     setupFee: 0,
   },
