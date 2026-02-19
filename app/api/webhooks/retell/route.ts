@@ -263,7 +263,7 @@ interface RetellCallWebhookEvent {
   call_id?: string
   call?: {
     call_id?: string
-    agent_id?: string
+    agent_id?: string  // Retell agent that handled the call; matches business.retellAgentId for dedicated agents
     from_number?: string
     to_number?: string
     start_timestamp?: number
@@ -293,14 +293,23 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
   })
 
   const metadata = event.call?.metadata
+  const agentId = event.call?.agent_id
   let business = metadata?.client_id
     ? await db.business.findUnique({
         where: { id: metadata.client_id },
       })
     : null
   let resolutionMethod = business ? "metadata.client_id" : null
+
+  // Try to resolve by agent_id (business's dedicated Retell agent) — very reliable when using dedicated agents
+  if (!business && agentId) {
+    business = await db.business.findFirst({
+      where: { retellAgentId: agentId },
+    })
+    if (business) resolutionMethod = "retellAgentId"
+  }
   
-  // Try to resolve by to_number (business's dedicated Retell number) - PREFERRED
+  // Try to resolve by to_number (business's dedicated Retell number)
   if (!business && event.call?.to_number) {
     const toNormalized = normalizeE164(event.call.to_number)
     if (toNormalized) {
@@ -313,7 +322,6 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
   
   // Try forwarded_from_number from metadata
   if (!business && metadata?.forwarded_from_number) {
-    console.info("Trying to resolve by forwarded_from_number:", metadata.forwarded_from_number)
     const normalized = normalizeE164(metadata.forwarded_from_number)
     if (normalized) {
       business = await db.business.findFirst({
@@ -323,15 +331,21 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
     }
   }
   
-  // Fallback: any active business (single-tenant mode)
+  // Fallback: any business (ACTIVE first, then PAUSED) — single-tenant or last resort
   if (!business) {
     business = await db.business.findFirst({
       where: { status: ClientStatus.ACTIVE },
       orderBy: { createdAt: "desc" },
     })
+    if (business) resolutionMethod = "fallback_active"
+  }
+  if (!business) {
+    business = await db.business.findFirst({
+      orderBy: { createdAt: "desc" },
+    })
     if (business) {
-      resolutionMethod = "fallback"
-      console.warn("Using fallback business for call completion:", {
+      resolutionMethod = "fallback_any"
+      console.warn("Using fallback (any business) for call completion:", {
         callId,
         businessId: business.id,
         businessName: business.name,
@@ -342,6 +356,7 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
   if (!business) {
     console.error(`Client not found for call ${callId}`, {
       metadata_client_id: metadata?.client_id,
+      agent_id: agentId,
       metadata_forwarded_from: metadata?.forwarded_from_number,
       from_number: event.call?.from_number,
       to_number: event.call?.to_number,

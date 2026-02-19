@@ -188,6 +188,16 @@ export async function sendSMSNotification(
     return
   }
 
+  // SMS summary: name, contact, address, issue, vehicle, appointment pref — no transcript
+  const name = (intake.name || "—").trim()
+  const phone = (intake.phone || "—").trim()
+  const address = (intake.address || intake.city ? [intake.address, intake.city].filter(Boolean).join(", ") : "—").trim() || "—"
+  const rawIssue = (intake.issue_description || "").trim()
+  const issue = rawIssue.length <= 100 ? rawIssue : rawIssue.slice(0, 97).trim() + "…"
+  const vehicle = [intake.vehicle_year, intake.vehicle_make, intake.vehicle_model, intake.year, intake.make, intake.model]
+    .filter(Boolean)
+    .map((s) => String(s).trim())
+    .join(" ") || ""
   const appt = (call as { appointmentRequest?: { preferredDays?: string; preferredTime?: string; notes?: string } }).appointmentRequest
   const apptStr =
     appt?.notes?.trim() ||
@@ -197,34 +207,23 @@ export async function sendSMSNotification(
     intake.preferred_time?.trim() ||
     ""
 
-  const vehicleYear = intake.vehicle_year?.trim() || intake.year?.trim() || ""
-  const vehicleMake = intake.vehicle_make?.trim() || intake.make?.trim() || ""
-  const vehicleModel = intake.vehicle_model?.trim() || intake.model?.trim() || ""
-  const vehicle = [vehicleYear, vehicleMake, vehicleModel].filter(Boolean).join(" ") || ""
-
-  const caller = `${intake.name || "Unknown"} ${intake.phone || "N/A"}`.trim()
-  // Keep SMS to key points only — no full transcript; cap issue to brief summary (80 chars)
-  const rawIssue = (intake.issue_description || "").trim()
-  const issue =
-    rawIssue.length <= 80
-      ? rawIssue
-      : rawIssue.slice(0, 77).trim() + "…"
-
-  const lines: string[] = []
-  lines.push(`Caller: ${caller}`)
+  const lines: string[] = [
+    `Name: ${name}`,
+    `Contact: ${phone}`,
+    `Address: ${address}`,
+    `Issue: ${issue || "—"}`,
+  ]
   if (vehicle) lines.push(`Vehicle: ${vehicle}`)
   if (apptStr) lines.push(`Appt: ${apptStr}`)
-  lines.push(`Issue: ${issue || "—"}`)
 
   let message = lines.join("\n")
   if (intake.emergency) message = `🚨 EMERGENCY\n${message}`
 
   if (message.length > SMS_MAX_CHARS) {
     const over = message.length - SMS_MAX_CHARS
-    const lastLine = lines[lines.length - 1]
-    if (lastLine.startsWith("Issue:") && over > 0 && issue.length > 10) {
-      const maxIssue = Math.max(10, issue.length - over - 1)
-      lines[lines.length - 1] = `Issue: ${issue.slice(0, maxIssue)}…`
+    if (over > 0 && issue.length > 20) {
+      const maxIssue = Math.max(20, issue.length - over - 1)
+      lines[3] = `Issue: ${issue.slice(0, maxIssue)}…`
       message = lines.join("\n")
       if (intake.emergency) message = `🚨 EMERGENCY\n${message}`
     }
