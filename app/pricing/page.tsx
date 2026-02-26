@@ -9,6 +9,7 @@ const PLANS = [
   {
     name: "Starter",
     description: "Missed call capture and alerts",
+    includedMinutes: 300,
     features: [
       "Missed call capture",
       "Spam call filtering",
@@ -19,6 +20,7 @@ const PLANS = [
   {
     name: "Growth",
     description: "24/7 answering and booking",
+    includedMinutes: 900,
     features: [
       "24/7 answering",
       "Spam call filtering",
@@ -30,6 +32,7 @@ const PLANS = [
   {
     name: "Scale",
     description: "Custom scripts and reporting",
+    includedMinutes: 1800,
     features: [
       "Custom scripts",
       "Spam call filtering",
@@ -78,10 +81,10 @@ export default async function PricingPage() {
         <div className="max-w-2xl mx-auto mb-12 p-8 rounded-xl border-2 border-primary/20 bg-primary/5 text-center">
           <h2 className="text-2xl font-bold mb-2">Free trial — no card required</h2>
           <p className="text-muted-foreground mb-4">
-            50 call minutes or 4 days, whichever comes first. We won&apos;t charge until you choose a plan. One trial per business number.
+            7-day free trial. We won&apos;t charge until you choose a plan. One trial per business number.
           </p>
           <p className="text-sm text-muted-foreground mb-6">
-            Set up your business and try the AI. Upgrade to Starter, Growth, or Scale when you&apos;re ready.
+            Set up your business and try it. Upgrade to Starter, Growth, or Scale when you&apos;re ready.
           </p>
           {isLoggedIn ? (
             <Button size="lg" asChild>

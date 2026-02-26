@@ -18,6 +18,7 @@ export function PlanCard({
   name,
   description,
   features,
+  includedMinutes,
   annualPrice,
   annualLabel,
   isLoggedIn,
@@ -26,6 +27,7 @@ export function PlanCard({
   name: string
   description: string
   features: string[]
+  includedMinutes?: number
   annualPrice?: number
   annualLabel?: string
   isLoggedIn: boolean
@@ -73,6 +75,11 @@ export function PlanCard({
           <span className="text-4xl font-bold">${plan.price}</span>
           <span className="text-muted-foreground">/month</span>
         </div>
+        {includedMinutes != null && (
+          <p className="text-sm font-medium text-foreground mt-2">
+            {includedMinutes.toLocaleString()} included minutes/month
+          </p>
+        )}
         {annualPrice != null && annualLabel && (
           <p className="text-sm text-muted-foreground mt-2">
             Annual: ${annualPrice}/year ({annualLabel})

@@ -76,7 +76,7 @@ export function TrialStartClient() {
         <CardHeader>
           <CardTitle>Start your free trial — no card required</CardTitle>
           <CardDescription>
-            Trial: 50 call minutes or 4 days, whichever comes first. No charge until you choose a plan. Add your business phone to start. One trial per business number.
+            7-day free trial. No charge until you choose a plan. Add your business phone to start. One trial per business number.
           </CardDescription>
         </CardHeader>
         <CardContent>

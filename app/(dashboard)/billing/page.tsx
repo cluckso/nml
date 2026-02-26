@@ -99,7 +99,7 @@ export default async function BillingPage() {
               {isOnTrial
                 ? trial.isExhausted || trial.isExpired
                   ? "Trial ended or used — upgrade to continue"
-                  : "Free trial — 50 minutes or 4 days"
+                  : "Free trial — 7 days"
                 : planDetails
                   ? planDetails.name
                   : "No active subscription"}
@@ -110,7 +110,7 @@ export default async function BillingPage() {
               <div className="space-y-2">
                 <p className="text-2xl font-bold">Free trial</p>
                 <p className="text-sm text-muted-foreground">
-                  50 minutes or 4 days free. Upgrade to Starter, Growth, or Scale when you&apos;re ready.
+                  7-day free trial. Upgrade to Starter, Growth, or Scale when you&apos;re ready.
                 </p>
                 {(trial.isExhausted || trial.isExpired) && (
                   <Button asChild className="mt-2">

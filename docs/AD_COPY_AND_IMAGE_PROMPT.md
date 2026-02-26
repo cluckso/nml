@@ -3,7 +3,7 @@
 ## Product summary (for reference)
 - **What:** AI phone receptionist that answers business calls 24/7, captures lead/intake info, and sends summaries.
 - **Who:** Local service businesses (HVAC, plumbing, electrician, auto repair, childcare, handyman).
-- **Trial:** 50 minutes or 4 days free; 5-minute setup; no card required to start.
+- **Trial:** 7-day free trial; 5-minute setup; no card required to start.
 
 ---
 
@@ -24,16 +24,16 @@
 - Forward your business line. We answer, qualify, and send you the lead.
 
 ### Short body (social / display)
-- When you don’t answer, they call the next company. CallGrabbr answers every call, captures the lead, and sends you the job details instantly — 24/7. No voicemail. No hold music. No lost revenue. Start your free trial — 50 min or 4 days, no card required.
+- When you don’t answer, they call the next company. CallGrabbr answers every call, captures the lead, and sends you the job details instantly — 24/7. No voicemail. No hold music. No lost revenue. Start your 7-day free trial, no card required.
 
 ### Long body (landing / email)
-- CallGrabbr is an AI receptionist that answers your business phone 24/7. It greets callers, asks the right questions for your industry (HVAC, plumbing, electrician, auto repair, childcare, handyman), captures name, phone, and job details, and sends you a summary by email and optional SMS. You get every lead without missing a call. Setup takes about 5 minutes: forward your existing business line to your CallGrabbr number. Start with a free trial — 50 minutes or 4 days, no credit card required.
+- CallGrabbr is an AI receptionist that answers your business phone 24/7. It greets callers, asks the right questions for your industry (HVAC, plumbing, electrician, auto repair, childcare, handyman), captures name, phone, and job details, and sends you a summary by email and optional SMS. You get every lead without missing a call. Setup takes about 5 minutes: forward your existing business line to your CallGrabbr number. Start with a 7-day free trial, no credit card required.
 
 ### CTA phrases
 - Start free trial
 - Activate CallGrabbr
 - Get your AI number
-- Try free — 50 min or 4 days
+- Try free — 7-day trial
 
 ---
 

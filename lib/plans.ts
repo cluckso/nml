@@ -29,8 +29,8 @@ export const SETUP_FEES: Record<PlanType, number> = {
 /** Free trial: call minutes cap before first paid subscription */
 export const FREE_TRIAL_MINUTES = 50
 
-/** Free trial: validity window in days (trial ends at 4 days or 50 minutes, whichever comes first) */
-export const TRIAL_DAYS = 4
+/** Free trial: validity window in days (trial ends at 7 days or 50 minutes, whichever comes first) */
+export const TRIAL_DAYS = 7
 
 /** Monthly price per plan (USD) — Starter $99, Growth $149, Scale $249 */
 export const MONTHLY_PRICES: Record<PlanType, number> = {

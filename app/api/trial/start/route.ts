@@ -9,7 +9,7 @@ import { ClientStatus } from "@prisma/client"
 /**
  * POST /api/trial/start
  * Body: { businessPhone: string, smsConsent?: boolean }
- * No card required. Creates or updates business, starts trial (50 min or 4 days), redirects to onboarding.
+ * No card required. Creates or updates business, starts 7-day trial (includes trial minutes), redirects to onboarding.
  */
 export async function POST(req: NextRequest) {
   try {

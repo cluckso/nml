@@ -21,9 +21,9 @@ export function TrialCard({ trial, hasAgent }: TrialCardProps) {
     if (isExpired && !isExhausted)
       return "Your trial has ended. Upgrade to a plan to reactivate your number and keep capturing leads."
     if (isExhausted)
-      return "You've used all 50 free minutes. Upgrade to keep receiving calls."
+      return "You've used your trial minutes. Upgrade to keep receiving calls."
     if (isEnded) return "Your trial has ended. Upgrade to a plan to continue."
-    return "50 call minutes or 4 days, whichever comes first. No charge until you upgrade. One trial per business number."
+    return "7-day free trial. No charge until you upgrade. One trial per business number."
   }
 
   return (
