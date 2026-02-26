@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../config/env.dart';
-import '../services/auth_service.dart';
 import '../services/api_service.dart';
 import 'calls_screen.dart';
+import 'appointments_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -54,21 +54,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('CallGrabbr Dashboard'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loading ? null : _load,
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await context.read<AuthService>().signOut();
-            },
-          ),
-        ],
-      ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
@@ -199,8 +184,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                         ),
                                       );
                                     },
-                                    icon: const Icon(Icons.list),
+                                    icon: const Icon(Icons.phone),
                                     label: const Text('View all calls'),
+                                  ),
+                                  TextButton.icon(
+                                    onPressed: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) => const AppointmentsScreen(),
+                                        ),
+                                      );
+                                    },
+                                    icon: const Icon(Icons.calendar_today),
+                                    label: const Text('Appointments'),
                                   ),
                                 ],
                               ),

@@ -12,13 +12,14 @@ import {
 import { reportUsageToStripe } from "@/lib/stripe"
 import { releaseRetellNumber } from "@/lib/retell"
 import { isSubscriptionActive } from "@/lib/subscription"
-import { hasSmsToCallers, hasCrmForwarding, hasLeadTagging, getEffectivePlanType, FREE_TRIAL_MINUTES, TRIAL_DAYS, MAX_CALL_DURATION_SECONDS, toBillableMinutes } from "@/lib/plans"
+import { hasSmsToCallers, hasCrmForwarding, hasLeadTagging, hasAppointmentCapture, getEffectivePlanType, FREE_TRIAL_MINUTES, TRIAL_DAYS, MAX_CALL_DURATION_SECONDS, toBillableMinutes } from "@/lib/plans"
 import { rateLimit } from "@/lib/rate-limit"
 import { getAgentIdForInbound, getAgentIdForIndustry } from "@/lib/intake-routing"
 import { ClientStatus } from "@prisma/client"
 import { mergeWithDefaults, type BusinessSettings } from "@/lib/business-settings"
 import { buildAgentOverride } from "@/lib/agent-override"
 import { hasActionableInfo, isLikelySpam, isKnownSpamOrTestNumber } from "@/lib/call-filter"
+import { parseAppointmentRequest } from "@/lib/appointments"
 import { isSpamByTwilioLookup } from "@/lib/twilio-lookup"
 
 /** Retell expects 204 No Content on success. Use 200 + body only for call_inbound (required) and test/ping. */
@@ -495,6 +496,34 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
           ...callData,
         },
       })
+
+  // Create appointment from Retell intake when caller asked to schedule (Pro+)
+  if (hasAppointmentCapture(planType) && appointmentRequest && callerPhone) {
+    try {
+      const parsed = parseAppointmentRequest(
+        appointmentRequest as { preferredDays?: string; preferredTime?: string; notes?: string },
+        business.id
+      )
+      if (parsed) {
+        await db.appointment.create({
+          data: {
+            businessId: business.id,
+            callId: call.id,
+            callerName: typeof structuredIntake.name === "string" ? structuredIntake.name : null,
+            callerPhone,
+            scheduledAt: parsed.scheduledAt,
+            durationMinutes: parsed.durationMinutes,
+            status: "PENDING",
+            issueDescription: typeof structuredIntake.issue_description === "string" ? structuredIntake.issue_description : null,
+            notes: (appointmentRequest as { notes?: string }).notes?.trim() || null,
+          },
+        })
+        console.info("[Appointments] Created from Retell call", { callId, businessId: business.id })
+      }
+    } catch (err) {
+      console.error("[Appointments] Failed to create from Retell:", err)
+    }
+  }
 
   // Mark testCallVerifiedAt when we receive a completed call for this client (forwarded_from matched)
   if (!business.testCallVerifiedAt) {

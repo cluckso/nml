@@ -15,6 +15,8 @@ A Flutter mobile app for the CallGrabbr dashboard lives in **`dashboard_app/`**.
 - **Login** — Supabase email/password (same account as web).
 - **Dashboard** — Business name, AI number, agent status, usage stats, recent calls.
 - **Calls** — Paginated list of calls; pull-to-refresh.
+- **Appointments** — Upcoming appointments (Pro+); cancel from app.
+- **Settings** — Notification phone, SMS consent; full settings on web.
 
 ## Run the Flutter app
 

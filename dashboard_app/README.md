@@ -46,6 +46,8 @@ Cookie-based auth (browser) continues to work; no change for the web app.
 - **Login** — Email/password via Supabase (same account as web).
 - **Dashboard** — Business name, AI number, agent status, total calls/minutes, emergency count, recent calls list.
 - **Calls** — Full paginated list of calls; pull-to-refresh.
+- **Appointments** — Upcoming appointments (Pro+); cancel from app.
+- **Settings** — Notification phone, SMS consent; full settings on web.
 
 ## Run
 
@@ -60,3 +62,26 @@ flutter run -d chrome   # web
 flutter run -d windows # desktop
 flutter devices        # list devices
 ```
+
+## Build Android
+
+From the `dashboard_app` folder:
+
+1. **Install dependencies** (if you haven’t):
+   ```powershell
+   flutter pub get
+   ```
+
+2. **Build an APK** (for testing / sideloading):
+   ```powershell
+   flutter build apk --dart-define=API_BASE_URL=https://www.callgrabbr.com --dart-define=SUPABASE_URL=YOUR_SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=YOUR_ANON_KEY
+   ```
+   Output: `build/app/outputs/flutter-apk/app-release.apk`
+
+3. **Build an App Bundle** (for Play Store):
+   ```powershell
+   flutter build appbundle --dart-define=API_BASE_URL=https://www.callgrabbr.com --dart-define=SUPABASE_URL=YOUR_SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=YOUR_ANON_KEY
+   ```
+   Output: `build/app/outputs/bundle/release/app-release.aab`
+
+**Requirements:** Flutter SDK installed, Android SDK installed (via Android Studio or standalone). Run `flutter doctor` to confirm Android toolchain is set up.

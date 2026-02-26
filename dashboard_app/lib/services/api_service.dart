@@ -29,14 +29,86 @@ class ApiService {
     return DashboardResponse.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
   }
 
-  Future<CallsResponse> getCalls({int page = 1, int limit = 20}) async {
-    final uri = Uri.parse('${_base}api/calls').replace(
-      queryParameters: {'page': '$page', 'limit': '$limit'},
-    );
+  Future<CallsResponse> getCalls({int page = 1, int limit = 20, String? search, bool? emergency}) async {
+    final params = <String, String>{'page': '$page', 'limit': '$limit'};
+    if (search != null && search.isNotEmpty) params['search'] = search;
+    if (emergency == true) params['emergency'] = 'true';
+    final uri = Uri.parse('${_base}api/calls').replace(queryParameters: params);
     final res = await http.get(uri, headers: _headers);
     if (res.statusCode == 401) throw ApiException('Unauthorized', 401);
     if (res.statusCode != 200) throw ApiException(res.body, res.statusCode);
     return CallsResponse.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+  }
+
+  Future<SettingsResponse> getSettings() async {
+    final res = await http.get(Uri.parse('${_base}api/settings'), headers: _headers);
+    if (res.statusCode == 401) throw ApiException('Unauthorized', 401);
+    if (res.statusCode != 200) throw ApiException(res.body, res.statusCode);
+    return SettingsResponse.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+  }
+
+  Future<SettingsResponse> patchSettings(Map<String, dynamic> body) async {
+    final res = await http.patch(
+      Uri.parse('${_base}api/settings'),
+      headers: _headers,
+      body: jsonEncode(body),
+    );
+    if (res.statusCode == 401) throw ApiException('Unauthorized', 401);
+    if (res.statusCode != 200) throw ApiException(res.body, res.statusCode);
+    final data = jsonDecode(res.body) as Map<String, dynamic>;
+    // PATCH returns { settings, verified, notificationPhone?, smsConsent? }
+    return SettingsResponse(
+      settings: data['settings'] as Map<String, dynamic>?,
+      allowedSections: null,
+      planType: null,
+      notificationPhone: data['notificationPhone'] as String?,
+      smsConsent: data['smsConsent'] as bool? ?? false,
+    );
+  }
+
+  Future<AppointmentsResponse> getAppointments({DateTime? from, DateTime? to, String? status}) async {
+    final params = <String, String>{};
+    if (from != null) params['from'] = from.toIso8601String();
+    if (to != null) params['to'] = to.toIso8601String();
+    if (status != null) params['status'] = status;
+    final uri = Uri.parse('${_base}api/appointments').replace(queryParameters: params.isNotEmpty ? params : null);
+    final res = await http.get(uri, headers: _headers);
+    if (res.statusCode == 401) throw ApiException('Unauthorized', 401);
+    if (res.statusCode != 200) throw ApiException(res.body, res.statusCode);
+    return AppointmentsResponse.fromJson(jsonDecode(res.body) as Map<String, dynamic>);
+  }
+
+  Future<AppointmentItem> createAppointment({
+    String? callerName,
+    String? callerPhone,
+    required DateTime scheduledAt,
+    int durationMinutes = 60,
+    String? issueDescription,
+    String? notes,
+  }) async {
+    final body = {
+      'callerName': callerName,
+      'callerPhone': callerPhone,
+      'scheduledAt': scheduledAt.toIso8601String(),
+      'durationMinutes': durationMinutes,
+      'issueDescription': issueDescription,
+      'notes': notes,
+    };
+    final res = await http.post(
+      Uri.parse('${_base}api/appointments'),
+      headers: _headers,
+      body: jsonEncode(body),
+    );
+    if (res.statusCode == 401) throw ApiException('Unauthorized', 401);
+    if (res.statusCode != 200) throw ApiException(res.body, res.statusCode);
+    final data = jsonDecode(res.body) as Map<String, dynamic>;
+    return AppointmentItem.fromJson(data['appointment'] as Map<String, dynamic>);
+  }
+
+  Future<void> cancelAppointment(String id) async {
+    final res = await http.delete(Uri.parse('${_base}api/appointments/$id'), headers: _headers);
+    if (res.statusCode == 401) throw ApiException('Unauthorized', 401);
+    if (res.statusCode != 200) throw ApiException(res.body, res.statusCode);
   }
 }
 
@@ -144,6 +216,70 @@ class Pagination {
   final int limit;
   final int total;
   final int totalPages;
+}
+
+class SettingsResponse {
+  SettingsResponse({this.settings, this.allowedSections, this.planType, this.notificationPhone, this.smsConsent});
+  factory SettingsResponse.fromJson(Map<String, dynamic> json) {
+    return SettingsResponse(
+      settings: json['settings'] as Map<String, dynamic>?,
+      allowedSections: (json['allowedSections'] as List<dynamic>?)?.cast<String>(),
+      planType: json['planType'] as String?,
+      notificationPhone: json['notificationPhone'] as String?,
+      smsConsent: json['smsConsent'] as bool? ?? false,
+    );
+  }
+  final Map<String, dynamic>? settings;
+  final List<String>? allowedSections;
+  final String? planType;
+  final String? notificationPhone;
+  final bool smsConsent;
+}
+
+class AppointmentsResponse {
+  AppointmentsResponse({this.appointments = const []});
+  factory AppointmentsResponse.fromJson(Map<String, dynamic> json) {
+    return AppointmentsResponse(
+      appointments: (json['appointments'] as List<dynamic>?)
+              ?.map((e) => AppointmentItem.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+    );
+  }
+  final List<AppointmentItem> appointments;
+}
+
+class AppointmentItem {
+  AppointmentItem({
+    this.id,
+    this.callerName,
+    this.callerPhone,
+    this.scheduledAt,
+    this.durationMinutes = 60,
+    this.status,
+    this.issueDescription,
+    this.notes,
+  });
+  factory AppointmentItem.fromJson(Map<String, dynamic> json) {
+    return AppointmentItem(
+      id: json['id'] as String?,
+      callerName: json['callerName'] as String?,
+      callerPhone: json['callerPhone'] as String?,
+      scheduledAt: json['scheduledAt'] as String?,
+      durationMinutes: (json['durationMinutes'] as num?)?.toInt() ?? 60,
+      status: json['status'] as String?,
+      issueDescription: json['issueDescription'] as String?,
+      notes: json['notes'] as String?,
+    );
+  }
+  final String? id;
+  final String? callerName;
+  final String? callerPhone;
+  final String? scheduledAt;
+  final int durationMinutes;
+  final String? status;
+  final String? issueDescription;
+  final String? notes;
 }
 
 class CallItem {

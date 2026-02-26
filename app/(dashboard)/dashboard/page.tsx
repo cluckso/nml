@@ -7,7 +7,7 @@ import { SetupAICard } from "@/components/dashboard/SetupAICard"
 import { TrialCard } from "@/components/dashboard/TrialCard"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Phone, Clock, AlertTriangle, ChevronRight } from "lucide-react"
+import { Phone, Clock, AlertTriangle, ChevronRight, Calendar } from "lucide-react"
 
 export default async function DashboardPage() {
   const user = await requireAuth()
@@ -88,6 +88,12 @@ export default async function DashboardPage() {
             <Button variant="ghost" size="sm" className="gap-2">
               <Phone className="h-4 w-4" />
               Calls
+            </Button>
+          </Link>
+          <Link href="/appointments">
+            <Button variant="ghost" size="sm" className="gap-2">
+              <Calendar className="h-4 w-4" />
+              Appointments
             </Button>
           </Link>
           <Link href="/billing">

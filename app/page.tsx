@@ -26,32 +26,27 @@ export default function HomePage() {
         <div className="container relative z-10 mx-auto text-center max-w-4xl">
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary mb-8">
             <PhoneForwarded className="h-4 w-4" />
-            AI call answering for local service businesses
+            24/7 call answering for local service businesses
           </div>
           <h1 className="text-5xl md:text-6xl font-bold mb-4 tracking-tight">
-            CallGrabbr — AI That Answers Every Call and Books the Job
+            Answer every call. Book more jobs.
           </h1>
           <p className="text-2xl font-semibold text-foreground/90 mb-4">
-            Never miss another paying customer
+            Missed calls = lost revenue. We answer when you can&apos;t and send you the lead in seconds.
           </p>
           <p className="text-lg text-muted-foreground mb-6 max-w-2xl mx-auto">
-            When you don&apos;t answer, they call the next company. CallGrabbr answers every call,
-            captures the lead, and sends you the job details instantly — 24/7. No voicemail. No hold
-            music. No lost revenue.
-          </p>
-          <p className="text-primary font-medium mb-10">
-            Turn missed calls into booked work automatically.
+            No voicemail. No hold music. Callers get a real conversation; you get name, phone, service need, and urgency — by text and email — so you never lose a job to the competition.
           </p>
           <div className="flex flex-wrap gap-4 justify-center mb-10">
             <Link href="/sign-up">
-              <Button size="lg" className="gap-2 text-base px-8">
-                Start Free Trial — 50 Min or 4 Days
+              <Button size="lg" className="gap-2 text-base px-8 shadow-lg shadow-primary/25">
+                Start free — no card required
                 <ArrowRight className="h-5 w-5" />
               </Button>
             </Link>
             <Link href="/pricing">
               <Button size="lg" variant="outline" className="border-2 border-muted-foreground/40 bg-transparent hover:bg-white/5">
-                View Pricing
+                See pricing
               </Button>
             </Link>
           </div>
@@ -60,23 +55,32 @@ export default function HomePage() {
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
                 <CreditCard className="h-4 w-4" />
               </span>
-              No card required to start
+              No card required
             </span>
             <span className="inline-flex items-center gap-2">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
                 <Clock className="h-4 w-4" />
               </span>
-              5-minute setup
+              Live in 5 minutes
+            </span>
+            <span className="inline-flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+                <Shield className="h-4 w-4" />
+              </span>
+              Cancel anytime
             </span>
           </div>
+          <p className="text-sm text-muted-foreground/80 mt-6">
+            Used by HVAC, plumbing, electrical, and auto repair shops.
+          </p>
         </div>
       </section>
 
-      {/* What This Does (Fast) */}
+      {/* What You Get */}
       <section className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold text-center mb-4">What This Does (Fast)</h2>
+        <h2 className="text-3xl font-bold text-center mb-4">What you get</h2>
         <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-          Answers your business phone instantly and turns callers into leads.
+          Your business line answered instantly — every caller becomes a lead.
         </p>
         <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto list-none">
           {[
@@ -142,9 +146,9 @@ export default function HomePage() {
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary mb-4">
               <MessageSquare className="h-7 w-7" />
             </div>
-            <h3 className="font-semibold text-lg mb-2">Step 3 — Calls Get Answered Automatically</h3>
+            <h3 className="font-semibold text-lg mb-2">Step 3 — Every call gets answered</h3>
             <p className="text-muted-foreground text-sm">
-              AI handles intake, questions, and scheduling.
+              Intake, questions, and scheduling handled automatically.
             </p>
           </div>
           <div className="flex flex-col items-center text-center">
@@ -286,7 +290,7 @@ export default function HomePage() {
                 {[
                   "~450–720 calls/month",
                   "Spam call filtering",
-                  "Branded AI voice",
+                  "Custom branded voice",
                   "After-hours emergency handling",
                   "Weekly usage reports",
                   "Priority support",
@@ -315,11 +319,11 @@ export default function HomePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           <Card className="border-border/50 bg-card/50">
             <CardHeader>
-              <CardTitle className="text-base">“Will callers know it&apos;s AI?”</CardTitle>
+              <CardTitle className="text-base">“Does it sound like a real person?”</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Usually no. It sounds like a trained front desk. And it&apos;s faster than voicemail.
+                Yes. It sounds like a trained front desk — natural conversation, no robot menus. Callers get answers faster than voicemail.
               </p>
             </CardContent>
           </Card>
@@ -429,24 +433,21 @@ export default function HomePage() {
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center gap-2 mb-6">
             <Shield className="h-8 w-8" />
-            <h2 className="text-2xl font-bold">Guarantee</h2>
+            <h2 className="text-2xl font-bold">No lock-in. No risk.</h2>
           </div>
           <p className="text-lg mb-6 opacity-90 max-w-xl mx-auto">
-            If it doesn&apos;t capture real leads in your first month, cancel. No lock-in.
+            If you don&apos;t get real leads in your first month, cancel. One booked job typically covers the cost.
           </p>
-          <h3 className="text-xl font-semibold mb-4">Start Now</h3>
+          <h3 className="text-xl font-semibold mb-2">Start in 5 minutes</h3>
           <p className="mb-8 opacity-90">
-            Turn on 24/7 answering and stop losing inbound jobs.
+            No card required. 50 free trial minutes or 4 days — then choose your plan.
           </p>
           <Link href="/sign-up">
-            <Button size="lg" variant="secondary" className="gap-2 bg-white text-primary hover:bg-white/90">
-              Activate CallGrabbr
+            <Button size="lg" variant="secondary" className="gap-2 bg-white text-primary hover:bg-white/90 shadow-lg">
+              Start free trial
               <ArrowRight className="h-5 w-5" />
             </Button>
           </Link>
-          <p className="mt-6 text-sm opacity-80">
-            50 free trial minutes or 4 days. No card required.
-          </p>
         </div>
       </section>
     </div>

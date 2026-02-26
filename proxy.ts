@@ -1,6 +1,19 @@
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
+/** Origins allowed for CORS (Capacitor app, local dev). API routes accept Bearer token from these. */
+const CORS_ORIGINS = ["https://localhost", "capacitor://localhost", "http://localhost", "http://localhost:3000"]
+
+function corsHeaders(origin: string | null): Record<string, string> {
+  const allowOrigin = origin && CORS_ORIGINS.includes(origin) ? origin : CORS_ORIGINS[0]
+  return {
+    "Access-Control-Allow-Origin": allowOrigin,
+    "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
+    "Access-Control-Allow-Headers": "Authorization, Content-Type, Accept",
+    "Access-Control-Max-Age": "86400",
+  }
+}
+
 /** Set MAINTENANCE_MODE=true or 1 in env to show 503 for all traffic (webhooks and /api/health still work). */
 const MAINTENANCE_HTML = `
 <!DOCTYPE html>
@@ -20,6 +33,20 @@ export async function proxy(request: NextRequest) {
         headers: { "Content-Type": "text/html; charset=utf-8", "Retry-After": "300" },
       })
     }
+  }
+
+  // CORS preflight for API (Capacitor / mobile app)
+  const path = request.nextUrl.pathname
+  if (request.method === "OPTIONS" && path.startsWith("/api/")) {
+    return new NextResponse(null, {
+      status: 204,
+      headers: corsHeaders(request.headers.get("origin")),
+    })
+  }
+
+  // Do not redirect API routes to sign-in; let the route return 401 if Bearer token is missing/invalid
+  if (path.startsWith("/api/")) {
+    return NextResponse.next({ request })
   }
 
   let supabaseResponse = NextResponse.next({
@@ -71,7 +98,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // Public routes that don't require authentication
-  const publicRoutes = ["/", "/pricing", "/sign-in", "/sign-up", "/confirm-email", "/api/webhooks", "/api/test", "/api/health", "/docs", "/privacy", "/terms"]
+  const publicRoutes = ["/", "/pricing", "/sign-in", "/sign-up", "/confirm-email", "/api/", "/docs", "/privacy", "/terms"]
   const isPublicRoute = publicRoutes.some((route) =>
     request.nextUrl.pathname.startsWith(route)
   )

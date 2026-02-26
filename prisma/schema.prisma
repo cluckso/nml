@@ -114,6 +114,7 @@ model Business {
 
   users         User[]
   calls         Call[]
+  appointments  Appointment[]
   usage         Usage[]
 
   @@index([primaryForwardingNumber])
@@ -144,12 +145,42 @@ model Call {
   missedCallRecovery    Boolean   @default(false) // True if call ended early but we captured partial info
   notificationSent       Boolean   @default(false) // True after email/SMS summary sent (once per call)
   createdAt             DateTime  @default(now())
+  appointments          Appointment[]
 
   @@index([businessId])
   @@index([retellCallId])
   @@index([createdAt])
   @@index([emergencyFlag])
   @@index([leadTag])
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+model Appointment {
+  id                String            @id @default(cuid())
+  businessId        String
+  business          Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  callId            String?           // Link to call that created it (from Retell)
+  call              Call?             @relation(fields: [callId], references: [id], onDelete: SetNull)
+  callerName        String?
+  callerPhone       String?
+  callerEmail       String?
+  scheduledAt       DateTime
+  durationMinutes   Int               @default(60)
+  status            AppointmentStatus @default(PENDING)
+  issueDescription  String?
+  notes             String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([businessId])
+  @@index([scheduledAt])
+  @@index([status])
 }
 
 model Usage {

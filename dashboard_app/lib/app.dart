@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'services/auth_service.dart';
 import 'screens/login_screen.dart';
-import 'screens/dashboard_screen.dart';
+import 'screens/main_scaffold.dart';
 
 class AppShell extends StatelessWidget {
   const AppShell({super.key});
@@ -15,7 +15,7 @@ class AppShell extends StatelessWidget {
       builder: (context, snapshot) {
         final session = auth.currentSession;
         if (session != null) {
-          return const DashboardScreen();
+          return const MainScaffold();
         }
         return const LoginScreen();
       },

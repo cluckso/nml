@@ -41,6 +41,8 @@ export async function GET(req: NextRequest) {
             id: business.id,
             name: business.name,
             primaryForwardingNumber: business.primaryForwardingNumber,
+            phoneNumber: business.retellPhoneNumber ?? business.primaryForwardingNumber,
+            retellAgentId: business.retellAgentId,
           }
         : null,
       recentCalls,
