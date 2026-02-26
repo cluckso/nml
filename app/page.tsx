@@ -440,7 +440,7 @@ export default function HomePage() {
           </p>
           <h3 className="text-xl font-semibold mb-2">Start in 5 minutes</h3>
           <p className="mb-8 opacity-90">
-            No card required. 7-day free trial — then choose your plan.
+            No card required. 7-day free trial.
           </p>
           <Link href="/sign-up">
             <Button size="lg" variant="secondary" className="gap-2 bg-white text-primary hover:bg-white/90 shadow-lg">
