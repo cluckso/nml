@@ -8,11 +8,23 @@ import { Nav } from "@/components/nav"
 
 const inter = Inter({ subsets: ["latin"] })
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.callgrabbr.com"
+
 export const metadata: Metadata = {
-  title: "CallGrabbr - Never Miss Another Call",
-  description: "AI-powered call answering and lead intake for local service businesses",
-  icons: {
-    icon: "/icon.png",
+  title: "CallGrabbr - Stop Losing Jobs to Voicemail",
+  description: "80% of callers won't leave voicemail — they call the next business. CallGrabbr answers missed calls and texts you the lead in seconds. 7-day free trial.",
+  icons: { icon: "/icon.png" },
+  openGraph: {
+    title: "CallGrabbr - Stop Losing Jobs to Voicemail",
+    description: "80% of callers won't leave voicemail. AI captures 80-95% of leads vs voicemail's 5-15%. We answer when you can't and text you the lead instantly.",
+    url: siteUrl,
+    siteName: "CallGrabbr",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CallGrabbr - Stop Losing Jobs to Voicemail",
+    description: "80% of callers won't leave voicemail. CallGrabbr answers missed calls and texts you the lead in seconds. 7-day free trial.",
   },
 }
 
@@ -55,14 +67,25 @@ fbq('track', 'PageView');
         <Providers>
           <Nav />
           <main className="flex-1">{children}</main>
-          <footer className="border-t border-border/50 py-6 bg-muted/30">
-            <div className="container mx-auto px-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
-              <Link href="/privacy" className="hover:text-foreground">
-                Privacy Policy
-              </Link>
-              <Link href="/terms" className="hover:text-foreground">
-                Terms of Service
-              </Link>
+          <footer className="border-t border-border/50 py-8 bg-muted/30">
+            <div className="container mx-auto px-4">
+              <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm text-muted-foreground">
+                <Link href="/pricing" className="hover:text-foreground font-medium">
+                  Pricing
+                </Link>
+                <Link href="/docs/faq" className="hover:text-foreground font-medium">
+                  Help &amp; FAQ
+                </Link>
+                <Link href="/privacy" className="hover:text-foreground">
+                  Privacy Policy
+                </Link>
+                <Link href="/terms" className="hover:text-foreground">
+                  Terms of Service
+                </Link>
+              </div>
+              <p className="text-center text-xs text-muted-foreground/80 mt-4">
+                © {new Date().getFullYear()} CallGrabbr. AI call answering for local service businesses.
+              </p>
             </div>
           </footer>
         </Providers>

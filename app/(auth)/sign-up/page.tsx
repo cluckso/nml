@@ -114,6 +114,10 @@ export default function SignUpPage() {
             <a href="/sign-in" className="text-primary hover:underline">
               Sign in
             </a>
+            {" "}·{" "}
+            <a href="/trial/start" className="text-primary hover:underline">
+              Start free trial
+            </a>
           </p>
           <p className="mt-2 text-center text-xs text-muted-foreground">
             If you see &quot;too many attempts&quot;, wait a few minutes. After signing up, check your email (and spam) for the confirmation link.

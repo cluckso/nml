@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { trackStartTrial } from "@/lib/analytics"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -59,6 +60,7 @@ export function TrialStartClient() {
       }
       const url = startData.url as string | undefined
       if (url) {
+        trackStartTrial()
         window.location.href = url
         return
       }

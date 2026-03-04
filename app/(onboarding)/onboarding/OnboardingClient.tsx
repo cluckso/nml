@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { trackCompleteRegistration } from "@/lib/analytics"
 import { IndustrySelector } from "@/components/onboarding/IndustrySelector"
 import { BusinessInfoForm } from "@/components/onboarding/BusinessInfoForm"
 import { Industry } from "@prisma/client"
@@ -61,6 +62,8 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
   const [step, setStep] = useState<OnboardingStep>("industry")
   const [data, setData] = useState<OnboardingData>({ industry: initialIndustry ?? undefined })
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [provisioningWarning, setProvisioningWarning] = useState<string | null>(null)
 
   const handleIndustrySelect = async (industry: Industry) => {
     setData({ ...data, industry })
@@ -85,6 +88,7 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
       return
     }
     setIsSubmitting(true)
+    setSubmitError(null)
     try {
       const response = await fetch("/api/onboarding", {
         method: "POST",
@@ -97,15 +101,15 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
         const details = data?.details ?? data?.hint ?? ""
         throw new Error(details ? `${msg}. ${details}` : msg)
       }
-      setStep("complete")
       if (data.provisioningFailed) {
-        alert("Your info was saved. We couldn't set up your AI line just yet — click Connect on the dashboard to try again.")
+        setProvisioningWarning("Your info was saved. We couldn't set up your AI line just yet — click Connect on the dashboard to try again.")
       }
-      setTimeout(() => router.push("/dashboard"), data.provisioningFailed ? 500 : 2000)
+      trackCompleteRegistration()
+      setStep("complete")
+      setTimeout(() => router.push("/dashboard"), data.provisioningFailed ? 3000 : 2000)
     } catch (error) {
       console.error("Error saving onboarding:", error)
-      const message = error instanceof Error ? error.message : "Failed to save. Please try again."
-      alert(message)
+      setSubmitError(error instanceof Error ? error.message : "Failed to save. Please try again.")
     } finally {
       setIsSubmitting(false)
     }
@@ -147,6 +151,11 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
       <div className="container mx-auto max-w-2xl py-12">
         <div className="rounded-lg border border-border bg-card p-8 text-center shadow-sm">
           <h1 className="text-2xl font-bold mb-4">Setup Complete!</h1>
+          {provisioningWarning && (
+            <div className="rounded-lg border border-amber-500/50 bg-amber-500/10 p-4 mb-6 text-left text-sm text-amber-800 dark:text-amber-200" role="alert">
+              {provisioningWarning}
+            </div>
+          )}
           {intakeNumber && (
             <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 mb-6 text-left">
               <p className="text-sm font-semibold flex items-center gap-2 mb-2">
@@ -193,6 +202,11 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
         {step === "business-info" && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Business Information</h2>
+            {submitError && (
+              <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 mb-4 text-sm text-destructive" role="alert">
+                {submitError}
+              </div>
+            )}
             {intakeNumber && (
               <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 mb-6 flex items-start gap-3">
                 <Phone className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />

@@ -71,14 +71,14 @@ export default function AppointmentsPage() {
           <Button variant="outline" size="sm" onClick={today}>
             Today
           </Button>
-          <Button variant="outline" size="icon" onClick={prevWeek}>
-            <ChevronLeft className="h-4 w-4" />
+          <Button variant="outline" size="icon" onClick={prevWeek} aria-label="Previous week">
+            <ChevronLeft className="h-4 w-4" aria-hidden />
           </Button>
           <span className="text-sm font-medium min-w-[180px] text-center">
             {format(weekStart, "MMM d")} – {format(addDays(weekStart, 13), "MMM d, yyyy")}
           </span>
-          <Button variant="outline" size="icon" onClick={nextWeek}>
-            <ChevronRight className="h-4 w-4" />
+          <Button variant="outline" size="icon" onClick={nextWeek} aria-label="Next week">
+            <ChevronRight className="h-4 w-4" aria-hidden />
           </Button>
           <Button size="sm" onClick={() => setShowNewForm(true)} className="gap-2">
             <Plus className="h-4 w-4" />
@@ -210,10 +210,13 @@ function NewAppointmentForm({
       .finally(() => setLoadingSlots(false))
   }, [date])
 
+  const [formError, setFormError] = useState<string | null>(null)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.scheduledAt) return
     setSaving(true)
+    setFormError(null)
     try {
       const res = await fetch("/api/appointments", {
         method: "POST",
@@ -229,8 +232,10 @@ function NewAppointmentForm({
       if (res.ok) {
         onCreated()
       } else {
-        alert(data.error ?? "Failed to create")
+        setFormError(data.error ?? "Failed to create appointment. Please try again.")
       }
+    } catch {
+      setFormError("Network error. Please try again.")
     } finally {
       setSaving(false)
     }
@@ -305,6 +310,11 @@ function NewAppointmentForm({
               </div>
             )}
           </div>
+          {formError && (
+            <p className="text-sm text-destructive rounded-md bg-destructive/10 px-3 py-2" role="alert">
+              {formError}
+            </p>
+          )}
           <div className="flex gap-2">
             <Button type="submit" disabled={saving || !form.scheduledAt}>
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Calendar className="h-4 w-4" />}

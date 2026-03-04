@@ -96,11 +96,16 @@ function ConfirmEmailContent() {
 
           <div className="pt-4 border-t space-y-2">
             <p className="text-sm text-muted-foreground text-center">
-              Already confirmed? You can sign in now.
+              Already confirmed? Sign in or start your free trial.
             </p>
-            <Button asChild className="w-full" variant="secondary">
-              <Link href="/sign-in">Go to sign in</Link>
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button asChild className="flex-1" variant="secondary">
+                <Link href="/sign-in">Sign in</Link>
+              </Button>
+              <Button asChild className="flex-1">
+                <Link href="/trial/start">Start free trial</Link>
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

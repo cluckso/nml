@@ -57,3 +57,80 @@ Use this (or a shortened version) in an image generator (DALL·E, Midjourney, Id
 - **Google Search:** Headlines ≤ 30 chars where possible; descriptions ≤ 90 chars.
 - **LinkedIn:** More B2B tone; stress “local service businesses” and “lead capture.”
 - **Image:** Keep key message in copy; use image for mood and category (service biz, phone, reliability).
+
+---
+
+## Video ad scripts (15 seconds)
+
+### Script 1: Your Phone Is Losing You Jobs (Highest Conversion)
+
+**Format:** Vertical 9:16 for Facebook/Instagram Reels
+**Duration:** 15 seconds
+**Psychological triggers:** Loss aversion, self-recognition, instant relief
+
+| Time | Visual | Text/Caption | Audio |
+|------|--------|--------------|-------|
+| 0-2s | Phone ringing, screen flash | YOUR PHONE IS LOSING YOU JOBS (red, bold) | Loud alarm-style ring |
+| 2-5s | Contractor on ladder, phone ringing in pocket | You can't answer every call. | Phone keeps ringing |
+| 5-7s | Phone leaks flying dollar bills, money flies away | 28% of business calls go unanswered. | Cash flutter sound |
+| 7-10s | Competitor phone shows CallGrabbr AI answering | AI: Thanks for calling! What's the address? | AI voice, natural |
+| 10-12s | Phone screen: instant lead card | Contractor receives text notification | Notification ding |
+| 12-15s | Logo on black | Stop Losing Leads. We answer when you can't. | - |
+
+**Production notes:**
+- Fast cuts (0.7-1 sec)
+- Bold mobile-readable captions
+- Start with money loss, not AI explanation
+
+---
+
+### Script 2: @supasteveman Variant (Viral Hook)
+
+**Format:** Vertical 9:16
+**Duration:** 15 seconds
+**Psychological triggers:** Competence contrast, humor, loss visualization
+
+| Time | Visual | Text/Caption | Audio |
+|------|--------|--------------|-------|
+| 0-3s | @supasteveman throwing objects perfectly into targets | THIS GUY NEVER MISSES. | Energetic music |
+| 3-5s | Hard cut: Contractor on ladder, phone ringing | BUT YOUR BUSINESS PHONE DOES. | Phone ringing |
+| 5-7s | Cash flies out of phone toward competitor | 28% of calls go unanswered. | Cash flutter |
+| 7-10s | Competitor phone: AI answering, asks for address | - | AI voice |
+| 10-12s | Lead card appears, contractor gets text | - | Notification |
+| 12-15s | Logo + CTA | Stop Losing Leads. CallGrabbr.com | - |
+
+**Why this converts:** Pattern interrupt with humor lowers resistance.
+
+---
+
+### Script 3: Competitor Stealing Calls
+
+**Format:** Vertical 9:16
+**Duration:** 15 seconds
+**Psychological triggers:** Competitor threat, neighbor theft framing
+
+| Time | Visual | Text/Caption | Audio |
+|------|--------|--------------|-------|
+| 0-2s | Split screen: You on job vs Competitor nearby | When you miss a call... | Phone ringing |
+| 2-5s | Your phone goes to voicemail, money birds fly out | ...they don't leave a message. | Voicemail beep |
+| 5-8s | Money birds fly to competitor | They call the next listing. | Phone rings |
+| 8-11s | Competitor phone: AI captures the lead | Your missed call is their next job. | AI voice |
+| 11-15s | Your phone: missed call. His: new lead. | Stop Losing Leads. CallGrabbr.com | - |
+
+**Key message:** Your missed call is their next job.
+
+---
+
+## Static ad image prompts
+
+### Image 1: Ladder/Money (9:16 vertical)
+Contractor on ladder installing siding, phone ringing in pocket, cash bills floating away like birds, dramatic lighting, photorealistic, no text
+
+### Image 2: Voicemail Graveyard (1:1 square)
+Phone screen showing Voicemail (23) with cobwebs, dark moody lighting, shallow depth of field, no text
+
+### Image 3: Before/After Split (16:9)
+Split design: LEFT stressed contractor with missed calls, RIGHT same contractor relaxed with New Lead notification
+
+### Image 4: SMS Lead Notification (4:5 vertical)
+Contractor hand holding phone on job site, screen shows lead text (name, address, urgent), blurred background

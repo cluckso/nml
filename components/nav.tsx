@@ -64,10 +64,10 @@ export function Nav() {
     <nav className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2 text-foreground">
+          <Link href="/" className="flex items-center gap-2 text-foreground" aria-label="CallGrabbr home">
             <Image
               src="/icon.png"
-              alt="CallGrabbr"
+              alt=""
               width={40}
               height={40}
               className="h-9 w-9 rounded-lg"

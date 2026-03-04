@@ -8,9 +8,9 @@ export function AudioExamples() {
 
   return (
     <section className="container mx-auto px-4 py-16">
-      <h2 className="text-3xl font-bold text-center mb-4">Hear It In Action</h2>
+      <h2 className="text-3xl font-bold text-center mb-4">Hear what your customers experience</h2>
       <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-10">
-        Sample AI call answers — add your own clips in <code className="text-xs bg-muted px-1.5 py-0.5 rounded">config/audio-examples.ts</code> or via <code className="text-xs bg-muted px-1.5 py-0.5 rounded">NEXT_PUBLIC_AUDIO_EXAMPLE_*</code> env vars.
+        Listen to sample AI calls. Natural conversation, not robot menus.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
         {examples.map((example, i) => (

@@ -1,7 +1,13 @@
+import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { TrialStartClient } from "./TrialStartClient"
+
+export const metadata: Metadata = {
+  title: "Start Free Trial - CallGrabbr",
+  description: "Start your 7-day free trial. No card required. Add your business phone to get your AI call assistant.",
+}
 
 export const dynamic = "force-dynamic"
 

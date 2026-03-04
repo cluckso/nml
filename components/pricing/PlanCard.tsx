@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import { trackSubscribe } from "@/lib/analytics"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, Loader2 } from "lucide-react"
@@ -35,6 +36,7 @@ export function PlanCard({
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [checkoutError, setCheckoutError] = useState<string | null>(null)
   const plan = PLANS[name]
   if (!plan) return null
 
@@ -45,6 +47,7 @@ export function PlanCard({
     }
     if (!agreedToLegal) return
     setLoading(true)
+    setCheckoutError(null)
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
@@ -52,10 +55,12 @@ export function PlanCard({
         body: JSON.stringify({ planType: plan.planType }),
       })
       const data = await res.json()
-      if (data.url) window.location.href = data.url
-      else alert(data.error || data.details || "Something went wrong")
-    } catch (e) {
-      alert("Network or server error. Check the terminal for details.")
+      if (data.url) {
+        trackSubscribe(plan.name)
+        window.location.href = data.url
+      } else setCheckoutError(data.error || data.details || "Something went wrong. Please try again.")
+    } catch {
+      setCheckoutError("Network or server error. Please try again.")
     } finally {
       setLoading(false)
     }
@@ -98,6 +103,11 @@ export function PlanCard({
         </ul>
         {isLoggedIn ? (
           <>
+            {checkoutError && (
+              <p className="text-sm text-destructive mb-2 rounded-md bg-destructive/10 px-3 py-2" role="alert">
+                {checkoutError}
+              </p>
+            )}
             <Button
               className="w-full"
               variant={plan.popular ? "default" : "outline"}

@@ -25,7 +25,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-xl font-semibold text-foreground mb-2">2. Description of Service</h2>
           <p>
-            CallGrabbr provides AI-powered call answering, lead intake, call summaries, and related features for businesses. We use third-party providers (e.g., telephony, AI, payments) to deliver the Service. We reserve the right to modify, suspend, or discontinue features with reasonable notice where practicable.
+            CallGrabbr provides AI-powered call answering, lead intake, call summaries, and related features for businesses. Calls may be recorded or transcribed for service delivery, quality, and summaries; you are responsible for complying with applicable call-recording consent laws in your jurisdiction. We use third-party providers (e.g., telephony, AI, payments) to deliver the Service. We reserve the right to modify, suspend, or discontinue features with reasonable notice where practicable.
           </p>
         </section>
 

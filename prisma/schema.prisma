@@ -55,19 +55,21 @@ enum ClientStatus {
 }
 
 model User {
-  id             String   @id @default(cuid())
-  email          String   @unique
-  supabaseUserId String?  @unique
-  phoneNumber    String?  // For SMS notifications to owner
-  smsConsent     Boolean  @default(false)  // User explicitly opted in to receive SMS
-  smsConsentAt   DateTime? // Timestamp of SMS opt-in
-  smsOptedOut    Boolean  @default(false)  // User texted STOP or opted out
-  smsOptedOutAt  DateTime? // Timestamp of opt-out
-  role           UserRole @default(CUSTOMER)
-  businessId     String?
-  business       Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  name               String?   // User's display name
+  supabaseUserId     String?   @unique
+  phoneNumber        String?   // For SMS notifications to owner
+  smsConsent         Boolean   @default(false)  // User explicitly opted in to receive SMS
+  smsConsentAt       DateTime? // Timestamp of SMS opt-in
+  smsOptedOut        Boolean   @default(false)  // User texted STOP or opted out
+  smsOptedOutAt      DateTime? // Timestamp of opt-out
+  reviewEmailSentAt  DateTime? // When review request email was sent (null = not sent yet)
+  role               UserRole  @default(CUSTOMER)
+  businessId         String?
+  business           Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
 
   @@index([businessId])
   @@index([supabaseUserId])

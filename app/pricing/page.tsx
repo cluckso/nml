@@ -1,9 +1,15 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import { getCurrentUser } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { PricingPlansWithAgreement } from "@/components/pricing/PricingPlansWithAgreement"
 import { AudioExamples } from "@/components/marketing/AudioExamples"
 import { Button } from "@/components/ui/button"
+
+export const metadata: Metadata = {
+  title: "Pricing - CallGrabbr",
+  description: "Stop losing jobs to voicemail. Starter $99, Growth $149, Scale $249/mo. One captured lead pays for months of service. 7-day free trial, no card required.",
+}
 
 const PLANS = [
   {
@@ -57,12 +63,12 @@ export default async function PricingPage() {
   return (
     <div className="container mx-auto px-4 py-16">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">Tiered pricing</h1>
+        <h1 className="text-4xl font-bold mb-4">Missed call = lost job. Pick your coverage.</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Start free — no card required. Upgrade when you&apos;re ready.
+          Average job: $350–$600. One captured lead pays for months of service.
         </p>
         <p className="mt-2 text-muted-foreground">
-          No setup fees. No contracts. Cancel anytime.
+          7-day free trial. No card required. Cancel anytime.
         </p>
         {isLoggedIn && !hasStartedTrial && (
           <p className="mt-2 text-sm text-primary font-medium">
