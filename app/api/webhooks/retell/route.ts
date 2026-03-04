@@ -7,6 +7,7 @@ import {
   sendEmailNotification,
   sendSMSNotification,
   sendSMSToCaller,
+  sendDemoResultSms,
   forwardToCrm,
 } from "@/lib/notifications"
 import { reportUsageToStripe } from "@/lib/stripe"
@@ -554,41 +555,61 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
   const alreadySent = (call as { notificationSent?: boolean }).notificationSent === true
   const shouldNotify = shouldNotifyByPrefs && hasInfo && !likelySpam && !alreadySent
 
-  if (!shouldNotifyByPrefs) {
-    console.info("[Notifications] Skipped: emergencyOnlyAlerts is on and call is not emergency", { callId })
-  }
-  if (!hasInfo) {
-    console.info("[Notifications] Skipped: no actionable info captured", { callId, duration: call.duration, callerPhone: call.callerPhone })
-  }
-  if (likelySpam) {
-    console.info("[Notifications] Skipped: likely spam", { callId, duration: call.duration, callerPhone: call.callerPhone })
-  }
-  if (alreadySent) {
-    console.info("[Notifications] Skipped: already sent for this call", { callId })
-  }
+  const intakeForNotification = intakeForNotify as import("@/lib/notifications").StructuredIntake
 
-  if (shouldNotify) {
+  // Demo number: send exactly one SMS to the caller (lead summary or short fallback). No SMS on unlock; consent = 1 message after call.
+  const demoNumberRaw = process.env.NEXT_PUBLIC_DEMO_NUMBER
+  const toNumberNorm = event.call?.to_number ? (normalizeE164(event.call.to_number) ?? undefined) : undefined
+  const demoNumberNorm = demoNumberRaw ? normalizeE164(demoNumberRaw) : null
+  const isDemoCall = !!(toNumberNorm && demoNumberNorm && toNumberNorm === demoNumberNorm)
+
+  if (isDemoCall && callerPhone && !alreadySent) {
     try {
-      const notifies: Promise<any>[] = []
-      const intakeForNotification = intakeForNotify as import("@/lib/notifications").StructuredIntake
-      if (notifPrefs.emailAlerts) {
-        notifies.push(sendEmailNotification(business, call, intakeForNotification))
-      }
-      if (notifPrefs.smsAlerts) {
-        notifies.push(sendSMSNotification(business, call, intakeForNotification))
-      }
-      const intakePhone = typeof intakeForNotify.phone === "string" ? intakeForNotify.phone : null
-      if (hasSmsToCallers(planType) && intakePhone) {
-        notifies.push(sendSMSToCaller(business, intakePhone, intakeForNotification))
-      }
-      await Promise.all(notifies)
+      await sendDemoResultSms(callerPhone, intakeForNotification, call, hasInfo)
       await db.call.update({
         where: { id: call.id },
         data: { notificationSent: true },
       })
-      console.info("[Notifications] Sent", { callId, businessId: business.id, email: notifPrefs.emailAlerts, sms: notifPrefs.smsAlerts })
+      console.info("[Notifications] Demo result sent (1 SMS to caller)", { callId, hasInfo })
     } catch (error) {
-      console.error("Notification error:", error)
+      console.error("Demo result SMS error:", error)
+    }
+  } else {
+    if (!shouldNotifyByPrefs) {
+      console.info("[Notifications] Skipped: emergencyOnlyAlerts is on and call is not emergency", { callId })
+    }
+    if (!hasInfo) {
+      console.info("[Notifications] Skipped: no actionable info captured", { callId, duration: call.duration, callerPhone: call.callerPhone })
+    }
+    if (likelySpam) {
+      console.info("[Notifications] Skipped: likely spam", { callId, duration: call.duration, callerPhone: call.callerPhone })
+    }
+    if (alreadySent) {
+      console.info("[Notifications] Skipped: already sent for this call", { callId })
+    }
+
+    if (shouldNotify) {
+      try {
+        const notifies: Promise<any>[] = []
+        if (notifPrefs.emailAlerts) {
+          notifies.push(sendEmailNotification(business, call, intakeForNotification))
+        }
+        if (notifPrefs.smsAlerts) {
+          notifies.push(sendSMSNotification(business, call, intakeForNotification))
+        }
+        const intakePhone = typeof intakeForNotify.phone === "string" ? intakeForNotify.phone : null
+        if (hasSmsToCallers(planType) && intakePhone) {
+          notifies.push(sendSMSToCaller(business, intakePhone, intakeForNotification))
+        }
+        await Promise.all(notifies)
+        await db.call.update({
+          where: { id: call.id },
+          data: { notificationSent: true },
+        })
+        console.info("[Notifications] Sent", { callId, businessId: business.id, email: notifPrefs.emailAlerts, sms: notifPrefs.smsAlerts })
+      } catch (error) {
+        console.error("Notification error:", error)
+      }
     }
   }
 

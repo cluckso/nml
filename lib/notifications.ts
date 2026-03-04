@@ -30,6 +30,54 @@ export interface StructuredIntake {
 /** SMS character cutoff: 160 = 1 segment (GSM-7). With emoji (UCS-2) = 70/segment. We truncate to stay under 160 when possible. */
 const SMS_MAX_CHARS = 160
 
+/** Build lead summary SMS body (name, contact, address, issue, vehicle, appt). Reused for owner and demo-result SMS. */
+export function buildLeadSummarySmsBody(
+  intake: StructuredIntake,
+  call: Call | { appointmentRequest?: { preferredDays?: string; preferredTime?: string; notes?: string } }
+): string {
+  const name = (intake.name || "—").trim()
+  const phone = (intake.phone || "—").trim()
+  const address = (intake.address || intake.city ? [intake.address, intake.city].filter(Boolean).join(", ") : "—").trim() || "—"
+  const rawIssue = (intake.issue_description || "").trim()
+  const issue = rawIssue.length <= 100 ? rawIssue : rawIssue.slice(0, 97).trim() + "…"
+  const vehicle = [intake.vehicle_year, intake.vehicle_make, intake.vehicle_model, intake.year, intake.make, intake.model]
+    .filter(Boolean)
+    .map((s) => String(s).trim())
+    .join(" ") || ""
+  const appt = (call as { appointmentRequest?: { preferredDays?: string; preferredTime?: string; notes?: string } }).appointmentRequest
+  const apptStr =
+    appt?.notes?.trim() ||
+    [appt?.preferredDays, appt?.preferredTime].filter(Boolean).join(" ") ||
+    intake.appointment_preference?.trim() ||
+    intake.availability?.trim() ||
+    intake.preferred_time?.trim() ||
+    ""
+
+  const lines: string[] = [
+    `Name: ${name}`,
+    `Contact: ${phone}`,
+    `Address: ${address}`,
+    `Issue: ${issue || "—"}`,
+  ]
+  if (vehicle) lines.push(`Vehicle: ${vehicle}`)
+  if (apptStr) lines.push(`Appt: ${apptStr}`)
+
+  let message = lines.join("\n")
+  if (intake.emergency) message = `🚨 EMERGENCY\n${message}`
+
+  if (message.length > SMS_MAX_CHARS) {
+    const over = message.length - SMS_MAX_CHARS
+    if (over > 0 && issue.length > 20) {
+      const maxIssue = Math.max(20, issue.length - over - 1)
+      lines[3] = `Issue: ${issue.slice(0, maxIssue)}…`
+      message = lines.join("\n")
+      if (intake.emergency) message = `🚨 EMERGENCY\n${message}`
+    }
+    if (message.length > SMS_MAX_CHARS) message = message.slice(0, SMS_MAX_CHARS)
+  }
+  return message
+}
+
 /** Truncate summary to key points only (no full transcript in email). ~320 chars, break at sentence. */
 function truncateSummaryForEmail(summary: string | null | undefined): string {
   if (!summary?.trim()) return ""
@@ -188,48 +236,7 @@ export async function sendSMSNotification(
     return
   }
 
-  // SMS summary: name, contact, address, issue, vehicle, appointment pref — no transcript
-  const name = (intake.name || "—").trim()
-  const phone = (intake.phone || "—").trim()
-  const address = (intake.address || intake.city ? [intake.address, intake.city].filter(Boolean).join(", ") : "—").trim() || "—"
-  const rawIssue = (intake.issue_description || "").trim()
-  const issue = rawIssue.length <= 100 ? rawIssue : rawIssue.slice(0, 97).trim() + "…"
-  const vehicle = [intake.vehicle_year, intake.vehicle_make, intake.vehicle_model, intake.year, intake.make, intake.model]
-    .filter(Boolean)
-    .map((s) => String(s).trim())
-    .join(" ") || ""
-  const appt = (call as { appointmentRequest?: { preferredDays?: string; preferredTime?: string; notes?: string } }).appointmentRequest
-  const apptStr =
-    appt?.notes?.trim() ||
-    [appt?.preferredDays, appt?.preferredTime].filter(Boolean).join(" ") ||
-    intake.appointment_preference?.trim() ||
-    intake.availability?.trim() ||
-    intake.preferred_time?.trim() ||
-    ""
-
-  const lines: string[] = [
-    `Name: ${name}`,
-    `Contact: ${phone}`,
-    `Address: ${address}`,
-    `Issue: ${issue || "—"}`,
-  ]
-  if (vehicle) lines.push(`Vehicle: ${vehicle}`)
-  if (apptStr) lines.push(`Appt: ${apptStr}`)
-
-  let message = lines.join("\n")
-  if (intake.emergency) message = `🚨 EMERGENCY\n${message}`
-
-  if (message.length > SMS_MAX_CHARS) {
-    const over = message.length - SMS_MAX_CHARS
-    if (over > 0 && issue.length > 20) {
-      const maxIssue = Math.max(20, issue.length - over - 1)
-      lines[3] = `Issue: ${issue.slice(0, maxIssue)}…`
-      message = lines.join("\n")
-      if (intake.emergency) message = `🚨 EMERGENCY\n${message}`
-    }
-    if (message.length > SMS_MAX_CHARS) message = message.slice(0, SMS_MAX_CHARS)
-  }
-
+  const message = buildLeadSummarySmsBody(intake, call)
   try {
     await twilioClient.messages.create({
       body: message,
@@ -264,6 +271,34 @@ export async function sendSMSToCaller(
     })
   } catch (error) {
     console.error("SMS to caller error:", error)
+  }
+}
+
+/** Demo calls only: send exactly one SMS to the caller with their lead summary (or short fallback if nothing captured).
+ *  Matches consent: "exactly one SMS with my demo call result (sent after I call)".
+ */
+export async function sendDemoResultSms(
+  callerPhone: string,
+  intake: StructuredIntake,
+  call: Call,
+  hasActionableInfo: boolean
+) {
+  if (!twilioClient || !process.env.TWILIO_PHONE_NUMBER) {
+    console.warn("[Notifications] Demo result SMS skipped: Twilio not configured")
+    return
+  }
+  const body = hasActionableInfo
+    ? buildLeadSummarySmsBody(intake, call)
+    : "CallGrabbr: We didn't capture enough for a summary. Call again and briefly describe a job (e.g. \"I need a plumber for a leak\") to see your demo result."
+  try {
+    await twilioClient.messages.create({
+      body,
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: callerPhone,
+    })
+    console.info("[Notifications] Demo result SMS sent to caller", { to: callerPhone, hasInfo: hasActionableInfo })
+  } catch (error) {
+    console.error("[Notifications] Demo result SMS error:", error)
   }
 }
 

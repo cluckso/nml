@@ -1,9 +1,4 @@
 import { NextRequest, NextResponse } from "next/server"
-import twilio from "twilio"
-
-const twilioClient = process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN
-  ? twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
-  : null
 
 interface DemoUnlockRequest {
   name: string
@@ -31,18 +26,8 @@ export async function POST(request: NextRequest) {
 
     console.info("[Demo Unlock] Lead captured:", { name, phone: formattedPhone, businessType })
 
-    if (twilioClient && process.env.TWILIO_PHONE_NUMBER) {
-      try {
-        await twilioClient.messages.create({
-          body: `Hi ${name}! Thanks for trying CallGrabbr.\n\nCall our demo: ${process.env.NEXT_PUBLIC_DEMO_NUMBER || "(Demo number not configured)"}\n\nPretend you're a customer with a job request. After the call, you'll receive your "lead" summary here.\n\nQuestions? Reply to this message.`,
-          to: formattedPhone,
-          from: process.env.TWILIO_PHONE_NUMBER,
-        })
-        console.info("[Demo Unlock] Welcome SMS sent to", formattedPhone)
-      } catch (smsError) {
-        console.error("[Demo Unlock] SMS send failed:", smsError)
-      }
-    }
+    // No SMS on unlock — consent is for exactly one SMS: the demo result (sent after they call).
+    // Instructions and demo number are shown on the page only.
 
     return NextResponse.json({ 
       success: true,

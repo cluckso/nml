@@ -178,7 +178,7 @@ export function DemoUnlock({ className = "" }: DemoUnlockProps) {
               disabled={loading}
             />
             <Label htmlFor="demo-consent" className="text-sm text-muted-foreground leading-relaxed cursor-pointer">
-              I agree to receive one SMS with my demo call result. Standard messaging rates may apply.
+              I agree to receive exactly one SMS with my demo call result (sent after I call). Standard messaging rates may apply.
             </Label>
           </div>
           
