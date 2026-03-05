@@ -6,6 +6,7 @@ import {
   hasMultiDepartment,
 } from "./plans"
 import { RETELL_GLOBAL_PROMPT_TEMPLATE } from "./retell-agent-template"
+import { AGENT_PROMPT_CONFIG } from "@/config/agent-prompt"
 
 const RETELL_API_BASE = process.env.RETELL_API_BASE ?? "https://api.retellai.com"
 
@@ -983,6 +984,58 @@ function buildGenericFlow(businessName: string): any {
   }
 }
 
+/** Demo line: simple intake — name → phone → reason (with follow-up if vague) → confirm → end. */
+function buildDemoConversationFlow(): any {
+  return {
+    start_node_id: "start-node",
+    start_speaker: "agent",
+    nodes: [
+      {
+        id: "start-node",
+        type: "conversation",
+        name: "Welcome Node",
+        instruction: {
+          type: "static_text",
+          text: "Thanks for calling — you've reached the CallGrabbr demo. I'll take your info like a real business would. Who am I speaking with?\n",
+        },
+        edges: [{ id: "edge-1", destination_node_id: "collect-name", transition_condition: { type: "prompt", prompt: "User provided name" } }],
+        start_speaker: "agent",
+      },
+      {
+        id: "collect-name",
+        type: "conversation",
+        name: "Collect Name",
+        instruction: { type: "prompt", text: "Thanks {{Name}}. What's the best phone number to reach you?" },
+        edges: [{ id: "edge-2", destination_node_id: "collect-reason", transition_condition: { type: "prompt", prompt: "User provided phone number" } }],
+      },
+      {
+        id: "collect-reason",
+        type: "conversation",
+        name: "Collect Reason",
+        instruction: {
+          type: "prompt",
+          text: "What can we help you with today? If they give a vague or one-word answer, ask one short follow-up (e.g. \"Can you give me a quick detail — what's going on?\" or \"Which room or what kind of job?\") so the summary is useful. If it sounds like home/service (plumber, HVAC, etc.), ask for address or city. If auto: ask year, make, model. If they mention scheduling, ask preferred day or time. Only move on when you have a clear reason.",
+        },
+        edges: [{ id: "edge-3", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "User gave clear reason for call" } }],
+      },
+      {
+        id: "confirm-details",
+        type: "conversation",
+        name: "Recite Details",
+        instruction: { type: "prompt", text: "Repeat back what you gathered (name, phone, reason, and address/vehicle/appt if any). Ask if that's correct." },
+        edges: [{ id: "edge-4", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: "User agreed or conversation complete" } }],
+      },
+      {
+        id: "end-call",
+        type: "end",
+        name: "End Call",
+        speak_during_execution: true,
+        instruction: { type: "prompt", text: "Thank them and say we'll have someone follow up. Thanks for trying the demo." },
+      },
+    ],
+  }
+}
+
 // ─── Template agents (for API setup with {{variable}} formatting) ─────────────────────────────
 
 /**
@@ -1072,4 +1125,95 @@ export async function createTemplateAgentForIndustry(
     conversation_flow_id,
     version: result.response_engine?.version ?? version ?? 0,
   }
+}
+
+/**
+ * Create the dedicated demo agent + flow and attach a phone number.
+ * Use scripts/setup-demo-agent.ts to run. Set RETELL_DEMO_PHONE to attach an existing number.
+ */
+export async function createDemoRetellAgent(): Promise<{ agent_id: string; phone_number: string | null }> {
+  const apiKey = process.env.RETELL_API_KEY
+  if (!apiKey) throw new Error("RETELL_API_KEY is not configured")
+
+  const globalPrompt = AGENT_PROMPT_CONFIG.demoAgentPrompt
+  const flow = buildDemoConversationFlow()
+  const { conversation_flow_id, version } = await createConversationFlow(apiKey, {
+    ...flow,
+    global_prompt: globalPrompt,
+  })
+
+  const voiceId = "11labs-Chloe"
+  const MAX_CALL_DURATION_MS = 7 * 60 * 1000
+
+  const response = await fetch(`${RETELL_API_BASE}/create-agent`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({
+      agent_name: "CallGrabbr Demo",
+      language: "en-US",
+      voice_id: voiceId,
+      voice_temperature: 0.98,
+      voice_speed: 0.98,
+      volume: 0.94,
+      max_call_duration_ms: MAX_CALL_DURATION_MS,
+      interruption_sensitivity: 0.9,
+      response_engine: {
+        type: "conversation-flow",
+        conversation_flow_id,
+        version: version ?? 0,
+      },
+    }),
+  })
+
+  if (!response.ok) {
+    const err = await response.text()
+    throw new Error(`Failed to create demo agent (${response.status}): ${err}`)
+  }
+  const result = await response.json()
+  const agent_id = result.agent_id
+
+  let phone_number: string | null = null
+  const existingDemoPhone = process.env.RETELL_DEMO_PHONE ?? null
+  const areaCode = process.env.RETELL_DEFAULT_AREA_CODE ? parseInt(process.env.RETELL_DEFAULT_AREA_CODE, 10) : 415
+
+  if (existingDemoPhone) {
+    try {
+      await updatePhoneNumber(apiKey, existingDemoPhone, agent_id)
+      phone_number = existingDemoPhone
+    } catch (err) {
+      console.error("Failed to attach RETELL_DEMO_PHONE to demo agent:", err)
+    }
+  }
+  if (!phone_number) {
+    try {
+      phone_number = await createPhoneNumber(apiKey, agent_id, areaCode)
+    } catch (err) {
+      console.error("Failed to create phone for demo agent:", err)
+    }
+  }
+
+  return { agent_id, phone_number }
+}
+
+/** Attach a phone number to an existing demo agent. Use when createDemoRetellAgent couldn't get a number. */
+export async function attachPhoneToDemoAgent(agentId: string): Promise<string | null> {
+  const apiKey = process.env.RETELL_API_KEY
+  if (!apiKey) throw new Error("RETELL_API_KEY is not configured")
+
+  const existingPhone = process.env.RETELL_DEMO_PHONE ?? null
+  if (existingPhone) {
+    await updatePhoneNumber(apiKey, existingPhone, agentId)
+    return existingPhone
+  }
+
+  const areaCodesToTry = [202, 312, 646, 702, 404, 305]
+  for (const ac of areaCodesToTry) {
+    try {
+      const num = await createPhoneNumber(apiKey, agentId, ac)
+      return num
+    } catch {
+      continue
+    }
+  }
+  return null
 }

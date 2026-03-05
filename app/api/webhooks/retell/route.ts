@@ -101,6 +101,23 @@ export async function POST(req: NextRequest) {
         console.info("Retell inbound rejected: Twilio Lookup marked spam", { from_number: fromNumber })
         return NextResponse.json({ call_inbound: {} })
       }
+
+      // Demo number: route to dedicated demo agent (RETELL_DEMO_AGENT_ID)
+      const demoNumberRaw = process.env.NEXT_PUBLIC_DEMO_NUMBER
+      const toNumberNorm = toNumber ? normalizeE164(toNumber) ?? undefined : undefined
+      const demoNumberNorm = demoNumberRaw ? normalizeE164(demoNumberRaw) : null
+      const isDemoNumber = !!(toNumberNorm && demoNumberNorm && toNumberNorm === demoNumberNorm)
+      const demoAgentId = process.env.RETELL_DEMO_AGENT_ID
+
+      if (isDemoNumber && demoAgentId) {
+        console.info("Retell inbound: demo call, routing to demo agent", { to_number: toNumber })
+        return NextResponse.json({
+          call_inbound: {
+            override_agent_id: demoAgentId,
+            metadata: { demo_call: true },
+          },
+        })
+      }
       
       // Resolution priority:
       // 1. By to_number (business's dedicated Retell number) - PREFERRED for multi-tenant

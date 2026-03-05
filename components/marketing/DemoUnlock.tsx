@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Phone, ArrowRight, Check } from "lucide-react"
 
-const DEMO_NUMBER = process.env.NEXT_PUBLIC_DEMO_NUMBER || "(555) 123-4567"
+const DEMO_NUMBER = process.env.NEXT_PUBLIC_DEMO_NUMBER || "+1 (202) 873-8983"
 
 const BUSINESS_TYPES = [
   "HVAC",
@@ -178,7 +178,7 @@ export function DemoUnlock({ className = "" }: DemoUnlockProps) {
               disabled={loading}
             />
             <Label htmlFor="demo-consent" className="text-sm text-muted-foreground leading-relaxed cursor-pointer">
-              I agree to receive exactly one SMS with my demo call result (sent after I call). Standard messaging rates may apply.
+              Yes, text me my demo result after I call — one message only. Message and data rates may apply.
             </Label>
           </div>
           
