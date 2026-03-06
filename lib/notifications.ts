@@ -55,12 +55,12 @@ export function buildLeadSummarySmsBody(
 
   const lines: string[] = [
     `Name: ${name}`,
-    `Contact: ${phone}`,
+    `Phone: ${phone}`,
     `Address: ${address}`,
-    `Issue: ${issue || "—"}`,
+    `Reason for call: ${issue || "—"}`,
   ]
-  if (vehicle) lines.push(`Vehicle: ${vehicle}`)
-  if (apptStr) lines.push(`Appt: ${apptStr}`)
+  if (vehicle) lines.push(`Year-Make-Model: ${vehicle}`)
+  if (apptStr) lines.push(`Appointment pref: ${apptStr}`)
 
   let message = lines.join("\n")
   if (intake.emergency) message = `🚨 EMERGENCY\n${message}`
@@ -69,7 +69,7 @@ export function buildLeadSummarySmsBody(
     const over = message.length - SMS_MAX_CHARS
     if (over > 0 && issue.length > 20) {
       const maxIssue = Math.max(20, issue.length - over - 1)
-      lines[3] = `Issue: ${issue.slice(0, maxIssue)}…`
+      lines[3] = `Reason for call: ${issue.slice(0, maxIssue)}…`
       message = lines.join("\n")
       if (intake.emergency) message = `🚨 EMERGENCY\n${message}`
     }

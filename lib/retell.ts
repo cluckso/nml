@@ -984,7 +984,26 @@ function buildGenericFlow(businessName: string): any {
   }
 }
 
-/** Demo line: simple intake — name → phone → reason (with follow-up if vague) → confirm → end. */
+/** Extract-dynamic-variable tool so demo call populates name, phone, address, reason, vehicle, appointment in webhook. */
+const DEMO_EXTRACT_LEAD_TOOL = {
+  type: "extract_dynamic_variable" as const,
+  name: "store_lead_details",
+  description:
+    "Call when you have gathered caller name, phone, reason for call, and any address/city, vehicle (year/make/model), or appointment preference. Stores all fields for the lead summary.",
+  variables: [
+    { type: "string" as const, name: "name", description: "Caller's full name" },
+    { type: "string" as const, name: "phone", description: "Best callback phone number" },
+    { type: "string" as const, name: "address", description: "Street or service address if provided" },
+    { type: "string" as const, name: "city", description: "City if provided" },
+    { type: "string" as const, name: "issue_description", description: "Reason for call or issue/service needed" },
+    { type: "string" as const, name: "vehicle_year", description: "Vehicle year if auto-related" },
+    { type: "string" as const, name: "vehicle_make", description: "Vehicle make if auto-related" },
+    { type: "string" as const, name: "vehicle_model", description: "Vehicle model if auto-related" },
+    { type: "string" as const, name: "appointment_preference", description: "Preferred day or time for appointment if mentioned" },
+  ],
+}
+
+/** Demo line: simple intake — name → phone → reason (with follow-up if vague) → confirm (extract) → end. */
 function buildDemoConversationFlow(): any {
   return {
     start_node_id: "start-node",
@@ -1022,7 +1041,11 @@ function buildDemoConversationFlow(): any {
         id: "confirm-details",
         type: "conversation",
         name: "Recite Details",
-        instruction: { type: "prompt", text: "Repeat back what you gathered (name, phone, reason, and address/vehicle/appt if any). Ask if that's correct." },
+        instruction: {
+          type: "prompt",
+          text: "Repeat back what you gathered (name, phone, reason, and address/vehicle/appt if any). As soon as you have name, phone, and reason (and any address, city, vehicle, or appointment preference), call store_lead_details to save them. Then ask if that's correct.",
+        },
+        tools: [DEMO_EXTRACT_LEAD_TOOL],
         edges: [{ id: "edge-4", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: "User agreed or conversation complete" } }],
       },
       {
@@ -1216,4 +1239,27 @@ export async function attachPhoneToDemoAgent(agentId: string): Promise<string | 
     }
   }
   return null
+}
+
+/**
+ * Update the existing demo agent's conversation flow (e.g. after adding extract_dynamic_variable tool).
+ * Requires RETELL_API_KEY and RETELL_DEMO_AGENT_ID. Run: npx tsx scripts/update-demo-flow.ts
+ */
+export async function updateDemoAgentFlow(): Promise<void> {
+  const apiKey = process.env.RETELL_API_KEY
+  const agentId = process.env.RETELL_DEMO_AGENT_ID
+  if (!apiKey || !agentId) throw new Error("RETELL_API_KEY and RETELL_DEMO_AGENT_ID required")
+
+  const agent = await getAgent(apiKey, agentId)
+  const flowId = agent.response_engine?.type === "conversation-flow" && agent.response_engine?.conversation_flow_id
+  if (!flowId) throw new Error("Demo agent has no conversation flow")
+
+  const flow = buildDemoConversationFlow()
+  const globalPrompt = AGENT_PROMPT_CONFIG.demoAgentPrompt
+  const { version } = await updateConversationFlow(apiKey, flowId, { ...flow, global_prompt: globalPrompt })
+
+  await updateAgent(apiKey, agentId, {
+    response_engine: { type: "conversation-flow", conversation_flow_id: flowId, version },
+  })
+  console.info("Demo agent flow updated to version", version)
 }

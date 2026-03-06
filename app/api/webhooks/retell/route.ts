@@ -22,6 +22,7 @@ import { buildAgentOverride } from "@/lib/agent-override"
 import { hasActionableInfo, isLikelySpam, isKnownSpamOrTestNumber } from "@/lib/call-filter"
 import { parseAppointmentRequest } from "@/lib/appointments"
 import { isSpamByTwilioLookup } from "@/lib/twilio-lookup"
+import { parseLeadFromSummaryOrTranscript } from "@/lib/parse-lead-from-transcript"
 
 /** Retell expects 204 No Content on success. Use 200 + body only for call_inbound (required) and test/ping. */
 const RETELL_SUCCESS = new NextResponse(null, { status: 204 })
@@ -391,7 +392,15 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
   const hasAnalysis = Object.keys(analysis).length > 0
 
   // Missed-call recovery: use whatever we have (call_ended may arrive before call_analysis)
-  const ev = analysis.extracted_variables || {}
+  const evRaw = analysis.extracted_variables || {}
+  // Normalize keys (Retell may send Name, Phone; we use lowercase name, phone)
+  const ev: Record<string, string | undefined> = {}
+  for (const [k, v] of Object.entries(evRaw)) {
+    if (typeof v === "string" && v.trim()) {
+      const key = k.toLowerCase().replace(/\s+/g, "_")
+      ev[key] = v.trim()
+    }
+  }
   const a = analysis as Record<string, unknown>
 
   // Reason for call: multiple possible keys from Retell (issue_description, reason_for_call, reason, etc.)
@@ -438,10 +447,11 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
     vehicle_model: vehicleModel,
   }
 
-  // Merge any other string values from extracted_variables so we don't miss custom extraction keys
+  // Merge any other string values from extracted_variables (use lowercase keys for consistency)
   for (const [k, v] of Object.entries(ev)) {
-    if (typeof v === "string" && v.trim() && structuredIntake[k] == null) {
-      structuredIntake[k] = v
+    if (typeof v === "string" && v.trim()) {
+      const key = k.toLowerCase().replace(/\s+/g, "_")
+      if (structuredIntake[key] == null || structuredIntake[key] === "") structuredIntake[key] = v
     }
   }
 
@@ -457,6 +467,29 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
         ? transcriptStr.trim().slice(0, 500)
         : null
     if (fallback) structuredIntake.issue_description = fallback
+  }
+
+  // When extracted_variables are missing, parse transcript/summary so SMS shows Name / Phone / Address / Reason for call
+  const textToParse = typeof transcriptStr === "string" && transcriptStr.trim()
+    ? transcriptStr
+    : typeof summary === "string" && summary.trim()
+      ? summary
+      : null
+  const needsParsing =
+    textToParse &&
+    (!structuredIntake.name ||
+      !structuredIntake.address ||
+      (typeof structuredIntake.issue_description === "string" && structuredIntake.issue_description.length > 180))
+  if (needsParsing && textToParse) {
+    const parsed = parseLeadFromSummaryOrTranscript(textToParse)
+    if (parsed.name && !structuredIntake.name) structuredIntake.name = parsed.name
+    if (parsed.address && !structuredIntake.address) structuredIntake.address = parsed.address
+    if (parsed.city && !structuredIntake.city) structuredIntake.city = parsed.city
+    if (parsed.issue_description) {
+      // Prefer short parsed reason over long summary blob so SMS is clear
+      const current = String(structuredIntake.issue_description || "")
+      if (!current || current.length > 180) structuredIntake.issue_description = parsed.issue_description
+    }
   }
 
   const leadTag = detectLeadTag(analysis, emergency)
