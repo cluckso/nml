@@ -64,6 +64,24 @@ fbq('track', 'PageView');
             alt=""
           />
         </noscript>
+        {/* Roku Pixel — PAGE_VIEW on load; subscription events via lib/analytics */}
+        <Script
+          id="roku-pixel"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+!function(e,r){if(!e.rkp){var t=e.rkp=function(){
+var e=Array.prototype.slice.call(arguments);
+e.push(Date.now()),t.eventProcessor?t.eventProcessor.apply(t,e):t.queue.push(e)
+};t.initiatorVersion="1.0",t.queue=[],t.load=function(e){
+var t=r.createElement("script");t.async=!0,t.src=e;
+var n=r.getElementsByTagName("script")[0];
+(n?n.parentNode:r.body).insertBefore(t,n)},rkp.load("https://cdn.ravm.tv/ust/dist/rkp.loader.js")}
+}(window,document);
+rkp("init","PaccPmsytSiq");rkp("event","PAGE_VIEW");
+            `,
+          }}
+        />
         <Providers>
           <Nav />
           <main className="flex-1">{children}</main>
