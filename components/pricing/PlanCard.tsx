@@ -24,6 +24,7 @@ export function PlanCard({
   annualLabel,
   isLoggedIn,
   agreedToLegal = true,
+  founderDeal = false,
 }: {
   name: string
   description: string
@@ -33,6 +34,7 @@ export function PlanCard({
   annualLabel?: string
   isLoggedIn: boolean
   agreedToLegal?: boolean
+  founderDeal?: boolean
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -42,7 +44,7 @@ export function PlanCard({
 
   const handleGetStarted = async () => {
     if (!isLoggedIn) {
-      router.push(`/sign-up?next=/pricing`)
+      router.push(`/sign-up?next=${encodeURIComponent(founderDeal ? "/pricing?founder=1" : "/pricing")}`)
       return
     }
     if (!agreedToLegal) return
@@ -52,7 +54,7 @@ export function PlanCard({
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planType: plan.planType }),
+        body: JSON.stringify({ planType: plan.planType, founderDeal: founderDeal || undefined }),
       })
       const data = await res.json()
       if (data.url) {
@@ -80,6 +82,11 @@ export function PlanCard({
           <span className="text-4xl font-bold">${plan.price}</span>
           <span className="text-muted-foreground">/month</span>
         </div>
+        {founderDeal && (
+          <p className="mt-2 text-sm font-semibold text-primary">
+            11 months FREE — pay first month, get a full year
+          </p>
+        )}
         {includedMinutes != null && (
           <p className="text-sm font-medium text-foreground mt-2">
             {includedMinutes.toLocaleString()} included minutes/month
@@ -130,7 +137,7 @@ export function PlanCard({
             )}
           </>
         ) : (
-          <Link href="/sign-up?next=/pricing" className="block">
+          <Link href={founderDeal ? "/sign-up?next=/pricing?founder=1" : "/sign-up?next=/pricing"} className="block">
             <Button className="w-full" variant={plan.popular ? "default" : "outline"}>
               Get started
             </Button>

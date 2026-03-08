@@ -76,7 +76,8 @@ export async function createCheckoutSession(
   businessId: string,
   planType: PlanType,
   setupFee: number,
-  appUrl: string = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+  appUrl: string = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  founderDeal?: boolean
 ) {
   if (!stripe) {
     throw new Error("STRIPE_SECRET_KEY is not configured. Add it to .env to enable billing.")
@@ -115,6 +116,11 @@ export async function createCheckoutSession(
   }
 
   const baseUrl = appUrl.replace(/\/$/, "")
+  const founderCouponId = founderDeal ? process.env.STRIPE_FOUNDER_COUPON_ID : undefined
+  if (founderDeal && !founderCouponId) {
+    throw new Error("Founder deal is enabled but STRIPE_FOUNDER_COUPON_ID is not set. Create a 100% off, 11-month repeating coupon in Stripe and set the env var.")
+  }
+
   // Use existing Stripe Customer when upgrading from trial so same payment method is charged
   const session = await stripe.checkout.sessions.create({
     customer: business.stripeCustomerId ?? undefined,
@@ -126,12 +132,14 @@ export async function createCheckoutSession(
     metadata: {
       businessId,
       planType,
+      ...(founderDeal ? { founderDeal: "true" } : {}),
     },
     subscription_data: {
       metadata: {
         businessId,
         planType,
       },
+      ...(founderCouponId ? { coupon: founderCouponId } : {}),
     },
     branding_settings: { display_name: "CallGrabbr" },
   } as Stripe.Checkout.SessionCreateParams)
@@ -273,7 +281,8 @@ export async function handleStripeWebhook(event: Stripe.Event) {
         const stripeSubscriptionId = session.subscription as string
         const now = new Date()
         const periodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
-        // Store subscription on Business (one row per business)
+        const isFounderDeal = session.metadata?.founderDeal === "true"
+        // Store subscription on Business (one row per business); set founder flag when founder deal was used
         await db.business.update({
           where: { id: businessId },
           data: {
@@ -287,6 +296,7 @@ export async function handleStripeWebhook(event: Stripe.Event) {
             trialStartedAt: null,
             trialEndsAt: null,
             trialMinutesUsed: 0,
+            ...(isFounderDeal ? { founderDealRedeemedAt: now } : {}),
           },
         })
         // Add metered overage item so we can report usage later; not included at checkout so no upfront charge

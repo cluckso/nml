@@ -83,6 +83,30 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Founders Deal — limited promo */}
+      <section className="relative border-y border-amber-500/30 bg-gradient-to-b from-amber-500/10 to-background py-12">
+        <div className="container relative z-10 mx-auto px-4 text-center max-w-3xl">
+          <p className="text-sm font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400 mb-2">
+            Limited offer
+          </p>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-3">
+            Founders Deal: 11 months FREE
+          </h2>
+          <p className="text-muted-foreground mb-2">
+            Sign up for a paid plan, pay your <strong className="text-foreground">first month</strong>, and get a <strong className="text-foreground">full year</strong> of service — 11 months on us.
+          </p>
+          <p className="text-sm text-muted-foreground mb-6">
+            One month&apos;s price. Twelve months of calls answered and leads captured.
+          </p>
+          <Link href="/pricing?founder=1" className="min-h-[44px] inline-flex items-center">
+            <Button size="lg" className="gap-2 bg-amber-600 hover:bg-amber-700 text-white border-0 shadow-lg min-h-[44px]">
+              Claim founders deal
+              <ArrowRight className="h-5 w-5" aria-hidden />
+            </Button>
+          </Link>
+        </div>
+      </section>
+
       {/* From first ring to lead — outcome narrative */}
       <section className="border-y border-border/50 bg-muted/20 py-16">
         <div className="container mx-auto px-4">

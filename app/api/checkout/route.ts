@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     const user = await getAuthUserFromRequest(req)
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    let body: { planType?: string }
+    let body: { planType?: string; founderDeal?: boolean }
     try {
       body = await req.json()
     } catch {
@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
     if (!planType || typeof planType !== "string") {
       return NextResponse.json({ error: "Missing planType" }, { status: 400 })
     }
+    const founderDeal = !!body?.founderDeal
 
     const setupFee = SETUP_FEES[planType as PlanType]
     if (setupFee === undefined) {
@@ -63,7 +64,8 @@ export async function POST(req: NextRequest) {
       businessId,
       planType as PlanType,
       setupFee,
-      appUrl
+      appUrl,
+      founderDeal
     )
 
     return NextResponse.json({ url: session.url })

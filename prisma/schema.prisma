@@ -111,6 +111,7 @@ model Business {
   currentPeriodStart        DateTime?
   currentPeriodEnd          DateTime?
   cancelAtPeriodEnd         Boolean       @default(false)
+  founderDealRedeemedAt     DateTime?    // Founder deal: pay first month, 11 months free (subscription has Stripe coupon)
   createdAt                 DateTime     @default(now())
   updatedAt                 DateTime     @updatedAt
 

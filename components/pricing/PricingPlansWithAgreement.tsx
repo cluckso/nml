@@ -16,9 +16,11 @@ export type PlanInfo = {
 export function PricingPlansWithAgreement({
   plans,
   isLoggedIn,
+  founderDeal = false,
 }: {
   plans: PlanInfo[]
   isLoggedIn: boolean
+  founderDeal?: boolean
 }) {
   const [agreedToLegal, setAgreedToLegal] = useState(false)
 
@@ -61,6 +63,7 @@ export function PricingPlansWithAgreement({
             annualLabel={plan.annualLabel}
             isLoggedIn={isLoggedIn}
             agreedToLegal={agreedToLegal}
+            founderDeal={founderDeal}
           />
         ))}
       </div>
