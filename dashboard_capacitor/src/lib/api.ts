@@ -3,8 +3,8 @@ import { API_BASE_URL } from '../env'
 const base = API_BASE_URL.replace(/\/$/, '') + '/'
 
 async function getToken(): Promise<string | null> {
-  const { supabase } = await import('./supabase')
-  if (!supabase) return null
+  const { getSupabase } = await import('./supabase')
+  const supabase = await getSupabase()
   const { data } = await supabase.auth.getSession()
   return data.session?.access_token ?? null
 }

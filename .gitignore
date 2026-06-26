@@ -27,6 +27,7 @@ yarn-error.log*
 # local env files
 .env*.local
 .env
+dashboard_capacitor/.env.production
 
 # vercel
 .vercel

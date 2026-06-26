@@ -1,8 +1,16 @@
-import { createClient } from '@supabase/supabase-js'
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../env'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { loadAppConfig } from './config'
 
-export const supabase =
-  SUPABASE_URL && SUPABASE_ANON_KEY
-    ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-    : (null as ReturnType<typeof createClient> | null)
+let client: SupabaseClient | null = null
+let initPromise: Promise<SupabaseClient> | null = null
 
+export async function getSupabase(): Promise<SupabaseClient> {
+  if (client) return client
+  if (!initPromise) {
+    initPromise = loadAppConfig().then((config) => {
+      client = createClient(config.supabaseUrl, config.supabaseAnonKey)
+      return client
+    })
+  }
+  return initPromise
+}

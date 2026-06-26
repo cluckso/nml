@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
-import { supabase } from './lib/supabase'
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from './env'
+import { getSupabase } from './lib/supabase'
 import { registerPushNotifications } from './lib/notifications'
-import type { Session } from '@supabase/supabase-js'
+import type { Session, SupabaseClient } from '@supabase/supabase-js'
 import Login from './screens/Login'
 import Dashboard from './screens/Dashboard'
 import Calls from './screens/Calls'
@@ -12,24 +11,40 @@ import Settings from './screens/Settings'
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null)
+  const [supabase, setSupabase] = useState<SupabaseClient | null>(null)
   const [loading, setLoading] = useState(true)
+  const [configError, setConfigError] = useState<string | null>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (!supabase) {
-      setLoading(false)
-      return
+    let active = true
+    let subscription: { unsubscribe: () => void } | null = null
+
+    async function init() {
+      try {
+        const client = await getSupabase()
+        if (!active) return
+        setSupabase(client)
+        const { data: { session } } = await client.auth.getSession()
+        if (!active) return
+        setSession(session)
+        const { data: { subscription: authSub } } = client.auth.onAuthStateChange((_event, nextSession) => {
+          setSession(nextSession)
+        })
+        subscription = authSub
+      } catch (error) {
+        if (!active) return
+        setConfigError(error instanceof Error ? error.message : 'Could not load app configuration')
+      } finally {
+        if (active) setLoading(false)
+      }
     }
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setLoading(false)
-    })
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-    })
-    return () => subscription.unsubscribe()
+
+    void init()
+    return () => {
+      active = false
+      subscription?.unsubscribe()
+    }
   }, [])
 
   useEffect(() => {
@@ -67,11 +82,14 @@ export default function App() {
     )
   }
 
-  if (!supabase || !SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  if (configError || !supabase) {
     return (
       <div className="page" style={{ paddingTop: 48 }}>
         <div className="card">
-          <p>Configure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in .env or build args.</p>
+          <p>Could not connect to CallGrabbr.</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 14, marginTop: 8 }}>
+            {configError || 'Supabase configuration is missing. Check your network connection and try again.'}
+          </p>
         </div>
       </div>
     )
@@ -80,7 +98,7 @@ export default function App() {
   if (!session) {
     return (
       <Routes>
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Login supabase={supabase} />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     )
