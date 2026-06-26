@@ -4,9 +4,21 @@ import { generatePrompt, BusinessHoursInput } from "./prompts"
 import {
   hasAppointmentCapture,
   hasMultiDepartment,
+  hasBrandedVoice,
+  getEffectivePlanType,
 } from "./plans"
-import { RETELL_GLOBAL_PROMPT_TEMPLATE } from "./retell-agent-template"
+import { computeRingDurationMs, normalizeCallRouting, ringDurationMsForRetellAgent, DEFAULT_CALL_ROUTING } from "./call-routing"
+import { DEFAULT_RETELL_VOICE, RETELL_GLOBAL_PROMPT_TEMPLATE } from "./retell-agent-template"
 import { AGENT_PROMPT_CONFIG } from "@/config/agent-prompt"
+import {
+  DEMO_SAVE_LEAD_INSTRUCTION,
+  FLOW_ACKNOWLEDGE,
+  FLOW_CONFIRM_EDGE,
+  FLOW_CONFIRM_ONCE,
+  FLOW_DEMO_END,
+  FLOW_END_POLITE,
+  FLOW_NAME_USAGE,
+} from "./conversation-flow-instructions"
 
 const RETELL_API_BASE = process.env.RETELL_API_BASE ?? "https://api.retellai.com"
 
@@ -50,18 +62,15 @@ export async function createRetellAgent(
     global_prompt: globalPrompt,
   })
 
-  const voiceId = "11labs-Chloe"
-  const MAX_CALL_DURATION_MS = 7 * 60 * 1000 // 7 minutes
-
   const agentPayload = {
     agent_name: data.businessName,
     language: "en-US" as const,
-    voice_id: voiceId,
-    voice_temperature: 0.98,
-    voice_speed: 0.98,
-    volume: 0.94,
-    max_call_duration_ms: MAX_CALL_DURATION_MS,
-    interruption_sensitivity: 0.9,
+    voice_id: DEFAULT_RETELL_VOICE.voice_id,
+    voice_temperature: DEFAULT_RETELL_VOICE.voice_temperature,
+    voice_speed: DEFAULT_RETELL_VOICE.voice_speed,
+    volume: DEFAULT_RETELL_VOICE.volume,
+    max_call_duration_ms: DEFAULT_RETELL_VOICE.max_call_duration_ms,
+    interruption_sensitivity: DEFAULT_RETELL_VOICE.interruption_sensitivity,
     response_engine: {
       type: "conversation-flow" as const,
       conversation_flow_id,
@@ -158,17 +167,15 @@ export async function createRetellAgentOnly(
     global_prompt: globalPrompt,
   })
 
-  const voiceId = "11labs-Chloe"
-  const MAX_CALL_DURATION_MS = 7 * 60 * 1000 // 7 minutes
   const agentPayload = {
     agent_name: name,
     language: "en-US" as const,
-    voice_id: voiceId,
-    voice_temperature: 0.98,
-    voice_speed: 0.98,
-    volume: 0.94,
-    max_call_duration_ms: MAX_CALL_DURATION_MS,
-    interruption_sensitivity: 0.9,
+    voice_id: DEFAULT_RETELL_VOICE.voice_id,
+    voice_temperature: DEFAULT_RETELL_VOICE.voice_temperature,
+    voice_speed: DEFAULT_RETELL_VOICE.voice_speed,
+    volume: DEFAULT_RETELL_VOICE.volume,
+    max_call_duration_ms: DEFAULT_RETELL_VOICE.max_call_duration_ms,
+    interruption_sensitivity: DEFAULT_RETELL_VOICE.interruption_sensitivity,
     response_engine: {
       type: "conversation-flow" as const,
       conversation_flow_id,
@@ -554,7 +561,12 @@ export type SyncSettings = {
   greeting?: { customGreeting?: string | null; tone?: string; voiceGender?: "male" | "female" | null }
   questionDepth?: string
   voiceBrand?: { speed?: number; conciseness?: number }
-  callRouting?: { ringBeforeAnswerSeconds?: number }
+  callRouting?: {
+    answerAllCalls?: boolean
+    ringDelayMode?: "seconds" | "rings"
+    ringBeforeAnswerSeconds?: number
+    ringBeforeAnswerRings?: number
+  }
   aiBehavior?: { maxCallLengthMinutes?: number }
 }
 
@@ -586,7 +598,10 @@ export async function syncRetellAgentFromBusiness(
     business.serviceAreas,
     {
       businessHours: bh ?? undefined,
-      departments: business.departments?.length ? business.departments : undefined,
+      departments:
+        hasMultiDepartment(effectivePlan) && business.departments?.length
+          ? business.departments
+          : undefined,
       afterHoursEmergencyPhone: business.afterHoursEmergencyPhone ?? undefined,
       includeAppointmentCapture: hasAppointmentCapture(effectivePlan),
     }
@@ -618,26 +633,31 @@ export async function syncRetellAgentFromBusiness(
   const voiceGender = settings?.greeting?.voiceGender
   const voiceId = voiceGender === "male" ? "11labs-Ethan" : "11labs-Chloe"
   const vs = business.voiceSettings as { speed?: number; temperature?: number; volume?: number } | null | undefined
-  const voiceBrand = settings?.voiceBrand
+  const voiceBrand = hasBrandedVoice(effectivePlan) ? settings?.voiceBrand : undefined
   const voiceSpeed =
     voiceBrand != null && typeof voiceBrand.speed === "number"
       ? Math.max(0.5, Math.min(2, 0.75 + voiceBrand.speed * 0.75))
       : vs != null && typeof vs.speed === "number"
         ? Math.max(0.5, Math.min(2, 0.5 + vs.speed * 1.5))
-        : 0.98
+        : DEFAULT_RETELL_VOICE.voice_speed
   const voiceTemp =
     voiceBrand != null && typeof voiceBrand.conciseness === "number"
       ? Math.max(0, Math.min(2, 0.2 + voiceBrand.conciseness * 0.6))
       : vs != null && typeof vs.temperature === "number"
         ? Math.max(0, Math.min(2, vs.temperature * 2))
-        : 0.98
+        : DEFAULT_RETELL_VOICE.voice_temperature
   const voiceVol =
     vs != null && typeof vs.volume === "number"
       ? Math.max(0, Math.min(2, vs.volume * 2))
-      : 0.94
+      : DEFAULT_RETELL_VOICE.volume
 
   const maxCallMinutes = Math.min(7, Math.max(1, settings?.aiBehavior?.maxCallLengthMinutes ?? 7))
   const maxCallDurationMs = maxCallMinutes * 60 * 1000
+
+  const ringDurationMs = settings?.callRouting
+    ? computeRingDurationMs(normalizeCallRouting(settings.callRouting, DEFAULT_CALL_ROUTING))
+    : 0
+  const ringDurationMsPayload = ringDurationMsForRetellAgent(ringDurationMs)
 
   await updateAgent(apiKey, business.retellAgentId, {
     agent_name: business.name,
@@ -646,6 +666,7 @@ export async function syncRetellAgentFromBusiness(
     voice_speed: voiceSpeed,
     volume: voiceVol,
     max_call_duration_ms: maxCallDurationMs,
+    ...(ringDurationMsPayload != null ? { ring_duration_ms: ringDurationMsPayload } : {}),
     response_engine: { type: "conversation-flow", conversation_flow_id: flowId, version },
   })
 }
@@ -671,7 +692,7 @@ function buildConversationFlow(
   }
 }
 
-/** HVAC, PLUMBING, ELECTRICIAN: property + service area + address + issue + emergency path */
+/** HVAC, PLUMBING, ELECTRICIAN: reason first, then location — natural CS flow with lead capture */
 function buildPropertyServiceFlow(businessName: string, serviceAreas: string[]): any {
   const areas = serviceAreas.join(", ")
   return {
@@ -682,95 +703,78 @@ function buildPropertyServiceFlow(businessName: string, serviceAreas: string[]):
         id: "start-node",
         type: "conversation",
         name: "Welcome Node",
-        instruction: { type: "static_text", text: `Thanks for calling ${businessName}! This is our virtual assistant. Who am I speaking with today?\n` },
-        edges: [{ id: "edge-1", destination_node_id: "collect-name", transition_condition: { type: "prompt", prompt: "User provided name" } }],
+        instruction: { type: "static_text", text: `Hi, thanks for calling ${businessName}! Who am I speaking with today?\n` },
+        edges: [{ id: "edge-1", destination_node_id: "collect-reason", transition_condition: { type: "prompt", prompt: "User provided name" } }],
         start_speaker: "agent",
       },
       {
-        id: "collect-name",
+        id: "collect-reason",
         type: "conversation",
-        name: "Collect Name",
-        instruction: { type: "prompt", text: `Thank you {{Name}}! Could you please provide the city where the property needing service is located?\n` },
-        edges: [{ id: "edge-2", destination_node_id: "verify-city", transition_condition: { type: "prompt", prompt: "User provided city" } }],
-      },
-      {
-        id: "verify-city",
-        type: "conversation",
-        name: "City Verified",
-        instruction: { type: "prompt", text: `Confirm the city with the caller. Verify it is one of our service areas: ${areas}. Do not read the list to the caller.\n` },
+        name: "Collect Reason",
+        instruction: { type: "prompt", text: `${FLOW_ACKNOWLEDGE} What can we help you with today? ${FLOW_NAME_USAGE} If they give a vague or one-word answer, politely ask one brief follow-up for more detail. Only move on when you have a clear, actionable description.` },
         edges: [
-          { id: "edge-3", destination_node_id: "collect-address", transition_condition: { type: "prompt", prompt: "if city IS supported" } },
-          { id: "edge-4", destination_node_id: "not-supported", transition_condition: { type: "prompt", prompt: "if city IS NOT supported" } },
-        ],
-      },
-      {
-        id: "collect-address",
-        type: "conversation",
-        name: "Ask Address",
-        instruction: { type: "prompt", text: `Great, we do service {{city}}. What is the full address of the property needing service?` },
-        edges: [{ id: "edge-5", destination_node_id: "collect-issue", transition_condition: { type: "prompt", prompt: "If address is provided" } }],
-      },
-      {
-        id: "collect-issue",
-        type: "conversation",
-        name: "Ask Issue Details",
-        instruction: { type: "prompt", text: `Ask the caller to describe the issue. If they give a vague or one-word answer (e.g. "a problem", "something's wrong", "help"), politely ask one follow-up for more detail (e.g. "Can you tell me a bit more about what's going on?" or "What exactly is happening?"). Only move on when you have a clear, actionable description.` },
-        edges: [
-          { id: "edge-6", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "If user gave enough detail and is done describing" } },
-          { id: "edge-7", destination_node_id: "emergency-flag", transition_condition: { type: "prompt", prompt: "If urgent or emergency, e.g. flooding, no heat, gas smell, burst pipe, no power, sparks" } },
+          { id: "edge-2a", destination_node_id: "emergency-flag", transition_condition: { type: "prompt", prompt: "If urgent or emergency, e.g. flooding, no heat, gas smell, burst pipe, no power, sparks" } },
+          { id: "edge-2b", destination_node_id: "collect-city", transition_condition: { type: "prompt", prompt: "User gave enough detail and issue is not an immediate emergency" } },
         ],
       },
       {
         id: "emergency-flag",
         type: "conversation",
         name: "Emergency Detected",
-        instruction: { type: "prompt", text: `This sounds urgent. I'll make sure it's flagged as a priority.` },
-        edges: [{ id: "edge-8", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "Always" } }],
+        instruction: { type: "prompt", text: `I understand this is urgent — I'll make sure it's flagged as a priority. Let me get your location.` },
+        edges: [{ id: "edge-3", destination_node_id: "collect-city", transition_condition: { type: "prompt", prompt: "Always" } }],
+      },
+      {
+        id: "collect-city",
+        type: "conversation",
+        name: "Collect City",
+        instruction: { type: "prompt", text: `What city is the property located in?` },
+        edges: [{ id: "edge-4", destination_node_id: "verify-city", transition_condition: { type: "prompt", prompt: "User provided city" } }],
+      },
+      {
+        id: "verify-city",
+        type: "conversation",
+        name: "City Verified",
+        instruction: { type: "prompt", text: `Confirm the city with the caller. Verify it is one of our service areas: ${areas}. Do not read the full list to the caller.` },
+        edges: [
+          { id: "edge-5a", destination_node_id: "collect-address", transition_condition: { type: "prompt", prompt: "if city IS supported" } },
+          { id: "edge-5b", destination_node_id: "not-supported", transition_condition: { type: "prompt", prompt: "if city IS NOT supported" } },
+        ],
+      },
+      {
+        id: "collect-address",
+        type: "conversation",
+        name: "Ask Address",
+        instruction: { type: "prompt", text: `Great, we do service that area. What is the full address of the property?` },
+        edges: [{ id: "edge-6", destination_node_id: "collect-phone", transition_condition: { type: "prompt", prompt: "If address is provided" } }],
+      },
+      {
+        id: "collect-phone",
+        type: "conversation",
+        name: "Collect Phone",
+        instruction: { type: "prompt", text: `${FLOW_ACKNOWLEDGE} What's the best phone number to reach you? If the number they're calling from works, they may say so.` },
+        edges: [{ id: "edge-6b", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "User provided phone number or confirmed calling number" } }],
       },
       {
         id: "confirm-details",
         type: "conversation",
-        name: "Recite Issue",
-        instruction: { type: "prompt", text: `Repeat back the information gathered. Ask if it is correct.` },
-        edges: [{ id: "edge-9", destination_node_id: "phone-confirm", transition_condition: { type: "prompt", prompt: "if user agrees that information recited is correct" } }],
-      },
-      {
-        id: "phone-confirm",
-        type: "conversation",
-        name: "Phone Confirm",
-        instruction: { type: "prompt", text: `Is the best number to reach you the one you're calling from?` },
-        edges: [
-          { id: "edge-10", destination_node_id: "final-assistant", transition_condition: { type: "prompt", prompt: "if confirmed" } },
-          { id: "edge-11", destination_node_id: "ask-number", transition_condition: { type: "prompt", prompt: "if NOT confirmed" } },
-        ],
-      },
-      {
-        id: "ask-number",
-        type: "conversation",
-        name: "Ask number",
-        instruction: { type: "prompt", text: `What is the best phone number to reach you?` },
-        edges: [{ id: "edge-12", destination_node_id: "final-assistant", transition_condition: { type: "prompt", prompt: "user provides number" } }],
-      },
-      {
-        id: "final-assistant",
-        type: "conversation",
-        name: "Final Assistant",
-        instruction: { type: "prompt", text: `Is there anything else I can help you with today?` },
-        edges: [{ id: "edge-13", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: "If conversation is complete" } }],
+        name: "Confirm Details",
+        instruction: { type: "prompt", text: FLOW_CONFIRM_ONCE },
+        edges: [{ id: "edge-7", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: FLOW_CONFIRM_EDGE } }],
       },
       {
         id: "not-supported",
         type: "conversation",
         name: "Not supported",
-        instruction: { type: "prompt", text: `Apologize and say we don't currently provide services in {{city}}. Do not offer future services.` },
-        edges: [{ id: "edge-14", destination_node_id: "end-call-not-supported", transition_condition: { type: "prompt", prompt: "Always" } }],
+        instruction: { type: "prompt", text: `I'm sorry — we don't currently provide services in that area.` },
+        edges: [{ id: "edge-11", destination_node_id: "end-call-not-supported", transition_condition: { type: "prompt", prompt: "Always" } }],
       },
       {
         id: "end-call",
         type: "end",
         name: "End Call",
         speak_during_execution: true,
-        instruction: { type: "prompt", text: `Thanks {{Name}}. A team member will reach out shortly about your request. Thank you for calling ${businessName}. Have a great day!` },
+        instruction: { type: "prompt", text: FLOW_END_POLITE(businessName) },
       },
       {
         id: "end-call-not-supported",
@@ -793,33 +797,28 @@ function buildAutoRepairFlow(businessName: string): any {
         id: "start-node",
         type: "conversation",
         name: "Welcome Node",
-        instruction: { type: "static_text", text: `Thanks for calling ${businessName}! Who am I speaking with today?\n` },
-        edges: [{ id: "edge-1", destination_node_id: "collect-name", transition_condition: { type: "prompt", prompt: "User provided name" } }],
+        instruction: { type: "static_text", text: `Hi, thanks for calling ${businessName}! Who am I speaking with today?\n` },
+        edges: [{ id: "edge-1", destination_node_id: "collect-reason", transition_condition: { type: "prompt", prompt: "User provided name" } }],
         start_speaker: "agent",
-      },
-      {
-        id: "collect-name",
-        type: "conversation",
-        name: "Collect Name",
-        instruction: { type: "prompt", text: `Thanks {{Name}}. What's the best phone number to reach you?` },
-        edges: [{ id: "edge-2", destination_node_id: "collect-vehicle", transition_condition: { type: "prompt", prompt: "User provided phone number" } }],
-      },
-      {
-        id: "collect-vehicle",
-        type: "conversation",
-        name: "Vehicle Info",
-        instruction: { type: "prompt", text: `What vehicle are you calling about? Please give the year, make, and model.` },
-        edges: [{ id: "edge-3", destination_node_id: "collect-reason", transition_condition: { type: "prompt", prompt: "User provided vehicle year, make, or model" } }],
       },
       {
         id: "collect-reason",
         type: "conversation",
         name: "Reason for Call",
-        instruction: { type: "prompt", text: `Ask what we can help with today — new issue, maintenance, checking on an existing repair, or scheduling. If they give a vague answer (e.g. "car trouble", "something's wrong"), politely ask for a bit more detail (e.g. "What exactly is going on with the vehicle?" or "Is it a specific repair, or are you checking on one we're already working on?"). Only move on when you have a clear reason.` },
+        instruction: { type: "prompt", text: `${FLOW_ACKNOWLEDGE} What can we help you with today — a new issue, maintenance, checking on an existing repair, or scheduling? If they give a vague answer, politely ask for a bit more detail. Only move on when you have a clear reason.` },
         edges: [
-          { id: "edge-4a", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "If new issue or maintenance and enough detail" } },
-          { id: "edge-4b", destination_node_id: "collect-dropoff", transition_condition: { type: "prompt", prompt: "If checking on existing repair or status" } },
-          { id: "edge-4c", destination_node_id: "collect-appointment-pref", transition_condition: { type: "prompt", prompt: "If scheduling or appointment" } },
+          { id: "edge-2a", destination_node_id: "collect-vehicle", transition_condition: { type: "prompt", prompt: "If new issue, maintenance, or scheduling" } },
+          { id: "edge-2b", destination_node_id: "collect-dropoff", transition_condition: { type: "prompt", prompt: "If checking on existing repair or status" } },
+        ],
+      },
+      {
+        id: "collect-vehicle",
+        type: "conversation",
+        name: "Vehicle Info",
+        instruction: { type: "prompt", text: `What vehicle is this for? Please give the year, make, and model.` },
+        edges: [
+          { id: "edge-3a", destination_node_id: "collect-appointment-pref", transition_condition: { type: "prompt", prompt: "If scheduling or appointment" } },
+          { id: "edge-3b", destination_node_id: "collect-phone", transition_condition: { type: "prompt", prompt: "If not scheduling" } },
         ],
       },
       {
@@ -827,35 +826,35 @@ function buildAutoRepairFlow(businessName: string): any {
         type: "conversation",
         name: "When Dropped Off",
         instruction: { type: "prompt", text: `When did you drop the vehicle off?` },
-        edges: [{ id: "edge-5", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "User provided date or time" } }],
+        edges: [{ id: "edge-4", destination_node_id: "collect-phone", transition_condition: { type: "prompt", prompt: "User provided date or time" } }],
+      },
+      {
+        id: "collect-phone",
+        type: "conversation",
+        name: "Collect Phone",
+        instruction: { type: "prompt", text: `Got it. What's the best phone number to reach you?` },
+        edges: [{ id: "edge-5", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "User provided phone number" } }],
       },
       {
         id: "collect-appointment-pref",
         type: "conversation",
         name: "Appointment Preference",
         instruction: { type: "prompt", text: `Do you have preferred days or times for an appointment?` },
-        edges: [{ id: "edge-6", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "User provided preference or said no preference" } }],
+        edges: [{ id: "edge-6", destination_node_id: "collect-phone", transition_condition: { type: "prompt", prompt: "User provided preference or said no preference" } }],
       },
       {
         id: "confirm-details",
         type: "conversation",
-        name: "Recite Details",
-        instruction: { type: "prompt", text: `Repeat back the information gathered. Ask if it is correct.` },
-        edges: [{ id: "edge-7", destination_node_id: "final-assistant", transition_condition: { type: "prompt", prompt: "if user agrees" } }],
-      },
-      {
-        id: "final-assistant",
-        type: "conversation",
-        name: "Final Assistant",
-        instruction: { type: "prompt", text: `Anything else we should know?` },
-        edges: [{ id: "edge-8", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: "If conversation is complete" } }],
+        name: "Confirm Details",
+        instruction: { type: "prompt", text: FLOW_CONFIRM_ONCE },
+        edges: [{ id: "edge-7", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: FLOW_CONFIRM_EDGE } }],
       },
       {
         id: "end-call",
         type: "end",
         name: "End Call",
         speak_during_execution: true,
-        instruction: { type: "prompt", text: `Thanks {{Name}}. We'll be in touch about your vehicle. Thank you for calling ${businessName}.` },
+        instruction: { type: "prompt", text: FLOW_END_POLITE(businessName) },
       },
     ],
   }
@@ -871,16 +870,16 @@ function buildChildcareFlow(businessName: string): any {
         id: "start-node",
         type: "conversation",
         name: "Welcome Node",
-        instruction: { type: "static_text", text: `Thanks for calling ${businessName}! Who am I speaking with today?\n` },
-        edges: [{ id: "edge-1", destination_node_id: "collect-name", transition_condition: { type: "prompt", prompt: "User provided name" } }],
+        instruction: { type: "static_text", text: `Hi, thanks for calling ${businessName}! Who am I speaking with today?\n` },
+        edges: [{ id: "edge-1", destination_node_id: "collect-reason", transition_condition: { type: "prompt", prompt: "User provided name" } }],
         start_speaker: "agent",
       },
       {
-        id: "collect-name",
+        id: "collect-reason",
         type: "conversation",
-        name: "Collect Name",
-        instruction: { type: "prompt", text: `Thanks. What's the best phone number to reach you?` },
-        edges: [{ id: "edge-2", destination_node_id: "collect-child-age", transition_condition: { type: "prompt", prompt: "User provided phone number" } }],
+        name: "Call Reason",
+        instruction: { type: "prompt", text: `${FLOW_ACKNOWLEDGE} Are you calling about enrolling a child, an existing enrollment, or something else?` },
+        edges: [{ id: "edge-2", destination_node_id: "collect-child-age", transition_condition: { type: "prompt", prompt: "User described reason" } }],
       },
       {
         id: "collect-child-age",
@@ -895,7 +894,7 @@ function buildChildcareFlow(businessName: string): any {
         name: "Type of Care",
         instruction: { type: "prompt", text: `What type of care are you looking for — full-time, part-time, drop-in, or something else?` },
         edges: [
-          { id: "edge-4a", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "If not requesting a tour" } },
+          { id: "edge-4a", destination_node_id: "collect-phone", transition_condition: { type: "prompt", prompt: "If not requesting a tour" } },
           { id: "edge-4b", destination_node_id: "collect-tour-pref", transition_condition: { type: "prompt", prompt: "If requesting a tour or visit" } },
         ],
       },
@@ -904,28 +903,28 @@ function buildChildcareFlow(businessName: string): any {
         type: "conversation",
         name: "Tour Preference",
         instruction: { type: "prompt", text: `Do you have preferred days or times for a tour?` },
-        edges: [{ id: "edge-5", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "User provided preference or said no preference" } }],
+        edges: [{ id: "edge-5", destination_node_id: "collect-phone", transition_condition: { type: "prompt", prompt: "User provided preference or said no preference" } }],
+      },
+      {
+        id: "collect-phone",
+        type: "conversation",
+        name: "Collect Phone",
+        instruction: { type: "prompt", text: `What's the best phone number to reach you?` },
+        edges: [{ id: "edge-6", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "User provided phone number" } }],
       },
       {
         id: "confirm-details",
         type: "conversation",
-        name: "Recite Details",
-        instruction: { type: "prompt", text: `Repeat back the information gathered. Ask if it is correct.` },
-        edges: [{ id: "edge-6", destination_node_id: "final-assistant", transition_condition: { type: "prompt", prompt: "if user agrees" } }],
-      },
-      {
-        id: "final-assistant",
-        type: "conversation",
-        name: "Final Assistant",
-        instruction: { type: "prompt", text: `Anything else we should know?` },
-        edges: [{ id: "edge-7", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: "If conversation is complete" } }],
+        name: "Confirm Details",
+        instruction: { type: "prompt", text: FLOW_CONFIRM_ONCE },
+        edges: [{ id: "edge-7", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: FLOW_CONFIRM_EDGE } }],
       },
       {
         id: "end-call",
         type: "end",
         name: "End Call",
         speak_during_execution: true,
-        instruction: { type: "prompt", text: `Thanks {{Name}}. We'll be in touch. Thank you for calling ${businessName}.` },
+        instruction: { type: "prompt", text: FLOW_END_POLITE(businessName) },
       },
     ],
   }
@@ -941,44 +940,37 @@ function buildGenericFlow(businessName: string): any {
         id: "start-node",
         type: "conversation",
         name: "Welcome Node",
-        instruction: { type: "static_text", text: `Thanks for calling ${businessName}! Who am I speaking with today?\n` },
-        edges: [{ id: "edge-1", destination_node_id: "collect-name", transition_condition: { type: "prompt", prompt: "User provided name" } }],
+        instruction: { type: "static_text", text: `Hi, thanks for calling ${businessName}! Who am I speaking with today?\n` },
+        edges: [{ id: "edge-1", destination_node_id: "collect-reason", transition_condition: { type: "prompt", prompt: "User provided name" } }],
         start_speaker: "agent",
       },
       {
-        id: "collect-name",
+        id: "collect-reason",
         type: "conversation",
-        name: "Collect Name",
-        instruction: { type: "prompt", text: `Thanks {{Name}}. What can we help you with today? If they give a vague or one-word answer (e.g. "a question", "something", "help"), politely ask one follow-up (e.g. "Can you tell me a bit more about what you need?"). Only move on when you have a clear reason for the call.` },
+        name: "Collect Reason",
+        instruction: { type: "prompt", text: `${FLOW_ACKNOWLEDGE} What can we help you with today? If they give a vague or one-word answer, politely ask one follow-up. Only move on when you have a clear reason for the call.` },
         edges: [{ id: "edge-2", destination_node_id: "collect-contact", transition_condition: { type: "prompt", prompt: "User described reason for calling with enough detail" } }],
       },
       {
         id: "collect-contact",
         type: "conversation",
         name: "Contact Info",
-        instruction: { type: "prompt", text: `What's the best phone number to reach you?` },
+        instruction: { type: "prompt", text: `Got it. What's the best phone number to reach you?` },
         edges: [{ id: "edge-3", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "User provided phone number" } }],
       },
       {
         id: "confirm-details",
         type: "conversation",
-        name: "Recite Details",
-        instruction: { type: "prompt", text: `Repeat back what you gathered. Ask if it is correct.` },
-        edges: [{ id: "edge-4", destination_node_id: "final-assistant", transition_condition: { type: "prompt", prompt: "if user agrees" } }],
-      },
-      {
-        id: "final-assistant",
-        type: "conversation",
-        name: "Final Assistant",
-        instruction: { type: "prompt", text: `Anything else?` },
-        edges: [{ id: "edge-5", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: "If conversation is complete" } }],
+        name: "Confirm Details",
+        instruction: { type: "prompt", text: FLOW_CONFIRM_ONCE },
+        edges: [{ id: "edge-4", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: FLOW_CONFIRM_EDGE } }],
       },
       {
         id: "end-call",
         type: "end",
         name: "End Call",
         speak_during_execution: true,
-        instruction: { type: "prompt", text: `Thanks {{Name}}. We'll be in touch. Thank you for calling ${businessName}.` },
+        instruction: { type: "prompt", text: FLOW_END_POLITE(businessName) },
       },
     ],
   }
@@ -1003,7 +995,7 @@ const DEMO_EXTRACT_LEAD_TOOL = {
   ],
 }
 
-/** Demo line: simple intake — name → phone → reason (with follow-up if vague) → confirm (extract) → end. */
+/** Demo line: name → reason → phone → save → confirm → end. */
 function buildDemoConversationFlow(): any {
   return {
     start_node_id: "start-node",
@@ -1015,17 +1007,10 @@ function buildDemoConversationFlow(): any {
         name: "Welcome Node",
         instruction: {
           type: "static_text",
-          text: "Thanks for calling — you've reached the CallGrabbr demo. I'll take your info like a real business would. Who am I speaking with?\n",
+          text: "Hi, thanks for calling — you've reached the CallGrabbr demo. I'll take your information so our team can follow up, just like a real business would. Who am I speaking with?\n",
         },
-        edges: [{ id: "edge-1", destination_node_id: "collect-name", transition_condition: { type: "prompt", prompt: "User provided name" } }],
+        edges: [{ id: "edge-1", destination_node_id: "collect-reason", transition_condition: { type: "prompt", prompt: "User provided name" } }],
         start_speaker: "agent",
-      },
-      {
-        id: "collect-name",
-        type: "conversation",
-        name: "Collect Name",
-        instruction: { type: "prompt", text: "Thanks {{Name}}. What's the best phone number to reach you?" },
-        edges: [{ id: "edge-2", destination_node_id: "collect-reason", transition_condition: { type: "prompt", prompt: "User provided phone number" } }],
       },
       {
         id: "collect-reason",
@@ -1033,27 +1018,38 @@ function buildDemoConversationFlow(): any {
         name: "Collect Reason",
         instruction: {
           type: "prompt",
-          text: "What can we help you with today? If they give a vague or one-word answer, ask one short follow-up (e.g. \"Can you give me a quick detail — what's going on?\" or \"Which room or what kind of job?\") so the summary is useful. If it sounds like home/service (plumber, HVAC, etc.), ask for address or city. If auto: ask year, make, model. If they mention scheduling, ask preferred day or time. Only move on when you have a clear reason.",
+          text: `${FLOW_ACKNOWLEDGE} What can we help you with today? ${FLOW_NAME_USAGE} If they give a vague or one-word answer, ask one short follow-up so the summary is useful. If it sounds like home or service work, ask for the address or city. If auto-related, ask year, make, and model. If they mention scheduling, ask preferred day or time. Only move on when you have a clear reason.`,
         },
-        edges: [{ id: "edge-3", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "User gave clear reason for call" } }],
+        edges: [{ id: "edge-2", destination_node_id: "collect-phone", transition_condition: { type: "prompt", prompt: "User gave clear reason for call" } }],
+      },
+      {
+        id: "collect-phone",
+        type: "conversation",
+        name: "Collect Phone",
+        instruction: { type: "prompt", text: `${FLOW_ACKNOWLEDGE} What's the best phone number to reach you?` },
+        edges: [{ id: "edge-3", destination_node_id: "save-lead", transition_condition: { type: "prompt", prompt: "User provided phone number" } }],
+      },
+      {
+        id: "save-lead",
+        type: "conversation",
+        name: "Save Lead",
+        instruction: { type: "prompt", text: DEMO_SAVE_LEAD_INSTRUCTION },
+        tools: [DEMO_EXTRACT_LEAD_TOOL],
+        edges: [{ id: "edge-3b", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: "Tool called or lead fields saved" } }],
       },
       {
         id: "confirm-details",
         type: "conversation",
-        name: "Recite Details",
-        instruction: {
-          type: "prompt",
-          text: "Repeat back what you gathered (name, phone, reason, and address/vehicle/appt if any). As soon as you have name, phone, and reason (and any address, city, vehicle, or appointment preference), call store_lead_details to save them. Then ask if that's correct.",
-        },
-        tools: [DEMO_EXTRACT_LEAD_TOOL],
-        edges: [{ id: "edge-4", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: "User agreed or conversation complete" } }],
+        name: "Confirm Details",
+        instruction: { type: "prompt", text: FLOW_CONFIRM_ONCE },
+        edges: [{ id: "edge-4", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: FLOW_CONFIRM_EDGE } }],
       },
       {
         id: "end-call",
         type: "end",
         name: "End Call",
         speak_during_execution: true,
-        instruction: { type: "prompt", text: "Thank them and say we'll have someone follow up. Thanks for trying the demo." },
+        instruction: { type: "prompt", text: FLOW_DEMO_END },
       },
     ],
   }
@@ -1112,7 +1108,7 @@ export async function createTemplateAgentForIndustry(
   })
 
   const agentName = options?.agentName ?? `CallGrabbr ${industry}`
-  const voiceId = options?.voiceId ?? "11labs-Chloe"
+  const voiceId = options?.voiceId ?? DEFAULT_RETELL_VOICE.voice_id
 
   const response = await fetch(`${RETELL_API_BASE}/create-agent`, {
     method: "POST",
@@ -1124,11 +1120,11 @@ export async function createTemplateAgentForIndustry(
       agent_name: agentName,
       language: "en-US",
       voice_id: voiceId,
-      voice_temperature: 0.98,
-      voice_speed: 0.98,
-      volume: 0.94,
-      max_call_duration_ms: 7 * 60 * 1000,
-      interruption_sensitivity: 0.9,
+      voice_temperature: DEFAULT_RETELL_VOICE.voice_temperature,
+      voice_speed: DEFAULT_RETELL_VOICE.voice_speed,
+      volume: DEFAULT_RETELL_VOICE.volume,
+      max_call_duration_ms: DEFAULT_RETELL_VOICE.max_call_duration_ms,
+      interruption_sensitivity: DEFAULT_RETELL_VOICE.interruption_sensitivity,
       response_engine: {
         type: "conversation-flow",
         conversation_flow_id,
@@ -1165,21 +1161,18 @@ export async function createDemoRetellAgent(): Promise<{ agent_id: string; phone
     global_prompt: globalPrompt,
   })
 
-  const voiceId = "11labs-Chloe"
-  const MAX_CALL_DURATION_MS = 7 * 60 * 1000
-
   const response = await fetch(`${RETELL_API_BASE}/create-agent`, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify({
       agent_name: "CallGrabbr Demo",
       language: "en-US",
-      voice_id: voiceId,
-      voice_temperature: 0.98,
-      voice_speed: 0.98,
-      volume: 0.94,
-      max_call_duration_ms: MAX_CALL_DURATION_MS,
-      interruption_sensitivity: 0.9,
+      voice_id: DEFAULT_RETELL_VOICE.voice_id,
+      voice_temperature: DEFAULT_RETELL_VOICE.voice_temperature,
+      voice_speed: DEFAULT_RETELL_VOICE.voice_speed,
+      volume: DEFAULT_RETELL_VOICE.volume,
+      max_call_duration_ms: DEFAULT_RETELL_VOICE.max_call_duration_ms,
+      interruption_sensitivity: DEFAULT_RETELL_VOICE.interruption_sensitivity,
       response_engine: {
         type: "conversation-flow",
         conversation_flow_id,
@@ -1259,7 +1252,59 @@ export async function updateDemoAgentFlow(): Promise<void> {
   const { version } = await updateConversationFlow(apiKey, flowId, { ...flow, global_prompt: globalPrompt })
 
   await updateAgent(apiKey, agentId, {
+    ...DEFAULT_RETELL_VOICE,
     response_engine: { type: "conversation-flow", conversation_flow_id: flowId, version },
   })
   console.info("Demo agent flow updated to version", version)
+}
+
+type TemplateAgentEntry = {
+  agent_id: string
+  conversation_flow_id: string
+  version?: number
+}
+
+/**
+ * Update one industry template agent's flow and voice from retell-agents-by-industry.json.
+ */
+export async function updateTemplateAgentForIndustry(
+  apiKey: string,
+  industry: Industry,
+  entry: TemplateAgentEntry
+): Promise<{ version: number }> {
+  const flow = buildTemplateConversationFlow(industry)
+  const { version } = await updateConversationFlow(apiKey, entry.conversation_flow_id, {
+    ...flow,
+    global_prompt: RETELL_GLOBAL_PROMPT_TEMPLATE,
+  })
+  await updateAgent(apiKey, entry.agent_id, {
+    ...DEFAULT_RETELL_VOICE,
+    response_engine: {
+      type: "conversation-flow",
+      conversation_flow_id: entry.conversation_flow_id,
+      version,
+    },
+  })
+  return { version }
+}
+
+/**
+ * Sync all industry template agents from retell-agents-by-industry.json.
+ * Run: npx tsx scripts/sync-retell-agents.ts
+ */
+export async function updateAllTemplateAgents(): Promise<void> {
+  const apiKey = process.env.RETELL_API_KEY
+  if (!apiKey) throw new Error("RETELL_API_KEY required")
+
+  const fs = await import("fs/promises")
+  const path = await import("path")
+  const configPath = path.join(process.cwd(), "retell-agents-by-industry.json")
+  const raw = await fs.readFile(configPath, "utf-8")
+  const config = JSON.parse(raw) as Record<string, TemplateAgentEntry>
+
+  for (const [industryKey, entry] of Object.entries(config)) {
+    const industry = industryKey as Industry
+    const { version } = await updateTemplateAgentForIndustry(apiKey, industry, entry)
+    console.info(`Updated ${industry} template agent to flow version`, version)
+  }
 }

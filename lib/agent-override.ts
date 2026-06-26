@@ -1,4 +1,7 @@
 import type { BusinessSettings } from "./business-settings"
+import { PlanType } from "@prisma/client"
+import { getEffectivePlanType, hasBrandedVoice } from "./plans"
+import { computeRingDurationMs, ringDurationMsForRetellAgent } from "./call-routing"
 
 /**
  * Build the agent_override and dynamic_variables that the Retell inbound webhook sends.
@@ -7,7 +10,8 @@ import type { BusinessSettings } from "./business-settings"
 export function buildAgentOverride(
   settings: BusinessSettings,
   businessName: string,
-  serviceAreas: string | string[]
+  serviceAreas: string | string[],
+  planType?: PlanType | null
 ): {
   agentOverride: {
     agent?: Record<string, unknown>
@@ -18,9 +22,12 @@ export function buildAgentOverride(
   beginMessage: string
   ringDurationMs: number
 } {
+  const effectivePlan = getEffectivePlanType(planType)
+  const brandedVoice = hasBrandedVoice(effectivePlan)
+
   const beginMessage = settings.greeting.customGreeting
     ? settings.greeting.customGreeting.replace(/\[business\]/gi, businessName)
-    : `Thanks for calling ${businessName}! Who am I speaking with today?`
+    : `Hi, thanks for calling ${businessName}! Who am I speaking with today?`
 
   const dynamicVars: Record<string, string> = {
     business_name: businessName,
@@ -50,9 +57,9 @@ export function buildAgentOverride(
     booking_emergency_override: String(settings.booking.emergencyOverride),
     lead_tags: settings.leadTags.customTags.join(", "),
     priority_rules: JSON.stringify(settings.leadTags.priorityRules),
-    always_say: settings.voiceBrand.alwaysSay.join("; "),
-    never_say: settings.voiceBrand.neverSay.join("; "),
-    compliance_phrases: settings.voiceBrand.compliancePhrases.join("; "),
+    always_say: brandedVoice ? settings.voiceBrand.alwaysSay.join("; ") : "",
+    never_say: brandedVoice ? settings.voiceBrand.neverSay.join("; ") : "",
+    compliance_phrases: brandedVoice ? settings.voiceBrand.compliancePhrases.join("; ") : "",
     max_call_length_minutes: String(settings.aiBehavior.maxCallLengthMinutes),
     question_retry_count: String(settings.aiBehavior.questionRetryCount),
     escalate_after_retries: String(settings.aiBehavior.escalateToHumanAfterRetries),
@@ -61,11 +68,14 @@ export function buildAgentOverride(
     spam_handling: settings.callRouting.spamHandling,
   }
 
-  const ringBeforeAnswerSeconds = settings.callRouting.ringBeforeAnswerSeconds ?? 0
-  const ringDurationMs = Math.min(15, Math.max(0, ringBeforeAnswerSeconds)) * 1000
+  const ringDurationMs = computeRingDurationMs(settings.callRouting)
 
-  const voiceSpeed = 0.75 + (settings.voiceBrand.speed ?? 0.5) * 0.75
-  const temperature = 0.2 + (settings.voiceBrand.conciseness ?? 0.5) * 0.6
+  const voiceSpeed = brandedVoice
+    ? 0.75 + (settings.voiceBrand.speed ?? 0.5) * 0.75
+    : 0.94
+  const temperature = brandedVoice
+    ? 0.2 + (settings.voiceBrand.conciseness ?? 0.5) * 0.6
+    : 0.88
 
   // Voice: male = Ethan, female/Auto = Chloe (default)
   const voiceGender = settings.greeting.voiceGender
@@ -80,15 +90,16 @@ export function buildAgentOverride(
   const agentFields: Record<string, unknown> = {
     voice_id: voiceId,
     voice_speed: Math.round(voiceSpeed * 100) / 100,
-    interruption_sensitivity: settings.aiBehavior.interruptTolerance ?? 0.5,
+    voice_temperature: Math.round(temperature * 100) / 100,
+    interruption_sensitivity: settings.aiBehavior.interruptTolerance ?? 0.82,
     max_call_duration_ms: Math.min(
       Math.max(60_000, (settings.aiBehavior.maxCallLengthMinutes ?? 7) * 60 * 1000),
       MAX_CALL_DURATION_MS
     ),
   }
-  // ring_duration_ms valid range [5000, 90000]; omit when outside range (0 = answer immediately)
-  if (ringDurationMs >= 5000 && ringDurationMs <= 90000) {
-    agentFields.ring_duration_ms = Math.round(ringDurationMs)
+  const retellRingMs = ringDurationMsForRetellAgent(ringDurationMs)
+  if (retellRingMs != null) {
+    agentFields.ring_duration_ms = retellRingMs
   }
 
   const agentOverride = {

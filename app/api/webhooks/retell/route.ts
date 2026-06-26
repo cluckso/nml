@@ -23,7 +23,7 @@ import { buildAgentOverride } from "@/lib/agent-override"
 import { hasActionableInfo, isLikelySpam, isKnownSpamOrTestNumber } from "@/lib/call-filter"
 import { parseAppointmentRequest } from "@/lib/appointments"
 import { isSpamByTwilioLookup } from "@/lib/twilio-lookup"
-import { parseLeadFromSummaryOrTranscript } from "@/lib/parse-lead-from-transcript"
+import { parseLeadFromSummaryOrTranscript, isLikelyPhysicalAddress } from "@/lib/parse-lead-from-transcript"
 import { fireZapierLeadHook } from "@/lib/zapier"
 
 /** Retell expects 204 No Content on success. Use 200 + body only for call_inbound (required) and test/ping. */
@@ -203,10 +203,11 @@ export async function POST(req: NextRequest) {
       const { agentOverride, dynamicVars, ringDurationMs } = buildAgentOverride(
         settings,
         businessName,
-        serviceAreas
+        serviceAreas,
+        getEffectivePlanType((client as { planType?: import("@prisma/client").PlanType }).planType)
       )
       if (ringDurationMs > 0) {
-        console.info("Retell call_inbound: ring delay", ringDurationMs, "ms from settings.callRouting.ringBeforeAnswerSeconds")
+        console.info("Retell call_inbound: ring delay", ringDurationMs, "ms from call routing settings")
       }
 
       const response = {
@@ -457,6 +458,14 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
     }
   }
 
+  if (
+    typeof structuredIntake.address === "string" &&
+    structuredIntake.address.trim() &&
+    !isLikelyPhysicalAddress(structuredIntake.address)
+  ) {
+    structuredIntake.address = undefined
+  }
+
   const summary =
     analysis.summary || analysis.call_summary || (analysis.transcript ? String(analysis.transcript).slice(0, 500) : null)
   const transcriptStr = analysis.transcript || event.call?.transcript
@@ -485,7 +494,9 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
   if (needsParsing && textToParse) {
     const parsed = parseLeadFromSummaryOrTranscript(textToParse)
     if (parsed.name && !structuredIntake.name) structuredIntake.name = parsed.name
-    if (parsed.address && !structuredIntake.address) structuredIntake.address = parsed.address
+    if (parsed.address && isLikelyPhysicalAddress(parsed.address) && !structuredIntake.address) {
+      structuredIntake.address = parsed.address
+    }
     if (parsed.city && !structuredIntake.city) structuredIntake.city = parsed.city
     if (parsed.issue_description) {
       // Prefer short parsed reason over long summary blob so SMS is clear
@@ -719,7 +730,7 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
     console.error("CRM forward error:", error)
   }
 
-  if (hasInfo && isNewCall) {
+  if (hasInfo && isNewCall && hasCrmForwarding(planType)) {
     try {
       await fireZapierLeadHook(business.id, business.name, {
         id: call.id,

@@ -16,6 +16,8 @@ import type {
   NotificationSettings,
   CallRoutingSettings,
   RingBeforeAnswerSeconds,
+  RingBeforeAnswerRings,
+  RingDelayMode,
   MissedCallRecoverySettings,
   FollowUpSmsSettings,
   ReputationSettings,
@@ -29,6 +31,7 @@ import type {
   QuestionDepth,
 } from "@/lib/business-settings"
 import { SECTION_LABELS, SECTION_MIN_TIER } from "@/lib/business-settings"
+import { formatRingDelayLabel } from "@/lib/call-routing"
 import { getUpgradeTierLabel } from "@/lib/plan-labels"
 import { PlanType } from "@prisma/client"
 import { PhoneInputWithCountry } from "@/components/ui/phone-input-with-country"
@@ -65,7 +68,16 @@ export function SettingsClient() {
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
-  const [agentPreview, setAgentPreview] = useState<{ summary?: { ringBeforeAnswerSeconds: number; tone?: string; questionDepth?: string }; ringDurationMs?: number } | null>(null)
+  const [agentPreview, setAgentPreview] = useState<{
+    summary?: {
+      answerAllCalls?: boolean
+      ringDelayLabel?: string
+      ringBeforeAnswerSeconds?: number
+      tone?: string
+      questionDepth?: string
+    }
+    ringDurationMs?: number
+  } | null>(null)
 
   const refreshAgentPreview = useCallback(() => {
     fetch("/api/settings/agent-preview")
@@ -215,7 +227,16 @@ function AgentPreviewCard({
   onRefresh,
   onSettingsLoad,
 }: {
-  agentPreview: { summary?: { ringBeforeAnswerSeconds?: number; tone?: string; questionDepth?: string }; ringDurationMs?: number } | null
+  agentPreview: {
+    summary?: {
+      answerAllCalls?: boolean
+      ringDelayLabel?: string
+      ringBeforeAnswerSeconds?: number
+      tone?: string
+      questionDepth?: string
+    }
+    ringDurationMs?: number
+  } | null
   onRefresh: () => void
   onSettingsLoad: boolean
 }) {
@@ -237,7 +258,11 @@ function AgentPreviewCard({
       <CardContent className="text-sm">
         {summary ? (
           <ul className="space-y-1 text-muted-foreground">
-            <li>Ring before answer: {summary.ringBeforeAnswerSeconds ?? 0} sec</li>
+            <li>
+              {summary.answerAllCalls
+                ? "Answer all calls immediately"
+                : `Ring delay: ${summary.ringDelayLabel ?? `${summary.ringBeforeAnswerSeconds ?? 0} sec`}`}
+            </li>
             <li>Tone: {summary.tone ?? "—"}</li>
             <li>Question depth: {summary.questionDepth ?? "—"}</li>
             {agentPreview?.ringDurationMs != null && agentPreview.ringDurationMs > 0 && (
@@ -575,37 +600,125 @@ function NotificationsSection({
   )
 }
 
-const RING_OPTIONS: { value: RingBeforeAnswerSeconds; label: string }[] = [
-  { value: 0, label: "0 seconds (answer immediately)" },
-  { value: 5, label: "5 seconds" },
-  { value: 10, label: "10 seconds" },
-  { value: 15, label: "15 seconds" },
+const RING_SECOND_OPTIONS: { value: RingBeforeAnswerSeconds; label: string }[] = [
+  { value: 5, label: "5 seconds (~1 ring)" },
+  { value: 10, label: "10 seconds (~2 rings)" },
+  { value: 15, label: "15 seconds (~3 rings)" },
+  { value: 20, label: "20 seconds (~4 rings)" },
+  { value: 25, label: "25 seconds (~5 rings)" },
+  { value: 30, label: "30 seconds (~6 rings)" },
+]
+
+const RING_COUNT_OPTIONS: { value: RingBeforeAnswerRings; label: string }[] = [
+  { value: 1, label: "1 ring (~5 seconds)" },
+  { value: 2, label: "2 rings (~10 seconds)" },
+  { value: 3, label: "3 rings (~15 seconds)" },
+  { value: 4, label: "4 rings (~20 seconds)" },
+  { value: 5, label: "5 rings (~25 seconds)" },
+  { value: 6, label: "6 rings (~30 seconds)" },
 ]
 
 function CallRoutingSection({ value, onSave, saving }: { value: CallRoutingSettings; onSave: (v: CallRoutingSettings) => void; saving: boolean }) {
   const [d, setD] = useState(value)
+
+  useEffect(() => {
+    setD(value)
+  }, [value])
+
+  const handleAnswerAllChange = (answerAll: boolean) => {
+    setD({
+      ...d,
+      answerAllCalls: answerAll,
+      ringBeforeAnswerSeconds: answerAll ? d.ringBeforeAnswerSeconds : d.ringBeforeAnswerSeconds || 10,
+    })
+  }
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Call Routing</CardTitle>
-        <CardDescription>Rules for routing special calls. Set how long the line rings before the AI answers.</CardDescription>
+        <CardDescription>
+          Control when the AI picks up forwarded calls. Forward your business line to your AI number at your carrier, then choose whether the AI answers right away or after a delay.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <Label>Ring time before AI answers</Label>
-          <select
-            className="w-full rounded border border-input bg-background px-3 py-2 text-sm"
-            value={d.ringBeforeAnswerSeconds ?? 0}
-            onChange={(e) => setD({ ...d, ringBeforeAnswerSeconds: Number(e.target.value) as RingBeforeAnswerSeconds })}
-          >
-            {RING_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-          <p className="text-xs text-muted-foreground">
-            Gives you time to pick up first. After this many seconds, the AI will answer if the call isn’t picked up.
-          </p>
-        </div>
+        <Toggle
+          label="Answer all calls immediately"
+          checked={d.answerAllCalls}
+          onChange={handleAnswerAllChange}
+          description="When on, every forwarded call is answered by the AI right away. When off, the line rings for your chosen delay first (use unconditional call forwarding at your carrier)."
+        />
+        {!d.answerAllCalls && (
+          <div className="space-y-4 rounded-lg border border-border bg-muted/30 p-4">
+            <div className="space-y-2">
+              <Label>Delay before AI answers</Label>
+              <div className="flex flex-wrap gap-4">
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input
+                    type="radio"
+                    name="ringDelayMode"
+                    checked={d.ringDelayMode === "seconds"}
+                    onChange={() => setD({ ...d, ringDelayMode: "seconds" as RingDelayMode })}
+                  />
+                  Seconds
+                </label>
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input
+                    type="radio"
+                    name="ringDelayMode"
+                    checked={d.ringDelayMode === "rings"}
+                    onChange={() => setD({ ...d, ringDelayMode: "rings" as RingDelayMode })}
+                  />
+                  Number of rings
+                </label>
+              </div>
+            </div>
+            {d.ringDelayMode === "seconds" ? (
+              <div className="space-y-2">
+                <Label>Seconds to ring</Label>
+                <select
+                  className="w-full rounded border border-input bg-background px-3 py-2 text-sm"
+                  value={d.ringBeforeAnswerSeconds}
+                  onChange={(e) =>
+                    setD({
+                      ...d,
+                      ringBeforeAnswerSeconds: Number(e.target.value) as RingBeforeAnswerSeconds,
+                    })
+                  }
+                >
+                  {RING_SECOND_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label>Rings before AI answers</Label>
+                <select
+                  className="w-full rounded border border-input bg-background px-3 py-2 text-sm"
+                  value={d.ringBeforeAnswerRings}
+                  onChange={(e) =>
+                    setD({
+                      ...d,
+                      ringBeforeAnswerRings: Number(e.target.value) as RingBeforeAnswerRings,
+                    })
+                  }
+                >
+                  {RING_COUNT_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Current setting: {formatRingDelayLabel(d)}. Use unconditional forwarding at your carrier so calls reach the AI number; this delay controls how long the AI waits before answering.
+            </p>
+          </div>
+        )}
         <Toggle label="Forward emergencies" checked={d.emergencyForward} onChange={(v) => setD({ ...d, emergencyForward: v })} description="Immediately forward emergency calls to a phone number." />
         {d.emergencyForward && (
           <div className="space-y-2 pl-6">

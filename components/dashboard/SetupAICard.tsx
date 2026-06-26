@@ -86,7 +86,7 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
                   In your phone provider&apos;s settings (or carrier app), set call forwarding to this number. Incoming calls will be answered by your AI; you&apos;ll get a summary by email.
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Want the AI to answer only when you don&apos;t pick up? At your carrier, use <strong>conditional</strong> or <strong>no-answer</strong> forwarding (e.g. forward after 4–5 rings) instead of &quot;forward all.&quot; See <Link href="/docs/faq" className="text-primary underline">Help & FAQ</Link> for carrier steps.
+                  Set <strong>unconditional</strong> forwarding to this AI number, then use <Link href="/settings" className="text-primary underline">Settings → Call Routing</Link> to choose whether the AI answers immediately or after a ring delay.
                 </p>
               </div>
             </div>

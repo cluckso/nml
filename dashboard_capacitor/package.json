@@ -1,7 +1,7 @@
 {
   "name": "callgrabbr-dashboard",
   "private": true,
-  "version": "1.0.0",
+  "version": "122.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -303,7 +303,7 @@ export default function DocsFaqPage() {
           <ol className="list-decimal list-inside space-y-2 text-sm">
             <li>Get your <strong>AI number</strong> from the dashboard (after you connect your call assistant).</li>
             <li>Use the steps below for <strong>your carrier</strong> to set up <strong>call forwarding</strong> to that AI number.</li>
-            <li>Configure <strong>ring time</strong> in the dashboard: go to <strong>Settings → Call Routing</strong> and choose how many seconds (0, 5, 10, or 15) the line rings before the AI answers. That gives you time to pick up first if you want.</li>
+            <li>Configure when the AI answers in <strong>Settings → Call Routing</strong>: turn on <strong>Answer all calls immediately</strong>, or choose a delay in seconds or number of rings before the AI picks up.</li>
             <li>Save and test by calling your business line from another phone.</li>
           </ol>
           <Link href="/dashboard">

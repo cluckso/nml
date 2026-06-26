@@ -1,4 +1,14 @@
 import { PlanType } from "@prisma/client"
+import {
+  normalizeCallRouting,
+  DEFAULT_CALL_ROUTING,
+  type CallRoutingSettings,
+  type RingBeforeAnswerRings,
+  type RingBeforeAnswerSeconds,
+  type RingDelayMode,
+} from "./call-routing"
+
+export type { CallRoutingSettings, RingBeforeAnswerRings, RingBeforeAnswerSeconds, RingDelayMode }
 
 // ─── TYPES ───────────────────────────────────────────────────────────────
 
@@ -30,20 +40,6 @@ export interface NotificationSettings {
   emailAlerts: boolean
   emergencyOnlyAlerts: boolean
   dailyDigest: boolean
-}
-
-/** Ring time (seconds) before AI answers — lets you pick up first if you want */
-export type RingBeforeAnswerSeconds = 0 | 5 | 10 | 15
-
-/** Call routing rules */
-export interface CallRoutingSettings {
-  /** Seconds to ring before connecting to the AI (0 = answer immediately). Configurable in dashboard. */
-  ringBeforeAnswerSeconds: RingBeforeAnswerSeconds
-  emergencyForward: boolean
-  emergencyForwardNumber: string | null
-  vipCallerList: string[] // E.164 numbers that get forwarded
-  repeatCallerPriorityTag: boolean
-  spamHandling: "block" | "short_response" | "voicemail"
 }
 
 /** Missed call recovery */
@@ -216,14 +212,7 @@ export const DEFAULT_SETTINGS: BusinessSettings = {
     emergencyOnlyAlerts: false,
     dailyDigest: false,
   },
-  callRouting: {
-    ringBeforeAnswerSeconds: 0,
-    emergencyForward: false,
-    emergencyForwardNumber: null,
-    vipCallerList: [],
-    repeatCallerPriorityTag: false,
-    spamHandling: "short_response",
-  },
+  callRouting: { ...DEFAULT_CALL_ROUTING },
   missedCallRecovery: {
     enabled: true,
     smsAutoReplyText: "Sorry we missed you! We'll call back shortly. Need urgent help? Reply URGENT.",
@@ -444,7 +433,7 @@ export function mergeWithDefaults(saved: Partial<BusinessSettings> | null | unde
     intakeFields: { ...DEFAULT_SETTINGS.intakeFields, ...(saved.intakeFields ?? {}) },
     availability: { ...DEFAULT_SETTINGS.availability, ...(saved.availability ?? {}) },
     notifications: { ...DEFAULT_SETTINGS.notifications, ...(saved.notifications ?? {}) },
-    callRouting: { ...DEFAULT_SETTINGS.callRouting, ...(saved.callRouting ?? {}) },
+    callRouting: normalizeCallRouting(saved.callRouting, DEFAULT_CALL_ROUTING),
     missedCallRecovery: { ...DEFAULT_SETTINGS.missedCallRecovery, ...(saved.missedCallRecovery ?? {}) },
     followUpSms: { ...DEFAULT_SETTINGS.followUpSms, ...(saved.followUpSms ?? {}) },
     reputation: { ...DEFAULT_SETTINGS.reputation, ...(saved.reputation ?? {}) },

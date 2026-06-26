@@ -7,6 +7,9 @@ import { SetupAICard } from "@/components/dashboard/SetupAICard"
 import { TrialCard } from "@/components/dashboard/TrialCard"
 import { ROICard } from "@/components/dashboard/ROICard"
 import { ReferralCard } from "@/components/dashboard/ReferralCard"
+import { ReportingCard } from "@/components/dashboard/ReportingCard"
+import { hasWeeklyReports, getEffectivePlanType } from "@/lib/plans"
+import { subDays } from "date-fns"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Phone, Clock, AlertTriangle, ChevronRight, Calendar } from "lucide-react"
@@ -32,6 +35,7 @@ export default async function DashboardPage() {
   let stats: { _count: number; _sum: { minutes: number | null } } = { _count: 0, _sum: { minutes: 0 } }
   let monthlyLeads = 0
   let trial: TrialStatus = defaultTrial
+  let weekReporting: { weekCalls: number; weekMinutes: number; leadsByTag: { tag: string; count: number }[] } | null = null
 
   const monthStart = new Date()
   monthStart.setDate(1)
@@ -84,6 +88,29 @@ export default async function DashboardPage() {
         </Card>
       </div>
     )
+  }
+
+  if (business && hasWeeklyReports(getEffectivePlanType(business.planType))) {
+    const weekStart = subDays(new Date(), 7)
+    const weekCalls = await db.call.findMany({
+      where: { businessId: user.businessId, createdAt: { gte: weekStart } },
+      select: { minutes: true, leadTag: true },
+    })
+    const tagMap = weekCalls.reduce(
+      (acc, c) => {
+        const tag = c.leadTag || "GENERAL"
+        acc[tag] = (acc[tag] || 0) + 1
+        return acc
+      },
+      {} as Record<string, number>
+    )
+    weekReporting = {
+      weekCalls: weekCalls.length,
+      weekMinutes: weekCalls.reduce((sum, c) => sum + c.minutes, 0),
+      leadsByTag: Object.entries(tagMap)
+        .map(([tag, count]) => ({ tag, count }))
+        .sort((a, b) => b.count - a.count),
+    }
   }
 
   const emergencyCalls = recentCalls.filter((c) => c.emergencyFlag).length
@@ -195,6 +222,13 @@ export default async function DashboardPage() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        {weekReporting && (
+          <ReportingCard
+            weekCalls={weekReporting.weekCalls}
+            weekMinutes={weekReporting.weekMinutes}
+            leadsByTag={weekReporting.leadsByTag}
+          />
+        )}
         <ReferralCard />
       </div>
 

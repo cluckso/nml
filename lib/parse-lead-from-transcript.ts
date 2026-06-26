@@ -11,6 +11,26 @@ export interface ParsedLead {
   issue_description?: string
 }
 
+const STREET_SUFFIX =
+  /\b(street|st|avenue|ave|road|rd|blvd|boulevard|lane|ln|drive|dr|way|court|ct|place|pl|circle|cir|trail|trl|parkway|pkwy|highway|hwy)\b/i
+
+/** Reject reason/summary text that was mis-captured as an address. */
+export function isLikelyPhysicalAddress(value: string | null | undefined): boolean {
+  if (!value?.trim()) return false
+  const v = value.trim().replace(/\s+/g, " ")
+  if (v.length < 5 || v.length > 120) return false
+
+  const hasNumber = /\d/.test(v)
+  const hasStreetSuffix = STREET_SUFFIX.test(v)
+  if (!hasNumber && !hasStreetSuffix) return false
+
+  const reasonLike =
+    /\b(leak|leaking|broken|repair|fix|install|replace|calling about|water heater|furnace|plumb|hvac|electric|appointment|schedule|need help|having (?:a |an )?problem)\b/i
+  if (reasonLike.test(v) && !hasNumber) return false
+
+  return true
+}
+
 /**
  * Heuristic parse of transcript/summary text to extract lead fields.
  * Used as fallback when call_analysis.extracted_variables is empty or incomplete.
@@ -38,17 +58,17 @@ export function parseLeadFromSummaryOrTranscript(text: string | null | undefined
     }
   }
 
-  // Address: street address pattern or "address is X" / "at X"
+  // Address: explicit labels or numbered street — avoid bare "at" (captures reason text)
   const addressPatterns = [
-    /(?:address|service address|located at|at)\s*[:\s]+([^\n.]{5,80})(?=[.,\n]|$)/i,
-    /(\d+\s+[\w\s]+(?:street|st|avenue|ave|road|rd|blvd|lane|ln|drive|dr|way|court|ct|place|pl))[^\n]*/i,
-    /(?:address|location)[:\s]+([^\n.]{5,80})/i,
+    /(?:service address|property address|street address|mailing address|address is|address:?)\s*[:\s]+([^\n.]{5,120}?)(?=[.,\n]|$)/i,
+    /(?:located at|property (?:is )?at)\s+(\d{1,6}[^\n.]{4,100})/i,
+    /(\d{1,6}\s+[\w\s.'#-]{2,60}\b(?:street|st|avenue|ave|road|rd|blvd|boulevard|lane|ln|drive|dr|way|court|ct|place|pl|circle|cir|trail|trl|parkway|pkwy)\b\.?)/i,
   ]
   for (const re of addressPatterns) {
     const m = t.match(re)
     if (m && m[1]) {
       const addr = m[1].trim().replace(/\s+/g, " ")
-      if (addr.length >= 5 && addr.length <= 120) {
+      if (isLikelyPhysicalAddress(addr)) {
         out.address = addr
         break
       }
@@ -62,26 +82,25 @@ export function parseLeadFromSummaryOrTranscript(text: string | null | undefined
     if (city.length >= 2 && city.length <= 50) out.city = city
   }
 
-  // Reason for call: "calling about", "reason for call", "need(s)", "issue", or first sentence
+  // Reason for call: short-form OK (e.g. "AC leak", "furnace out")
   const reasonPatterns = [
-    /(?:calling about|reason for call|reason|need[s]?|issue|problem|request)[:\s]+([^\n.]{10,200})/i,
-    /(?:job|service)[:\s]+([^\n.]{10,150})/i,
-    /(?:wanted to|asking about)[^\n.]{0,80}([^\n.]{10,150})/i,
+    /(?:calling about|reason for call|reason|need[s]?|issue|problem|request)[:\s]+([^\n.]{3,200})/i,
+    /(?:job|service)[:\s]+([^\n.]{3,150})/i,
+    /(?:wanted to|asking about)[^\n.]{0,80}([^\n.]{3,150})/i,
   ]
   for (const re of reasonPatterns) {
     const m = t.match(re)
     if (m && m[1]) {
       const reason = m[1].trim().replace(/\s+/g, " ")
-      if (reason.length >= 10) {
-        out.issue_description = reason.length > 200 ? reason.slice(0, 197) + "…" : reason
+      if (reason.length >= 3) {
+        out.issue_description = reason.length > 300 ? reason.slice(0, 297) + "…" : reason
         break
       }
     }
   }
-  if (!out.issue_description && t.length >= 10) {
-    // Use first sentence or first 200 chars as reason
-    const first = t.split(/[.\n]/)[0]?.trim() || t.slice(0, 200).trim()
-    if (first.length >= 10) out.issue_description = first.length > 200 ? first.slice(0, 197) + "…" : first
+  if (!out.issue_description && t.length >= 3) {
+    const first = t.split(/[.\n]/)[0]?.trim() || t.slice(0, 300).trim()
+    if (first.length >= 3) out.issue_description = first.length > 300 ? first.slice(0, 297) + "…" : first
   }
 
   return out

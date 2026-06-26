@@ -3,6 +3,7 @@ import { getAuthUserFromRequest } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { mergeWithDefaults, type BusinessSettings } from "@/lib/business-settings"
 import { buildAgentOverride } from "@/lib/agent-override"
+import { formatRingDelayLabel } from "@/lib/call-routing"
 
 /**
  * GET /api/settings/agent-preview
@@ -17,7 +18,7 @@ export async function GET(req: NextRequest) {
 
     const business = await db.business.findUnique({
       where: { id: user.businessId },
-      select: { name: true, settings: true, serviceAreas: true },
+      select: { name: true, settings: true, serviceAreas: true, planType: true },
     })
     if (!business) return NextResponse.json({ error: "Business not found" }, { status: 404 })
 
@@ -28,7 +29,8 @@ export async function GET(req: NextRequest) {
     const { agentOverride, dynamicVars, beginMessage, ringDurationMs } = buildAgentOverride(
       settings,
       businessName,
-      serviceAreas
+      serviceAreas,
+      business.planType
     )
 
     return NextResponse.json({
@@ -37,7 +39,11 @@ export async function GET(req: NextRequest) {
       beginMessage,
       ringDurationMs,
       summary: {
-        ringBeforeAnswerSeconds: settings.callRouting.ringBeforeAnswerSeconds ?? 0,
+        answerAllCalls: settings.callRouting.answerAllCalls,
+        ringDelayLabel: formatRingDelayLabel(settings.callRouting),
+        ringBeforeAnswerSeconds: settings.callRouting.ringBeforeAnswerSeconds,
+        ringDelayMode: settings.callRouting.ringDelayMode,
+        ringBeforeAnswerRings: settings.callRouting.ringBeforeAnswerRings,
         voiceSpeed: agentOverride.agent?.voice_speed,
         maxCallDurationMs: agentOverride.agent?.max_call_duration_ms,
         tone: settings.greeting.tone,

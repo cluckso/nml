@@ -27,19 +27,35 @@ export interface StructuredIntake {
   preferred_time?: string
 }
 
-/** SMS character cutoff: 160 = 1 segment (GSM-7). With emoji (UCS-2) = 70/segment. We truncate to stay under 160 when possible. */
-const SMS_MAX_CHARS = 160
+/** Prefer one bubble up to ~3 SMS segments; split into a second text if still too long. */
+const SMS_PREFERRED_MAX_CHARS = 480
+/** Twilio concatenated SMS hard limit (~10 segments). */
+const SMS_HARD_MAX_CHARS = 1530
 
-/** Build lead summary SMS body (name, contact, address, issue, vehicle, appt). Reused for owner and demo-result SMS. */
+function formatLeadAddress(intake: StructuredIntake): string {
+  const parts = [intake.address, intake.city]
+    .filter((s): s is string => typeof s === "string" && s.trim().length > 0)
+    .map((s) => s.trim())
+  return parts.length > 0 ? parts.join(", ") : "—"
+}
+
+/** Build lead summary SMS body (name, contact, address, issue, vehicle, appt). */
 export function buildLeadSummarySmsBody(
   intake: StructuredIntake,
   call: Call | { appointmentRequest?: { preferredDays?: string; preferredTime?: string; notes?: string } }
 ): string {
+  return buildLeadSummarySmsBodies(intake, call).join("\n\n")
+}
+
+/** One or two SMS bodies — contact block first, details second when needed. */
+export function buildLeadSummarySmsBodies(
+  intake: StructuredIntake,
+  call: Call | { appointmentRequest?: { preferredDays?: string; preferredTime?: string; notes?: string } }
+): string[] {
   const name = (intake.name || "—").trim()
   const phone = (intake.phone || "—").trim()
-  const address = (intake.address || intake.city ? [intake.address, intake.city].filter(Boolean).join(", ") : "—").trim() || "—"
-  const rawIssue = (intake.issue_description || "").trim()
-  const issue = rawIssue.length <= 100 ? rawIssue : rawIssue.slice(0, 97).trim() + "…"
+  const address = formatLeadAddress(intake)
+  const issue = (intake.issue_description || "").trim() || "—"
   const vehicle = [intake.vehicle_year, intake.vehicle_make, intake.vehicle_model, intake.year, intake.make, intake.model]
     .filter(Boolean)
     .map((s) => String(s).trim())
@@ -53,29 +69,22 @@ export function buildLeadSummarySmsBody(
     intake.preferred_time?.trim() ||
     ""
 
-  const lines: string[] = [
-    `Name: ${name}`,
-    `Phone: ${phone}`,
-    `Address: ${address}`,
-    `Reason for call: ${issue || "—"}`,
-  ]
-  if (vehicle) lines.push(`Year-Make-Model: ${vehicle}`)
-  if (apptStr) lines.push(`Appointment pref: ${apptStr}`)
+  const contactLines = [`Name: ${name}`, `Phone: ${phone}`, `Address: ${address}`]
+  const detailLines = [`Reason for call: ${issue}`]
+  if (vehicle) detailLines.push(`Year-Make-Model: ${vehicle}`)
+  if (apptStr) detailLines.push(`Appointment pref: ${apptStr}`)
 
-  let message = lines.join("\n")
-  if (intake.emergency) message = `🚨 EMERGENCY\n${message}`
+  const emergencyPrefix = intake.emergency ? "🚨 EMERGENCY\n" : ""
+  const fullMessage = emergencyPrefix + [...contactLines, ...detailLines].join("\n")
 
-  if (message.length > SMS_MAX_CHARS) {
-    const over = message.length - SMS_MAX_CHARS
-    if (over > 0 && issue.length > 20) {
-      const maxIssue = Math.max(20, issue.length - over - 1)
-      lines[3] = `Reason for call: ${issue.slice(0, maxIssue)}…`
-      message = lines.join("\n")
-      if (intake.emergency) message = `🚨 EMERGENCY\n${message}`
-    }
-    if (message.length > SMS_MAX_CHARS) message = message.slice(0, SMS_MAX_CHARS)
+  if (fullMessage.length <= SMS_PREFERRED_MAX_CHARS) {
+    return [fullMessage.slice(0, SMS_HARD_MAX_CHARS)]
   }
-  return message
+
+  const contactMessage = emergencyPrefix + contactLines.join("\n")
+  const detailsMessage = detailLines.join("\n")
+  const bodies = [contactMessage, detailsMessage].map((b) => b.slice(0, SMS_HARD_MAX_CHARS))
+  return bodies.filter((b) => b.trim().length > 0)
 }
 
 /** Truncate summary to key points only (no full transcript in email). ~320 chars, break at sentence. */
@@ -236,14 +245,16 @@ export async function sendSMSNotification(
     return
   }
 
-  const message = buildLeadSummarySmsBody(intake, call)
+  const messages = buildLeadSummarySmsBodies(intake, call)
   try {
-    await twilioClient.messages.create({
-      body: message,
-      from: process.env.TWILIO_PHONE_NUMBER!,
-      to: ownerPhone,
-    })
-    console.info("[Notifications] SMS sent to owner", { businessId: business.id, to: ownerPhone })
+    for (const body of messages) {
+      await twilioClient.messages.create({
+        body,
+        from: process.env.TWILIO_PHONE_NUMBER!,
+        to: ownerPhone,
+      })
+    }
+    console.info("[Notifications] SMS sent to owner", { businessId: business.id, to: ownerPhone, parts: messages.length })
   } catch (error) {
     console.error("[Notifications] SMS send error:", error)
     throw error
@@ -344,7 +355,7 @@ export async function sendGoogleReviewRequest(
     `Thanks for choosing ${business.name}! If we did a great job, would you leave us a quick Google review? ${googleReviewUrl} Reply STOP to opt out.`
   try {
     await twilioClient.messages.create({
-      body: message.slice(0, SMS_MAX_CHARS * 2),
+      body: message.slice(0, SMS_HARD_MAX_CHARS),
       from: process.env.TWILIO_PHONE_NUMBER,
       to: callerPhone,
     })
@@ -368,16 +379,18 @@ export async function sendDemoResultSms(
     console.warn("[Notifications] Demo result SMS skipped: Twilio not configured")
     return
   }
-  const body = hasActionableInfo
-    ? buildLeadSummarySmsBody(intake, call)
-    : "CallGrabbr: We didn't capture enough for a summary. Call again and briefly describe a job (e.g. \"I need a plumber for a leak\") to see your demo result."
+  const bodies = hasActionableInfo
+    ? buildLeadSummarySmsBodies(intake, call)
+    : ["CallGrabbr: We didn't capture enough for a summary. Call again and briefly describe a job (e.g. \"I need a plumber for a leak\") to see your demo result."]
   try {
-    await twilioClient.messages.create({
-      body,
-      from: process.env.TWILIO_PHONE_NUMBER,
-      to: callerPhone,
-    })
-    console.info("[Notifications] Demo result SMS sent to caller", { to: callerPhone, hasInfo: hasActionableInfo })
+    for (const body of bodies) {
+      await twilioClient.messages.create({
+        body,
+        from: process.env.TWILIO_PHONE_NUMBER,
+        to: callerPhone,
+      })
+    }
+    console.info("[Notifications] Demo result SMS sent to caller", { to: callerPhone, hasInfo: hasActionableInfo, parts: bodies.length })
   } catch (error) {
     console.error("[Notifications] Demo result SMS error:", error)
   }
