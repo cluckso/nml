@@ -54,6 +54,9 @@
   .text-gradient-hero {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-cyan-300 via-blue-400 to-violet-400;
   }
+  .glass-card {
+    @apply border-border/40 bg-card/60 backdrop-blur-md shadow-lg shadow-black/10;
+  }
 }
 
 @layer base {

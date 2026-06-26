@@ -4,6 +4,8 @@ import { getCurrentUser } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { PricingPlansWithAgreement } from "@/components/pricing/PricingPlansWithAgreement"
 import { AudioExamples } from "@/components/marketing/AudioExamples"
+import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
+import { MARKETING_IMAGES } from "@/lib/marketing-images"
 import { Button } from "@/components/ui/button"
 
 export const metadata: Metadata = {
@@ -61,27 +63,34 @@ export default async function PricingPage() {
   const hasStartedTrial = !!business?.trialStartedAt
 
   return (
-    <div className="container mx-auto px-4 py-16">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold mb-4">Missed call = lost job. Pick your coverage.</h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Average job: $350–$600. One captured lead pays for months of service.
+  <>
+    <SectionBackdrop
+      src={MARKETING_IMAGES.teamTrust}
+      alt=""
+      overlay="heavy"
+      className="py-20 border-b border-border/50"
+      contentClassName="container mx-auto px-4 text-center"
+    >
+      <h1 className="text-4xl font-bold mb-4">Missed call = lost job. Pick your coverage.</h1>
+      <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+        Average job: $350–$600. One captured lead pays for months of service.
+      </p>
+      <p className="mt-2 text-muted-foreground">
+        7-day free trial. No card required. Cancel anytime.
+      </p>
+      {isLoggedIn && !hasStartedTrial && (
+        <p className="mt-2 text-sm text-primary font-medium">
+          Start a free trial or pick a plan below.
         </p>
-        <p className="mt-2 text-muted-foreground">
-          7-day free trial. No card required. Cancel anytime.
+      )}
+      {isLoggedIn && hasStartedTrial && (
+        <p className="mt-2 text-sm text-primary font-medium">
+          Pick a plan to upgrade.
         </p>
-        {isLoggedIn && !hasStartedTrial && (
-          <p className="mt-2 text-sm text-primary font-medium">
-            Start a free trial or pick a plan below.
-          </p>
-        )}
-        {isLoggedIn && hasStartedTrial && (
-          <p className="mt-2 text-sm text-primary font-medium">
-            Pick a plan to upgrade.
-          </p>
-        )}
-      </div>
+      )}
+    </SectionBackdrop>
 
+    <div className="container mx-auto px-4 py-16">
       {/* Free trial — no card required (hidden if user already started trial) */}
       {!hasStartedTrial && (
         <div className="max-w-2xl mx-auto mb-12 p-8 rounded-xl border-2 border-primary/20 bg-primary/5 text-center">
@@ -109,5 +118,6 @@ export default async function PricingPage() {
       <PricingPlansWithAgreement plans={PLANS} isLoggedIn={isLoggedIn} />
 
     </div>
+  </>
   )
 }

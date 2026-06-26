@@ -1,10 +1,14 @@
 import Link from "next/link"
-import { HOMEPAGE_INDUSTRY_LINKS } from "@/lib/industry-data"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { AudioExamples } from "@/components/marketing/AudioExamples"
 import { SMSPreview } from "@/components/marketing/SMSPreview"
 import { DemoUnlock } from "@/components/marketing/DemoUnlock"
+import { HomeHero } from "@/components/marketing/HomeHero"
+import { IndustryPhotoCards } from "@/components/marketing/IndustryPhotoCards"
+import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
+import { TrustStrip } from "@/components/marketing/TrustStrip"
+import { MARKETING_IMAGES } from "@/lib/marketing-images"
 import {
   ArrowRight,
   CreditCard,
@@ -19,74 +23,22 @@ import {
   Calendar,
   Link2,
   Phone,
-  TrendingUp,
-  PhoneOff,
 } from "lucide-react"
 
 export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero */}
-      <section className="relative min-h-[85vh] flex flex-col items-center justify-center px-4 py-24 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/10" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(217_91%_60%_/_.15),transparent)]" />
-        <div className="container relative z-10 mx-auto text-center max-w-4xl">
-          {/* Proof stat badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-destructive/30 bg-destructive/10 px-4 py-1.5 text-sm font-medium text-destructive mb-4">
-            <PhoneOff className="h-4 w-4" />
-            80% of callers won&apos;t leave voicemail — they call the next business
-          </div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 tracking-tight">
-            Stop Losing Jobs to Voicemail
-          </h1>
-          <p className="text-xl sm:text-2xl font-semibold text-foreground/90 mb-4">
-            We answer when you can&apos;t and text you the lead in seconds.
-          </p>
-          <p className="text-base sm:text-lg text-muted-foreground mb-2 max-w-2xl mx-auto px-1">
-            Voicemail captures 5–15% of callers. AI answering captures 80–95%. From first ring to qualified lead — no hold music, no robot menus. You get name, phone, job details, and urgency by text and email.
-          </p>
-          <p className="text-sm text-muted-foreground/90 mb-8 max-w-xl mx-auto">
-            Built for HVAC, plumbing, electrical, and auto repair shops.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center mb-6">
-            <Link href="/sign-up" className="min-h-[44px] flex items-center">
-              <Button size="lg" className="gap-2 text-base px-6 sm:px-8 shadow-lg shadow-primary/25 min-h-[44px]">
-                Start free trial
-                <ArrowRight className="h-5 w-5" aria-hidden />
-              </Button>
-            </Link>
-            <Link href="#demo" className="min-h-[44px] flex items-center">
-              <Button size="lg" variant="outline" className="border-2 border-muted-foreground/40 bg-transparent hover:bg-white/5 min-h-[44px]">
-                Test the AI
-              </Button>
-            </Link>
-          </div>
-          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-sm text-muted-foreground">
-            <span className="inline-flex items-center gap-2">
-              <Clock className="h-4 w-4 text-primary/80" aria-hidden />
-              7-day free trial
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <CreditCard className="h-4 w-4 text-primary/80" aria-hidden />
-              No card required
-            </span>
-            <span className="inline-flex items-center gap-2">
-              <Shield className="h-4 w-4 text-primary/80" aria-hidden />
-              Cancel anytime
-            </span>
-          </div>
-          {/* Conversion stat */}
-          <div className="mt-8 inline-flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-2 text-sm">
-            <TrendingUp className="h-4 w-4 text-primary" aria-hidden />
-            <span className="text-muted-foreground">Study of 130,000+ calls:</span>
-            <span className="font-semibold text-foreground">AI captures 80–95% vs voicemail&apos;s 5–15%</span>
-          </div>
-        </div>
-      </section>
+      <HomeHero />
+      <TrustStrip />
 
       {/* From first ring to lead — outcome narrative */}
-      <section className="border-y border-border/50 bg-muted/20 py-16">
-        <div className="container mx-auto px-4">
+      <SectionBackdrop
+        src={MARKETING_IMAGES.workflow}
+        alt=""
+        overlay="light"
+        className="border-y border-border/50 py-16"
+        contentClassName="container mx-auto px-4"
+      >
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-3">
             From first ring to qualified lead.
           </h2>
@@ -122,8 +74,7 @@ export default function HomePage() {
               </p>
             </div>
           </div>
-        </div>
-      </section>
+      </SectionBackdrop>
 
       {/* Stats strip */}
       <section className="container mx-auto px-4 py-8">
@@ -150,7 +101,7 @@ export default function HomePage() {
           When the line is busy or the office is closed, CallGrabbr takes over — no more voicemail black holes.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
-          <Card className="border-border/50 bg-card/50">
+          <Card className="glass-card">
             <CardHeader className="pb-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary mb-2">
                 <Phone className="h-5 w-5" aria-hidden />
@@ -163,7 +114,7 @@ export default function HomePage() {
               </p>
             </CardContent>
           </Card>
-          <Card className="border-border/50 bg-card/50">
+          <Card className="glass-card">
             <CardHeader className="pb-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary mb-2">
                 <Zap className="h-5 w-5" aria-hidden />
@@ -176,7 +127,7 @@ export default function HomePage() {
               </p>
             </CardContent>
           </Card>
-          <Card className="border-border/50 bg-card/50">
+          <Card className="glass-card">
             <CardHeader className="pb-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary mb-2">
                 <Calendar className="h-5 w-5" aria-hidden />
@@ -189,7 +140,7 @@ export default function HomePage() {
               </p>
             </CardContent>
           </Card>
-          <Card className="border-border/50 bg-card/50">
+          <Card className="glass-card">
             <CardHeader className="pb-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary mb-2">
                 <Link2 className="h-5 w-5" aria-hidden />
@@ -206,8 +157,13 @@ export default function HomePage() {
       </section>
 
       {/* Why This Matters */}
-      <section className="bg-muted/30 py-16 border-y border-border/50">
-        <div className="container mx-auto px-4">
+      <SectionBackdrop
+        src={MARKETING_IMAGES.whyMatters}
+        alt=""
+        overlay="medium"
+        className="py-16 border-y border-border/50"
+        contentClassName="container mx-auto px-4"
+      >
           <h2 className="text-3xl font-bold text-center mb-4">Why This Matters</h2>
           <ul className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto list-none text-center">
             <li className="text-muted-foreground">
@@ -223,8 +179,7 @@ export default function HomePage() {
           <p className="text-center font-medium mt-8 text-primary">
             Recover just 2 jobs per month → service pays for itself
           </p>
-        </div>
-      </section>
+      </SectionBackdrop>
 
       {/* How It Works */}
       <section className="container mx-auto px-4 py-16">
@@ -326,7 +281,7 @@ export default function HomePage() {
             Professional, friendly, and fast. No robot menus. No hold music.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card className="border-border/50 bg-card/50">
+            <Card className="glass-card">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Phone className="h-5 w-5 text-primary" />
@@ -338,7 +293,7 @@ export default function HomePage() {
                 <p>The AI asks relevant questions based on your industry (plumbing, HVAC, electrical, etc.) and captures the details you need.</p>
               </CardContent>
             </Card>
-            <Card className="border-border/50 bg-card/50">
+            <Card className="glass-card">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <MessageSquare className="h-5 w-5 text-primary" />
@@ -350,7 +305,7 @@ export default function HomePage() {
                 <p>Average call time: under 2 minutes. Fast for them, detailed for you.</p>
               </CardContent>
             </Card>
-            <Card className="border-border/50 bg-card/50">
+            <Card className="glass-card">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Zap className="h-5 w-5 text-primary" />
@@ -362,7 +317,7 @@ export default function HomePage() {
                 <p>You set the rules: what counts as emergency, who gets notified, when to escalate.</p>
               </CardContent>
             </Card>
-            <Card className="border-border/50 bg-card/50">
+            <Card className="glass-card">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Shield className="h-5 w-5 text-primary" />
@@ -379,8 +334,13 @@ export default function HomePage() {
       </section>
 
       {/* What You Receive — with SMS preview */}
-      <section className="bg-muted/30 py-16 border-y border-border/50">
-        <div className="container mx-auto px-4">
+      <SectionBackdrop
+        src={MARKETING_IMAGES.leadCapture}
+        alt=""
+        overlay="light"
+        className="py-16 border-y border-border/50"
+        contentClassName="container mx-auto px-4"
+      >
           <h2 className="text-3xl font-bold text-center mb-3">What you get after every call</h2>
           <p className="text-center text-muted-foreground mb-12 max-w-xl mx-auto">
             Seconds after the call ends, you receive everything you need to call back and close the job.
@@ -417,8 +377,7 @@ export default function HomePage() {
               </p>
             </div>
           </div>
-        </div>
-      </section>
+      </SectionBackdrop>
 
       <AudioExamples />
 
@@ -426,15 +385,7 @@ export default function HomePage() {
       <section className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center mb-4">Built for Local Service Businesses</h2>
         <p className="text-center text-muted-foreground mb-10">Ideal for:</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center max-w-3xl mx-auto">
-          {HOMEPAGE_INDUSTRY_LINKS.map(({ name, slug }) => (
-            <div key={slug + name}>
-              <Link href={`/for/${slug}`} className="font-semibold hover:text-primary transition-colors">
-                {name}
-              </Link>
-            </div>
-          ))}
-        </div>
+        <IndustryPhotoCards />
         <p className="text-center text-muted-foreground mt-8">If customers call you — this fits.</p>
       </section>
 
@@ -446,7 +397,7 @@ export default function HomePage() {
             No setup fees. No hidden charges. Cancel anytime.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            <Card className="border-border/50 bg-card/50">
+            <Card className="glass-card">
               <CardHeader>
                 <CardTitle>Solo — $99/mo</CardTitle>
                 <p className="text-sm text-muted-foreground font-normal">Best for solo operators · 300 included min/mo</p>
@@ -488,7 +439,7 @@ export default function HomePage() {
                 ))}
               </CardContent>
             </Card>
-            <Card className="border-border/50 bg-card/50">
+            <Card className="glass-card">
               <CardHeader>
                 <CardTitle>Pro — $249/mo</CardTitle>
                 <p className="text-sm text-muted-foreground font-normal">Best for high-volume trades · 1,800 included min/mo</p>
@@ -529,7 +480,7 @@ export default function HomePage() {
           Quick answers so you can get started with confidence.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
-          <Card className="border-border/50 bg-card/50">
+          <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-base">“Does it sound like a real person?”</CardTitle>
             </CardHeader>
@@ -539,7 +490,7 @@ export default function HomePage() {
               </p>
             </CardContent>
           </Card>
-          <Card className="border-border/50 bg-card/50">
+          <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-base">“What if the caller wants a human?”</CardTitle>
             </CardHeader>
@@ -552,7 +503,7 @@ export default function HomePage() {
               </ul>
             </CardContent>
           </Card>
-          <Card className="border-border/50 bg-card/50">
+          <Card className="glass-card">
             <CardHeader>
               <CardTitle className="text-base">“Do I need new software?”</CardTitle>
             </CardHeader>
@@ -562,7 +513,7 @@ export default function HomePage() {
               </p>
             </CardContent>
           </Card>
-          <Card className="border-border/50 bg-card/50">
+          <Card className="glass-card">
             <CardHeader className="pb-2">
               <CardTitle className="text-base">How fast can I get set up?</CardTitle>
             </CardHeader>
@@ -635,8 +586,14 @@ export default function HomePage() {
       </section>
 
       {/* Final CTA */}
-      <section className="bg-primary text-primary-foreground py-20">
-        <div className="container mx-auto px-4 text-center">
+      <SectionBackdrop
+        src={MARKETING_IMAGES.finalCta}
+        alt=""
+        overlay="heavy"
+        className="py-20"
+        contentClassName="container mx-auto px-4 text-center"
+      >
+        <div className="max-w-3xl mx-auto rounded-2xl border border-white/10 bg-primary/90 backdrop-blur-md px-6 py-12 sm:px-10 text-primary-foreground shadow-2xl shadow-primary/20">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Turn your phone into a 24/7 lead machine</h2>
           <p className="text-lg opacity-90 max-w-2xl mx-auto mb-8">
             Stop losing jobs to voicemail. Get every call answered, every lead captured, and every summary in your inbox in seconds.
@@ -658,7 +615,7 @@ export default function HomePage() {
             Setup in 5 minutes. Use your existing business number.
           </p>
         </div>
-      </section>
+      </SectionBackdrop>
     </div>
   )
 }
