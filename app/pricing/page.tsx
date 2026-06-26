@@ -48,13 +48,7 @@ const PLANS = [
   },
 ]
 
-type Props = { searchParams?: Promise<{ founder?: string }> | { founder?: string } }
-
-export default async function PricingPage(props: Props) {
-  const sp = props.searchParams ?? {}
-  const resolved = sp instanceof Promise ? await sp : sp
-  const founder = resolved.founder === "1" || resolved.founder === "true"
-
+export default async function PricingPage() {
   const user = await getCurrentUser()
   const isLoggedIn = !!user
 
@@ -88,17 +82,6 @@ export default async function PricingPage(props: Props) {
         )}
       </div>
 
-      {/* Founders Deal banner — when ?founder=1 */}
-      {founder && (
-        <div className="max-w-3xl mx-auto mb-10 p-6 rounded-xl border-2 border-amber-500/50 bg-amber-500/10 text-center">
-          <p className="text-amber-600 dark:text-amber-400 font-bold text-lg mb-1">Founders Deal — limited time</p>
-          <p className="text-muted-foreground mb-2">
-            Pay your first month. Get <strong className="text-foreground">11 months FREE</strong> — a full year of service for the price of one month.
-          </p>
-          <p className="text-sm text-muted-foreground">Choose a plan below to lock in this offer.</p>
-        </div>
-      )}
-
       {/* Free trial — no card required (hidden if user already started trial) */}
       {!hasStartedTrial && (
         <div className="max-w-2xl mx-auto mb-12 p-8 rounded-xl border-2 border-primary/20 bg-primary/5 text-center">
@@ -123,7 +106,7 @@ export default async function PricingPage(props: Props) {
 
       <AudioExamples />
 
-      <PricingPlansWithAgreement plans={PLANS} isLoggedIn={isLoggedIn} founderDeal={founder} />
+      <PricingPlansWithAgreement plans={PLANS} isLoggedIn={isLoggedIn} />
 
     </div>
   )
