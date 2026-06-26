@@ -1,0 +1,75 @@
+{
+  "version": "1.0.0",
+  "platformVersion": "15.0.0",
+  "authentication": {
+    "type": "custom",
+    "fields": {
+      "api_key": {
+        "label": "API Key",
+        "helpText": "Generate your API key in CallGrabbr Settings → CRM & Integrations",
+        "required": true,
+        "type": "string"
+      }
+    },
+    "test": {
+      "url": "{{process.env.BASE_URL}}/api/integrations/zapier/hooks",
+      "method": "GET",
+      "headers": {
+        "Authorization": "Bearer {{bundle.authData.api_key}}"
+      }
+    },
+    "connectionLabel": "{{bundle.authData.api_key}}"
+  },
+  "triggers": {
+    "new_lead": {
+      "key": "new_lead",
+      "noun": "Lead",
+      "display": {
+        "label": "New Lead Captured",
+        "description": "Triggers when CallGrabbr captures a lead from an incoming call."
+      },
+      "operation": {
+        "type": "hook",
+        "performSubscribe": {
+          "url": "{{process.env.BASE_URL}}/api/integrations/zapier/hooks",
+          "method": "POST",
+          "headers": {
+            "Authorization": "Bearer {{bundle.authData.api_key}}",
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "target_url": "{{bundle.targetUrl}}",
+            "event": "new_lead"
+          }
+        },
+        "performUnsubscribe": {
+          "url": "{{process.env.BASE_URL}}/api/integrations/zapier/hooks?id={{bundle.subscribeData.id}}",
+          "method": "DELETE",
+          "headers": {
+            "Authorization": "Bearer {{bundle.authData.api_key}}"
+          }
+        },
+        "performList": {
+          "url": "{{process.env.BASE_URL}}/api/integrations/zapier/hooks",
+          "method": "GET",
+          "headers": {
+            "Authorization": "Bearer {{bundle.authData.api_key}}"
+          }
+        },
+        "sample": {
+          "event": "new_lead",
+          "business": { "id": "biz_123", "name": "Acme HVAC" },
+          "lead": {
+            "callId": "call_123",
+            "callerName": "John Smith",
+            "callerPhone": "+15551234567",
+            "issueDescription": "AC not cooling",
+            "summary": "Customer needs AC repair",
+            "emergency": false,
+            "createdAt": "2026-06-25T12:00:00.000Z"
+          }
+        }
+      }
+    }
+  }
+}

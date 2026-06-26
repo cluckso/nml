@@ -1,0 +1,510 @@
+{
+  "agent_id": "",
+  "channel": "voice",
+  "last_modification_timestamp": 1769613434394,
+  "agent_name": "Kip",
+  "response_engine": {
+    "type": "conversation-flow",
+    "version": 0,
+    "conversation_flow_id": "conversation_flow_d3290706621b"
+  },
+  "language": "en-US",
+  "data_storage_setting": "everything",
+  "opt_in_signed_url": false,
+  "version": 0,
+  "is_published": false,
+  "post_call_analysis_model": "gpt-4.1-mini",
+  "pii_config": {
+    "mode": "post_call",
+    "categories": []
+  },
+  "voice_id": "11labs-Chloe",
+  "voice_temperature": 0.98,
+  "voice_speed": 0.98,
+  "volume": 0.94,
+  "max_call_duration_ms": 3600000,
+  "interruption_sensitivity": 0.9,
+  "allow_user_dtmf": true,
+  "user_dtmf_options": {},
+  "conversationFlow": {
+    "conversation_flow_id": "conversation_flow_d3290706621b",
+    "version": 0,
+    "global_prompt": "You are a professional and friendly AI voice assistant for Plumbers R' Us, a plumbing and heating repair company.   Callers should hear a smile in your voice, so speak clearly and with a little enthusiasm. Your role is to:\n- Greet callers warmly and professionally\n- Collect necessary information about maintenance requests\n- Verify service area coverage\n- Gather contact information\n- Provide clear next steps\n\nAlways be:\n- Polite and professional\n- Concise but thorough\n- Patient with callers\n- Clear in your instructions\n\nAvoid using fillers like \"um\" \"uh\" \"well\" \"so\"\n\nIf given information that should be a 911 call, pronounce \"911\" as \"Nine-One-One\", NOT \"Nine hundred eleven\"",
+    "nodes": [
+      {
+        "instruction": {
+          "type": "static_text",
+          "text": "Thanks for calling Plumbers R’ Us! This is Anna, our virtual assistant. Who am I speaking with today?\n"
+        },
+        "model_choice": {
+          "type": "cascading",
+          "model": "gpt-4.1-mini",
+          "high_priority": false
+        },
+        "name": "Welcome Node",
+        "edges": [
+          {
+            "destination_node_id": "node-1769547331254",
+            "id": "edge-2",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "User provided name"
+            }
+          },
+          {
+            "destination_node_id": "node-1769548514528",
+            "id": "edge-1769604065164-ymzepqlbs",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "If confidence < threshold OR name uncommon"
+            }
+          }
+        ],
+        "start_speaker": "agent",
+        "id": "start-node-1769546904646",
+        "type": "conversation",
+        "display_position": {
+          "x": -106.09672701568185,
+          "y": 389.03627576131584
+        },
+        "interruption_sensitivity": 0
+      },
+      {
+        "name": "End Call",
+        "id": "end-call-node-1769546904646",
+        "type": "end",
+        "display_position": {
+          "x": 4306.409673494068,
+          "y": 274.84436159696463
+        },
+        "speak_during_execution": true,
+        "instruction": {
+          "type": "prompt",
+          "text": "Thanks {{Name}}.  A member of our team will reach out shortly regarding your {{issue_description}}.  Thank you for calling Plumbers R’ Us. Have a great day!"
+        }
+      },
+      {
+        "name": "Collect Name",
+        "edges": [
+          {
+            "destination_node_id": "node-1769548384153",
+            "id": "edge-1769547331254-tt3ssinmd",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "User provided city"
+            }
+          }
+        ],
+        "id": "node-1769547331254",
+        "type": "conversation",
+        "display_position": {
+          "x": 424.5474270453826,
+          "y": 396.9054674251459
+        },
+        "instruction": {
+          "type": "prompt",
+          "text": "Thank you {{Name}}! Could you please provide the city the property is in that needs maintenance?\n"
+        }
+      },
+      {
+        "name": "City Verified",
+        "edges": [
+          {
+            "destination_node_id": "node-1769571735946",
+            "id": "edge-1769548384153-d23lwgy7u",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "if city IS supported"
+            }
+          },
+          {
+            "destination_node_id": "node-1769571673370",
+            "id": "edge-1769571626146-e5k23m4bz",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "if city IS NOT supported"
+            }
+          }
+        ],
+        "id": "node-1769548384153",
+        "type": "conversation",
+        "display_position": {
+          "x": 851.9942182209617,
+          "y": 301.9552494242109
+        },
+        "instruction": {
+          "type": "prompt",
+          "text": "Ask the caller to confirm the city.\nInternally verify the city is one of the supported service locations:\nPlatteville, Lancaster, Cuba City, Belmont, Potosi, Kieler, Jonestown, Rewey.\n\nDo not show the list to the caller."
+        }
+      },
+      {
+        "instruction": {
+          "type": "prompt",
+          "text": "To ensure i have the correct information, could you spell your name for me, please?  After you spell it, I will confirm it back to you. If I get it wrong, please let me know and we'll try again."
+        },
+        "model_choice": {
+          "type": "cascading",
+          "model": "gpt-5",
+          "high_priority": false
+        },
+        "name": "Spell Name",
+        "edges": [
+          {
+            "destination_node_id": "node-1769547331254",
+            "id": "edge-1769548514528-o8lhuspfg",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "positive response from user after agent repeats spelling of name."
+            }
+          }
+        ],
+        "id": "node-1769548514528",
+        "type": "conversation",
+        "display_position": {
+          "x": 212.96124385889857,
+          "y": 807.1811901760497
+        }
+      },
+      {
+        "name": "Not supported",
+        "edges": [
+          {
+            "destination_node_id": "node-1769611958466",
+            "id": "edge-1769571673370-p4iuk5h98",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "Always"
+            }
+          }
+        ],
+        "id": "node-1769571673370",
+        "type": "conversation",
+        "display_position": {
+          "x": 1644.7403302041155,
+          "y": 900.9540757535726
+        },
+        "instruction": {
+          "type": "prompt",
+          "text": "Apologize, and inform the caller that we don’t currently provide services in {{city}}.  Do not offer any future services, i.e. dont say anything like \"If you ever have a property that needs service in our area....\""
+        }
+      },
+      {
+        "name": "Ask Address",
+        "edges": [
+          {
+            "destination_node_id": "node-1769571814027",
+            "id": "edge-1769571735946-kcvjml4mv",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "If address is provided"
+            }
+          }
+        ],
+        "id": "node-1769571735946",
+        "type": "conversation",
+        "display_position": {
+          "x": 1226.8214164357626,
+          "y": 221.40322986804188
+        },
+        "instruction": {
+          "type": "prompt",
+          "text": "“Great, we do service {{city}} Could you please provide the full address of the property needing maintenance?"
+        }
+      },
+      {
+        "name": "Ask Issue Details",
+        "edges": [
+          {
+            "destination_node_id": "node-1769572341674",
+            "id": "edge-1769571814027-wklcy8w6f",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "If user has more details"
+            }
+          },
+          {
+            "destination_node_id": "node-1769572004554",
+            "id": "edge-1769571957690-0tu1e0zjv",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "If user is done"
+            }
+          },
+          {
+            "destination_node_id": "node-1769604911556",
+            "id": "edge-1769604867060-amji4xx4g",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "If urgent or emergency, i.e. “flooding”\n“no heat”\n“gas smell”\n“burst pipe”"
+            }
+          }
+        ],
+        "id": "node-1769571814027",
+        "type": "conversation",
+        "display_position": {
+          "x": 1772.688827948707,
+          "y": 33.6783598410481
+        },
+        "instruction": {
+          "type": "prompt",
+          "text": "“Please describe the issue you’re experiencing in as much detail as possible.”"
+        }
+      },
+      {
+        "name": "Recite Issue",
+        "edges": [
+          {
+            "destination_node_id": "node-1769572852043",
+            "id": "edge-1769572004554-nwm77x98u",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "if user agrees that information recited is correct"
+            }
+          },
+          {
+            "destination_node_id": "node-1769571814027",
+            "id": "edge-1769572187402-8npzffw45",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "if user does NOT agree that information recited is correct"
+            }
+          }
+        ],
+        "id": "node-1769572004554",
+        "type": "conversation",
+        "display_position": {
+          "x": 2432.9565934579205,
+          "y": 67.65182905707417
+        },
+        "instruction": {
+          "type": "prompt",
+          "text": "Repeat back to the user the information gathered about the issue.   Ask if it is correct."
+        }
+      },
+      {
+        "name": "More Details",
+        "edges": [
+          {
+            "destination_node_id": "node-1769572004554",
+            "id": "edge-1769572341674-u46291l6c",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "User confirms they have given all the pertinent details"
+            }
+          }
+        ],
+        "id": "node-1769572341674",
+        "type": "conversation",
+        "display_position": {
+          "x": 1944.8781411544726,
+          "y": -395.78040935295456
+        },
+        "instruction": {
+          "type": "prompt",
+          "text": "Ask for the rest of the details about the issue, confirm that response is the final details pertinent to the issue.\n"
+        }
+      },
+      {
+        "name": "Phone Confirm",
+        "edges": [
+          {
+            "destination_node_id": "node-1769572933643",
+            "id": "edge-1769572852043-u3ojmfkpz",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "if confirmed"
+            }
+          },
+          {
+            "destination_node_id": "node-1769573156859",
+            "id": "edge-1769573148627-07ch73te8",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "if NOT confirmed"
+            }
+          }
+        ],
+        "id": "node-1769572852043",
+        "type": "conversation",
+        "display_position": {
+          "x": 2858.685428320703,
+          "y": -121.33036001667098
+        },
+        "instruction": {
+          "type": "prompt",
+          "text": "Ok, got it!  {{Name}}! Now, is the best number to reach you the one you’re calling from? Recite number from caller id."
+        }
+      },
+      {
+        "name": "Final Assistant",
+        "edges": [
+          {
+            "destination_node_id": "end-call-node-1769546904646",
+            "id": "edge-1769572933643-ge8p5sffd",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "If conversation is complete"
+            }
+          },
+          {
+            "destination_node_id": "node-1769605422285",
+            "id": "edge-1769605368309-3kl1v2aqy",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "if addtional information is given by user"
+            }
+          }
+        ],
+        "id": "node-1769572933643",
+        "type": "conversation",
+        "display_position": {
+          "x": 3662.875681815591,
+          "y": -138.463057334337
+        },
+        "instruction": {
+          "type": "prompt",
+          "text": "“ Is there anything else we should know or anything else I can help you with today?”"
+        }
+      },
+      {
+        "name": "Ask number",
+        "edges": [
+          {
+            "destination_node_id": "node-1769572933643",
+            "id": "edge-1769573156859-ygo3r7m1j",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "user provides number"
+            }
+          }
+        ],
+        "id": "node-1769573156859",
+        "type": "conversation",
+        "display_position": {
+          "x": 3027.8634319450484,
+          "y": 369.9254126573529
+        },
+        "instruction": {
+          "type": "prompt",
+          "text": "Ask for best contact phone number"
+        }
+      },
+      {
+        "name": "Conversation",
+        "edges": [
+          {
+            "destination_node_id": "node-1769572004554",
+            "id": "edge-1769604911556-rabap2k0v",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "Always"
+            }
+          }
+        ],
+        "id": "node-1769604911556",
+        "type": "conversation",
+        "display_position": {
+          "x": 2035.8888757471714,
+          "y": 489.96734529154685
+        },
+        "instruction": {
+          "type": "prompt",
+          "text": "This sounds urgent. I’ll make sure it’s flagged as a priority."
+        }
+      },
+      {
+        "name": "Conversation",
+        "edges": [
+          {
+            "destination_node_id": "end-call-node-1769546904646",
+            "id": "edge-1769605422285-k8eyqsdu6",
+            "transition_condition": {
+              "type": "prompt",
+              "prompt": "no further information"
+            }
+          }
+        ],
+        "id": "node-1769605422285",
+        "type": "conversation",
+        "display_position": {
+          "x": 3514.9182000190353,
+          "y": 315.91765424658087
+        },
+        "instruction": {
+          "type": "prompt",
+          "text": "repeat summary of additional information back to user, ask if there is anything else that we should take note of?"
+        }
+      },
+      {
+        "name": "End Call",
+        "id": "node-1769611958466",
+        "type": "end",
+        "speak_during_execution": true,
+        "display_position": {
+          "x": 2329.2668163512103,
+          "y": 1006.2729330255363
+        },
+        "instruction": {
+          "type": "prompt",
+          "text": "Politely end the call"
+        }
+      }
+    ],
+    "components": [
+      {
+        "name": "Component L1",
+        "start_node_id": "conversation-1769604767317",
+        "conversation_flow_component_id": "cf-component-1769604767316",
+        "nodes": [
+          {
+            "name": "Conversation",
+            "edges": [],
+            "id": "conversation-1769604767317",
+            "type": "conversation",
+            "display_position": {
+              "x": 200,
+              "y": 100
+            },
+            "instruction": {
+              "type": "prompt",
+              "text": "Describe what the AI should say or do"
+            }
+          },
+          {
+            "name": "Exit Component",
+            "id": "component-end-1769604767317",
+            "type": "end",
+            "speak_during_execution": false,
+            "display_position": {
+              "x": 600,
+              "y": 100
+            },
+            "instruction": {
+              "type": "static_text",
+              "text": "Component completed"
+            }
+          }
+        ],
+        "user_modified_timestamp": 1769604767317,
+        "tools": []
+      }
+    ],
+    "start_node_id": "start-node-1769546904646",
+    "start_speaker": "agent",
+    "model_choice": {
+      "type": "cascading",
+      "model": "gpt-4.1"
+    },
+    "tool_call_strict_mode": true,
+    "knowledge_base_ids": [],
+    "kb_config": {
+      "top_k": 3,
+      "filter_score": 0.6
+    },
+    "begin_tag_display_position": {
+      "x": -530.8571428571429,
+      "y": 520.1428571428572
+    },
+    "is_published": false
+  }
+}

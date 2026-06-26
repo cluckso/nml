@@ -1,0 +1,25 @@
+# Flutter
+.dart_tool/
+.packages
+build/
+*.iml
+*.ipr
+*.iws
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Env / secrets
+.env
+.env.*
+*.jks
+*.keystore
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,320 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Use pooler URL (port 6543, ?pgbouncer=true) for DATABASE_URL at runtime to avoid "MaxClientsInSessionMode".
+// Use direct URL (port 5432) for DIRECT_URL (migrations only). See DATABASE.md.
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+  PARTNER
+}
+
+enum AgencyClientStatus {
+  ACTIVE
+  PAUSED
+  CHURNED
+}
+
+enum Industry {
+  HVAC
+  PLUMBING
+  AUTO_REPAIR
+  CHILDCARE
+  ELECTRICIAN
+  HANDYMAN
+  GENERIC
+}
+
+enum PlanType {
+  STARTER
+  PRO
+  LOCAL_PLUS  // Legacy; treat as ELITE
+  ELITE
+}
+
+enum LeadTag {
+  EMERGENCY
+  ESTIMATE
+  FOLLOW_UP
+  GENERAL
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  PAUSED
+}
+
+enum ClientStatus {
+  PAUSED
+  ACTIVE
+}
+
+enum ReferralStatus {
+  PENDING
+  CONVERTED
+  EXPIRED
+}
+
+model User {
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  name               String?   // User's display name
+  supabaseUserId     String?   @unique
+  phoneNumber        String?   // For SMS notifications to owner
+  smsConsent         Boolean   @default(false)  // User explicitly opted in to receive SMS
+  smsConsentAt       DateTime? // Timestamp of SMS opt-in
+  smsOptedOut        Boolean   @default(false)  // User texted STOP or opted out
+  smsOptedOutAt      DateTime? // Timestamp of opt-out
+  pushToken          String?   // FCM push token for mobile app notifications
+  pushPlatform       String?   // android or ios
+  reviewEmailSentAt  DateTime? // When review request email was sent (null = not sent yet)
+  role               UserRole  @default(CUSTOMER)
+  businessId         String?
+  business           Business? @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([businessId])
+  @@index([supabaseUserId])
+}
+
+model Business {
+  id                        String        @id @default(cuid())
+  name                      String
+  industry                  Industry
+  primaryForwardingNumber   String        @unique // E.164; the business's own phone that forwards to AI
+  retellPhoneNumber         String?       @unique // E.164; dedicated Retell number for this business (to_number in webhook)
+  retellAgentId             String?       // Dedicated Retell agent for this business (one agent per business)
+  stripeCustomerId          String?       @unique
+  serviceAreas              String[]      @default([])
+  businessHours             Json?         // { open: "09:00", close: "17:00", days: ["monday", "tuesday", ...] }
+  departments               String[]      @default([]) // Local Plus: e.g. ["Plumbing", "HVAC"]
+  address                   String?
+  city                      String?
+  state                     String?
+  zipCode                   String?
+  onboardingComplete        Boolean       @default(false)
+  requiresManualSetup       Boolean       @default(false)
+  status                    ClientStatus  @default(PAUSED) // ACTIVE = answer calls and bill; PAUSED = do not connect
+  testCallVerifiedAt        DateTime?     // Set when first completed call received for this client (forwarded_from matched)
+  crmWebhookUrl             String?       // Pro+: POST lead data to CRM
+  forwardToEmail            String?       // Pro+: forward leads to this email (e.g. CRM pipe)
+  afterHoursEmergencyPhone  String?       // Pro only: on-call number for after-hours emergencies (not Local Plus)
+  offersRoadsideService     Boolean?      // For AUTO_REPAIR: true = collect location for roadside
+  voiceSettings             Json?         // Local Plus: { speed?, temperature?, volume? } 0–1 or similar
+  settings                  Json?         // BusinessSettings JSON (greeting, intake fields, notifications, routing, booking, etc.)
+  // Trial (one per business; no separate TrialClaim table)
+  trialStartedAt            DateTime?     // When trial started
+  trialEndsAt               DateTime?     // trialStartedAt + 7 days
+  trialMinutesUsed          Float        @default(0) // Minutes counting toward 50-minute trial cap
+  // Subscription (merged from Subscription table; one plan per business)
+  planType                  PlanType?
+  stripeSubscriptionId      String?       @unique
+  subscriptionStatus        SubscriptionStatus?
+  currentPeriodStart        DateTime?
+  currentPeriodEnd          DateTime?
+  cancelAtPeriodEnd         Boolean       @default(false)
+  founderDealRedeemedAt     DateTime?    // Founder deal: pay first month, 11 months free (subscription has Stripe coupon)
+  referralCode              String?      @unique // Self-serve referral program code
+  referredByBusinessId      String?      // Business that referred this signup
+  referredByBusiness        Business?    @relation("BusinessReferrals", fields: [referredByBusinessId], references: [id], onDelete: SetNull)
+  referredBusinesses        Business[]   @relation("BusinessReferrals")
+  createdAt                 DateTime     @default(now())
+  updatedAt                 DateTime     @updatedAt
+
+  users              User[]
+  calls              Call[]
+  appointments       Appointment[]
+  usage              Usage[]
+  referralsMade      Referral[] @relation("ReferrerBusiness")
+  referralsReceived  Referral[] @relation("ReferredBusiness")
+  agencyId           String?
+  agency             Agency?    @relation("AgencyClients", fields: [agencyId], references: [id], onDelete: SetNull)
+  agencyProfile      Agency?    @relation("AgencyOwner")
+  agencyClient       AgencyClient?
+  zapierHooks        ZapierHook[]
+
+  @@index([primaryForwardingNumber])
+  @@index([agencyId])
+  @@index([retellPhoneNumber])
+  @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
+  @@index([subscriptionStatus])
+}
+
+model Call {
+  id                    String    @id @default(cuid())
+  retellCallId          String    @unique
+  businessId            String
+  business              Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  callerPhone           String?   // E.164 caller (from_number; fallback to intake phone)
+  aiNumberAnswered      String?   // E.164 number that was called (Retell to_number)
+  duration              Int       // Duration in seconds
+  minutes               Float     // Duration in minutes (for billing)
+  transcript            String?
+  summary               String?   // Short summary (Pro+)
+  structuredIntake      Json?     // { name, phone, address, issue_description, emergency, appointmentRequest, etc. }
+  emergencyFlag         Boolean   @default(false)
+  leadTag               LeadTag?  // Pro+: EMERGENCY | ESTIMATE | FOLLOW_UP | GENERAL
+  department            String?   // Local Plus: which department was requested
+  appointmentRequest    Json?     // Pro+: { preferredDays?, preferredTime?, notes? }
+  callerName            String?
+  issueDescription      String?
+  missedCallRecovery    Boolean   @default(false) // True if call ended early but we captured partial info
+  notificationSent       Boolean   @default(false) // True after email/SMS summary sent (once per call)
+  missedCallTextBackSent Boolean   @default(false) // True after missed-call SMS sent to caller
+  callerConfirmationSentAt DateTime? // When immediate confirmation SMS was sent to caller
+  followUpSentAt        DateTime? // When 24hr follow-up SMS was sent to caller
+  createdAt             DateTime  @default(now())
+  appointments          Appointment[]
+
+  @@index([businessId])
+  @@index([retellCallId])
+  @@index([createdAt])
+  @@index([emergencyFlag])
+  @@index([leadTag])
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+model Appointment {
+  id                String            @id @default(cuid())
+  businessId        String
+  business          Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  callId            String?           // Link to call that created it (from Retell)
+  call              Call?             @relation(fields: [callId], references: [id], onDelete: SetNull)
+  callerName        String?
+  callerPhone       String?
+  callerEmail       String?
+  scheduledAt       DateTime
+  durationMinutes   Int               @default(60)
+  status            AppointmentStatus @default(PENDING)
+  issueDescription  String?
+  notes             String?
+  reviewRequestSentAt DateTime?       // When Google review request SMS was sent
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  @@index([businessId])
+  @@index([scheduledAt])
+  @@index([status])
+}
+
+model Agency {
+  id             String         @id @default(cuid())
+  name           String
+  ownerBusinessId String        @unique
+  ownerBusiness  Business       @relation("AgencyOwner", fields: [ownerBusinessId], references: [id], onDelete: Cascade)
+  inviteCode     String         @unique
+  commissionRate Float          @default(0.30)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  clients        AgencyClient[]
+  clientBusinesses Business[]   @relation("AgencyClients")
+  commissions    AgencyCommission[]
+
+  @@index([inviteCode])
+}
+
+model AgencyClient {
+  id                    String             @id @default(cuid())
+  agencyId              String
+  agency                Agency             @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  businessId            String             @unique
+  business              Business           @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  status                AgencyClientStatus @default(ACTIVE)
+  commissionCentsTotal  Int                @default(0)
+  joinedAt              DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+
+  @@index([agencyId])
+  @@index([status])
+}
+
+model AgencyCommission {
+  id              String   @id @default(cuid())
+  agencyId        String
+  agency          Agency   @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  businessId      String
+  amountCents     Int
+  periodStart     DateTime
+  periodEnd       DateTime
+  stripeInvoiceId String?
+  createdAt       DateTime @default(now())
+
+  @@index([agencyId])
+  @@index([businessId])
+}
+
+model ZapierHook {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  targetUrl  String
+  event      String   @default("new_lead")
+  createdAt  DateTime @default(now())
+
+  @@index([businessId])
+  @@index([event])
+}
+
+model Referral {
+  id                  String         @id @default(cuid())
+  referrerBusinessId  String
+  referrerBusiness    Business       @relation("ReferrerBusiness", fields: [referrerBusinessId], references: [id], onDelete: Cascade)
+  referredEmail       String?
+  referredPhone       String?
+  referredBusinessId  String?
+  referredBusiness    Business?      @relation("ReferredBusiness", fields: [referredBusinessId], references: [id], onDelete: SetNull)
+  status              ReferralStatus @default(PENDING)
+  rewardAmountCents   Int            @default(5000)
+  rewardCredited      Boolean        @default(false)
+  createdAt           DateTime       @default(now())
+  convertedAt         DateTime?
+
+  @@index([referrerBusinessId])
+  @@index([referredBusinessId])
+  @@index([status])
+}
+
+model Usage {
+  id               String   @id @default(cuid())
+  businessId       String
+  business         Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  minutesUsed      Float
+  billingPeriod   String   // Format: "YYYY-MM"
+  reportedToStripe Boolean  @default(false)
+  stripeUsageRecordId String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([businessId, billingPeriod])
+  @@index([businessId])
+  @@index([billingPeriod])
+}
+
+/// Pool of Retell numbers released by churned/canceled businesses; reused for new signups instead of buying new.
+model RecycledRetellNumber {
+  id          String   @id @default(cuid())
+  phoneNumber String   @unique // E.164
+  releasedAt  DateTime @default(now())
+  @@index([releasedAt])
+}

@@ -1,0 +1,15 @@
+{
+  "buildCommand": "npm run build",
+  "framework": "nextjs",
+  "installCommand": "npm install",
+  "crons": [
+    {
+      "path": "/api/cron/expire-trials",
+      "schedule": "0 12 * * *"
+    },
+    {
+      "path": "/api/cron/follow-up",
+      "schedule": "0 13 * * *"
+    }
+  ]
+}

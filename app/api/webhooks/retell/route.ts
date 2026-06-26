@@ -1,0 +1,803 @@
+import { NextRequest, NextResponse } from "next/server"
+import { verify } from "retell-sdk"
+import { db } from "@/lib/db"
+import { resolveClient, resolveClientByRetellNumber } from "@/lib/resolve-client"
+import { normalizeE164 } from "@/lib/normalize-phone"
+import {
+  sendEmailNotification,
+  sendSMSNotification,
+  sendSMSToCaller,
+  sendDemoResultSms,
+  sendMissedCallTextBack,
+  forwardToCrm,
+} from "@/lib/notifications"
+import { reportUsageToStripe } from "@/lib/stripe"
+import { releaseRetellNumber } from "@/lib/retell"
+import { isSubscriptionActive } from "@/lib/subscription"
+import { hasSmsToCallers, hasCrmForwarding, hasLeadTagging, hasAppointmentCapture, getEffectivePlanType, FREE_TRIAL_MINUTES, TRIAL_DAYS, MAX_CALL_DURATION_SECONDS, toBillableMinutes } from "@/lib/plans"
+import { rateLimit } from "@/lib/rate-limit"
+import { getAgentIdForInbound, getAgentIdForIndustry } from "@/lib/intake-routing"
+import { ClientStatus } from "@prisma/client"
+import { mergeWithDefaults, type BusinessSettings } from "@/lib/business-settings"
+import { buildAgentOverride } from "@/lib/agent-override"
+import { hasActionableInfo, isLikelySpam, isKnownSpamOrTestNumber } from "@/lib/call-filter"
+import { parseAppointmentRequest } from "@/lib/appointments"
+import { isSpamByTwilioLookup } from "@/lib/twilio-lookup"
+import { parseLeadFromSummaryOrTranscript } from "@/lib/parse-lead-from-transcript"
+import { fireZapierLeadHook } from "@/lib/zapier"
+
+/** Retell expects 204 No Content on success. Use 200 + body only for call_inbound (required) and test/ping. */
+const RETELL_SUCCESS = new NextResponse(null, { status: 204 })
+
+export async function POST(req: NextRequest) {
+  try {
+    const forwarded = req.headers.get("x-forwarded-for")
+    const ip = forwarded ? forwarded.split(",")[0].trim() : req.headers.get("x-real-ip") || "unknown"
+    const limit = rateLimit(`webhook-retell-${ip}`, 100, 60000)
+    if (!limit.allowed) {
+      return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 })
+    }
+
+    const signature = req.headers.get("x-retell-signature") ?? ""
+    const body = await req.text()
+
+    // Retell dashboard "Test" often sends minimal/no signature — accept so Test button passes
+    const isTestOrPing =
+      !body?.trim() ||
+      body === "{}" ||
+      body === "null" ||
+      /^\s*\{\s*"event"\s*:\s*"(ping|webhook_ping|test)"\s*\}\s*$/i.test(body)
+    if (isTestOrPing) {
+      return RETELL_SUCCESS
+    }
+
+    const apiKey = process.env.RETELL_WEBHOOK_SECRET || process.env.RETELL_API_KEY
+    if (!apiKey) {
+      console.warn("Retell webhook: RETELL_API_KEY not set")
+      return NextResponse.json({ error: "Webhook not configured" }, { status: 500 })
+    }
+
+    const valid = await verify(body, apiKey, signature)
+    if (!valid) {
+      console.warn("Retell webhook signature invalid — use an API key with the webhook badge in Retell dashboard")
+      return NextResponse.json(
+        { error: "Invalid signature. Use an API key with the webhook badge in Retell." },
+        { status: 401 }
+      )
+    }
+
+    const event = JSON.parse(body) as RetellCallWebhookEvent
+
+    // Log every webhook event for debugging
+    console.info("Retell webhook received:", { 
+      event: event.event,
+      hasCall: !!event.call,
+      callId: event.call?.call_id || event.call_id,
+    })
+
+    // Inbound: resolve client by forwarded_from; pick agent by to_number (service vs childcare intake).
+    // Only ACTIVE businesses are returned by resolveClient; PAUSED/unknown → we return empty call_inbound
+    // (no override_agent_id), so Retell rejects the call — no connection, no Retell usage.
+    if (event.event === "call_inbound") {
+      const inbound = (event as RetellInboundEvent).call_inbound
+      const toNumber = inbound?.to_number
+      const fromNumber = inbound?.from_number
+      const forwardedFrom =
+        (inbound as { forwarded_from_number?: string; forwarded_from?: string })?.forwarded_from_number ??
+        (inbound as { forwarded_from_number?: string; forwarded_from?: string })?.forwarded_from ??
+        fromNumber
+      
+      console.info("Retell call_inbound details:", {
+        to_number: toNumber,
+        from_number: fromNumber,
+        forwarded_from: forwardedFrom,
+        to_number_normalized: normalizeE164(toNumber),
+        forwarded_from_normalized: normalizeE164(forwardedFrom),
+      })
+
+      if (isKnownSpamOrTestNumber(fromNumber)) {
+        console.info("Retell inbound rejected: known spam/test number", { from_number: fromNumber })
+        return NextResponse.json({ call_inbound: {} })
+      }
+
+      if (await isSpamByTwilioLookup(fromNumber)) {
+        console.info("Retell inbound rejected: Twilio Lookup marked spam", { from_number: fromNumber })
+        return NextResponse.json({ call_inbound: {} })
+      }
+
+      // Demo number: route to dedicated demo agent (RETELL_DEMO_AGENT_ID)
+      const demoNumberRaw = process.env.NEXT_PUBLIC_DEMO_NUMBER
+      const toNumberNorm = toNumber ? normalizeE164(toNumber) ?? undefined : undefined
+      const demoNumberNorm = demoNumberRaw ? normalizeE164(demoNumberRaw) : null
+      const isDemoNumber = !!(toNumberNorm && demoNumberNorm && toNumberNorm === demoNumberNorm)
+      const demoAgentId = process.env.RETELL_DEMO_AGENT_ID
+
+      if (isDemoNumber && demoAgentId) {
+        console.info("Retell inbound: demo call, routing to demo agent", { to_number: toNumber })
+        return NextResponse.json({
+          call_inbound: {
+            override_agent_id: demoAgentId,
+            metadata: { demo_call: true },
+          },
+        })
+      }
+      
+      // Resolution priority:
+      // 1. By to_number (business's dedicated Retell number) - PREFERRED for multi-tenant
+      // 2. By forwarded_from (if carrier provides it) - LEGACY
+      // 3. Fallback to any active business - SINGLE-TENANT mode
+      
+      let client = await resolveClientByRetellNumber(toNumber)
+      let resolutionMethod = client ? "retellPhoneNumber" : null
+      
+      if (!client) {
+        client = await resolveClient(forwardedFrom)
+        resolutionMethod = client ? "primaryForwardingNumber" : null
+      }
+      
+      // FALLBACK: If no client found, fall back to ANY active business (single-tenant mode)
+      if (!client) {
+        const fallbackClient = await db.business.findFirst({
+          where: { status: ClientStatus.ACTIVE },
+          orderBy: { createdAt: "desc" },
+        })
+        if (fallbackClient) {
+          console.warn("Using fallback business:", {
+            businessId: fallbackClient.id,
+            businessName: fallbackClient.name,
+            reason: "No match by retellPhoneNumber or primaryForwardingNumber - using single-tenant fallback",
+          })
+          client = fallbackClient
+          resolutionMethod = "fallback"
+        }
+      }
+      
+      // Agent: prefer business's dedicated agent (one per business), else industry/env fallback for legacy
+      const agentId = client
+        ? (client.retellAgentId ?? getAgentIdForIndustry(client.industry) ?? getAgentIdForInbound(toNumber))
+        : getAgentIdForInbound(toNumber)
+      
+      console.info("Retell call_inbound resolution:", {
+        clientFound: !!client,
+        clientId: client?.id,
+        clientName: client?.name,
+        clientIndustry: client?.industry,
+        clientStatus: client?.status,
+        resolutionMethod,
+        agentId: agentId,
+        agentIdConfigured: !!process.env.RETELL_AGENT_ID,
+      })
+      
+      if (!client || !agentId) {
+        // Block call: no override_agent_id = Retell rejects → caller hears unavailable / disconnect
+        const reason = !agentId
+          ? "No agent ID (business has no retellAgentId and RETELL_AGENT_ID / RETELL_AGENT_ID_<INDUSTRY> not set)"
+          : "No business found for this call (to_number not in retellPhoneNumber, forwarded_from not in primaryForwardingNumber, and no ACTIVE fallback business)"
+        console.warn("Retell inbound rejected — caller will hear unavailable:", {
+          reason,
+          to_number: toNumber,
+          from_number: fromNumber,
+          forwarded_from: forwardedFrom,
+          clientFound: !!client,
+          agentIdConfigured: !!process.env.RETELL_AGENT_ID,
+        })
+        const normalizedFrom = normalizeE164(forwardedFrom)
+        if (normalizedFrom) {
+          const paused = await db.business.findFirst({
+            where: { primaryForwardingNumber: normalizedFrom, status: ClientStatus.PAUSED },
+            select: { id: true, name: true },
+          })
+          if (paused) {
+            console.info("Retell inbound blocked: PAUSED client", { businessId: paused.id, name: paused.name, from: normalizedFrom })
+          }
+        }
+        return NextResponse.json({ call_inbound: {} })
+      }
+      const forwardedFromNormalized = normalizeE164(forwardedFrom) ?? forwardedFrom
+      const settings = mergeWithDefaults((client as any).settings as Partial<BusinessSettings> | null)
+      const businessName = settings.greeting.businessNamePronunciation || String(client.name ?? "").trim() || "our office"
+      const serviceAreas = Array.isArray((client as { serviceAreas?: string[] }).serviceAreas)
+        ? (client as { serviceAreas: string[] }).serviceAreas
+        : []
+
+      const { agentOverride, dynamicVars, ringDurationMs } = buildAgentOverride(
+        settings,
+        businessName,
+        serviceAreas
+      )
+      if (ringDurationMs > 0) {
+        console.info("Retell call_inbound: ring delay", ringDurationMs, "ms from settings.callRouting.ringBeforeAnswerSeconds")
+      }
+
+      const response = {
+        call_inbound: {
+          override_agent_id: agentId,
+          metadata: {
+            client_id: client.id,
+            forwarded_from_number: forwardedFromNormalized,
+            resolved_business_name: businessName,
+            tone: settings.greeting.tone,
+            question_depth: settings.questionDepth,
+            after_hours_behavior: settings.availability.afterHoursBehavior,
+          },
+          dynamic_variables: dynamicVars,
+          agent_override: agentOverride,
+        },
+      }
+      
+      console.info("Retell inbound response:", JSON.stringify(response, null, 2))
+      return NextResponse.json(response)
+    }
+
+    // Retell sends call_ended and call_analyzed (not call_analysis). Handle both so we never miss completion events.
+    if (event.event === "call_ended" || event.event === "call_analysis" || event.event === "call_analyzed") {
+      await handleCallCompletion(event)
+      return RETELL_SUCCESS
+    }
+
+    return RETELL_SUCCESS
+  } catch (error) {
+    console.error("Retell webhook error:", error)
+    return NextResponse.json({ error: "Webhook processing failed" }, { status: 500 })
+  }
+}
+
+interface RetellInboundEvent {
+  event: "call_inbound"
+  call_inbound?: { from_number?: string; to_number?: string }
+}
+
+/** Minimal shape for Retell call_ended / call_analysis webhook payload. */
+interface RetellCallAnalysis {
+  caller_name?: string
+  caller_phone?: string
+  service_address?: string
+  city?: string
+  issue_description?: string
+  extracted_variables?: {
+    name?: string
+    phone?: string
+    address?: string
+    city?: string
+    issue_description?: string
+    reason_for_call?: string
+    reason?: string
+    lead_tag?: string
+    appointment_preference?: string
+    availability?: string
+    preferred_time?: string
+    department?: string
+    vehicle_year?: string
+    vehicle_make?: string
+    vehicle_model?: string
+    year?: string
+    make?: string
+    model?: string
+  }
+  summary?: string
+  call_summary?: string
+  transcript?: string
+  [key: string]: unknown
+}
+
+interface RetellCallWebhookEvent {
+  event?: string
+  call_id?: string
+  call?: {
+    call_id?: string
+    agent_id?: string  // Retell agent that handled the call; matches business.retellAgentId for dedicated agents
+    from_number?: string
+    to_number?: string
+    start_timestamp?: number
+    end_timestamp?: number
+    transcript?: string
+    metadata?: { client_id?: string; forwarded_from_number?: string }
+    call_analysis?: RetellCallAnalysis
+  }
+  call_analysis?: RetellCallAnalysis
+}
+
+async function handleCallCompletion(event: RetellCallWebhookEvent) {
+  // Retell may send call_id at top level or under event.call
+  const callId = event.call?.call_id ?? event.call_id
+  if (!callId) {
+    console.error("Retell webhook: missing call_id in payload", { event: event.event, hasCall: !!event.call })
+    return
+  }
+
+  // Log the full event for debugging (remove in production once working)
+  console.info("Retell call completion event:", {
+    event: event.event,
+    call_id: callId,
+    metadata: event.call?.metadata,
+    from_number: event.call?.from_number,
+    to_number: event.call?.to_number,
+  })
+
+  const metadata = event.call?.metadata
+  const agentId = event.call?.agent_id
+  let business = metadata?.client_id
+    ? await db.business.findUnique({
+        where: { id: metadata.client_id },
+      })
+    : null
+  let resolutionMethod = business ? "metadata.client_id" : null
+
+  // Try to resolve by agent_id (business's dedicated Retell agent) — very reliable when using dedicated agents
+  if (!business && agentId) {
+    business = await db.business.findFirst({
+      where: { retellAgentId: agentId },
+    })
+    if (business) resolutionMethod = "retellAgentId"
+  }
+  
+  // Try to resolve by to_number (business's dedicated Retell number)
+  if (!business && event.call?.to_number) {
+    const toNormalized = normalizeE164(event.call.to_number)
+    if (toNormalized) {
+      business = await db.business.findFirst({
+        where: { retellPhoneNumber: toNormalized },
+      })
+      if (business) resolutionMethod = "retellPhoneNumber"
+    }
+  }
+  
+  // Try forwarded_from_number from metadata
+  if (!business && metadata?.forwarded_from_number) {
+    const normalized = normalizeE164(metadata.forwarded_from_number)
+    if (normalized) {
+      business = await db.business.findFirst({
+        where: { primaryForwardingNumber: normalized },
+      })
+      if (business) resolutionMethod = "primaryForwardingNumber"
+    }
+  }
+  
+  // Fallback: any business (ACTIVE first, then PAUSED) — single-tenant or last resort
+  if (!business) {
+    business = await db.business.findFirst({
+      where: { status: ClientStatus.ACTIVE },
+      orderBy: { createdAt: "desc" },
+    })
+    if (business) resolutionMethod = "fallback_active"
+  }
+  if (!business) {
+    business = await db.business.findFirst({
+      orderBy: { createdAt: "desc" },
+    })
+    if (business) {
+      resolutionMethod = "fallback_any"
+      console.warn("Using fallback (any business) for call completion:", {
+        callId,
+        businessId: business.id,
+        businessName: business.name,
+      })
+    }
+  }
+  
+  if (!business) {
+    console.error(`Client not found for call ${callId}`, {
+      metadata_client_id: metadata?.client_id,
+      agent_id: agentId,
+      metadata_forwarded_from: metadata?.forwarded_from_number,
+      from_number: event.call?.from_number,
+      to_number: event.call?.to_number,
+    })
+    return
+  }
+  
+  console.info("Resolved business for call:", { callId, businessId: business.id, businessName: business.name, resolutionMethod })
+
+  const planType = getEffectivePlanType(business.planType)
+  // call_analysis can be at top level (call_analyzed) or nested under event.call
+  const analysis = event.call_analysis || event.call?.call_analysis || {}
+  const hasAnalysis = Object.keys(analysis).length > 0
+
+  // Missed-call recovery: use whatever we have (call_ended may arrive before call_analysis)
+  const evRaw = analysis.extracted_variables || {}
+  // Normalize keys (Retell may send Name, Phone; we use lowercase name, phone)
+  const ev: Record<string, string | undefined> = {}
+  for (const [k, v] of Object.entries(evRaw)) {
+    if (typeof v === "string" && v.trim()) {
+      const key = k.toLowerCase().replace(/\s+/g, "_")
+      ev[key] = v.trim()
+    }
+  }
+  const a = analysis as Record<string, unknown>
+
+  // Reason for call: multiple possible keys from Retell (issue_description, reason_for_call, reason, etc.)
+  const evAny = ev as Record<string, string | undefined>
+  const issueDescription =
+    analysis.issue_description ||
+    ev.issue_description ||
+    ev.reason_for_call ||
+    ev.reason ||
+    evAny.call_reason ||
+    (typeof a.reason_for_call === "string" ? a.reason_for_call : null) ||
+    (typeof a.reason === "string" ? a.reason : null)
+
+  // Appointment/availability: preference, availability, preferred_time, etc.
+  const appointmentPreference =
+    ev.appointment_preference ||
+    ev.availability ||
+    ev.preferred_time ||
+    evAny.appointment_availability ||
+    evAny.preferred_days ||
+    (typeof a.appointment_preference === "string" ? a.appointment_preference : null) ||
+    (typeof a.availability === "string" ? a.availability : null)
+
+  // Vehicle (auto repair): year, make, model — from ev or top-level analysis
+  const vehicleYear =
+    ev.vehicle_year ?? ev.year ?? (typeof a.vehicle_year === "string" ? a.vehicle_year : null) ?? (typeof a.year === "string" ? a.year : null)
+  const vehicleMake =
+    ev.vehicle_make ?? ev.make ?? (typeof a.vehicle_make === "string" ? a.vehicle_make : null) ?? (typeof a.make === "string" ? a.make : null)
+  const vehicleModel =
+    ev.vehicle_model ?? ev.model ?? (typeof a.vehicle_model === "string" ? a.vehicle_model : null) ?? (typeof a.model === "string" ? a.model : null)
+
+  const emergency = detectEmergency(analysis)
+  const structuredIntake: Record<string, unknown> = {
+    name: analysis.caller_name || ev.name,
+    phone: analysis.caller_phone || ev.phone || event.call?.from_number,
+    address: analysis.service_address || ev.address,
+    city: analysis.city || ev.city,
+    issue_description: issueDescription,
+    emergency,
+    appointment_preference: appointmentPreference,
+    department: ev.department,
+    vehicle_year: vehicleYear,
+    vehicle_make: vehicleMake,
+    vehicle_model: vehicleModel,
+  }
+
+  // Merge any other string values from extracted_variables (use lowercase keys for consistency)
+  for (const [k, v] of Object.entries(ev)) {
+    if (typeof v === "string" && v.trim()) {
+      const key = k.toLowerCase().replace(/\s+/g, "_")
+      if (structuredIntake[key] == null || structuredIntake[key] === "") structuredIntake[key] = v
+    }
+  }
+
+  const summary =
+    analysis.summary || analysis.call_summary || (analysis.transcript ? String(analysis.transcript).slice(0, 500) : null)
+  const transcriptStr = analysis.transcript || event.call?.transcript
+
+  // Fallback: if no issue_description but we have summary or transcript, use it so lead report isn't empty
+  if (!structuredIntake.issue_description && (summary || transcriptStr)) {
+    const fallback = typeof summary === "string" && summary.trim()
+      ? summary.trim().slice(0, 500)
+      : typeof transcriptStr === "string"
+        ? transcriptStr.trim().slice(0, 500)
+        : null
+    if (fallback) structuredIntake.issue_description = fallback
+  }
+
+  // When extracted_variables are missing, parse transcript/summary so SMS shows Name / Phone / Address / Reason for call
+  const textToParse = typeof transcriptStr === "string" && transcriptStr.trim()
+    ? transcriptStr
+    : typeof summary === "string" && summary.trim()
+      ? summary
+      : null
+  const needsParsing =
+    textToParse &&
+    (!structuredIntake.name ||
+      !structuredIntake.address ||
+      (typeof structuredIntake.issue_description === "string" && structuredIntake.issue_description.length > 180))
+  if (needsParsing && textToParse) {
+    const parsed = parseLeadFromSummaryOrTranscript(textToParse)
+    if (parsed.name && !structuredIntake.name) structuredIntake.name = parsed.name
+    if (parsed.address && !structuredIntake.address) structuredIntake.address = parsed.address
+    if (parsed.city && !structuredIntake.city) structuredIntake.city = parsed.city
+    if (parsed.issue_description) {
+      // Prefer short parsed reason over long summary blob so SMS is clear
+      const current = String(structuredIntake.issue_description || "")
+      if (!current || current.length > 180) structuredIntake.issue_description = parsed.issue_description
+    }
+  }
+
+  const leadTag = detectLeadTag(analysis, emergency)
+  const apptPref = structuredIntake.appointment_preference
+  const appointmentRequest = apptPref
+    ? typeof apptPref === "object" && apptPref !== null
+      ? (apptPref as object)
+      : { preferredDays: undefined, preferredTime: undefined, notes: String(apptPref) }
+    : undefined
+
+  // Duration from Retell timestamps only (server-side; never trust client). Clamp to prevent abuse.
+  const rawDurationSeconds =
+    event.call?.end_timestamp != null && event.call?.start_timestamp != null
+      ? Math.floor((event.call.end_timestamp - event.call.start_timestamp) / 1000)
+      : 0
+  const duration = Math.max(0, Math.min(MAX_CALL_DURATION_SECONDS, rawDurationSeconds))
+  const minutes = toBillableMinutes(duration) // min 1 min per call; round up (used for trial + plan usage)
+  const missedCallRecovery = !hasAnalysis && (structuredIntake.phone || event.call?.from_number)
+
+  const existingCall = await db.call.findUnique({
+    where: { retellCallId: callId },
+  })
+
+  const fromNumber = event.call?.from_number ? normalizeE164(event.call.from_number) ?? event.call.from_number : undefined
+  const aiNumberAnswered = event.call?.to_number ? normalizeE164(event.call.to_number) ?? event.call.to_number : undefined
+  const callerPhone: string | undefined = (fromNumber || (typeof structuredIntake.phone === "string" ? structuredIntake.phone : undefined)) ?? undefined
+
+  const callData = {
+    duration,
+    minutes,
+    callerPhone,
+    aiNumberAnswered,
+    transcript: analysis.transcript || event.call?.transcript || undefined,
+    summary: summary || undefined,
+    structuredIntake: structuredIntake as any,
+    emergencyFlag: emergency,
+    leadTag: hasLeadTagging(planType) ? leadTag : undefined,
+    department: typeof structuredIntake.department === "string" ? structuredIntake.department : undefined,
+    appointmentRequest: appointmentRequest as any,
+    callerName: typeof structuredIntake.name === "string" ? structuredIntake.name : undefined,
+    issueDescription: typeof structuredIntake.issue_description === "string" ? structuredIntake.issue_description : undefined,
+    missedCallRecovery: !!missedCallRecovery,
+  }
+
+  const isNewCall = !existingCall
+  const call = existingCall
+    ? await db.call.update({
+        where: { id: existingCall.id },
+        data: callData,
+      })
+    : await db.call.create({
+        data: {
+          retellCallId: callId,
+          businessId: business.id,
+          ...callData,
+        },
+      })
+
+  // Create appointment from Retell intake when caller asked to schedule (Pro+)
+  if (hasAppointmentCapture(planType) && appointmentRequest && callerPhone) {
+    try {
+      const parsed = parseAppointmentRequest(
+        appointmentRequest as { preferredDays?: string; preferredTime?: string; notes?: string },
+        business.id
+      )
+      if (parsed) {
+        await db.appointment.create({
+          data: {
+            businessId: business.id,
+            callId: call.id,
+            callerName: typeof structuredIntake.name === "string" ? structuredIntake.name : null,
+            callerPhone,
+            scheduledAt: parsed.scheduledAt,
+            durationMinutes: parsed.durationMinutes,
+            status: "PENDING",
+            issueDescription: typeof structuredIntake.issue_description === "string" ? structuredIntake.issue_description : null,
+            notes: (appointmentRequest as { notes?: string }).notes?.trim() || null,
+          },
+        })
+        console.info("[Appointments] Created from Retell call", { callId, businessId: business.id })
+      }
+    } catch (err) {
+      console.error("[Appointments] Failed to create from Retell:", err)
+    }
+  }
+
+  // Mark testCallVerifiedAt when we receive a completed call for this client (forwarded_from matched)
+  if (!business.testCallVerifiedAt) {
+    await db.business.update({
+      where: { id: business.id },
+      data: { testCallVerifiedAt: new Date() },
+    })
+  }
+
+  // Notifications: send at most once per call. Retell sends call_ended first (no analysis), then call_analyzed (full analysis).
+  // We send when we have actionable info and haven't sent yet — so we send on call_analyzed if we skipped on call_ended.
+  const callSettings = mergeWithDefaults((business as any).settings as Partial<BusinessSettings> | null)
+  const notifPrefs = callSettings.notifications
+  const isEmergency = structuredIntake.emergency
+  const shouldNotifyByPrefs = notifPrefs.emergencyOnlyAlerts ? isEmergency : true
+
+  // Ensure intake has callback number from call when analysis didn't provide it (e.g. call_ended before call_analysis)
+  const intakeForNotify = { ...structuredIntake } as Record<string, unknown>
+  if (!intakeForNotify.phone && call.callerPhone) {
+    intakeForNotify.phone = call.callerPhone
+  }
+
+  const intakeForFilter = intakeForNotify as { name?: string; phone?: string; address?: string; city?: string; issue_description?: string; vehicle_year?: string; vehicle_make?: string; vehicle_model?: string; year?: string; make?: string; model?: string; appointment_preference?: string; availability?: string; preferred_time?: string }
+  const callForFilter = { duration: call.duration, callerPhone: call.callerPhone }
+  const hasInfo = hasActionableInfo(intakeForFilter, callForFilter)
+  const likelySpam = isLikelySpam(intakeForFilter, callForFilter)
+
+  const alreadySent = (call as { notificationSent?: boolean }).notificationSent === true
+  const shouldNotify = shouldNotifyByPrefs && hasInfo && !likelySpam && !alreadySent
+
+  const intakeForNotification = intakeForNotify as import("@/lib/notifications").StructuredIntake
+
+  // Demo number: send exactly one SMS to the caller (lead summary or short fallback). No SMS on unlock; consent = 1 message after call.
+  const demoNumberRaw = process.env.NEXT_PUBLIC_DEMO_NUMBER
+  const toNumberNorm = event.call?.to_number ? (normalizeE164(event.call.to_number) ?? undefined) : undefined
+  const demoNumberNorm = demoNumberRaw ? normalizeE164(demoNumberRaw) : null
+  const isDemoCall = !!(toNumberNorm && demoNumberNorm && toNumberNorm === demoNumberNorm)
+
+  if (isDemoCall && callerPhone && !alreadySent) {
+    try {
+      await sendDemoResultSms(callerPhone, intakeForNotification, call, hasInfo)
+      await db.call.update({
+        where: { id: call.id },
+        data: { notificationSent: true },
+      })
+      console.info("[Notifications] Demo result sent (1 SMS to caller)", { callId, hasInfo })
+    } catch (error) {
+      console.error("Demo result SMS error:", error)
+    }
+  } else {
+    if (!shouldNotifyByPrefs) {
+      console.info("[Notifications] Skipped: emergencyOnlyAlerts is on and call is not emergency", { callId })
+    }
+    if (!hasInfo) {
+      console.info("[Notifications] Skipped: no actionable info captured", { callId, duration: call.duration, callerPhone: call.callerPhone })
+    }
+    if (likelySpam) {
+      console.info("[Notifications] Skipped: likely spam", { callId, duration: call.duration, callerPhone: call.callerPhone })
+    }
+    if (alreadySent) {
+      console.info("[Notifications] Skipped: already sent for this call", { callId })
+    }
+
+    if (shouldNotify) {
+      try {
+        const notifies: Promise<any>[] = []
+        if (notifPrefs.emailAlerts) {
+          notifies.push(sendEmailNotification(business, call, intakeForNotification))
+        }
+        if (notifPrefs.smsAlerts) {
+          notifies.push(sendSMSNotification(business, call, intakeForNotification))
+        }
+        const intakePhone = typeof intakeForNotify.phone === "string" ? intakeForNotify.phone : null
+        if (hasSmsToCallers(planType) && intakePhone) {
+          const confirmMsg = callSettings.followUpSms?.enabled
+            ? callSettings.followUpSms.confirmationMessage
+            : null
+          notifies.push(sendSMSToCaller(business, intakePhone, intakeForNotification, confirmMsg))
+        }
+        await Promise.all(notifies)
+        const updateData: Record<string, unknown> = { notificationSent: true }
+        if (hasSmsToCallers(planType) && intakePhone && callSettings.followUpSms?.enabled) {
+          updateData.callerConfirmationSentAt = new Date()
+        }
+        await db.call.update({
+          where: { id: call.id },
+          data: updateData,
+        })
+        console.info("[Notifications] Sent", { callId, businessId: business.id, email: notifPrefs.emailAlerts, sms: notifPrefs.smsAlerts })
+      } catch (error) {
+        console.error("Notification error:", error)
+      }
+    }
+
+    // Missed call text-back: short calls or calls without full analysis
+    const textBackSent = (call as { missedCallTextBackSent?: boolean }).missedCallTextBackSent === true
+    const shouldTextBack =
+      !isDemoCall &&
+      callerPhone &&
+      !textBackSent &&
+      callSettings.missedCallRecovery.enabled &&
+      (missedCallRecovery || (!hasInfo && call.duration < 60))
+
+    if (shouldTextBack) {
+      try {
+        const text = callSettings.missedCallRecovery.smsAutoReplyText.replace(
+          /\[Business\]/g,
+          business.name
+        )
+        await sendMissedCallTextBack(business, callerPhone, text)
+        await db.call.update({
+          where: { id: call.id },
+          data: { missedCallTextBackSent: true },
+        })
+      } catch (error) {
+        console.error("Missed call text-back error:", error)
+      }
+    }
+  }
+
+  try {
+    if (hasCrmForwarding(planType)) {
+      const crmWebhookUrl = business.crmWebhookUrl ?? callSettings.crm.crmWebhookUrl ?? null
+      await forwardToCrm(
+        { ...business, crmWebhookUrl, forwardToEmail: business.forwardToEmail ?? null },
+        call,
+        structuredIntake as any
+      )
+      // Also send to Zapier if configured
+      const zapierUrl = callSettings.crm.zapierWebhookUrl
+      if (zapierUrl) {
+        await fetch(zapierUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ business: { id: business.id, name: business.name }, call, intake: structuredIntake }),
+        }).catch((e) => console.error("Zapier webhook error:", e))
+      }
+    }
+  } catch (error) {
+    console.error("CRM forward error:", error)
+  }
+
+  if (hasInfo && isNewCall) {
+    try {
+      await fireZapierLeadHook(business.id, business.name, {
+        id: call.id,
+        callerName: call.callerName,
+        callerPhone: call.callerPhone,
+        issueDescription: call.issueDescription,
+        summary: call.summary,
+        emergencyFlag: call.emergencyFlag,
+        createdAt: call.createdAt,
+      })
+    } catch (error) {
+      console.error("Zapier lead hook error:", error)
+    }
+  }
+
+  // Only count usage and trial minutes once per call (first event that creates the record)
+  if (!isNewCall) return
+
+  const hasActiveSubscription = isSubscriptionActive(business)
+  const isOnTrial = !hasActiveSubscription
+
+  if (isOnTrial) {
+    const now = new Date()
+    const trialEndsAtDefault = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000)
+    const updateData: { trialMinutesUsed: { increment: number }; trialStartedAt?: Date; trialEndsAt?: Date } = {
+      trialMinutesUsed: { increment: minutes },
+    }
+    if (!business.trialStartedAt) {
+      updateData.trialStartedAt = now
+      updateData.trialEndsAt = trialEndsAtDefault
+    }
+    const updated = await db.business.update({
+      where: { id: business.id },
+      data: updateData,
+    })
+    const exhausted = updated.trialMinutesUsed >= FREE_TRIAL_MINUTES
+    const expired = updated.trialEndsAt != null && now > updated.trialEndsAt
+    if (exhausted || expired) {
+      await db.business.update({
+        where: { id: business.id },
+        data: { status: "PAUSED" },
+      })
+      await releaseRetellNumber(business.id)
+    }
+  } else if (hasActiveSubscription) {
+    try {
+      await reportUsageToStripe(business.id, minutes)
+    } catch (error) {
+      console.error("Usage reporting error:", error)
+    }
+  }
+}
+
+function detectEmergency(analysis: any): boolean {
+  const emergencyKeywords = [
+    "flooding",
+    "no heat",
+    "gas smell",
+    "burst pipe",
+    "emergency",
+    "urgent",
+    "sparks",
+    "smoke",
+    "no power",
+    "electrical fire",
+    "no water",
+    "frozen pipes",
+  ]
+  const text = JSON.stringify(analysis).toLowerCase()
+  return emergencyKeywords.some((keyword) => text.includes(keyword))
+}
+
+function detectLeadTag(analysis: any, isEmergency: boolean): "EMERGENCY" | "ESTIMATE" | "FOLLOW_UP" | "GENERAL" {
+  if (isEmergency) return "EMERGENCY"
+  const raw = (analysis.extracted_variables?.lead_tag || analysis.lead_tag || "").toLowerCase()
+  const text = JSON.stringify(analysis).toLowerCase()
+  if (raw.includes("estimate") || text.includes("estimate") || text.includes("quote")) return "ESTIMATE"
+  if (raw.includes("follow") || text.includes("follow-up") || text.includes("callback")) return "FOLLOW_UP"
+  return "GENERAL"
+}
+

@@ -1,0 +1,94 @@
+import { NextRequest, NextResponse } from "next/server"
+import { getAuthUserFromRequest } from "@/lib/auth"
+import { db } from "@/lib/db"
+import { getTrialStatus } from "@/lib/trial"
+
+/** Dashboard summary for Flutter (and other API clients). Requires Bearer token or cookie. */
+export async function GET(req: NextRequest) {
+  try {
+    const user = await getAuthUserFromRequest(req)
+    if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+    if (!user.businessId) {
+      return NextResponse.json(
+        { error: "Complete onboarding first", business: null, recentCalls: [], stats: null, trial: null },
+        { status: 200 }
+      )
+    }
+
+    const monthStart = new Date()
+    monthStart.setDate(1)
+    monthStart.setHours(0, 0, 0, 0)
+
+    const [business, recentCalls, stats, trial, monthlyLeads] = await Promise.all([
+      db.business.findUnique({
+        where: { id: user.businessId },
+      }),
+      db.call.findMany({
+        where: { businessId: user.businessId },
+        orderBy: { createdAt: "desc" },
+        take: 10,
+      }),
+      db.call.aggregate({
+        where: { businessId: user.businessId },
+        _count: true,
+        _sum: { minutes: true },
+      }),
+      getTrialStatus(user.businessId),
+      db.call.count({
+        where: {
+          businessId: user.businessId,
+          createdAt: { gte: monthStart },
+          OR: [
+            { callerName: { not: null } },
+            { callerPhone: { not: null } },
+            { issueDescription: { not: null } },
+          ],
+        },
+      }),
+    ])
+
+    const emergencyCount = recentCalls.filter((c) => c.emergencyFlag).length
+
+    return NextResponse.json({
+      business: business
+        ? {
+            id: business.id,
+            name: business.name,
+            primaryForwardingNumber: business.primaryForwardingNumber,
+            phoneNumber: business.retellPhoneNumber ?? business.primaryForwardingNumber,
+            retellAgentId: business.retellAgentId,
+          }
+        : null,
+      recentCalls,
+      stats: {
+        totalCalls: stats._count,
+        totalMinutes: stats._sum.minutes ?? 0,
+        emergencyInRecent: emergencyCount,
+        monthlyLeads,
+      },
+      hasAgent: !!business?.primaryForwardingNumber && business.primaryForwardingNumber !== "" && !business.primaryForwardingNumber.startsWith("pending-"),
+      trial: trial
+        ? {
+            isOnTrial: trial.isOnTrial,
+            minutesUsed: trial.minutesUsed,
+            minutesRemaining: trial.minutesRemaining,
+            isExhausted: trial.isExhausted,
+            isExpired: trial.isExpired,
+            trialEndsAt: trial.trialEndsAt?.toISOString() ?? null,
+            daysRemaining: trial.daysRemaining,
+          }
+        : null,
+    })
+  } catch (error) {
+    console.error("Dashboard API error:", error)
+    const message = error instanceof Error ? error.message : "Failed to load dashboard"
+    return NextResponse.json(
+      {
+        error: "Failed to load dashboard",
+        ...(process.env.NODE_ENV === "development" && { detail: message }),
+      },
+      { status: 500 }
+    )
+  }
+}
