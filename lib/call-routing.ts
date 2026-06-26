@@ -62,14 +62,24 @@ function coerceRings(value: unknown): RingBeforeAnswerRings {
 
 /** Normalize saved/partial call routing (legacy ringBeforeAnswerSeconds=0 supported). */
 export function normalizeCallRouting(
-  saved: Partial<CallRoutingSettings> | null | undefined,
+  saved: Partial<{
+    answerAllCalls: boolean
+    ringDelayMode: RingDelayMode
+    ringBeforeAnswerSeconds: number
+    ringBeforeAnswerRings: number
+    emergencyForward: boolean
+    emergencyForwardNumber: string | null
+    vipCallerList: string[]
+    repeatCallerPriorityTag: boolean
+    spamHandling: "block" | "short_response" | "voicemail"
+  }> | null | undefined,
   defaults: CallRoutingSettings = DEFAULT_CALL_ROUTING
 ): CallRoutingSettings {
   const merged = { ...defaults, ...(saved ?? {}) }
-  const legacySeconds = saved?.ringBeforeAnswerSeconds
+  const legacyRaw = saved?.ringBeforeAnswerSeconds
   const answerAllCalls =
     saved?.answerAllCalls ??
-    (legacySeconds !== undefined ? legacySeconds === 0 : defaults.answerAllCalls)
+    (legacyRaw !== undefined ? legacyRaw === 0 : defaults.answerAllCalls)
 
   return {
     ...merged,
