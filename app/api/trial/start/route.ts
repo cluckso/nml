@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getAuthUserFromRequest } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { checkTrialEligibility } from "@/lib/trial"
+import { checkTrialEligibility, releasePrimaryForwardingNumberFromOtherBusinesses } from "@/lib/trial"
 import { TRIAL_DAYS } from "@/lib/plans"
 import { Industry } from "@prisma/client"
 import { ClientStatus } from "@prisma/client"
@@ -51,6 +51,11 @@ export async function POST(req: NextRequest) {
         })
       : null
 
+    await releasePrimaryForwardingNumberFromOtherBusinesses(
+      normalizedPhone,
+      business?.id
+    )
+
     if (business?.primaryForwardingNumber?.startsWith("pending-")) {
       await db.business.update({
         where: { id: business.id },
@@ -85,6 +90,7 @@ export async function POST(req: NextRequest) {
       data: {
         trialStartedAt: now,
         trialEndsAt,
+        trialMinutesUsed: 0,
         status: ClientStatus.ACTIVE,
       },
     })

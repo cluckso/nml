@@ -7,6 +7,7 @@ import { ClientStatus } from "@prisma/client"
 import { isComplexSetup } from "@/lib/industries"
 import { getConfiguredIntakeNumbersE164 } from "@/lib/intake-routing"
 import { provisionAgentAndNumberForBusiness } from "@/lib/retell"
+import { isMultiTrialPhone, releasePrimaryForwardingNumberFromOtherBusinesses } from "@/lib/trial"
 
 export async function POST(req: NextRequest) {
   try {
@@ -71,6 +72,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: "Use your business phone number (the line that forwards to CallGrabbr), not the CallGrabbr intake number. The forwarding number is shown above for reference — your customers call your business line, which forwards to that number." },
         { status: 400 }
+      )
+    }
+
+    if (isMultiTrialPhone(primaryForwardingNumberNormalized)) {
+      await releasePrimaryForwardingNumberFromOtherBusinesses(
+        primaryForwardingNumberNormalized,
+        user.businessId ?? undefined
       )
     }
 

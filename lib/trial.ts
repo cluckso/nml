@@ -64,6 +64,47 @@ export type TrialEligibilityResult =
   | { eligible: true; normalizedPhone: string }
   | { eligible: false; reason: "invalid_phone" | "phone_already_used_trial" }
 
+/** Owner/dev numbers allowed to start multiple free trials (E.164). */
+const DEFAULT_MULTI_TRIAL_PHONES = ["+16086421459"]
+
+function getMultiTrialPhones(): Set<string> {
+  const fromEnv =
+    process.env.MULTI_TRIAL_PHONE_NUMBERS?.split(",")
+      .map((value) => normalizePhoneToE164(value.trim()))
+      .filter((value): value is string => !!value) ?? []
+  return new Set([...DEFAULT_MULTI_TRIAL_PHONES, ...fromEnv])
+}
+
+export function isMultiTrialPhone(normalizedPhone: string): boolean {
+  return getMultiTrialPhones().has(normalizedPhone)
+}
+
+/**
+ * For allowlisted numbers, clear primaryForwardingNumber on other businesses so a new
+ * trial account can claim the same forwarding line (unique constraint).
+ */
+export async function releasePrimaryForwardingNumberFromOtherBusinesses(
+  normalizedPhone: string,
+  exceptBusinessId?: string
+): Promise<void> {
+  if (!isMultiTrialPhone(normalizedPhone)) return
+
+  const others = await db.business.findMany({
+    where: {
+      primaryForwardingNumber: normalizedPhone,
+      ...(exceptBusinessId ? { id: { not: exceptBusinessId } } : {}),
+    },
+    select: { id: true },
+  })
+
+  for (const business of others) {
+    await db.business.update({
+      where: { id: business.id },
+      data: { primaryForwardingNumber: `released-${business.id}` },
+    })
+  }
+}
+
 /**
  * Check if a business phone is eligible for a new trial (one trial per phone).
  * Normalizes to E.164 and checks Business.primaryForwardingNumber (unique);
@@ -74,6 +115,10 @@ export async function checkTrialEligibility(
 ): Promise<TrialEligibilityResult> {
   const normalized = normalizePhoneToE164(businessPhone)
   if (!normalized) return { eligible: false, reason: "invalid_phone" }
+
+  if (isMultiTrialPhone(normalized)) {
+    return { eligible: true, normalizedPhone: normalized }
+  }
 
   const existing = await db.business.findUnique({
     where: { primaryForwardingNumber: normalized },

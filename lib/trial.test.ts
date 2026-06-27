@@ -1,11 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { getTrialStatus } from "./trial"
+import { getTrialStatus, checkTrialEligibility, isMultiTrialPhone } from "./trial"
 import { FREE_TRIAL_MINUTES } from "./plans"
 
 vi.mock("./db", () => ({
   db: {
     business: {
       findUnique: vi.fn(),
+      findMany: vi.fn(),
+      update: vi.fn(),
     },
   },
 }))
@@ -91,5 +93,30 @@ describe("getTrialStatus", () => {
     } as any)
     const result = await getTrialStatus("b5")
     expect(result.isOnTrial).toBe(false)
+  })
+})
+
+describe("checkTrialEligibility", () => {
+  beforeEach(() => {
+    vi.mocked(db.business.findUnique).mockReset()
+  })
+
+  it("allows allowlisted phone even when another business already uses it", async () => {
+    vi.mocked(db.business.findUnique).mockResolvedValue({ id: "existing" } as any)
+    const result = await checkTrialEligibility("6086421459")
+    expect(result).toEqual({ eligible: true, normalizedPhone: "+16086421459" })
+    expect(isMultiTrialPhone("+16086421459")).toBe(true)
+  })
+
+  it("blocks non-allowlisted phone when already used", async () => {
+    vi.mocked(db.business.findUnique).mockResolvedValue({ id: "existing" } as any)
+    const result = await checkTrialEligibility("6085551234")
+    expect(result).toEqual({ eligible: false, reason: "phone_already_used_trial" })
+  })
+
+  it("allows unused non-allowlisted phone", async () => {
+    vi.mocked(db.business.findUnique).mockResolvedValue(null)
+    const result = await checkTrialEligibility("6085551234")
+    expect(result).toEqual({ eligible: true, normalizedPhone: "+16085551234" })
   })
 })
