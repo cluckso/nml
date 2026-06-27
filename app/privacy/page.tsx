@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { LEGAL_LAST_UPDATED, SUPPORT_EMAIL } from "@/lib/site-contact"
 
 export const metadata: Metadata = {
   title: "Privacy Policy - CallGrabbr",
@@ -11,7 +12,7 @@ export default function PrivacyPage() {
     <div className="container mx-auto px-4 py-12 max-w-3xl">
       <h1 className="text-3xl font-bold mb-2">Privacy Policy</h1>
       <p className="text-sm text-muted-foreground mb-8">
-        Last updated: {new Date().toLocaleDateString("en-US")}
+        Last updated: {LEGAL_LAST_UPDATED}
       </p>
 
       <div className="prose prose-sm max-w-none space-y-8 text-muted-foreground">
@@ -118,7 +119,15 @@ export default function PrivacyPage() {
         <section>
           <h2 className="text-xl font-semibold text-foreground mb-2">11. Contact</h2>
           <p>
-            For privacy-related questions or requests, contact us at the email or address provided on our website or in your account settings.
+            For privacy-related questions or requests, contact us at{" "}
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="text-primary hover:underline">
+              {SUPPORT_EMAIL}
+            </a>
+            . For SMS program details, see our{" "}
+            <Link href="/sms-terms" className="text-primary hover:underline">
+              SMS Terms
+            </Link>
+            .
           </p>
         </section>
       </div>

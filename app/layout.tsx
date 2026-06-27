@@ -5,6 +5,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { Providers } from "./providers"
 import { Nav } from "@/components/nav"
+import { SUPPORT_EMAIL } from "@/lib/site-contact"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -103,6 +104,12 @@ rkp("init","PaccPmsytSiq");rkp("event","PAGE_VIEW");
                 <Link href="/terms" className="hover:text-foreground">
                   Terms of Service
                 </Link>
+                <Link href="/sms-terms" className="hover:text-foreground">
+                  SMS Terms
+                </Link>
+                <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:text-foreground">
+                  {SUPPORT_EMAIL}
+                </a>
               </div>
               <p className="text-center text-xs text-muted-foreground/80 mt-4">
                 © {new Date().getFullYear()} CallGrabbr. Call answering for local service businesses.

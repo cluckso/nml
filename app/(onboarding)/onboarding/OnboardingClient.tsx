@@ -137,7 +137,7 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
   }
 
   if (step === "manual-setup") {
-    const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "support@example.com"
+    const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "support@callgrabbr.com"
     const supportPhone = process.env.NEXT_PUBLIC_SUPPORT_PHONE ?? null
     const supportName = process.env.NEXT_PUBLIC_SUPPORT_NAME ?? "Support"
     return (

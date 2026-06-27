@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { PublicSmsOptInForm } from "@/components/consent/PublicSmsOptInForm"
+import { LEGAL_LAST_UPDATED } from "@/lib/site-contact"
 
 export const metadata: Metadata = {
   title: "SMS Opt-In & Messaging Terms - CallGrabbr",
@@ -17,7 +18,7 @@ export default function SmsTermsPage() {
     <div className="container mx-auto px-4 py-12 max-w-3xl">
       <h1 className="text-3xl font-bold mb-2">SMS Opt-In & Messaging Terms</h1>
       <p className="text-sm text-muted-foreground mb-6">
-        Last updated: {new Date().toLocaleDateString("en-US")}
+        Last updated: {LEGAL_LAST_UPDATED}
       </p>
 
       {/* Opt-in form first so the URL leads directly to consent collection (Twilio requirement) */}

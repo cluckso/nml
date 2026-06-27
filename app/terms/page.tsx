@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { LEGAL_LAST_UPDATED, SUPPORT_EMAIL } from "@/lib/site-contact"
 
 export const metadata: Metadata = {
   title: "Terms of Service - CallGrabbr",
@@ -11,7 +12,7 @@ export default function TermsPage() {
     <div className="container mx-auto px-4 py-12 max-w-3xl">
       <h1 className="text-3xl font-bold mb-2">Terms of Service</h1>
       <p className="text-sm text-muted-foreground mb-8">
-        Last updated: {new Date().toLocaleDateString("en-US")}
+        Last updated: {LEGAL_LAST_UPDATED}
       </p>
 
       <div className="prose prose-sm max-w-none space-y-8 text-muted-foreground">
@@ -39,7 +40,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-xl font-semibold text-foreground mb-2">4. Subscription and Payment</h2>
           <p>
-            Subscription plans, fees, and included minutes are described on our pricing page. You agree to pay all applicable fees, including setup fees and overage charges. Payments are processed by our payment provider; by subscribing, you agree to their terms. Fees are generally billed in advance; overage may be billed in arrears. Refunds are at our discretion unless required by law.
+            Subscription plans, fees, and included minutes are described on our pricing page. You agree to pay all applicable subscription and overage fees. There are no separate setup fees for standard plans listed on our pricing page. Payments are processed by our payment provider; by subscribing, you agree to their terms. Fees are generally billed in advance; overage may be billed in arrears. Refunds are at our discretion unless required by law.
           </p>
         </section>
 
@@ -117,7 +118,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-xl font-semibold text-foreground mb-2">13. Governing Law and Disputes</h2>
           <p>
-            These Terms are governed by the laws of the United States and the state in which we are located, without regard to conflict of law principles. Any disputes shall be resolved in the courts of that state. If any provision is held invalid, the remaining provisions remain in effect.
+            These Terms are governed by the laws of the State of Wisconsin and the United States, without regard to conflict of law principles. Any disputes shall be resolved in the courts of Wisconsin. If any provision is held invalid, the remaining provisions remain in effect.
           </p>
         </section>
 
@@ -131,7 +132,11 @@ export default function TermsPage() {
         <section>
           <h2 className="text-xl font-semibold text-foreground mb-2">15. Contact</h2>
           <p>
-            For questions about these Terms, contact us at the email or address provided on our website or in your account settings.
+            For questions about these Terms, contact us at{" "}
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="text-primary hover:underline">
+              {SUPPORT_EMAIL}
+            </a>
+            .
           </p>
         </section>
       </div>
