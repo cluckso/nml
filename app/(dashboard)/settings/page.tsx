@@ -41,15 +41,15 @@ export default async function SettingsPage() {
     <div className="container mx-auto max-w-5xl py-8 px-4">
       <h1 className="text-3xl font-bold mb-6">Settings</h1>
 
-      {/* AI Number Card */}
+      {/* Forwarding number card */}
       <Card className="mb-6">
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
             <Phone className="h-4 w-4" />
-            AI call number (forward to)
+            CallGrabbr number (forward to)
           </CardTitle>
           <CardDescription>
-            Forward your business line to this number so the AI answers.
+            Forward your business line to this number so your call assistant answers.
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -2,7 +2,7 @@
 
 ## Overview
 
-CallGrabbr offers a **30% recurring revenue share** to marketing agencies who refer contractor and service business clients.
+CallGrabbr offers a **20% recurring revenue share** to marketing agencies who refer contractor and service business clients.
 
 **What CallGrabbr does:**
 - AI answers missed calls 24/7
@@ -22,7 +22,7 @@ CallGrabbr offers a **30% recurring revenue share** to marketing agencies who re
 
 | Item | Details |
 |------|---------|
-| Commission | 30% recurring revenue share |
+| Commission | 20% recurring revenue share |
 | Payment | Monthly, via Stripe or PayPal |
 | Tracking | Unique referral link or coupon code |
 | Minimum | No minimum referrals required |
@@ -30,7 +30,7 @@ CallGrabbr offers a **30% recurring revenue share** to marketing agencies who re
 | Support | Dedicated partner contact |
 
 ### What you get:
-- 30% of every monthly payment from referred clients
+- 20% of every monthly payment from referred clients
 - Recurring as long as the client stays subscribed
 - Access to co-branded landing pages (coming soon)
 - Partner dashboard to track referrals (coming soon)
@@ -41,7 +41,7 @@ CallGrabbr offers a **30% recurring revenue share** to marketing agencies who re
 - 7-day free trial for all referrals
 - No card required to start
 - Full onboarding support
-- White-label option for Scale tier agencies (coming soon)
+- White-label option for Pro tier agencies (coming soon)
 
 ---
 
@@ -49,18 +49,18 @@ CallGrabbr offers a **30% recurring revenue share** to marketing agencies who re
 
 ### Cold Email Template (Short)
 
-**Subject:** 30% recurring commission — AI call answering for your contractor clients
+**Subject:** 20% recurring commission — call answering for your contractor clients
 
 ```
 Hi [Agency Name] team,
 
 Quick question: Do your contractor clients miss calls when they're on jobs?
 
-We built CallGrabbr — AI that answers missed calls and texts the lead details instantly.
+We built CallGrabbr — automated call answering that captures missed-call leads and texts the details to your client.
 
-Your clients lose 20-40% of calls. We fix that.
+Your clients lose 20-40% of calls. We help fix that.
 
-Offer: 30% recurring commission on every client you refer.
+Offer: 20% recurring commission on every client you refer.
 
 Interested in a 10-minute demo?
 
@@ -85,14 +85,14 @@ Quick problem we solve:
 - 80% of callers won't leave voicemail
 - They just call the next listing
 
-We built CallGrabbr — an AI phone system that:
-1. Answers every missed call
-2. Asks the right questions (name, address, job type, urgency)
-3. Texts the lead to the business owner instantly
+We built CallGrabbr — a phone system that:
+1. Answers forwarded and missed calls
+2. Asks the right questions (name, address, job type, urgency when shared)
+3. Texts or emails the lead to the business owner, usually within seconds
 
-One captured job ($350-600) pays for months of service ($99-149/mo).
+One captured job ($350-600) pays for months of service ($99-279/mo).
 
-We're offering agencies 30% recurring revenue share on all referrals.
+We're offering agencies 20% recurring revenue share on all referrals.
 
 Would you be open to a quick call or demo?
 
@@ -112,7 +112,7 @@ Quick question: how do your clients handle missed calls?
 
 We built an AI that answers when they can't and texts them the lead.
 
-Offering 30% recurring to agencies who refer clients.
+Offering 20% recurring to agencies who refer clients.
 
 Worth a quick chat?
 ```
@@ -130,7 +130,7 @@ Following up on my note about CallGrabbr.
 
 TL;DR: AI answers missed calls for contractors, texts them the lead.
 
-We're offering 30% recurring commission for agency partners.
+We're offering 20% recurring commission for agency partners.
 
 Happy to send a demo link if easier than a call.
 
@@ -162,7 +162,7 @@ Platforms to find them:
 ## Objection Handling
 
 **"My clients already have answering services."**
-> Most answering services cost $300-700/month with humans. CallGrabbr is $99-149 and captures leads faster. Worth comparing.
+> Most answering services cost $300-700/month with humans. CallGrabbr starts at $99/mo and captures leads faster. Worth comparing.
 
 **"How is this different from voicemail?"**
 > Voicemail captures 5-15% of callers. AI captures 80-95%. Most people hang up on voicemail and call the next listing.
@@ -171,7 +171,7 @@ Platforms to find them:
 > They don't have to. 7-day free trial, no card required. Let them test with real calls.
 
 **"What's the catch?"**
-> No catch. We pay 30% recurring as long as the client stays. Monthly payment via Stripe or PayPal.
+> No catch. We pay 20% recurring as long as the client stays. Monthly payment via Stripe or PayPal.
 
 ---
 

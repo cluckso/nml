@@ -160,7 +160,7 @@ export function BusinessInfoForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="phoneNumber">Business phone (the number that forwards to the AI) *</Label>
+        <Label htmlFor="phoneNumber">Business phone (the number that forwards to CallGrabbr) *</Label>
         <Input
           id="phoneNumber"
           type="tel"
@@ -170,7 +170,7 @@ export function BusinessInfoForm({
           placeholder="(608) 555-1234"
         />
         <p className="text-xs text-muted-foreground">
-          Your business line — the one you set to forward to the AI. Not the AI intake number shown above. One trial per business number.
+          Your business line — the one you set to forward to CallGrabbr. Not the CallGrabbr intake number shown above. One trial per business number.
         </p>
       </div>
 
@@ -213,7 +213,7 @@ export function BusinessInfoForm({
       <div className="space-y-2">
         <Label>Service areas (cities/towns you serve) *</Label>
         <p className="text-xs text-muted-foreground">
-          Add each city or town where you provide service. The AI will only accept calls for these areas.
+          Add each city or town where you provide service. Your call assistant will only accept calls for these areas.
         </p>
         <div className="flex flex-wrap gap-2 mb-2">
           {formData.serviceAreas.map((area, index) => (

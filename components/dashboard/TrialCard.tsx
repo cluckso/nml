@@ -74,7 +74,7 @@ export function TrialCard({ trial, hasAgent }: TrialCardProps) {
 
         {!hasAgent && !isEnded && (
           <p className="text-sm">
-            Connect your call assistant below to start using your trial minutes. Forward your business line to the AI number and receive real calls.
+            Connect your call assistant below to start using your trial minutes. Forward your business line to your forwarding number and receive real calls.
           </p>
         )}
 

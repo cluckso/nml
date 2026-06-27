@@ -7,7 +7,7 @@ export const INDUSTRIES = [
   { value: Industry.HANDYMAN, label: "Handyman / Repairs", description: "General handyman and repairs" },
   { value: Industry.AUTO_REPAIR, label: "Auto Repair", description: "Automotive repair and maintenance" },
   { value: Industry.CHILDCARE, label: "Childcare", description: "Daycare, preschool, after-school programs" },
-  { value: Industry.GENERIC, label: "Other", description: "Other service business — uses the default AI number" },
+  { value: Industry.GENERIC, label: "Other", description: "Other service business — uses the default service number" },
 ] as const
 
 export function isComplexSetup(data: {

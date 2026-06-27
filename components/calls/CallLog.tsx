@@ -29,7 +29,7 @@ export function CallLog({ calls }: CallLogProps) {
           <Phone className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
           <p className="text-muted-foreground font-medium">No calls yet</p>
           <p className="text-sm text-muted-foreground mt-1">
-            Calls will appear here once your AI answers
+            Calls will appear here once your call assistant is answering
           </p>
         </CardContent>
       </Card>

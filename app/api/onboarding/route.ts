@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
     const intakeNumbers = getConfiguredIntakeNumbersE164()
     if (intakeNumbers.length && intakeNumbers.includes(primaryForwardingNumberNormalized)) {
       return NextResponse.json(
-        { error: "Use your business phone number (the line that forwards to the AI), not the AI intake number. The AI number is shown above for reference — your customers call your business line, which forwards to that number." },
+        { error: "Use your business phone number (the line that forwards to CallGrabbr), not the CallGrabbr intake number. The forwarding number is shown above for reference — your customers call your business line, which forwards to that number." },
         { status: 400 }
       )
     }

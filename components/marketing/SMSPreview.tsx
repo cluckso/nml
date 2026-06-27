@@ -44,7 +44,7 @@ export function SMSPreview({ className = "" }: SMSPreviewProps) {
           
           {/* Timestamp */}
           <p className="text-xs text-muted-foreground text-center mt-3">
-            Delivered 3 seconds after call ended
+            Usually delivered in seconds
           </p>
         </div>
         

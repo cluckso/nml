@@ -4,7 +4,7 @@ const TRUST_ITEMS = [
   { icon: Star, label: "Built for local trades" },
   { icon: Headphones, label: "24/7 call coverage" },
   { icon: Lock, label: "Your data stays yours" },
-  { icon: BadgeCheck, label: "Professional AI voice" },
+  { icon: BadgeCheck, label: "Professional voice" },
 ] as const
 
 export function TrustStrip() {

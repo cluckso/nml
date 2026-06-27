@@ -223,7 +223,7 @@ model Agency {
   ownerBusinessId String        @unique
   ownerBusiness  Business       @relation("AgencyOwner", fields: [ownerBusinessId], references: [id], onDelete: Cascade)
   inviteCode     String         @unique
-  commissionRate Float          @default(0.30)
+  commissionRate Float          @default(0.20)
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 

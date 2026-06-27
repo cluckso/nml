@@ -12,8 +12,8 @@ const { PrismaClient } = require("@prisma/client")
 
 const db = new PrismaClient()
 
-const FREE_TRIAL_MINUTES = 50
-const INCLUDED_MINUTES = { STARTER: 300, PRO: 900, LOCAL_PLUS: 1800 }
+const FREE_TRIAL_MINUTES = 40
+const INCLUDED_MINUTES = { STARTER: 300, PRO: 800, LOCAL_PLUS: 1500 }
 
 function getIncludedMinutes(planType) {
   return INCLUDED_MINUTES[planType] ?? 0

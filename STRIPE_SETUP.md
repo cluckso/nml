@@ -2,10 +2,28 @@
 
 Your app uses Stripe for:
 
-- **Recurring plans:** Starter ($99/mo), Growth ($149/mo), Scale ($249/mo)
-- **Overage:** $0.20/min after included minutes (reported as metered usage)
+- **Recurring plans:** Solo ($99/mo), Team ($159/mo), Pro ($279/mo)
+- **Overage:** $0.22/min after included minutes (reported as usage on a subscription item)
 
 You need to create the products/prices in Stripe and set env vars so checkout and usage reporting work.
+
+---
+
+## Current live price IDs (Jun 2026)
+
+These are the **active** prices in the CallGrabbr Stripe account. Set them in Vercel / `.env`:
+
+```env
+STRIPE_PRICE_STARTER=price_1SvQxbDcWEGGVqRpfuSnJfLy       # Solo $99/mo
+STRIPE_PRICE_PRO=price_1TmpyODcWEGGVqRpMX75b7oD             # Team $159/mo
+STRIPE_PRICE_LOCAL_PLUS=price_1TmpyODcWEGGVqRpHlavDS9m      # Pro $279/mo
+STRIPE_PRICE_ELITE=price_1TmpyODcWEGGVqRpHlavDS9m           # Pro $279/mo (same as LOCAL_PLUS)
+STRIPE_USAGE_PRICE_ID=price_1Tmpz2DcWEGGVqRpcG3uI6MG        # Overage $0.22/min
+```
+
+**Note:** Stripe prices are immutable. When pricing changes, create **new** prices and update env vars. Existing subscribers stay on their original price until you migrate them.
+
+Older prices (`$149` Team, `$249` Pro, `$0.20` overage) have been archived in Stripe.
 
 ---
 
@@ -15,37 +33,34 @@ You need to create the products/prices in Stripe and set env vars so checkout an
 
 1. **Stripe Dashboard** → **Products** → **Add product**
 
-2. **Basic**
-   - Name: `Basic` (or "CallGrabbr Basic")
+2. **Solo (Starter)**
+   - Name: `Starter` or `Solo`
    - Add a **recurring** price:
      - **Price:** $99.00 USD
      - **Billing period:** Monthly
      - **Usage type:** Licensed (default)
    - Copy the **Price ID** (starts with `price_`) → use as `STRIPE_PRICE_STARTER`
-   - Copy the **Product ID** (starts with `prod_`) → optional for `STRIPE_PRODUCT_STARTER`
 
-3. **Growth**
-   - New product, name: `Growth`
-   - Recurring price: $149.00 USD, monthly, licensed
+3. **Team (Pro plan in app)**
+   - Product name: `Pro` or `Team`
+   - Recurring price: $159.00 USD, monthly, licensed
    - Copy Price ID → `STRIPE_PRICE_PRO`
-   - Copy Product ID → optional `STRIPE_PRODUCT_PRO`
 
-4. **Scale**
-   - New product, name: `Scale`
-   - Recurring price: $249.00 USD, monthly, licensed
-   - Copy Price ID → `STRIPE_PRICE_LOCAL_PLUS`
-   - Copy Product ID → optional `STRIPE_PRODUCT_LOCAL_PLUS`
+4. **Pro (Elite / Local Plus in app)**
+   - Product name: `Elite`
+   - Recurring price: $279.00 USD, monthly, licensed
+   - Copy Price ID → `STRIPE_PRICE_LOCAL_PLUS` and `STRIPE_PRICE_ELITE`
 
-5. **Overage (metered)**
-   - New product, name: `Call minutes overage` (or "Overage")
+5. **Overage**
+   - Product name: `Call minutes overage` (or "Stripe Usage")
    - Add a **recurring** price:
-     - **Price:** $0.20 USD
+     - **Price:** $0.22 USD per unit
      - **Billing period:** Monthly
-     - **Usage type:** **Metered** (not licensed)
+     - **Usage type:** **Metered** (preferred) or match your existing usage price type
      - **Usage aggregation:** Sum (default)
-   - Copy the **Price ID** (starts with `price_`) → use as `STRIPE_USAGE_PRICE_ID`
+   - Copy the **Price ID** → use as `STRIPE_USAGE_PRICE_ID`
 
-Important: the overage price must be **metered** so the app can report usage with `createUsageRecord`. The app adds this overage item to the subscription in the webhook after checkout (not at checkout), so customers are not charged for usage until the app reports overage minutes.
+Important: the overage price must support usage reporting (`createUsageRecord` or Billing Meters) so the app can bill per minute above the plan's included minutes. The app adds this overage item to the subscription in the webhook after checkout (not at checkout).
 
 ---
 
@@ -59,13 +74,14 @@ STRIPE_SECRET_KEY=sk_live_...          # or sk_test_... for test mode
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 
-# Price IDs (from step 1)
-STRIPE_PRICE_STARTER=price_xxxxx       # Starter $99/mo
-STRIPE_PRICE_PRO=price_xxxxx          # Growth $149/mo
-STRIPE_PRICE_LOCAL_PLUS=price_xxxxx   # Scale $249/mo
-STRIPE_USAGE_PRICE_ID=price_xxxxx     # Overage $0.20/min (metered)
+# Price IDs (from step 1 or "Current live price IDs" above)
+STRIPE_PRICE_STARTER=price_xxxxx       # Solo $99/mo
+STRIPE_PRICE_PRO=price_xxxxx           # Team $159/mo
+STRIPE_PRICE_LOCAL_PLUS=price_xxxxx    # Pro $279/mo
+STRIPE_PRICE_ELITE=price_xxxxx         # Pro $279/mo (optional if same as LOCAL_PLUS)
+STRIPE_USAGE_PRICE_ID=price_xxxxx      # Overage $0.22/min
 
-# Optional product IDs (used only if you reference them in code)
+# Optional product IDs
 # STRIPE_PRODUCT_STARTER=prod_xxxxx
 # STRIPE_PRODUCT_PRO=prod_xxxxx
 # STRIPE_PRODUCT_LOCAL_PLUS=prod_xxxxx
@@ -86,12 +102,12 @@ Use **test** keys and **test** price IDs while developing; switch to **live** wh
    - `STRIPE_PRICE_STARTER` (e.g. `price_...`)
    - `STRIPE_PRICE_PRO`
    - `STRIPE_PRICE_LOCAL_PLUS`
-   - `STRIPE_USAGE_PRICE_ID` (metered overage price)
+   - `STRIPE_USAGE_PRICE_ID` (overage price)
 
 3. **Run the app and try checkout**  
    - Start the app: `npm run dev`
    - Sign in, go to **Pricing** or **Billing**, pick a plan and click through.
-   - If something is missing, the UI now shows the exact error (e.g. *"Stripe price ID for STARTER is not set. Set STRIPE_PRICE_STARTER in .env (value must start with price_)"*).
+   - If something is missing, the UI shows the exact error (e.g. *"Stripe price ID for STARTER is not set. Set STRIPE_PRICE_STARTER in .env (value must start with price_)"*).
 
 4. **Webhook (optional for local)**  
    To test the full flow (subscription created in DB after payment), run:
@@ -131,25 +147,25 @@ Use **test** keys and **test** price IDs while developing; switch to **live** wh
 
 - **Checkout:**  
   Creates a Stripe Checkout session with:
-  - One **recurring** line item (plan: Starter, Pro, or Local Plus)
+  - One **recurring** line item (plan: Solo, Team, or Pro)
   - Optional one-time **setup fee** line item  
-  No usage/overage line at checkout — the metered overage item is added to the subscription in the webhook after payment, so customers are only charged for usage when the app reports overage minutes.
+  No usage/overage line at checkout — the overage item is added to the subscription in the webhook after payment.
 
 - **After payment:**  
   Webhook `checkout.session.completed` creates the subscription in your DB and links it to the business.
 
 - **Overage:**  
-  When a call ends, the app computes overage minutes (total minutes − included minutes for the plan). It finds the subscription item for `STRIPE_USAGE_PRICE_ID` and reports only that overage amount with `createUsageRecord`. Stripe then bills $0.20 per reported minute on the next invoice.
+  When a call ends, the app computes overage minutes (total minutes − included minutes for the plan). It finds the subscription item for `STRIPE_USAGE_PRICE_ID` and reports only that overage amount with `createUsageRecord`. Stripe then bills $0.22 per reported minute on the next invoice.
 
 ---
 
 ## 6. Checklist
 
-- [ ] Created 3 products with **recurring licensed** prices ($99, $199, $299/month)
-- [ ] Created 1 product with a **recurring metered** price ($0.20, monthly, metered)
+- [ ] Created 3 products with **recurring licensed** prices ($99, $159, $279/month)
+- [ ] Created 1 product with a **usage-based** overage price ($0.22/min)
 - [ ] Set `STRIPE_PRICE_STARTER`, `STRIPE_PRICE_PRO`, `STRIPE_PRICE_LOCAL_PLUS`, `STRIPE_USAGE_PRICE_ID` in env
 - [ ] Set `STRIPE_SECRET_KEY`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`
 - [ ] Webhook endpoint added in Stripe with the events above
 - [ ] Test a subscription in test mode and confirm usage appears under the subscription (overage item)
 
-If any price ID is wrong or the overage price is not metered, checkout or usage reporting will fail; double-check those first.
+If any price ID is wrong or the overage price does not support usage reporting, checkout or usage billing will fail; double-check those first.

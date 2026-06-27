@@ -97,12 +97,28 @@ export default async function IndustryLandingPage({ params }: PageProps) {
         <div className="grid md:grid-cols-2 gap-10 max-w-5xl mx-auto items-center">
           <SMSPreview />
           <div>
-            <h2 className="text-2xl font-bold mb-4">Leads delivered in seconds</h2>
+            <h2 className="text-2xl font-bold mb-4">What happens after a completed call?</h2>
             <p className="text-muted-foreground mb-6">
-              Every call becomes a text and email with name, phone, address, issue, and urgency — so you can call back while the job is still yours.
+              You get captured lead info in a neat, easy-to-read text or email—or sent directly to your CRM on Team and Pro.
             </p>
+            <h3 className="text-lg font-semibold mb-4">Your call assistant collects as much pertinent lead information as possible, including:</h3>
+            <ul className="space-y-2 text-sm text-muted-foreground mb-6 list-none">
+              {[
+                "Caller name + phone number",
+                "Service requested",
+                "Problem description",
+                "Address / location",
+                "Urgency level",
+                "Preferred appointment time",
+              ].map((item) => (
+                <li key={item} className="flex items-center gap-2">
+                  <Check className="h-4 w-4 text-primary shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
             <ul className="space-y-2 text-sm">
-              {["24/7 AI answering", "Industry-specific intake", "Emergency flagging", "No setup fee · 7-day trial"].map((f) => (
+              {["24/7 call answering (when forwarded)", "Industry-specific intake on Team & Pro", "Emergency flagging on Team & Pro", "No setup fee · 7-day trial"].map((f) => (
                 <li key={f} className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-primary" />
                   {f}
@@ -115,7 +131,7 @@ export default async function IndustryLandingPage({ params }: PageProps) {
 
       <section className="bg-muted/30 border-y border-border/50 py-16">
         <div className="container mx-auto px-4 max-w-xl">
-          <h2 className="text-2xl font-bold text-center mb-6">Test the AI yourself</h2>
+          <h2 className="text-2xl font-bold text-center mb-6">Try a demo call</h2>
           <DemoUnlock />
         </div>
       </section>

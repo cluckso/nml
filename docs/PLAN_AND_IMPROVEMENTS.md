@@ -8,8 +8,8 @@
 
 ### Product
 - **Offer:** AI phone receptionist for local service businesses (HVAC, plumbing, electrical, auto, handyman, etc.).
-- **Core value:** Answer every call 24/7, capture lead info, send summaries (email + optional SMS), optional appointment booking.
-- **Plans:** Starter $99 (300 min), Growth $149 (900 min), Scale $249 (1,800 min). 7-day free trial, no card required; 50 trial minutes.
+- **Core value:** Answer forwarded calls 24/7, capture lead info when callers share it, send summaries (email + optional SMS), optional appointment booking on Team and Pro.
+- **Plans:** Solo $99 (300 min), Team $159 (800 min), Pro $279 (1,500 min). 7-day free trial, no card required; 40 trial minutes.
 
 ### User flows
 | Flow | Steps | Status |
@@ -54,7 +54,7 @@
    - Add per-page `metadata` (title, description) where missing: `/pricing`, `/trial/start`, auth pages.
    - Add Open Graph and Twitter card meta in root layout so links look good when shared.
 2. **Landing ↔ pricing consistency**
-   - On landing, the three pricing cards say "~75–120 calls" etc. but not "300 / 900 / 1,800 minutes." Add included minutes to match `/pricing` and avoid confusion.
+   - On landing, the three pricing cards say "~75–120 calls" etc. but not "300 / 800 / 1,500 minutes." Add included minutes to match `/pricing` and avoid confusion.
 3. **Trial-first path from sign-up**
    - On Sign Up page, add a line like “New? Start with a free trial” linking to `/trial/start` so users can go trial-first without hunting.
 4. **Confirm-email → next step**
@@ -86,7 +86,7 @@
 
 **Phase 1 (completed):**
 - **SEO & share:** Root layout — added `openGraph` and `twitter` metadata (title, description, url, siteName). Pricing page — added `metadata` (title, description). Trial start page — added `metadata`. Auth — added `app/(auth)/layout.tsx` with metadata for sign-in/sign-up/confirm-email.
-- **Landing ↔ pricing:** Landing pricing cards now show "300 / 900 / 1,800 included minutes/month" and subtitle "· X included min/mo" so they match `/pricing`.
+- **Landing ↔ pricing:** Landing pricing cards now show "300 / 800 / 1,500 included minutes/month" and subtitle "· X included min/mo" so they match `/pricing`.
 - **Trial-first path:** Sign-up page — added "Start free trial" link (to `/trial/start`) next to "Sign in" for returning users. Confirm-email — added "Start free trial" button next to "Sign in" so after confirming, users can go straight to trial.
 
 **Phase 2 (completed):**

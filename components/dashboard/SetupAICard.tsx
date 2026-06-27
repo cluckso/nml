@@ -34,7 +34,7 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
     try {
       const res = await fetch("/api/agents", { method: "POST" })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || "Failed to create AI")
+      if (!res.ok) throw new Error(data.error || "Failed to connect call assistant")
       if (data.warning) setWarning(data.warning)
       router.refresh()
     } catch (e: any) {
@@ -71,7 +71,7 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
             Your call assistant is connected
           </CardTitle>
           <CardDescription>
-            Finish setup by forwarding your business line to the AI number below. Call alerts use the number in this card.
+            Finish setup by forwarding your business line to the forwarding number below. Call alerts use the number in this card.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -80,13 +80,13 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
             <div className="flex items-center gap-3 rounded-lg border border-border bg-background p-4">
               <Phone className="h-5 w-5 text-muted-foreground shrink-0" />
               <div>
-                <p className="text-sm font-medium text-muted-foreground">1. Business line → forward to this AI number</p>
+                <p className="text-sm font-medium text-muted-foreground">1. Business line → forward to this number</p>
                 <p className="text-xl font-mono font-semibold mt-1">{formatPhoneForDisplay(phoneNumber) || phoneNumber}</p>
                 <p className="text-xs text-muted-foreground mt-2">
-                  In your phone provider&apos;s settings (or carrier app), set call forwarding to this number. Incoming calls will be answered by your AI; you&apos;ll get a summary by email.
+                  In your phone provider&apos;s settings (or carrier app), set call forwarding to this number. Incoming calls will be answered by your call assistant; you&apos;ll get a summary by email.
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Set <strong>unconditional</strong> forwarding to this AI number, then use <Link href="/settings" className="text-primary underline">Settings → Call Routing</Link> to choose whether the AI answers immediately or after a ring delay.
+                  Set <strong>unconditional</strong> forwarding to this number, then use <Link href="/settings" className="text-primary underline">Settings → Call Routing</Link> to choose whether your assistant answers immediately or after a ring delay.
                 </p>
               </div>
             </div>
@@ -102,7 +102,7 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            New calls appear under <Link href="/calls" className="text-primary underline">Calls</Link>. Forward your business line to the AI number above to go live.
+            New calls appear under <Link href="/calls" className="text-primary underline">Calls</Link>. Forward your business line to the number above to go live.
           </p>
         </CardContent>
       </Card>
@@ -115,10 +115,10 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CheckCircle2 className="h-5 w-5 text-green-600" />
-            AI created
+            Call assistant connected
           </CardTitle>
           <CardDescription>
-            Your AI receptionist is set up. If you don&apos;t see a number, contact support.
+            Your call assistant is set up. If you don&apos;t see a number, contact support.
           </CardDescription>
         </CardHeader>
         {warning && (
@@ -165,7 +165,7 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
       <CardHeader>
         <CardTitle>Connect your call assistant</CardTitle>
         <CardDescription>
-          Connect once to get your AI number and set both your business line and alert number in one place.
+          Connect once to get your forwarding number and set both your business line and alert number in one place.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">

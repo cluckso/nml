@@ -94,7 +94,7 @@ export function AgencyDashboardClient() {
             Become a CallGrabbr Partner
           </CardTitle>
           <CardDescription>
-            Manage client accounts, track aggregate performance, and earn 30% recurring commission on every subscription.
+            Manage client accounts, track aggregate performance, and earn recurring commission on every subscription (default 20%).
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

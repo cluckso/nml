@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   verification: { google: googleSiteVerification },
   openGraph: {
     title: "CallGrabbr - Stop Losing Jobs to Voicemail",
-    description: "80% of callers won't leave voicemail. AI captures 80-95% of leads vs voicemail's 5-15%. We answer when you can't and text you the lead instantly.",
+    description: "80% of callers won't leave voicemail. Live answering captures 80-95% of leads vs voicemail's 5-15%. We answer when you can't and text you the lead instantly.",
     url: siteUrl,
     siteName: "CallGrabbr",
     type: "website",
@@ -105,7 +105,7 @@ rkp("init","PaccPmsytSiq");rkp("event","PAGE_VIEW");
                 </Link>
               </div>
               <p className="text-center text-xs text-muted-foreground/80 mt-4">
-                © {new Date().getFullYear()} CallGrabbr. AI call answering for local service businesses.
+                © {new Date().getFullYear()} CallGrabbr. Call answering for local service businesses.
               </p>
             </div>
           </footer>

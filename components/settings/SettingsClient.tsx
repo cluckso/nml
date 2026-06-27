@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Lock, Save, Loader2 } from "lucide-react"
+import { Lock, Save, Loader2, Check } from "lucide-react"
 import Link from "next/link"
 import type {
   BusinessSettings,
@@ -78,15 +78,33 @@ export function SettingsClient() {
     }
     ringDurationMs?: number
   } | null>(null)
+  const [agentPreviewVerified, setAgentPreviewVerified] = useState(false)
+  const [verifyingAgentPreview, setVerifyingAgentPreview] = useState(false)
 
-  const refreshAgentPreview = useCallback(() => {
-    fetch("/api/settings/agent-preview")
-      .then(async (r) => {
-        const d = await r.json()
-        if (r.ok) setAgentPreview(d)
-      })
-      .catch(() => setAgentPreview(null))
+  const refreshAgentPreview = useCallback(async (opts?: { markVerified?: boolean }) => {
+    try {
+      const r = await fetch("/api/settings/agent-preview")
+      const d = await r.json()
+      if (r.ok) {
+        setAgentPreview(d)
+        if (opts?.markVerified) setAgentPreviewVerified(true)
+        return true
+      }
+      setAgentPreview(null)
+      if (opts?.markVerified) setAgentPreviewVerified(false)
+      return false
+    } catch {
+      setAgentPreview(null)
+      if (opts?.markVerified) setAgentPreviewVerified(false)
+      return false
+    }
   }, [])
+
+  const verifyAgentPreview = useCallback(async () => {
+    setVerifyingAgentPreview(true)
+    await refreshAgentPreview({ markVerified: true })
+    setVerifyingAgentPreview(false)
+  }, [refreshAgentPreview])
 
   useEffect(() => {
     fetch("/api/settings")
@@ -124,6 +142,7 @@ export function SettingsClient() {
           if (d.notificationPhone !== undefined) setNotificationPhone(d.notificationPhone)
           if (d.smsConsent !== undefined) setSmsConsent(d.smsConsent)
           setSaved(true)
+          setAgentPreviewVerified(false)
           setTimeout(() => setSaved(false), 2000)
           refreshAgentPreview()
         } else setError(d.error)
@@ -179,7 +198,9 @@ export function SettingsClient() {
         {saved && <p className="text-sm text-emerald-600 mb-4">Settings saved and verified.</p>}
         <AgentPreviewCard
           agentPreview={agentPreview}
-          onRefresh={refreshAgentPreview}
+          verified={agentPreviewVerified}
+          verifying={verifyingAgentPreview}
+          onVerify={verifyAgentPreview}
           onSettingsLoad={settings !== null}
         />
 
@@ -224,7 +245,9 @@ export function SettingsClient() {
 
 function AgentPreviewCard({
   agentPreview,
-  onRefresh,
+  verified,
+  verifying,
+  onVerify,
   onSettingsLoad,
 }: {
   agentPreview: {
@@ -237,7 +260,9 @@ function AgentPreviewCard({
     }
     ringDurationMs?: number
   } | null
-  onRefresh: () => void
+  verified: boolean
+  verifying: boolean
+  onVerify: () => void
   onSettingsLoad: boolean
 }) {
   if (!onSettingsLoad) return null
@@ -247,12 +272,36 @@ function AgentPreviewCard({
       <CardHeader className="pb-2">
         <CardTitle className="text-base flex items-center justify-between gap-2">
           <span>Agent config preview</span>
-          <Button variant="ghost" size="sm" onClick={onRefresh} className="h-8 text-xs">
-            Verify
-          </Button>
+          {verified ? (
+            <Button
+              size="sm"
+              disabled
+              className="h-8 text-xs gap-1.5 bg-emerald-600 text-white hover:bg-emerald-600 border-emerald-600 cursor-default opacity-100"
+            >
+              <Check className="h-3.5 w-3.5" aria-hidden />
+              Verified
+            </Button>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onVerify}
+              disabled={verifying}
+              className="h-8 text-xs"
+            >
+              {verifying ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+                  Verifying…
+                </>
+              ) : (
+                "Verify"
+              )}
+            </Button>
+          )}
         </CardTitle>
         <CardDescription>
-          Shows what will be sent to the AI on each call. Use &quot;Verify&quot; to confirm your settings are applied.
+          Shows what will be sent to your call assistant on each call. Use &quot;Verify&quot; to confirm your settings are applied.
         </CardDescription>
       </CardHeader>
       <CardContent className="text-sm">
@@ -342,13 +391,13 @@ function GreetingSection({ value, onSave, saving }: { value: GreetingSettings; o
     <Card>
       <CardHeader>
         <CardTitle>Greeting & Voice</CardTitle>
-        <CardDescription>How the AI introduces itself on calls.</CardDescription>
+        <CardDescription>How your call assistant introduces itself on calls.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <Label>Business name pronunciation <span className="text-muted-foreground font-normal">(optional)</span></Label>
           <Input placeholder="e.g. 'Mc-Gee Plumming'" value={d.businessNamePronunciation ?? ""} onChange={(e) => setD({ ...d, businessNamePronunciation: e.target.value || null })} />
-          <p className="text-xs text-muted-foreground">Phonetic spelling so the AI says your name correctly.</p>
+          <p className="text-xs text-muted-foreground">Phonetic spelling so your assistant says your name correctly.</p>
         </div>
         <div className="space-y-2">
           <Label>Custom greeting</Label>
@@ -408,7 +457,7 @@ function IntakeFieldsSection({ value, onSave, saving }: { value: IntakeFieldConf
     <Card>
       <CardHeader>
         <CardTitle>Intake Fields</CardTitle>
-        <CardDescription>Choose which fields the AI collects. Mark as required or optional.</CardDescription>
+        <CardDescription>Choose which fields your assistant collects. Mark as required or optional.</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
@@ -638,7 +687,7 @@ function CallRoutingSection({ value, onSave, saving }: { value: CallRoutingSetti
       <CardHeader>
         <CardTitle>Call Routing</CardTitle>
         <CardDescription>
-          Control when the AI picks up forwarded calls. Forward your business line to your AI number at your carrier, then choose whether the AI answers right away or after a delay.
+          Control when your call assistant picks up forwarded calls. Forward your business line to your CallGrabbr number at your carrier, then choose whether it answers right away or after a delay.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -646,12 +695,12 @@ function CallRoutingSection({ value, onSave, saving }: { value: CallRoutingSetti
           label="Answer all calls immediately"
           checked={d.answerAllCalls}
           onChange={handleAnswerAllChange}
-          description="When on, every forwarded call is answered by the AI right away. When off, the line rings for your chosen delay first (use unconditional call forwarding at your carrier)."
+          description="When on, every forwarded call is answered by your call assistant right away. When off, the line rings for your chosen delay first (use unconditional call forwarding at your carrier)."
         />
         {!d.answerAllCalls && (
           <div className="space-y-4 rounded-lg border border-border bg-muted/30 p-4">
             <div className="space-y-2">
-              <Label>Delay before AI answers</Label>
+              <Label>Delay before assistant answers</Label>
               <div className="flex flex-wrap gap-4">
                 <label className="flex items-center gap-2 text-sm cursor-pointer">
                   <input
@@ -695,7 +744,7 @@ function CallRoutingSection({ value, onSave, saving }: { value: CallRoutingSetti
               </div>
             ) : (
               <div className="space-y-2">
-                <Label>Rings before AI answers</Label>
+                <Label>Rings before assistant answers</Label>
                 <select
                   className="w-full rounded border border-input bg-background px-3 py-2 text-sm"
                   value={d.ringBeforeAnswerRings}
@@ -715,7 +764,7 @@ function CallRoutingSection({ value, onSave, saving }: { value: CallRoutingSetti
               </div>
             )}
             <p className="text-xs text-muted-foreground">
-              Current setting: {formatRingDelayLabel(d)}. Use unconditional forwarding at your carrier so calls reach the AI number; this delay controls how long the AI waits before answering.
+              Current setting: {formatRingDelayLabel(d)}. Use unconditional forwarding at your carrier so calls reach your CallGrabbr number; this delay controls how long your assistant waits before answering.
             </p>
           </div>
         )}
@@ -866,7 +915,7 @@ function QuestionDepthSection({ value, onSave, saving }: { value: QuestionDepth;
     <Card>
       <CardHeader>
         <CardTitle>Question Depth</CardTitle>
-        <CardDescription>How thorough the AI is during intake.</CardDescription>
+        <CardDescription>How thorough your assistant is during intake.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
         {(["fast", "standard", "deep"] as QuestionDepth[]).map((q) => (
@@ -890,7 +939,7 @@ function BookingSection({ value, onSave, saving }: { value: BookingSettings; onS
     <Card>
       <CardHeader>
         <CardTitle>Booking & Appointments</CardTitle>
-        <CardDescription>AI collects info and schedules within your timeslots. Only offered when caller explicitly asks.</CardDescription>
+        <CardDescription>Your assistant collects info and schedules within your timeslots. Only offered when caller explicitly asks.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <Toggle label="Enable appointment booking" checked={d.askForAppointment} onChange={(v) => setD({ ...d, askForAppointment: v })} />
@@ -1118,7 +1167,7 @@ function VoiceBrandSection({ value, onSave, saving }: { value: VoiceBrandSetting
     <Card>
       <CardHeader>
         <CardTitle>Voice & Branding</CardTitle>
-        <CardDescription>Fine-tune the AI voice personality.</CardDescription>
+        <CardDescription>Fine-tune voice and personality.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <Slider label="Speed" value={d.speed} onChange={(v) => setD({ ...d, speed: v })} />
@@ -1144,7 +1193,7 @@ function AiBehaviorSection({ value, onSave, saving }: { value: AiBehaviorSetting
   return (
     <Card>
       <CardHeader>
-        <CardTitle>AI Behavior</CardTitle>
+        <CardTitle>Call Handling</CardTitle>
         <CardDescription>Advanced call handling controls.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

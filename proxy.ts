@@ -98,7 +98,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // Public routes that don't require authentication
-  const publicRoutes = ["/", "/pricing", "/sign-in", "/sign-up", "/confirm-email", "/api/", "/docs", "/privacy", "/terms"]
+  const publicRoutes = ["/", "/pricing", "/sign-in", "/sign-up", "/confirm-email", "/forgot-password", "/reset-password", "/api/", "/docs", "/privacy", "/terms"]
   const isPublicRoute = publicRoutes.some((route) =>
     request.nextUrl.pathname.startsWith(route)
   )
@@ -113,7 +113,7 @@ export async function proxy(request: NextRequest) {
   }
 
   // If user is authenticated and trying to access auth pages, redirect to dashboard
-  if (user && (request.nextUrl.pathname === "/sign-in" || request.nextUrl.pathname === "/sign-up" || request.nextUrl.pathname === "/confirm-email")) {
+  if (user && (request.nextUrl.pathname === "/sign-in" || request.nextUrl.pathname === "/sign-up" || request.nextUrl.pathname === "/confirm-email" || request.nextUrl.pathname === "/forgot-password")) {
     const url = request.nextUrl.clone()
     url.pathname = "/dashboard"
     const res = NextResponse.redirect(url)

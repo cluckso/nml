@@ -375,7 +375,7 @@ export const SECTION_LABELS: Record<SettingsSection, string> = {
   crm: "CRM & Integrations",
   departments: "Departments",
   voiceBrand: "Voice & Branding",
-  aiBehavior: "AI Behavior",
+  aiBehavior: "Call Handling",
   reporting: "Report Customization",
 }
 

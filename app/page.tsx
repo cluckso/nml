@@ -9,6 +9,7 @@ import { IndustryPhotoCards } from "@/components/marketing/IndustryPhotoCards"
 import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
 import { TrustStrip } from "@/components/marketing/TrustStrip"
 import { MARKETING_IMAGES } from "@/lib/marketing-images"
+import { formatJobRoiLine, formatOverageRate, PRICING_TIERS } from "@/lib/pricing-catalog"
 import {
   ArrowRight,
   CreditCard,
@@ -43,7 +44,7 @@ export default function HomePage() {
             From first ring to qualified lead.
           </h2>
           <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-12">
-            CallGrabbr handles the full flow: answer every call, qualify the lead, and deliver the details straight to you.
+            CallGrabbr handles the full flow: answer forwarded calls, qualify the lead, and deliver captured details straight to you.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             <div className="text-center">
@@ -59,9 +60,9 @@ export default function HomePage() {
               <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15 text-primary mb-4">
                 <MessageSquare className="h-6 w-6" aria-hidden />
               </div>
-              <h3 className="font-semibold text-lg mb-2">Captures every lead</h3>
+              <h3 className="font-semibold text-lg mb-2">Captures lead details</h3>
               <p className="text-sm text-muted-foreground">
-                Name, phone, service need, urgency, and preferred time. Appointment booking on higher tiers.
+                Name, phone, service need, urgency, and preferred time when shared. Appointment booking on Team and Pro.
               </p>
             </div>
             <div className="text-center">
@@ -70,7 +71,7 @@ export default function HomePage() {
               </div>
               <h3 className="font-semibold text-lg mb-2">Delivers to your stack</h3>
               <p className="text-sm text-muted-foreground">
-                Summaries by email and SMS. Optional CRM webhook. No data lock-in — you own the leads.
+                Summaries by email and SMS. CRM webhook on Team and Pro. No data lock-in — you own the leads.
               </p>
             </div>
           </div>
@@ -96,7 +97,7 @@ export default function HomePage() {
 
       {/* Features — Every call picked up */}
       <section className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold text-center mb-3">Every call picked up. Every lead captured.</h2>
+        <h2 className="text-3xl font-bold text-center mb-3">Forwarded calls answered. Lead details captured.</h2>
         <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
           When the line is busy or the office is closed, CallGrabbr takes over — no more voicemail black holes.
         </p>
@@ -110,7 +111,7 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Every call answered in seconds. Spam and robocalls filtered before the AI picks up.
+                Forwarded calls answered in seconds. Spam and robocalls filtered before your call assistant picks up.
               </p>
             </CardContent>
           </Card>
@@ -149,7 +150,7 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Email and SMS summaries. CRM webhook. Your calendar. Works with your existing phone number.
+                Email and SMS summaries. CRM webhook on Team and Pro. Works with your existing phone number.
               </p>
             </CardContent>
           </Card>
@@ -210,18 +211,18 @@ export default function HomePage() {
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary mb-4">
               <MessageSquare className="h-7 w-7" />
             </div>
-            <h3 className="font-semibold text-lg mb-2">Step 3 — Every call gets answered</h3>
+            <h3 className="font-semibold text-lg mb-2">Step 3 — Calls get answered</h3>
             <p className="text-muted-foreground text-sm">
-              Intake, questions, and scheduling handled automatically.
+              Intake and scheduling handled automatically when enabled on your plan.
             </p>
           </div>
           <div className="flex flex-col items-center text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary mb-4">
               <LayoutDashboard className="h-7 w-7" />
             </div>
-            <h3 className="font-semibold text-lg mb-2">Step 4 — You Get the Lead Instantly</h3>
+            <h3 className="font-semibold text-lg mb-2">Step 4 — You get the lead</h3>
             <p className="text-muted-foreground text-sm">
-              SMS + email + CRM push with full summary.
+              SMS and email summary with captured details. CRM webhook on Team and Pro.
             </p>
           </div>
         </div>
@@ -263,7 +264,7 @@ export default function HomePage() {
             </div>
             <div className="flex items-center gap-3 rounded-lg border border-border/50 bg-card/50 px-5 py-3">
               <Calendar className="h-6 w-6 text-primary" aria-hidden />
-              <span className="font-medium">Your calendar</span>
+              <span className="font-medium">Appointments (Team & Pro)</span>
             </div>
             <div className="flex items-center gap-3 rounded-lg border border-border/50 bg-card/50 px-5 py-3">
               <Phone className="h-6 w-6 text-primary" aria-hidden />
@@ -273,7 +274,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* What Callers Hear — AI disclosure */}
+      {/* What Callers Hear */}
       <section className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-3">What your callers experience</h2>
@@ -290,7 +291,7 @@ export default function HomePage() {
               </CardHeader>
               <CardContent className="space-y-3 text-sm text-muted-foreground">
                 <p>Callers hear a friendly, professional voice — not a robot menu.</p>
-                <p>The AI asks relevant questions based on your industry (plumbing, HVAC, electrical, etc.) and captures the details you need.</p>
+                <p>Your call assistant asks relevant questions based on your industry (plumbing, HVAC, electrical, etc.) and captures the details you need.</p>
               </CardContent>
             </Card>
             <Card className="glass-card">
@@ -325,7 +326,7 @@ export default function HomePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm text-muted-foreground">
-                <p>The AI identifies itself as an assistant if asked directly.</p>
+                <p>Identifies as an automated assistant if asked directly — no pretending to be you.</p>
                 <p>Calls may be recorded for quality and training. You control the settings.</p>
               </CardContent>
             </Card>
@@ -341,9 +342,9 @@ export default function HomePage() {
         className="py-16 border-y border-border/50"
         contentClassName="container mx-auto px-4"
       >
-          <h2 className="text-3xl font-bold text-center mb-3">What you get after every call</h2>
-          <p className="text-center text-muted-foreground mb-12 max-w-xl mx-auto">
-            Seconds after the call ends, you receive everything you need to call back and close the job.
+          <h2 className="text-3xl font-bold text-center mb-3">What happens after a completed call?</h2>
+          <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+            You get all captured lead info in a neat, easy-to-read text or email—or sent directly to your CRM.
           </p>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-5xl mx-auto items-center">
             {/* SMS Preview */}
@@ -351,7 +352,7 @@ export default function HomePage() {
             
             {/* Feature list */}
             <div>
-              <h3 className="text-xl font-semibold mb-6">Every lead includes:</h3>
+              <h3 className="text-xl font-semibold mb-6">Your call assistant collects as much pertinent lead information as possible, including:</h3>
               <ul className="space-y-3 list-none">
                 {[
                   "Caller name + phone number",
@@ -370,10 +371,10 @@ export default function HomePage() {
                 ))}
               </ul>
               <p className="text-sm text-muted-foreground mt-6">
-                Delivered by <strong className="text-foreground">SMS + email + CRM webhook</strong>
+                CRM delivery available on Team and Pro plans.
               </p>
               <p className="text-sm text-muted-foreground mt-2">
-                Spam and robocalls filtered automatically — you only see real leads.
+                Spam and robocalls filtered when possible — alerts focus on actionable leads.
               </p>
             </div>
           </div>
@@ -394,72 +395,50 @@ export default function HomePage() {
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-3">Simple, predictable pricing</h2>
           <p className="text-center text-muted-foreground mb-10 max-w-xl mx-auto">
-            No setup fees. No hidden charges. Cancel anytime.
+            No setup fees. No hidden charges. Overage {formatOverageRate()} after included minutes. Cancel anytime.
+          </p>
+          <p className="text-center text-sm text-muted-foreground mb-8 max-w-lg mx-auto">
+            {formatJobRoiLine()}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle>Solo — $99/mo</CardTitle>
-                <p className="text-sm text-muted-foreground font-normal">Best for solo operators · 300 included min/mo</p>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {[
-                  "300 included minutes/month",
-                  "24/7 call answering",
-                  "Spam call filtering",
-                  "Name, phone, reason captured",
-                  "Email summaries",
-                  "No setup fee",
-                ].map((f, i) => (
-                  <p key={i} className="text-sm text-muted-foreground flex items-center gap-2">
-                    <Check className="h-4 w-4 text-primary shrink-0" />
-                    {f}
+            {PRICING_TIERS.map((tier) => (
+              <Card
+                key={tier.key}
+                className={
+                  tier.popular
+                    ? "border-primary/50 bg-primary/5 border-2"
+                    : "glass-card"
+                }
+              >
+                <CardHeader>
+                  {tier.badge && (
+                    <span
+                      className={`mb-2 inline-block w-fit rounded px-2 py-1 text-xs font-semibold ${
+                        tier.badge === "Best value"
+                          ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+                          : "bg-primary text-primary-foreground"
+                      }`}
+                    >
+                      {tier.badge}
+                    </span>
+                  )}
+                  <CardTitle>
+                    {tier.name} — ${tier.price}/mo
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground font-normal">
+                    {tier.subtitle} · {tier.includedMinutes.toLocaleString()} included min/mo
                   </p>
-                ))}
-              </CardContent>
-            </Card>
-            <Card className="border-primary/50 bg-primary/5 border-2">
-              <CardHeader>
-                <CardTitle>Team — $149/mo</CardTitle>
-                <p className="text-sm text-muted-foreground font-normal">Best for growing shops · 900 included min/mo</p>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {[
-                  "900 included minutes/month",
-                  "Spam call filtering",
-                  "Industry intake flows",
-                  "Appointment + emergency logic",
-                  "CRM + SMS notifications",
-                  "Lead tagging",
-                ].map((f, i) => (
-                  <p key={i} className="text-sm text-muted-foreground flex items-center gap-2">
-                    <Check className="h-4 w-4 text-primary shrink-0" />
-                    {f}
-                  </p>
-                ))}
-              </CardContent>
-            </Card>
-            <Card className="glass-card">
-              <CardHeader>
-                <CardTitle>Pro — $249/mo</CardTitle>
-                <p className="text-sm text-muted-foreground font-normal">Best for high-volume trades · 1,800 included min/mo</p>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {[
-                  "1,800 included minutes/month",
-                  "Spam call filtering",
-                  "Custom branded voice",
-                  "After-hours emergency handling",
-                  "Weekly usage reports",
-                  "Priority support",
-                ].map((f, i) => (
-                  <p key={i} className="text-sm text-muted-foreground flex items-center gap-2">
-                    <Check className="h-4 w-4 text-primary shrink-0" />
-                    {f}
-                  </p>
-                ))}
-              </CardContent>
-            </Card>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {tier.features.map((f) => (
+                    <p key={f} className="text-sm text-muted-foreground flex items-center gap-2">
+                      <Check className="h-4 w-4 text-primary shrink-0" />
+                      {f}
+                    </p>
+                  ))}
+                </CardContent>
+              </Card>
+            ))}
           </div>
           <div className="text-center mt-10">
             <p className="text-sm text-muted-foreground mb-4">Start with a 7-day free trial. No card required.</p>
@@ -596,7 +575,7 @@ export default function HomePage() {
         <div className="max-w-3xl mx-auto rounded-2xl border border-white/10 bg-primary/90 backdrop-blur-md px-6 py-12 sm:px-10 text-primary-foreground shadow-2xl shadow-primary/20">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Turn your phone into a 24/7 lead machine</h2>
           <p className="text-lg opacity-90 max-w-2xl mx-auto mb-8">
-            Stop losing jobs to voicemail. Get every call answered, every lead captured, and every summary in your inbox in seconds.
+            Stop losing jobs to voicemail. Forward your line, capture lead details, and get summaries by text or email — usually within seconds.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
             <span className="opacity-90">7-day free trial</span>

@@ -1,9 +1,12 @@
 # CallGrabbr — Ad Copy & Ad Image Generation Prompt
 
+> **Keep in sync with the live site** (`app/page.tsx`, `lib/pricing-catalog.ts`). Pricing: Solo $99 / Team $159 / Pro $279. Trial: 7 days, 40 minutes, no card. Lead fields are captured when callers share them — do not promise every field on every call.
+
 ## Product summary (for reference)
-- **What:** AI phone receptionist that answers business calls 24/7, captures lead/intake info, and sends summaries.
+- **What:** Automated call answering for forwarded business lines; captures intake info and sends summaries.
 - **Who:** Local service businesses (HVAC, plumbing, electrician, auto repair, childcare, handyman).
-- **Trial:** 7-day free trial; 5-minute setup; no card required to start.
+- **Trial:** 7-day free trial, 40 included minutes; ~5-minute setup; no card required to start.
+- **Plans:** Solo $99 (300 min), Team $159 (800 min), Pro $279 (1,500 min). Overage $0.22/min.
 
 ---
 
@@ -11,28 +14,27 @@
 
 ### Headlines (short)
 - Never miss another call.
-- AI that answers every call and books the job.
 - Turn missed calls into booked work.
-- Your AI receptionist. 24/7.
+- Your call assistant. 24/7.
 - No voicemail. No hold. No lost leads.
 - When you don’t answer, they call the next company. We answer.
 
 ### Subheads / one-liners
-- AI call answering for local service businesses. Start your free trial in 5 minutes.
-- Answers every call, captures the lead, sends you the job details instantly.
-- 24/7. No voicemail. No hold music. No lost revenue.
-- Forward your business line. We answer, qualify, and send you the lead.
+- Call answering for local service businesses. Start your free trial in 5 minutes.
+- Answers forwarded calls, captures lead details, sends a summary — usually within seconds.
+- 24/7 when your line forwards to CallGrabbr. No voicemail black hole.
+- Forward your business line. We answer, qualify, and send you what was captured.
 
 ### Short body (social / display)
-- When you don’t answer, they call the next company. CallGrabbr answers every call, captures the lead, and sends you the job details instantly — 24/7. No voicemail. No hold music. No lost revenue. Start your 7-day free trial, no card required.
+- When you don’t answer, they call the next company. CallGrabbr answers forwarded calls, captures lead details when callers share them, and sends a summary by text and email — usually within seconds. Plans from $99/mo. Start your 7-day free trial, no card required.
 
 ### Long body (landing / email)
-- CallGrabbr is an AI receptionist that answers your business phone 24/7. It greets callers, asks the right questions for your industry (HVAC, plumbing, electrician, auto repair, childcare, handyman), captures name, phone, and job details, and sends you a summary by email and optional SMS. You get every lead without missing a call. Setup takes about 5 minutes: forward your existing business line to your CallGrabbr number. Start with a 7-day free trial, no credit card required.
+- CallGrabbr answers your business line when you forward it to us. Your call assistant greets callers, asks industry-specific questions (HVAC, plumbing, electrician, auto repair, childcare, handyman), and captures name, phone, and job details when provided. Summaries go out by email and SMS based on your settings; CRM webhook on Team and Pro. Setup takes about 5 minutes. Start with a 7-day free trial — no credit card required.
 
 ### CTA phrases
 - Start free trial
 - Activate CallGrabbr
-- Get your AI number
+- Get your forwarding number
 - Try free — 7-day trial
 
 ---

@@ -6,7 +6,7 @@ import { TrialStartClient } from "./TrialStartClient"
 
 export const metadata: Metadata = {
   title: "Start Free Trial - CallGrabbr",
-  description: "Start your 7-day free trial. No card required. Add your business phone to get your AI call assistant.",
+  description: "Start your 7-day free trial. No card required. Add your business phone to get your call assistant.",
 }
 
 export const dynamic = "force-dynamic"

@@ -39,6 +39,12 @@ ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "smsConsentAt" TIMESTAMP(3);
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "smsOptedOut" BOOLEAN NOT NULL DEFAULT false;
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "smsOptedOutAt" TIMESTAMP(3);
 
+-- ─── 6b. User: display name, push, review email ─────────────────────────────
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "name" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "pushToken" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "pushPlatform" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "reviewEmailSentAt" TIMESTAMP(3);
+
 -- ─── 7. RecycledRetellNumber table (required for onboarding) ─────────────────
 CREATE TABLE IF NOT EXISTS "RecycledRetellNumber" (
   "id" TEXT NOT NULL PRIMARY KEY,

@@ -8,8 +8,10 @@ import {
   getEffectivePlanType,
 } from "./plans"
 import { computeRingDurationMs, normalizeCallRouting, ringDurationMsForRetellAgent, DEFAULT_CALL_ROUTING } from "./call-routing"
-import { DEFAULT_RETELL_VOICE, RETELL_GLOBAL_PROMPT_TEMPLATE } from "./retell-agent-template"
+import { DEFAULT_RETELL_VOICE, RETELL_GLOBAL_PROMPT_TEMPLATE, getRetellVoiceConfig } from "./retell-agent-template"
 import { AGENT_PROMPT_CONFIG } from "@/config/agent-prompt"
+import { buildStevePersonalPromptContext, STEVE_PERSONAL_AGENT_CONFIG } from "@/config/steve-personal-agent"
+import { buildStevePersonalConversationFlow } from "./flows/steve-personal-flow"
 import {
   DEMO_SAVE_LEAD_INSTRUCTION,
   FLOW_ACKNOWLEDGE,
@@ -62,15 +64,16 @@ export async function createRetellAgent(
     global_prompt: globalPrompt,
   })
 
+  const voiceConfig = getRetellVoiceConfig(data.planType)
   const agentPayload = {
     agent_name: data.businessName,
     language: "en-US" as const,
-    voice_id: DEFAULT_RETELL_VOICE.voice_id,
-    voice_temperature: DEFAULT_RETELL_VOICE.voice_temperature,
-    voice_speed: DEFAULT_RETELL_VOICE.voice_speed,
-    volume: DEFAULT_RETELL_VOICE.volume,
-    max_call_duration_ms: DEFAULT_RETELL_VOICE.max_call_duration_ms,
-    interruption_sensitivity: DEFAULT_RETELL_VOICE.interruption_sensitivity,
+    voice_id: voiceConfig.voice_id,
+    voice_temperature: voiceConfig.voice_temperature,
+    voice_speed: voiceConfig.voice_speed,
+    volume: voiceConfig.volume,
+    max_call_duration_ms: voiceConfig.max_call_duration_ms,
+    interruption_sensitivity: voiceConfig.interruption_sensitivity,
     response_engine: {
       type: "conversation-flow" as const,
       conversation_flow_id,
@@ -167,15 +170,16 @@ export async function createRetellAgentOnly(
     global_prompt: globalPrompt,
   })
 
+  const voiceConfig = getRetellVoiceConfig(data.planType)
   const agentPayload = {
     agent_name: name,
     language: "en-US" as const,
-    voice_id: DEFAULT_RETELL_VOICE.voice_id,
-    voice_temperature: DEFAULT_RETELL_VOICE.voice_temperature,
-    voice_speed: DEFAULT_RETELL_VOICE.voice_speed,
-    volume: DEFAULT_RETELL_VOICE.volume,
-    max_call_duration_ms: DEFAULT_RETELL_VOICE.max_call_duration_ms,
-    interruption_sensitivity: DEFAULT_RETELL_VOICE.interruption_sensitivity,
+    voice_id: voiceConfig.voice_id,
+    voice_temperature: voiceConfig.voice_temperature,
+    voice_speed: voiceConfig.voice_speed,
+    volume: voiceConfig.volume,
+    max_call_duration_ms: voiceConfig.max_call_duration_ms,
+    interruption_sensitivity: voiceConfig.interruption_sensitivity,
     response_engine: {
       type: "conversation-flow" as const,
       conversation_flow_id,
@@ -345,9 +349,10 @@ async function createPhoneNumber(
   agentId: string,
   areaCode: number
 ): Promise<string> {
+  const agentBinding = [{ agent_id: agentId, weight: 1 }]
   const body = {
-    inbound_agent_id: agentId,
-    outbound_agent_id: agentId,
+    inbound_agents: agentBinding,
+    outbound_agents: agentBinding,
     area_code: areaCode,
     country_code: "US",
   }
@@ -387,9 +392,10 @@ async function updatePhoneNumber(
   phoneNumber: string,
   agentId: string
 ): Promise<void> {
+  const agentBinding = [{ agent_id: agentId, weight: 1 }]
   const body = {
-    inbound_agent_id: agentId,
-    outbound_agent_id: agentId,
+    inbound_agents: agentBinding,
+    outbound_agents: agentBinding,
   }
   const encoded = encodeURIComponent(phoneNumber)
   const url = `${RETELL_API_BASE}/update-phone-number/${encoded}`
@@ -629,9 +635,9 @@ export async function syncRetellAgentFromBusiness(
     global_prompt: globalPrompt,
   })
 
-  // Voice: male = Ethan, female/Auto = Chloe (default)
   const voiceGender = settings?.greeting?.voiceGender
-  const voiceId = voiceGender === "male" ? "11labs-Ethan" : "11labs-Chloe"
+  const voiceBase = getRetellVoiceConfig(effectivePlan, voiceGender)
+  const voiceId = voiceBase.voice_id
   const vs = business.voiceSettings as { speed?: number; temperature?: number; volume?: number } | null | undefined
   const voiceBrand = hasBrandedVoice(effectivePlan) ? settings?.voiceBrand : undefined
   const voiceSpeed =
@@ -1256,6 +1262,99 @@ export async function updateDemoAgentFlow(): Promise<void> {
     response_engine: { type: "conversation-flow", conversation_flow_id: flowId, version },
   })
   console.info("Demo agent flow updated to version", version)
+}
+
+function getStevePersonalGlobalPrompt(): string {
+  return `${AGENT_PROMPT_CONFIG.stevePersonalAgentPrompt}\n\n${buildStevePersonalPromptContext()}`
+}
+
+/**
+ * Create Steve's personal missed-call agent + flow. Run scripts/setup-steve-agent.ts.
+ * Set RETELL_STEVE_PHONE to attach an existing Retell number.
+ */
+export async function createStevePersonalRetellAgent(): Promise<{ agent_id: string; phone_number: string | null }> {
+  const apiKey = process.env.RETELL_API_KEY
+  if (!apiKey) throw new Error("RETELL_API_KEY is not configured")
+
+  const globalPrompt = getStevePersonalGlobalPrompt()
+  const flow = buildStevePersonalConversationFlow()
+  const { conversation_flow_id, version } = await createConversationFlow(apiKey, {
+    ...flow,
+    global_prompt: globalPrompt,
+  })
+
+  const response = await fetch(`${RETELL_API_BASE}/create-agent`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({
+      agent_name: STEVE_PERSONAL_AGENT_CONFIG.retellAgentName,
+      language: "en-US",
+      voice_id: DEFAULT_RETELL_VOICE.voice_id,
+      voice_temperature: DEFAULT_RETELL_VOICE.voice_temperature,
+      voice_speed: DEFAULT_RETELL_VOICE.voice_speed,
+      volume: DEFAULT_RETELL_VOICE.volume,
+      max_call_duration_ms: DEFAULT_RETELL_VOICE.max_call_duration_ms,
+      interruption_sensitivity: DEFAULT_RETELL_VOICE.interruption_sensitivity,
+      response_engine: {
+        type: "conversation-flow",
+        conversation_flow_id,
+        version: version ?? 0,
+      },
+    }),
+  })
+
+  if (!response.ok) {
+    const err = await response.text()
+    throw new Error(`Failed to create Steve personal agent (${response.status}): ${err}`)
+  }
+  const result = await response.json()
+  const agent_id = result.agent_id
+
+  let phone_number: string | null = null
+  const existingPhone = process.env.RETELL_STEVE_PHONE ?? null
+  const areaCode = process.env.RETELL_DEFAULT_AREA_CODE ? parseInt(process.env.RETELL_DEFAULT_AREA_CODE, 10) : 608
+
+  if (existingPhone) {
+    try {
+      await updatePhoneNumber(apiKey, existingPhone, agent_id)
+      phone_number = existingPhone
+    } catch (err) {
+      console.error("Failed to attach RETELL_STEVE_PHONE:", err)
+    }
+  }
+  if (!phone_number) {
+    try {
+      phone_number = await createPhoneNumber(apiKey, agent_id, areaCode)
+    } catch (err) {
+      console.error("Failed to create phone for Steve personal agent:", err)
+    }
+  }
+
+  return { agent_id, phone_number }
+}
+
+/**
+ * Update Steve personal agent flow. Requires RETELL_API_KEY and RETELL_STEVE_AGENT_ID.
+ * Run: npx tsx scripts/update-steve-flow.ts
+ */
+export async function updateStevePersonalAgentFlow(): Promise<void> {
+  const apiKey = process.env.RETELL_API_KEY
+  const agentId = process.env.RETELL_STEVE_AGENT_ID
+  if (!apiKey || !agentId) throw new Error("RETELL_API_KEY and RETELL_STEVE_AGENT_ID required")
+
+  const agent = await getAgent(apiKey, agentId)
+  const flowId = agent.response_engine?.type === "conversation-flow" && agent.response_engine?.conversation_flow_id
+  if (!flowId) throw new Error("Steve personal agent has no conversation flow")
+
+  const flow = buildStevePersonalConversationFlow()
+  const globalPrompt = getStevePersonalGlobalPrompt()
+  const { version } = await updateConversationFlow(apiKey, flowId, { ...flow, global_prompt: globalPrompt })
+
+  await updateAgent(apiKey, agentId, {
+    ...DEFAULT_RETELL_VOICE,
+    response_engine: { type: "conversation-flow", conversation_flow_id: flowId, version },
+  })
+  console.info("Steve personal agent flow updated to version", version)
 }
 
 type TemplateAgentEntry = {

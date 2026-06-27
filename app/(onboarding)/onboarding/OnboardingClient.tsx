@@ -102,7 +102,7 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
         throw new Error(details ? `${msg}. ${details}` : msg)
       }
       if (result.provisioningFailed) {
-        setProvisioningWarning("Your info was saved. We couldn't set up your AI line just yet — click Connect on the dashboard to try again.")
+        setProvisioningWarning("Your info was saved. We couldn't set up your call line just yet — click Connect on the dashboard to try again.")
       }
       const businessId = result.business?.id
       if (businessId && typeof window !== "undefined") {
@@ -181,7 +181,7 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
             <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 mb-6 text-left">
               <p className="text-sm font-semibold flex items-center gap-2 mb-2">
                 <Phone className="h-4 w-4" />
-                Forward your business line to this AI number
+                Forward your business line to this number
               </p>
               <p className="text-xl font-mono font-semibold">{formatPhoneForDisplay(intakeNumber) || intakeNumber}</p>
               <p className="text-xs text-muted-foreground mt-2">
@@ -209,11 +209,11 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
           <div>
             <h2 className="text-xl font-semibold mb-2">Select Your Industry (required)</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              Choose the option that best fits your business. This determines which AI agent answers your calls. Select &quot;Other&quot; for the default service number if none of the listed industries apply.
+              Choose the option that best fits your business. This determines which call flow answers your calls. Select &quot;Other&quot; for the default service number if none of the listed industries apply.
             </p>
             {planType && hasIndustryOptimizedAgents(planType) && (
               <p className="text-sm text-muted-foreground mb-4">
-                Your plan includes industry-optimized AI agents for the types listed below.
+                Your plan includes industry-optimized call flows for the types listed below.
               </p>
             )}
             <IndustrySelector selected={data.industry} onSelect={handleIndustrySelect} />
@@ -232,7 +232,7 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
               <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 mb-6 flex items-start gap-3">
                 <Phone className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-semibold">Forward calls to this AI number</p>
+                  <p className="text-sm font-semibold">Forward calls to this number</p>
                   <p className="text-lg font-mono font-semibold mt-1">{formatPhoneForDisplay(intakeNumber) || intakeNumber}</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     After saving, set your business line to forward to this number. <Link href="/docs/faq" className="text-primary underline">Help & FAQ</Link>

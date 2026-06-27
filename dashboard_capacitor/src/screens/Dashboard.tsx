@@ -132,7 +132,7 @@ export default function Dashboard({ onSignOut }: DashboardProps) {
                   </span>
                 ) : (
                   <p style={{ marginTop: 12, fontSize: 14, color: 'var(--text-muted)' }}>
-                    Complete setup on the web app to connect your AI agent.
+                    Complete setup on the web app to connect your call assistant.
                   </p>
                 )}
               </div>

@@ -1,10 +1,23 @@
+import { PlanType } from "@prisma/client"
+import { getEffectivePlanType } from "./plans"
+
 /**
  * Retell agent template: global prompt and variable names.
  * Must match dynamic_variables sent in app/api/webhooks/retell/route.ts (call_inbound).
  * Use {{variable_name}} in prompts — Retell replaces these per call from our webhook response.
  */
 
-/** Warm, natural customer-service voice — clear pacing and patient turn-taking. */
+/** Standard-tier voice (lower Retell TTS cost). Default for Solo. */
+export const STANDARD_RETELL_VOICE = {
+  voice_id: "openai-Alloy",
+  voice_temperature: 0.85,
+  voice_speed: 0.95,
+  volume: 1.0,
+  interruption_sensitivity: 0.82,
+  max_call_duration_ms: 7 * 60 * 1000,
+} as const
+
+/** Premium ElevenLabs voice — Team+ and branded Pro settings. */
 export const DEFAULT_RETELL_VOICE = {
   voice_id: "11labs-Chloe",
   voice_temperature: 0.88,
@@ -13,6 +26,28 @@ export const DEFAULT_RETELL_VOICE = {
   interruption_sensitivity: 0.82,
   max_call_duration_ms: 7 * 60 * 1000,
 } as const
+
+export type RetellVoiceConfig = {
+  voice_id: string
+  voice_temperature: number
+  voice_speed: number
+  volume: number
+  interruption_sensitivity: number
+  max_call_duration_ms: number
+}
+
+/** Pick voice engine by plan: Solo uses standard TTS; Team+ uses ElevenLabs. */
+export function getRetellVoiceConfig(
+  planType: PlanType | null | undefined,
+  voiceGender?: string | null
+): RetellVoiceConfig {
+  const effective = getEffectivePlanType(planType)
+  const premium = effective !== PlanType.STARTER
+  const base = premium ? DEFAULT_RETELL_VOICE : STANDARD_RETELL_VOICE
+  if (!premium) return { ...base }
+  const voice_id = voiceGender === "male" ? "11labs-Ethan" : "11labs-Chloe"
+  return { ...base, voice_id }
+}
 
 /** Variable names we send in call_inbound dynamic_variables. Use these in agent prompts with {{name}}. */
 export const RETELL_DYNAMIC_VARIABLE_NAMES = [

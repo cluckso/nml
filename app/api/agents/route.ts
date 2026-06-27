@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
       const msg = err instanceof Error ? err.message : String(err)
       console.error("POST /api/agents: provisioning failed for business", business.id, msg)
       return NextResponse.json(
-        { error: `Could not set up your AI line: ${msg}` },
+        { error: `Could not set up your call line: ${msg}` },
         { status: 503 }
       )
     }

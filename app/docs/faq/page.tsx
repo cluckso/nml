@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 export const metadata = {
   title: "Help & FAQ - CallGrabbr",
   description:
-    "How to forward your business line to your AI call assistant. Step-by-step instructions by carrier.",
+    "How to forward your business line to your CallGrabbr call assistant. Step-by-step instructions by carrier.",
 }
 
 // Force dynamic so Vercel builder gets a lambda for this route (static pages don't emit one).
@@ -26,7 +26,7 @@ const CARRIERS = [
         method: "Dial code (fastest)",
         items: [
           "Open your phone’s dialer.",
-          "Dial ***21*** followed by the 10-digit AI number, then **#** (e.g. *21*1234567890#).",
+          "Dial ***21*** followed by the 10-digit forwarding number, then **#** (e.g. *21*1234567890#).",
           "Press **Call** and wait at least 3 seconds for a confirmation tone.",
           "To turn off: dial **#21#** and wait for confirmation.",
         ],
@@ -36,7 +36,7 @@ const CARRIERS = [
         items: [
           "Open the **Phone** app → **Menu** (⋮) → **Settings**.",
           "Go to **Supplementary services** → **Call forwarding**.",
-          "Select **Always forward**, enter the AI number, then **Turn on**.",
+          "Select **Always forward**, enter the forwarding number, then **Turn on**.",
           "To turn off: **Always forward** → **Turn off**.",
         ],
       },
@@ -50,7 +50,7 @@ const CARRIERS = [
         method: "From your phone",
         items: [
           "Open the **Phone** app.",
-          "Dial ***72** followed by the 10-digit AI number (e.g. *725551234567).",
+          "Dial ***72** followed by the 10-digit forwarding number (e.g. *725551234567).",
           "Press **Call** and listen for a confirmation message or tone.",
           "End the call. Forwarding is now on.",
           "To turn off: dial ***73** and press Call.",
@@ -61,7 +61,7 @@ const CARRIERS = [
         items: [
           "Log in at **verizon.com** → **My Verizon**.",
           "Go to **Call Forwarding** (under Calling or Plan).",
-          "Select the line, enter the AI number as the forward-to number.",
+          "Select the line, enter the forwarding number as the forward-to number.",
           "Choose **Forward all calls** (or conditional if offered).",
           "Click **Update** or **Save**.",
           "To turn off: open Call Forwarding and click **Cancel**.",
@@ -77,24 +77,24 @@ const CARRIERS = [
         method: "Forward all calls (dial code)",
         items: [
           "Open your phone’s dialer.",
-          "Dial **21* followed by the 10-digit AI number, then **#** (e.g. **21*5551234567#).",
+          "Dial **21* followed by the 10-digit forwarding number, then **#** (e.g. **21*5551234567#).",
           "Press **Call** and wait for a confirmation tone or message.",
           "To turn off: dial **##21#** and press Call.",
         ],
       },
       {
-        method: "Conditional (AI answers only when you don’t)",
+        method: "Conditional (CallGrabbr answers only when you don’t)",
         items: [
-          "**No answer** (when you don’t pick up, e.g. after 4–5 rings): Dial ***61*** + AI number + **#**, then Call.",
-          "**Busy** (when your line is busy, e.g. on another call): Dial ***67*** + AI number + **#**, then Call.",
-          "**Unreachable** (when your phone is off or out of service): Dial ***62*** + AI number + **#**, then Call.",
+          "**No answer** (when you don’t pick up, e.g. after 4–5 rings): Dial ***61*** + forwarding number + **#**, then Call.",
+          "**Busy** (when your line is busy, e.g. on another call): Dial ***67*** + forwarding number + **#**, then Call.",
+          "**Unreachable** (when your phone is off or out of service): Dial ***62*** + forwarding number + **#**, then Call.",
           "To turn off: **#61#**, **#67#**, or **#62#** respectively (same order as above).",
         ],
       },
       {
         method: "Phone settings",
         items: [
-          "**iPhone:** Settings → **Phone** → **Call Forwarding** → enter AI number and toggle on.",
+          "**iPhone:** Settings → **Phone** → **Call Forwarding** → enter forwarding number and toggle on.",
           "**Android:** **Phone** app → **Settings** or **Calls** → **Call forwarding** → set number.",
         ],
       },
@@ -108,17 +108,17 @@ const CARRIERS = [
         method: "Dial code",
         items: [
           "Open your phone’s dialer.",
-          "Dial ***72** followed by the 10-digit AI number (e.g. *725551234567), then press **Send**.",
+          "Dial ***72** followed by the 10-digit forwarding number (e.g. *725551234567), then press **Send**.",
           "Wait for a confirmation tone.",
           "To turn off: dial ***73** and press Send.",
         ],
       },
       {
-        method: "Conditional (AI answers only when you don’t)",
+        method: "Conditional (CallGrabbr answers only when you don’t)",
         items: [
-          "**No answer** (when you don’t pick up, e.g. after 4–5 rings): Dial ***71*** + 10-digit AI number, press Send.",
-          "**Busy** (when your line is busy, e.g. on another call): Dial ***90*** + 10-digit AI number, press Send.",
-          "**Unreachable** (when your phone is off or out of service): Dial ***92*** + 10-digit AI number, press Send.",
+          "**No answer** (when you don’t pick up, e.g. after 4–5 rings): Dial ***71*** + 10-digit forwarding number, press Send.",
+          "**Busy** (when your line is busy, e.g. on another call): Dial ***90*** + 10-digit forwarding number, press Send.",
+          "**Unreachable** (when your phone is off or out of service): Dial ***92*** + 10-digit forwarding number, press Send.",
         ],
       },
       {
@@ -126,7 +126,7 @@ const CARRIERS = [
         items: [
           "Open **Phone** app → **Menu** (⋮) → **Settings**.",
           "Go to **Supplementary Services** → **Call Forwarding**.",
-          "Select **Always forwarded**, enter the AI number, tap **Enable**.",
+          "Select **Always forwarded**, enter the forwarding number, tap **Enable**.",
           "To turn off: open Call Forwarding and disable.",
         ],
       },
@@ -137,22 +137,22 @@ const CARRIERS = [
     slug: "google-voice",
     steps: [
       {
-        method: "Forward calls to your AI number",
+        method: "Forward calls to your CallGrabbr number",
         items: [
           "Go to **voice.google.com** and sign in.",
           "Click the **gear icon (Settings)** in the top right.",
           "Under **Account**, open **Linked numbers**.",
-          "Click **+ New linked number** and enter your **AI assistant’s number** (the one from your CallGrabbr dashboard).",
+          "Click **+ New linked number** and enter your **CallGrabbr number** (the one from your dashboard).",
           "Click **Send code** and verify via text or call.",
-          "Once linked, calls to your Google Voice number will also ring/forward to your AI number (and any other linked devices).",
-          "To stop: go to **Settings** → **Linked numbers** and remove the AI number (click the X).",
+          "Once linked, calls to your Google Voice number will also ring/forward to your forwarding number (and any other linked devices).",
+          "To stop: go to **Settings** → **Linked numbers** and remove the forwarding number (click the X).",
         ],
       },
       {
         method: "Notes",
         items: [
           "You can link up to 6 numbers. US/Canada only.",
-          "For “forward all calls only to AI,” link just the AI number and turn off other linked devices or use **Calls** → **Incoming calls** to control where GV rings.",
+          "For “forward all calls only to CallGrabbr,” link just the CallGrabbr number and turn off other linked devices or use **Calls** → **Incoming calls** to control where GV rings.",
         ],
       },
     ],
@@ -165,24 +165,24 @@ const CARRIERS = [
         method: "Forward all calls",
         items: [
           "Open the **Phone** app.",
-          "Dial ***72** followed by the 10-digit AI number (e.g. *721234567890).",
+          "Dial ***72** followed by the 10-digit forwarding number (e.g. *721234567890).",
           "Press **Call** or **Send** and wait for a confirmation tone or message.",
           "To turn off: dial ***73** and press Call.",
         ],
       },
       {
-        method: "Conditional (AI answers only when you don’t)",
+        method: "Conditional (CallGrabbr answers only when you don’t)",
         items: [
-          "**No answer** (when you don’t pick up, e.g. after 4–5 rings): Dial ***61*** + AI number + **#**, then Call.",
-          "**Busy** (when your line is busy, e.g. on another call): Dial ***67*** + AI number + **#**, then Call.",
-          "**Unreachable** (when your phone is off or out of service): Dial ***62*** + AI number + **#**, then Call.",
+          "**No answer** (when you don’t pick up, e.g. after 4–5 rings): Dial ***61*** + forwarding number + **#**, then Call.",
+          "**Busy** (when your line is busy, e.g. on another call): Dial ***67*** + forwarding number + **#**, then Call.",
+          "**Unreachable** (when your phone is off or out of service): Dial ***62*** + forwarding number + **#**, then Call.",
           "To turn off: **#61#**, **#67#**, or **#62#** respectively (same order as above).",
         ],
       },
       {
         method: "Phone settings (if available)",
         items: [
-          "On some phones: **Settings** → **Phone** → **Call Forwarding** → choose type and enter the AI number.",
+          "On some phones: **Settings** → **Phone** → **Call Forwarding** → choose type and enter the forwarding number.",
         ],
       },
     ],
@@ -195,17 +195,17 @@ const CARRIERS = [
         method: "Forward all calls",
         items: [
           "Open your phone’s dialer.",
-          "Dial ***72** followed by the 10-digit AI number.",
+          "Dial ***72** followed by the 10-digit forwarding number.",
           "Press **Call** and wait for confirmation.",
           "To turn off: dial ***720** and press Call.",
         ],
       },
       {
-        method: "Conditional (AI answers only when you don’t)",
+        method: "Conditional (CallGrabbr answers only when you don’t)",
         items: [
-          "**No answer** (when you don’t pick up, e.g. after 4–5 rings): Dial ***73*** + AI number, press Call.",
-          "**Busy** (when your line is busy, e.g. on another call): Dial ***74*** + AI number, press Call.",
-          "**Unreachable** (when your phone is off or out of service): Dial ***62*** + AI number, press Call.",
+          "**No answer** (when you don’t pick up, e.g. after 4–5 rings): Dial ***73*** + forwarding number, press Call.",
+          "**Busy** (when your line is busy, e.g. on another call): Dial ***74*** + forwarding number, press Call.",
+          "**Unreachable** (when your phone is off or out of service): Dial ***62*** + forwarding number, press Call.",
         ],
       },
     ],
@@ -218,13 +218,13 @@ const CARRIERS = [
         method: "Forward all calls",
         items: [
           "Open your phone’s dialer.",
-          "Dial **21*1** + 10-digit AI number + **#** (include the 1 for US, e.g. **21*15551234567#).",
+          "Dial **21*1** + 10-digit forwarding number + **#** (include the 1 for US, e.g. **21*15551234567#).",
           "Press **Call** and wait for confirmation.",
           "To turn off: dial **##21#** and press Call.",
         ],
       },
       {
-        method: "Conditional (AI answers only when you don’t)",
+        method: "Conditional (CallGrabbr answers only when you don’t)",
         items: [
           "**No answer** (when you don’t pick up, e.g. after 4–5 rings): **21*1** + number + **#**. Off: **##61#**.",
           "**Unreachable** (when your phone is off or out of service): **62*1** + number + **#**. Off: **##62#**.",
@@ -241,16 +241,16 @@ const CARRIERS = [
         method: "Forward all calls",
         items: [
           "Open your phone’s dialer.",
-          "Dial ***72** followed by the 10-digit AI number.",
+          "Dial ***72** followed by the 10-digit forwarding number.",
           "Press **Send**. You’ll hear two quick beeps when it’s set.",
           "To turn off: dial ***720** and press Send.",
         ],
       },
       {
-        method: "Conditional (AI answers only when you don’t)",
+        method: "Conditional (CallGrabbr answers only when you don’t)",
         items: [
-          "**Busy** (when your line is busy, e.g. on another call): Dial ***73*** + AI number, press Send. Off: ***730**.",
-          "**No answer** (when you don’t pick up, e.g. after 4–5 rings): Dial ***74*** + AI number, press Send. Off: ***740**.",
+          "**Busy** (when your line is busy, e.g. on another call): Dial ***73*** + forwarding number, press Send. Off: ***730**.",
+          "**No answer** (when you don’t pick up, e.g. after 4–5 rings): Dial ***74*** + forwarding number, press Send. Off: ***740**.",
         ],
       },
     ],
@@ -266,8 +266,8 @@ const CARRIERS = [
           "Go to **Settings** → **Phone** in the left sidebar.",
           "Under **Call handling**, click **Edit**.",
           "Set **Work hours** and **After hours** (and ring order if needed).",
-          "Under **Incoming calls**, choose how your lines ring; for forwarding to the AI number select **Forward to external number** and enter your AI assistant’s number.",
-          "For **Missed call** or **After hours**, you can set **Forward to external number** to the same AI number.",
+          "Under **Incoming calls**, choose how your lines ring; for forwarding to the CallGrabbr number select **Forward to external number** and enter your CallGrabbr number.",
+          "For **Missed call** or **After hours**, you can set **Forward to external number** to the same forwarding number.",
           "Click **Save**.",
         ],
       },
@@ -275,7 +275,7 @@ const CARRIERS = [
         method: "Mobile app",
         items: [
           "Open the **RingCentral** app → **Settings** (or **Phone** settings).",
-          "Find **Call handling** or **Forwarding** and set **Forward to external number** to your AI number.",
+          "Find **Call handling** or **Forwarding** and set **Forward to external number** to your forwarding number.",
         ],
       },
     ],
@@ -288,22 +288,22 @@ export default function DocsFaqPage() {
       <div className="mb-10">
         <h1 className="text-3xl font-bold mb-2">Help & FAQ</h1>
         <p className="text-muted-foreground">
-          How to forward your business line to your AI call assistant. Pick your carrier below for exact steps.
+          How to forward your business line to CallGrabbr. Pick your carrier below for exact steps.
         </p>
       </div>
 
       <Card className="mb-10">
         <CardHeader>
-          <CardTitle>Forward your business line to the AI</CardTitle>
+          <CardTitle>Forward your business line to CallGrabbr</CardTitle>
           <CardDescription>
-            Your AI has its own phone number (shown on your dashboard after you connect). Forward your existing business number to that AI number so the AI answers when customers call you.
+            CallGrabbr has its own phone number (shown on your dashboard after you connect). Forward your existing business number to that forwarding number so your call assistant answers when customers call you.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <ol className="list-decimal list-inside space-y-2 text-sm">
-            <li>Get your <strong>AI number</strong> from the dashboard (after you connect your call assistant).</li>
-            <li>Use the steps below for <strong>your carrier</strong> to set up <strong>call forwarding</strong> to that AI number.</li>
-            <li>Configure when the AI answers in <strong>Settings → Call Routing</strong>: turn on <strong>Answer all calls immediately</strong>, or choose a delay in seconds or number of rings before the AI picks up.</li>
+            <li>Get your <strong>forwarding number</strong> from the dashboard (after you connect your call assistant).</li>
+            <li>Use the steps below for <strong>your carrier</strong> to set up <strong>call forwarding</strong> to that forwarding number.</li>
+            <li>Configure when your assistant answers in <strong>Settings → Call Routing</strong>: turn on <strong>Answer all calls immediately</strong>, or choose a delay in seconds or number of rings before it picks up.</li>
             <li>Save and test by calling your business line from another phone.</li>
           </ol>
           <Link href="/dashboard">
@@ -315,7 +315,7 @@ export default function DocsFaqPage() {
       <div className="space-y-4">
         <h2 className="text-xl font-semibold">Step-by-step by carrier</h2>
         <p className="text-sm text-muted-foreground">
-          Expand your carrier for exact dial codes and menu paths. Replace any example number with your AI number from the dashboard.
+          Expand your carrier for exact dial codes and menu paths. Replace any example number with your forwarding number from the dashboard.
         </p>
 
         <div className="space-y-2">

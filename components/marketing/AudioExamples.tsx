@@ -10,7 +10,7 @@ export function AudioExamples() {
     <section className="container mx-auto px-4 py-16">
       <h2 className="text-3xl font-bold text-center mb-4">Hear what your customers experience</h2>
       <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-10">
-        Listen to sample AI calls. Natural conversation, not robot menus.
+        Listen to sample calls. Natural conversation, not robot menus.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
         {examples.map((example, i) => (

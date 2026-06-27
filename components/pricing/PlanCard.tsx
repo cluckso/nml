@@ -8,13 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, Loader2 } from "lucide-react"
 import { PlanType } from "@prisma/client"
-import { PLAN_TYPE_BY_DISPLAY_KEY } from "@/lib/plan-labels"
-
-const PLANS: Record<string, { name: string; price: number; planType: PlanType; popular: boolean }> = {
-  Solo: { name: "Solo", price: 99, planType: PLAN_TYPE_BY_DISPLAY_KEY.Solo, popular: false },
-  Team: { name: "Team", price: 149, planType: PLAN_TYPE_BY_DISPLAY_KEY.Team, popular: true },
-  Pro: { name: "Pro", price: 249, planType: PLAN_TYPE_BY_DISPLAY_KEY.Pro, popular: false },
-}
+import { PRICING_TIERS_BY_KEY } from "@/lib/pricing-catalog"
 
 export function PlanCard({
   name,
@@ -38,7 +32,7 @@ export function PlanCard({
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
-  const plan = PLANS[name]
+  const plan = PRICING_TIERS_BY_KEY[name as keyof typeof PRICING_TIERS_BY_KEY]
   if (!plan) return null
 
   const handleGetStarted = async () => {
@@ -70,7 +64,12 @@ export function PlanCard({
   return (
     <Card className={plan.popular ? "border-primary border-2 shadow-lg" : ""}>
       <CardHeader>
-        {plan.popular && (
+        {plan.badge && (
+          <span className="mb-2 inline-block rounded bg-primary/15 px-2 py-1 text-xs font-semibold text-primary">
+            {plan.badge}
+          </span>
+        )}
+        {plan.popular && !plan.badge && (
           <span className="mb-2 inline-block rounded bg-primary px-2 py-1 text-xs font-semibold text-primary-foreground">
             Most Popular
           </span>

@@ -46,7 +46,7 @@ const LANDING_PAGES: IndustryLandingData[] = [
     name: "HVAC",
     headline: "Stop Losing HVAC Jobs to Voicemail",
     subheadline:
-      "When the AC goes out or the furnace dies, homeowners call the next contractor. CallGrabbr answers every call 24/7 and captures the job details before they hang up.",
+      "When the AC goes out or the furnace dies, homeowners call the next contractor. CallGrabbr answers forwarded calls 24/7 and captures job details when callers share them.",
     averageJobValue: 475,
     painPoints: [
       "No-heat and no-AC calls spike after hours and on weekends",
@@ -64,9 +64,9 @@ const LANDING_PAGES: IndustryLandingData[] = [
     slug: "plumbing",
     industry: Industry.PLUMBING,
     name: "Plumbing",
-    headline: "Capture Every Plumbing Lead — Even at 2 AM",
+    headline: "Capture More Plumbing Leads — Even at 2 AM",
     subheadline:
-      "Burst pipes and clogged drains can't wait. Your AI receptionist answers instantly, flags emergencies, and texts you the lead before the caller dials your competitor.",
+      "Burst pipes and clogged drains can't wait. Your call assistant answers instantly, flags emergencies, and texts you the lead before the caller dials your competitor.",
     averageJobValue: 380,
     painPoints: [
       "Emergency leaks need immediate callback info",
@@ -104,9 +104,9 @@ const LANDING_PAGES: IndustryLandingData[] = [
     slug: "auto-repair",
     industry: Industry.AUTO_REPAIR,
     name: "Auto Repair",
-    headline: "Book More Auto Repair Jobs From Every Call",
+    headline: "Book More Auto Repair Jobs From Missed Calls",
     subheadline:
-      "Capture year, make, model, and symptoms on every call. CallGrabbr handles intake while your techs are under the hood.",
+      "Capture year, make, model, and symptoms when callers share them. CallGrabbr handles intake while your techs are under the hood.",
     averageJobValue: 550,
     painPoints: [
       "Shop phones ring nonstop during business hours",
@@ -124,9 +124,9 @@ const LANDING_PAGES: IndustryLandingData[] = [
     slug: "handyman",
     industry: Industry.HANDYMAN,
     name: "Handyman",
-    headline: "Turn Every Handyman Call Into a Booked Job",
+    headline: "Turn Handyman Calls Into Booked Jobs",
     subheadline:
-      "From drywall to deck repairs, callers want fast answers. Your AI receptionist captures the scope, address, and urgency so you can follow up with a quote.",
+      "From drywall to deck repairs, callers want fast answers. Your call assistant captures the scope, address, and urgency so you can follow up with a quote.",
     averageJobValue: 320,
     painPoints: [
       "Solo operators can't answer while on a ladder",
@@ -144,7 +144,7 @@ const LANDING_PAGES: IndustryLandingData[] = [
     slug: "childcare",
     industry: Industry.CHILDCARE,
     name: "Childcare",
-    headline: "Answer Every Parent Inquiry — Even During Drop-Off",
+    headline: "Answer Parent Inquiries — Even During Drop-Off",
     subheadline:
       "Tour requests and enrollment calls need a warm, professional first impression. CallGrabbr captures parent info and schedules tours while you focus on the kids.",
     averageJobValue: 280,
@@ -163,9 +163,9 @@ const LANDING_PAGES: IndustryLandingData[] = [
   {
     slug: "cleaning",
     name: "Cleaning",
-    headline: "Book More Cleaning Clients From Every Call",
+    headline: "Book More Cleaning Clients From Missed Calls",
     subheadline:
-      "Residential and commercial cleaning leads need fast follow-up. Capture square footage, frequency, and address on every call automatically.",
+      "Residential and commercial cleaning leads need fast follow-up. Capture square footage, frequency, and address when callers provide them.",
     averageJobValue: 250,
     painPoints: [
       "Crews are on-site and can't answer",
@@ -182,7 +182,7 @@ const LANDING_PAGES: IndustryLandingData[] = [
   {
     slug: "landscaping",
     name: "Landscaping",
-    headline: "Grow Your Landscaping Business — Capture Every Lead",
+    headline: "Grow Your Landscaping Business — Capture More Leads",
     subheadline:
       "Seasonal demand spikes mean missed calls = missed revenue. CallGrabbr answers while your crew is on a job site.",
     averageJobValue: 350,

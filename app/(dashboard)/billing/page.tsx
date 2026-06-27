@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation"
 import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { getEffectivePlanType, FREE_TRIAL_MINUTES } from "@/lib/plans"
+import { getEffectivePlanType, FREE_TRIAL_MINUTES, MONTHLY_PRICES, INCLUDED_MINUTES, SETUP_FEES, OVERAGE_RATE_PER_MIN } from "@/lib/plans"
 import { getPlanDisplayName } from "@/lib/plan-labels"
 import { getTrialStatus } from "@/lib/trial"
 import { getIntakeNumberForIndustry, hasIntakeNumberConfigured } from "@/lib/intake-routing"
@@ -16,27 +16,27 @@ import { Phone } from "lucide-react"
 const PLAN_DETAILS = {
   [PlanType.STARTER]: {
     name: getPlanDisplayName(PlanType.STARTER),
-    price: 99,
-    minutes: 300,
-    setupFee: 0,
+    price: MONTHLY_PRICES[PlanType.STARTER],
+    minutes: INCLUDED_MINUTES[PlanType.STARTER],
+    setupFee: SETUP_FEES[PlanType.STARTER],
   },
   [PlanType.PRO]: {
     name: getPlanDisplayName(PlanType.PRO),
-    price: 149,
-    minutes: 900,
-    setupFee: 0,
+    price: MONTHLY_PRICES[PlanType.PRO],
+    minutes: INCLUDED_MINUTES[PlanType.PRO],
+    setupFee: SETUP_FEES[PlanType.PRO],
   },
   [PlanType.LOCAL_PLUS]: {
     name: getPlanDisplayName(PlanType.LOCAL_PLUS),
-    price: 249,
-    minutes: 1800,
-    setupFee: 0,
+    price: MONTHLY_PRICES[PlanType.LOCAL_PLUS],
+    minutes: INCLUDED_MINUTES[PlanType.LOCAL_PLUS],
+    setupFee: SETUP_FEES[PlanType.LOCAL_PLUS],
   },
   [PlanType.ELITE]: {
     name: getPlanDisplayName(PlanType.ELITE),
-    price: 249,
-    minutes: 1800,
-    setupFee: 0,
+    price: MONTHLY_PRICES[PlanType.ELITE],
+    minutes: INCLUDED_MINUTES[PlanType.ELITE],
+    setupFee: SETUP_FEES[PlanType.ELITE],
   },
 }
 
@@ -66,7 +66,7 @@ export default async function BillingPage() {
   const minutesUsed = isOnTrial ? trial.minutesUsed : (usage?.minutesUsed ?? 0)
   const minutesIncluded = isOnTrial ? FREE_TRIAL_MINUTES : (planDetails?.minutes ?? 0)
   const overageMinutes = isOnTrial ? 0 : Math.max(0, minutesUsed - minutesIncluded)
-  const overageCost = overageMinutes * 0.2
+  const overageCost = overageMinutes * OVERAGE_RATE_PER_MIN
   // Prefer business's dedicated Retell number, fall back to shared intake number
   const intakeNumber = business?.retellPhoneNumber || getIntakeNumberForIndustry(business?.industry ?? null)
   const showIntakeNumber = !!intakeNumber
@@ -80,10 +80,10 @@ export default async function BillingPage() {
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <Phone className="h-4 w-4" />
-              Forward calls to this AI number
+              Forward calls to this number
             </CardTitle>
             <CardDescription>
-              Set your business line to forward to this number so the AI answers. See <Link href="/docs/faq" className="text-primary underline">Help & FAQ</Link> for carrier steps.
+              Set your business line to forward to this number so your call assistant answers. See <Link href="/docs/faq" className="text-primary underline">Help & FAQ</Link> for carrier steps.
             </CardDescription>
           </CardHeader>
           <CardContent>

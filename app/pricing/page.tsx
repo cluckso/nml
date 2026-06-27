@@ -7,48 +7,17 @@ import { AudioExamples } from "@/components/marketing/AudioExamples"
 import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
 import { MARKETING_IMAGES } from "@/lib/marketing-images"
 import { Button } from "@/components/ui/button"
+import {
+  formatJobRoiLine,
+  formatOverageRate,
+  formatPricingSummary,
+  PRICING_TIERS,
+} from "@/lib/pricing-catalog"
 
 export const metadata: Metadata = {
   title: "Pricing - CallGrabbr",
-  description: "Stop losing jobs to voicemail. Solo $99, Team $149, Pro $249/mo. One captured lead pays for months of service. 7-day free trial, no card required.",
+  description: `Stop losing jobs to voicemail. ${formatPricingSummary()}. ${formatJobRoiLine()} 7-day free trial, no card required.`,
 }
-
-const PLANS = [
-  {
-    name: "Solo",
-    description: "For one-person shops — missed call capture and alerts",
-    includedMinutes: 300,
-    features: [
-      "Missed call capture",
-      "Spam call filtering",
-      "SMS summary",
-      "Lead email notification",
-    ],
-  },
-  {
-    name: "Team",
-    description: "For growing businesses — 24/7 answering and booking",
-    includedMinutes: 900,
-    features: [
-      "24/7 answering",
-      "Spam call filtering",
-      "Appointment booking",
-      "SMS follow-up",
-      "Basic CRM export",
-    ],
-  },
-  {
-    name: "Pro",
-    description: "For multi-location and high-volume shops",
-    includedMinutes: 1800,
-    features: [
-      "Custom scripts",
-      "Spam call filtering",
-      "Multi-location",
-      "Reporting dashboard",
-    ],
-  },
-]
 
 export default async function PricingPage() {
   const user = await getCurrentUser()
@@ -62,6 +31,13 @@ export default async function PricingPage() {
     : null
   const hasStartedTrial = !!business?.trialStartedAt
 
+  const plans = PRICING_TIERS.map(({ key, description, includedMinutes, features }) => ({
+    name: key,
+    description,
+    includedMinutes,
+    features,
+  }))
+
   return (
   <>
     <SectionBackdrop
@@ -73,10 +49,10 @@ export default async function PricingPage() {
     >
       <h1 className="text-4xl font-bold mb-4">Missed call = lost job. Pick your coverage.</h1>
       <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-        Average job: $350–$600. One captured lead pays for months of service.
+        {formatJobRoiLine()}
       </p>
       <p className="mt-2 text-muted-foreground">
-        7-day free trial. No card required. Cancel anytime.
+        7-day free trial. No card required. Overage {formatOverageRate()} after included minutes.
       </p>
       {isLoggedIn && !hasStartedTrial && (
         <p className="mt-2 text-sm text-primary font-medium">
@@ -91,15 +67,14 @@ export default async function PricingPage() {
     </SectionBackdrop>
 
     <div className="container mx-auto px-4 py-16">
-      {/* Free trial — no card required (hidden if user already started trial) */}
       {!hasStartedTrial && (
         <div className="max-w-2xl mx-auto mb-12 p-8 rounded-xl border-2 border-primary/20 bg-primary/5 text-center">
           <h2 className="text-2xl font-bold mb-2">Free trial — no card required</h2>
           <p className="text-muted-foreground mb-4">
-            7-day free trial. We won&apos;t charge until you choose a plan. One trial per business number.
+            7-day free trial. We won&apos;t charge until you choose a plan. Includes 40 call minutes. One trial per business number.
           </p>
           <p className="text-sm text-muted-foreground mb-6">
-            Set up your business and try it. Upgrade to Solo, Team, or Pro when you&apos;re ready.
+            Most solo shops start on <strong>Solo</strong> — upgrade to Team when you need booking and CRM tools.
           </p>
           {isLoggedIn ? (
             <Button size="lg" asChild>
@@ -115,7 +90,7 @@ export default async function PricingPage() {
 
       <AudioExamples />
 
-      <PricingPlansWithAgreement plans={PLANS} isLoggedIn={isLoggedIn} />
+      <PricingPlansWithAgreement plans={plans} isLoggedIn={isLoggedIn} />
 
     </div>
   </>

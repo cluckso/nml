@@ -25,7 +25,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-xl font-semibold text-foreground mb-2">2. Description of Service</h2>
           <p>
-            CallGrabbr provides AI-powered call answering, lead intake, call summaries, and related features for businesses. Calls may be recorded or transcribed for service delivery, quality, and summaries; you are responsible for complying with applicable call-recording consent laws in your jurisdiction. We use third-party providers (e.g., telephony, AI, payments) to deliver the Service. We reserve the right to modify, suspend, or discontinue features with reasonable notice where practicable.
+            CallGrabbr provides automated call answering, lead intake, call summaries, and related features for businesses. Calls may be recorded or transcribed for service delivery, quality, and summaries; you are responsible for complying with applicable call-recording consent laws in your jurisdiction. We use third-party providers (e.g., telephony, voice automation, payments) to deliver the Service. We reserve the right to modify, suspend, or discontinue features with reasonable notice where practicable.
           </p>
         </section>
 
@@ -89,7 +89,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-xl font-semibold text-foreground mb-2">9. Disclaimers</h2>
           <p>
-            THE SERVICE IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE.&quot; WE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. WE DO NOT GUARANTEE UNINTERRUPTED OR ERROR-FREE SERVICE OR THAT THE AI WILL ALWAYS RESPOND CORRECTLY. YOU USE THE SERVICE AT YOUR OWN RISK.
+            THE SERVICE IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE.&quot; WE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. WE DO NOT GUARANTEE UNINTERRUPTED OR ERROR-FREE SERVICE OR THAT CALL HANDLING WILL ALWAYS BE ACCURATE. YOU USE THE SERVICE AT YOUR OWN RISK.
           </p>
         </section>
 

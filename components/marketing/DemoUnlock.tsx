@@ -100,7 +100,7 @@ export function DemoUnlock({ className = "" }: DemoUnlockProps) {
               <li>Call the number above</li>
               <li>Pretend you&apos;re a customer with a job request</li>
               <li>Example: &quot;I need a plumber for a leak under my kitchen sink&quot;</li>
-              <li>The AI will collect your info like a real call</li>
+              <li>Your call assistant will collect your info like a real call</li>
               <li>You&apos;ll receive an SMS with your &quot;lead&quot; summary</li>
             </ol>
           </div>
@@ -120,7 +120,7 @@ export function DemoUnlock({ className = "" }: DemoUnlockProps) {
         <div className="mx-auto h-16 w-16 rounded-full bg-primary/15 flex items-center justify-center mb-4">
           <Phone className="h-8 w-8 text-primary" />
         </div>
-        <CardTitle className="text-2xl">Test the AI that answers your calls</CardTitle>
+        <CardTitle className="text-2xl">Try a demo call</CardTitle>
         <p className="text-muted-foreground mt-2">
           See exactly what your customers would experience. We&apos;ll text you the lead summary after.
         </p>

@@ -92,7 +92,7 @@ https://www.callgrabbr.com
 ```
 Voicemail isn’t a safety net. It’s a lead graveyard.
 
-CallGrabbr answers every call, qualifies the job, and sends you a summary by text + email — in seconds.
+CallGrabbr answers forwarded calls, qualifies the job, and sends you a summary by text + email — usually within seconds.
 
 Forward your existing business line. Live in ~5 minutes.
 
@@ -201,9 +201,9 @@ https://www.callgrabbr.com
 What does it cost to never miss a lead?
 
 CallGrabbr:
-• Starter — $99/mo (300 min)
-• Growth — $149/mo (900 min)
-• Scale — $249/mo (1,800 min)
+• Solo — $99/mo (300 min)
+• Team — $159/mo (800 min)
+• Pro — $279/mo (1,500 min)
 
 No setup fee. No contract. Cancel anytime.
 7-day free trial — no credit card to start.
@@ -275,7 +275,7 @@ We built CallGrabbr: an AI receptionist that answers 24/7, runs industry-specifi
 If you work with contractors or run a trades business, worth a look:
 https://www.callgrabbr.com
 
-Agencies: we offer 30% recurring referral commission — DM or visit the site.
+Agencies: we offer 20% recurring referral commission — DM or visit the site.
 ```
 
 ---

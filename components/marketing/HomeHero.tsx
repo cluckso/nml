@@ -33,12 +33,11 @@ export function HomeHero() {
         We answer when you can&apos;t and text you the lead in seconds.
       </p>
       <p className="text-base sm:text-lg text-muted-foreground mb-2 max-w-2xl mx-auto px-1">
-        Voicemail captures 5–15% of callers. AI answering captures 80–95%. From first ring to
-        qualified lead — no hold music, no robot menus. You get name, phone, job details, and
-        urgency by text and email.
+        Voicemail captures 5–15% of callers. Live answering captures 80–95%. From first ring to
+        qualified lead — no hold music, no robot menus. Captured details are sent by text and email when the caller shares them.
       </p>
       <p className="text-sm text-muted-foreground/90 mb-8 max-w-xl mx-auto">
-        Built for HVAC, plumbing, electrical, and auto repair shops.
+        Built for HVAC, plumbing, electrical, and auto repair shops. Plans from $99/mo.
       </p>
       <div className="flex flex-wrap gap-4 justify-center mb-6">
         <Link href="/sign-up" className="min-h-[44px] flex items-center">
@@ -56,7 +55,7 @@ export function HomeHero() {
             variant="outline"
             className="border-2 border-white/20 bg-background/40 backdrop-blur-sm hover:bg-background/60 min-h-[44px]"
           >
-            Test the AI
+            Try a demo call
           </Button>
         </Link>
       </div>
@@ -78,7 +77,7 @@ export function HomeHero() {
         <TrendingUp className="h-4 w-4 text-primary" aria-hidden />
         <span className="text-muted-foreground">Study of 130,000+ calls:</span>
         <span className="font-semibold text-foreground">
-          AI captures 80–95% vs voicemail&apos;s 5–15%
+          Live answering captures 80–95% vs voicemail&apos;s 5–15%
         </span>
       </div>
     </SectionBackdrop>

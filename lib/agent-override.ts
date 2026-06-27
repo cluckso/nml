@@ -1,7 +1,8 @@
-import type { BusinessSettings } from "./business-settings"
+import { getRetellVoiceConfig } from "./retell-agent-template"
 import { PlanType } from "@prisma/client"
 import { getEffectivePlanType, hasBrandedVoice } from "./plans"
 import { computeRingDurationMs, ringDurationMsForRetellAgent } from "./call-routing"
+import type { BusinessSettings } from "./business-settings"
 
 /**
  * Build the agent_override and dynamic_variables that the Retell inbound webhook sends.
@@ -70,19 +71,16 @@ export function buildAgentOverride(
 
   const ringDurationMs = computeRingDurationMs(settings.callRouting)
 
+  const voiceGender = settings.greeting.voiceGender
+  const voiceBase = getRetellVoiceConfig(effectivePlan, voiceGender)
+  const voiceId = voiceBase.voice_id
+
   const voiceSpeed = brandedVoice
     ? 0.75 + (settings.voiceBrand.speed ?? 0.5) * 0.75
-    : 0.94
+    : voiceBase.voice_speed
   const temperature = brandedVoice
     ? 0.2 + (settings.voiceBrand.conciseness ?? 0.5) * 0.6
-    : 0.88
-
-  // Voice: male = Ethan, female/Auto = Chloe (default)
-  const voiceGender = settings.greeting.voiceGender
-  const voiceId =
-    voiceGender === "male"
-      ? "11labs-Ethan"
-      : "11labs-Chloe"
+    : voiceBase.voice_temperature
 
   // Max call duration: 7 minutes (420000 ms)
   const MAX_CALL_DURATION_MS = 7 * 60 * 1000

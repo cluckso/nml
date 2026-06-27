@@ -2,13 +2,13 @@
 
 Simple, usage-based pricing built for service businesses.
 No setup fees. No contracts. Cancel anytime.
-Overage on all plans: $0.20/min after included minutes.
+Overage on all plans: $0.22/min after included minutes.
 
 ---
 
 ## Free Trial (All Plans)
 
-- **7-day free trial** (includes trial minutes)
+- **7-day free trial** (40 included minutes)
 - No card required to start
 - One trial per business phone number
 - No setup fee
@@ -20,31 +20,31 @@ Designed so businesses can test real calls—not demos.
 
 ---
 
-## Starter — $99/month
+## Solo — $99/month
 
 *Best for solo operators & small shops*
 
 **Includes:**
 - 300 minutes / month
-- $0.20/min overage
+- $0.22/min overage
 - Self-serve only
-- 24/7 AI call answering
+- 24/7 call answering
 - Caller name, phone, and reason captured
-- Call summaries by email
+- Call summaries by email & SMS
 
 **Setup:** 100% self-serve onboarding · No setup fee
 
 ---
 
-## Growth — $149/month
+## Team — $159/month
 
 *Best for growing service businesses*
 
 **Includes:**
-- 900 minutes / month
-- Industry-optimized AI agents
+- 800 minutes / month
+- Industry-optimized call flows
 - Appointment + emergency logic
-- $0.20/min overage
+- $0.22/min overage
 - Service-specific intake flows
 - Email and CRM forwarding
 
@@ -52,19 +52,19 @@ Designed so businesses can test real calls—not demos.
 
 ---
 
-## Scale — $249/month
+## Pro — $279/month
 
 *Built for high-volume, multi-department trades*
 
 **Includes:**
-- 1,800 minutes / month
+- 1,500 minutes / month
 - Multi-department routing
-- Branded voice + reporting
-- $0.20/min overage
+- Premium branded voice + reporting
+- $0.22/min overage
 - After-hours emergency handling
 - Weekly usage & lead reports
 
-**Setup:** Automated department creation and AI voice tuning · No setup fee
+**Setup:** Automated department creation and voice tuning · No setup fee
 
 ---
 
@@ -72,6 +72,6 @@ Designed so businesses can test real calls—not demos.
 
 - Minute-based trial ensures fairness and real value delivery
 - No setup fees reduce friction and increase conversion
-- Industry-optimized Growth agents feel "custom" without custom labor
+- Industry-optimized Team flows feel "custom" without custom labor
 - Clear upgrade ladder based on call volume and complexity
 - Consistent overage rate keeps pricing transparent

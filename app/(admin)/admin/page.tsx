@@ -3,6 +3,7 @@ import { db } from "@/lib/db"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { PlanType, SubscriptionStatus } from "@prisma/client"
+import { getMonthlyPrice } from "@/lib/plans"
 
 export default async function AdminPage() {
   await requireAdmin()
@@ -26,10 +27,7 @@ export default async function AdminPage() {
   const totalRevenue = businesses
     .filter((b) => b.subscriptionStatus === "ACTIVE")
     .reduce((sum, b) => {
-      const planPrice = b.planType === PlanType.STARTER ? 99
-        : b.planType === PlanType.PRO ? 149
-        : (b.planType === PlanType.ELITE || b.planType === PlanType.LOCAL_PLUS) ? 249
-        : 0
+      const planPrice = b.planType ? getMonthlyPrice(b.planType) : 0
       return sum + planPrice
     }, 0)
 

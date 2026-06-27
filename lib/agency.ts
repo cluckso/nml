@@ -149,7 +149,7 @@ export async function getAgencyStats(agencyId: string) {
     return sum + (MONTHLY_PRICES[plan] ?? 0) * 100
   }, 0)
 
-  const commissionRate = (await db.agency.findUnique({ where: { id: agencyId } }))?.commissionRate ?? 0.3
+  const commissionRate = (await db.agency.findUnique({ where: { id: agencyId } }))?.commissionRate ?? 0.2
 
   return {
     totalClients: clients.length,

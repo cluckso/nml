@@ -30,7 +30,7 @@ export default function SmsTermsPage() {
             Program Description
           </h2>
           <p>
-            CallGrabbr provides AI-powered call answering and lead intake
+            CallGrabbr provides automated call answering and lead intake
             for businesses. When you opt in to our SMS program, you will receive
             automated text messages related to:
           </p>
@@ -100,7 +100,7 @@ export default function SmsTermsPage() {
           <p>
             Message frequency varies based on your call volume and account
             activity. You may receive a text message each time a new call or
-            lead is received by the AI on your behalf. Typical volume ranges
+            lead is received on your behalf. Typical volume ranges
             from a few messages per week to several per day depending on
             business activity.
           </p>

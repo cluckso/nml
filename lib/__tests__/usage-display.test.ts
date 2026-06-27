@@ -3,24 +3,24 @@
  * (dashboard TrialCard, billing "Usage This Month" / "Trial usage").
  */
 import { describe, it, expect } from "vitest"
-import { FREE_TRIAL_MINUTES, getIncludedMinutes, getOverageMinutes } from "../plans"
+import { FREE_TRIAL_MINUTES, getIncludedMinutes, getOverageMinutes, OVERAGE_RATE_PER_MIN } from "../plans"
 import { PlanType } from "@prisma/client"
 
 describe("Usage display values (TrialCard, Billing)", () => {
   it("trial display: minutesUsed and minutesRemaining match UI formula", () => {
     const minutesUsed = 12.5
     const minutesRemaining = Math.max(0, FREE_TRIAL_MINUTES - minutesUsed)
-    expect(minutesRemaining).toBe(37.5)
+    expect(minutesRemaining).toBe(27.5)
     // UI shows Math.ceil(minutesUsed) / FREE_TRIAL_MINUTES
     const displayUsed = Math.ceil(minutesUsed)
     expect(displayUsed).toBe(13)
-    expect(FREE_TRIAL_MINUTES).toBe(50)
+    expect(FREE_TRIAL_MINUTES).toBe(40)
   })
 
   it("trial progress bar percent is 0–100", () => {
     const minutesUsed = 25
     const percentUsed = FREE_TRIAL_MINUTES > 0 ? (minutesUsed / FREE_TRIAL_MINUTES) * 100 : 0
-    expect(percentUsed).toBe(50)
+    expect(percentUsed).toBe(62.5)
     expect(percentUsed).toBeGreaterThanOrEqual(0)
     expect(percentUsed).toBeLessThanOrEqual(100)
   })
@@ -33,8 +33,8 @@ describe("Usage display values (TrialCard, Billing)", () => {
     expect(minutesIncluded).toBe(300)
     expect(overageMinutes).toBe(50)
     // UI overage cost
-    const overageCost = overageMinutes * 0.2
-    expect(overageCost).toBe(10)
+    const overageCost = overageMinutes * OVERAGE_RATE_PER_MIN
+    expect(overageCost).toBe(11)
   })
 
   it("billing: usage bar width percent is 0–100", () => {
