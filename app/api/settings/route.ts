@@ -122,7 +122,7 @@ export async function PATCH(req: NextRequest) {
             ) {
               const merged = mergeSectionInto(cur as unknown as Record<string, unknown>, incoming as Record<string, unknown>)
               if (k === "greeting") {
-                return { ...acc, [k]: normalizeGreetingForPlan(merged as GreetingSettings, planType) }
+                return { ...acc, [k]: normalizeGreetingForPlan(merged as unknown as GreetingSettings, planType) }
               }
               return { ...acc, [k]: merged }
             }

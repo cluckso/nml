@@ -572,7 +572,7 @@ export type BusinessForSync = {
 
 /** Settings passed from dashboard (greeting, tone, question depth, voice, call routing) used to personalize the synced agent. */
 export type SyncSettings = {
-  greeting?: { customGreeting?: string | null; tone?: string; voiceGender?: "male" | "female" | null }
+  greeting?: { customGreeting?: string | null; tone?: string; voiceGender?: "male" | "female" | null; premiumVoice?: boolean }
   questionDepth?: string
   voiceBrand?: { speed?: number; conciseness?: number; warmth?: number; strictness?: number }
   callRouting?: Partial<import("./call-routing").CallRoutingSettings>
