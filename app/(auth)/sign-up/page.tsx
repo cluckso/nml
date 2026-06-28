@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { validateEmail, validatePasswordSignUp } from "@/lib/utils"
 import { loadFunnelTrialContext } from "@/lib/funnel/funnel-trial-bridge"
 import { getSafeRedirectPath } from "@/lib/safe-redirect"
+import { LegalConsentCheckbox } from "@/components/legal/LegalConsentCheckbox"
 
 const AUTH_NEXT_KEY = "callgrabbr_auth_next"
 
@@ -24,6 +25,7 @@ export default function SignUpPage() {
 function SignUpForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [agreedToLegal, setAgreedToLegal] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
@@ -71,6 +73,10 @@ function SignUpForm() {
     const passwordResult = validatePasswordSignUp(password)
     if (passwordResult.ok === false) {
       setError(passwordResult.error)
+      return
+    }
+    if (!agreedToLegal) {
+      setError("Please agree to the Terms of Service and Privacy Policy to create an account.")
       return
     }
 
@@ -154,7 +160,13 @@ function SignUpForm() {
                 At least 8 characters, with at least one letter and one number
               </p>
             </div>
-            <Button type="submit" className="w-full" disabled={loading}>
+            <LegalConsentCheckbox
+              id="signup-legal-consent"
+              checked={agreedToLegal}
+              onChange={setAgreedToLegal}
+              variant="compact"
+            />
+            <Button type="submit" className="w-full" disabled={loading || !agreedToLegal}>
               {loading ? "Creating account..." : "Sign Up"}
             </Button>
           </form>

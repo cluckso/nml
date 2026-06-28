@@ -1,10 +1,10 @@
 "use client"
 
-import Link from "next/link"
 import { useState } from "react"
 import { UpgradeButton } from "@/components/billing/UpgradeButton"
 import { PlanType } from "@prisma/client"
 import { formatIncludedUsageShort } from "@/lib/pricing-catalog"
+import { LegalConsentCheckbox } from "@/components/legal/LegalConsentCheckbox"
 
 export type PlanDetailsEntry = {
   name: string
@@ -25,26 +25,15 @@ export function BillingPlansWithAgreement({
   return (
     <>
       <div className="mb-6 p-4 rounded-lg border bg-muted/50">
-        <label className="flex items-start gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={agreedToLegal}
-            onChange={(e) => setAgreedToLegal(e.target.checked)}
-            className="mt-1 h-4 w-4 rounded border-input accent-primary"
-            aria-describedby="billing-legal-desc"
-          />
-          <span id="billing-legal-desc" className="text-sm">
-            I agree to the{" "}
-            <Link href="/terms" className="text-primary underline hover:no-underline">
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link href="/privacy" className="text-primary underline hover:no-underline">
-              Privacy Policy
-            </Link>
-            . You must accept before changing your plan.
-          </span>
-        </label>
+        <LegalConsentCheckbox
+          id="billing-legal-consent"
+          checked={agreedToLegal}
+          onChange={setAgreedToLegal}
+          variant="compact"
+        />
+        <p id="billing-legal-desc" className="mt-2 text-xs text-muted-foreground">
+          You must accept before changing your plan.
+        </p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

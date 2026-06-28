@@ -12,11 +12,13 @@ import {
   loadFunnelTrialContext,
   type FunnelTrialContext,
 } from "@/lib/funnel/funnel-trial-bridge"
+import { LegalConsentCheckbox } from "@/components/legal/LegalConsentCheckbox"
 
 export function TrialStartClient() {
   const searchParams = useSearchParams()
   const [funnelCtx, setFunnelCtx] = useState<FunnelTrialContext | null>(null)
   const [businessPhone, setBusinessPhone] = useState("")
+  const [agreedToLegal, setAgreedToLegal] = useState(false)
   const smsConsent = false
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -43,6 +45,10 @@ export function TrialStartClient() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!agreedToLegal) {
+      setError("Please agree to the Terms of Service and Privacy Policy to start your trial.")
+      return
+    }
     setLoading(true)
     setError(null)
     try {
@@ -74,7 +80,7 @@ export function TrialStartClient() {
       const startRes = await fetch("/api/trial/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...startBody, smsConsent }),
+        body: JSON.stringify({ ...startBody, smsConsent, termsAccepted: true }),
       })
       const startData = await parseJsonSafe(startRes)
       if (!startRes.ok) {
@@ -150,10 +156,15 @@ export function TrialStartClient() {
             <p className="text-xs text-muted-foreground">
               You&apos;ll agree to SMS call alerts in the next step (setup).
             </p>
+            <LegalConsentCheckbox
+              id="trial-legal-consent"
+              checked={agreedToLegal}
+              onChange={setAgreedToLegal}
+            />
             {error && (
               <p className="rounded-md bg-destructive/10 p-2 text-sm text-destructive">{error}</p>
             )}
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button type="submit" className="w-full" disabled={loading || !agreedToLegal}>
               {loading ? "Starting…" : "Start free trial"}
             </Button>
             <p className="text-xs text-muted-foreground text-center">

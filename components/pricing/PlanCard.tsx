@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Check, Loader2 } from "lucide-react"
 import { PRICING_TIERS_BY_KEY } from "@/lib/pricing-catalog"
 import { formatIncludedUsageLabel } from "@/lib/plan-usage"
+import { LegalConsentCheckbox } from "@/components/legal/LegalConsentCheckbox"
 
 export function PlanCard({
   name,
@@ -111,29 +112,11 @@ export function PlanCard({
                 {checkoutError}
               </p>
             )}
-            <label
-              htmlFor={legalFieldId}
-              className="mb-4 flex items-start gap-3 cursor-pointer rounded-lg border bg-muted/40 p-3"
-            >
-              <input
-                id={legalFieldId}
-                type="checkbox"
-                checked={agreedToLegal}
-                onChange={(e) => setAgreedToLegal(e.target.checked)}
-                className="mt-0.5 h-4 w-4 shrink-0 rounded border-input accent-primary"
-              />
-              <span className="text-xs text-muted-foreground leading-relaxed">
-                I agree to the{" "}
-                <Link href="/terms" className="text-primary underline hover:no-underline">
-                  Terms of Service
-                </Link>{" "}
-                and{" "}
-                <Link href="/privacy" className="text-primary underline hover:no-underline">
-                  Privacy Policy
-                </Link>
-                .
-              </span>
-            </label>
+            <LegalConsentCheckbox
+              id={legalFieldId}
+              checked={agreedToLegal}
+              onChange={setAgreedToLegal}
+            />
             <Button
               className="w-full mt-auto"
               variant={plan.popular ? "default" : "outline"}

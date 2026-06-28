@@ -1,12 +1,11 @@
 import type { Metadata } from "next"
-import Link from "next/link"
 import { getCurrentUser } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { PricingPlansWithAgreement } from "@/components/pricing/PricingPlansWithAgreement"
+import { PricingTrialCta } from "@/components/pricing/PricingTrialCta"
 import { AudioExamples } from "@/components/marketing/AudioExamples"
 import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
 import { MARKETING_IMAGES, MARKETING_IMAGE_ALT } from "@/lib/marketing-images"
-import { Button } from "@/components/ui/button"
 import {
   formatJobRoiLine,
   formatOverageRate,
@@ -85,15 +84,7 @@ export default async function PricingPage() {
             coverage, then move to <strong>{PLAN_MID_VOLUME}</strong> when the team grows and calls
             need a full-time answer.
           </p>
-          {isLoggedIn ? (
-            <Button size="lg" asChild>
-              <Link href="/trial/start">Start your free trial</Link>
-            </Button>
-          ) : (
-            <Button size="lg" asChild>
-              <Link href="/sign-up">Sign up to start free trial</Link>
-            </Button>
-          )}
+          <PricingTrialCta isLoggedIn={isLoggedIn} />
         </div>
       )}
 

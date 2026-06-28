@@ -36,6 +36,13 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    if (body?.termsAccepted !== true) {
+      return NextResponse.json(
+        { error: "You must agree to the Terms of Service and Privacy Policy to start a trial." },
+        { status: 400 }
+      )
+    }
+
     const eligibility = await checkTrialEligibility(businessPhone.trim())
     if (!eligibility.eligible) {
       const reason = "reason" in eligibility ? eligibility.reason : "invalid_phone"
