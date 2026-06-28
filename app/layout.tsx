@@ -115,6 +115,9 @@ rkp("init","PaccPmsytSiq");rkp("event","PAGE_VIEW");
                 <Link href="/docs/faq" className="hover:text-foreground font-medium">
                   Help &amp; FAQ
                 </Link>
+                <Link href="/funnel/hvac" className="hover:text-foreground text-xs opacity-70">
+                  Funnel demo
+                </Link>
                 <Link href="/privacy" className="hover:text-foreground">
                   Privacy Policy
                 </Link>

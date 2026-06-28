@@ -29,6 +29,11 @@ export const INDUSTRY_IMAGES: Record<string, string> = {
   handyman: unsplash("photo-1581578731548-c64695cc6952", 800),
   cleaning: unsplash("photo-1585421514738-01798e2a7b0d", 800),
   landscaping: unsplash("photo-1416879595882-3373a048125b", 800),
+  roofing: unsplash("photo-1632759144336-25898c81d662", 800),
+  lawyers: unsplash("photo-1589829545855-df5d2f4e4f0e", 800),
+  realtors: unsplash("photo-1560518883-ce09059eeffa", 800),
+  dentists: unsplash("photo-1629909613654-28e377c37b09", 800),
+  salons: unsplash("photo-1560066984-138d9834c058", 800),
 }
 
 export function getIndustryImage(slug: string): string {

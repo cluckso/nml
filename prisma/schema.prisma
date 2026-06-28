@@ -318,3 +318,25 @@ model RecycledRetellNumber {
   releasedAt  DateTime @default(now())
   @@index([releasedAt])
 }
+
+/// Marketing funnel questionnaire submissions (MVP lead capture).
+model FunnelLead {
+  id          String   @id @default(cuid())
+  industry    String
+  score       Int      @default(0)
+  responses   Json
+  roiSnapshot Json?
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmTerm     String?
+  utmContent  String?
+  name        String?
+  email       String?
+  phone       String?
+  createdAt   DateTime @default(now())
+
+  @@index([industry])
+  @@index([createdAt])
+  @@index([email])
+}

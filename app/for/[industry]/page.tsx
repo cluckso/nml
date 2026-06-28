@@ -53,6 +53,9 @@ export default async function IndustryLandingPage({ params }: PageProps) {
             <Button size="lg" variant="outline" asChild>
               <Link href="/pricing">View pricing</Link>
             </Button>
+            <Button size="lg" variant="ghost" asChild>
+              <Link href={`/funnel/${slug}`}>See funnel</Link>
+            </Button>
           </div>
           <p className="text-sm text-muted-foreground mt-4">
             Average {data.name.toLowerCase()} job: {formatCurrency(data.averageJobValue)} · One captured lead can pay for months of service
