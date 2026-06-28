@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { UpgradeButton } from "@/components/billing/UpgradeButton"
 import { PlanType } from "@prisma/client"
+import { formatIncludedUsageShort } from "@/lib/pricing-catalog"
 
 export type PlanDetailsEntry = {
   name: string
@@ -56,8 +57,11 @@ export function BillingPlansWithAgreement({
           >
             <h3 className="text-xl font-semibold mb-2">{details.name}</h3>
             <p className="text-3xl font-bold mb-2">${details.price}/mo</p>
-            <p className="text-sm text-muted-foreground mb-4">
-              {details.minutes} minutes included
+            <p className="text-sm text-muted-foreground mb-1">
+              {details.minutes.toLocaleString()} minutes included
+            </p>
+            <p className="text-xs text-muted-foreground mb-4">
+              {formatIncludedUsageShort(details.minutes)}
             </p>
             <UpgradeButton
               planType={planType as PlanType}

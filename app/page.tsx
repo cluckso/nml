@@ -11,7 +11,7 @@ import { IndustryPhotoCards } from "@/components/marketing/IndustryPhotoCards"
 import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
 import { TrustStrip } from "@/components/marketing/TrustStrip"
 import { MARKETING_IMAGES, MARKETING_IMAGE_ALT } from "@/lib/marketing-images"
-import { formatJobRoiLine, formatOverageRate, PRICING_TIERS } from "@/lib/pricing-catalog"
+import { formatJobRoiLine, formatOverageRate, formatIncludedUsageShort, PRICING_TIERS } from "@/lib/pricing-catalog"
 import {
   ArrowRight,
   CreditCard,
@@ -436,7 +436,13 @@ export default function HomePage() {
                     {tier.name} — ${tier.price}/mo
                   </CardTitle>
                   <p className="text-sm text-muted-foreground font-normal">
-                    {tier.subtitle} · {tier.includedMinutes.toLocaleString()} included min/mo
+                    {tier.subtitle}
+                  </p>
+                  <p className="text-sm text-foreground/90 font-normal mt-1">
+                    {formatIncludedUsageShort(tier.includedMinutes)}
+                  </p>
+                  <p className="text-xs text-muted-foreground font-normal mt-1">
+                    {tier.usageNote}
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-2">

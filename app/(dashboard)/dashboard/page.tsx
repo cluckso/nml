@@ -8,7 +8,9 @@ import { TrialCard } from "@/components/dashboard/TrialCard"
 import { ROICard } from "@/components/dashboard/ROICard"
 import { ReferralCard } from "@/components/dashboard/ReferralCard"
 import { ReportingCard } from "@/components/dashboard/ReportingCard"
-import { hasWeeklyReports, getEffectivePlanType, FREE_TRIAL_MINUTES } from "@/lib/plans"
+import { hasWeeklyReports, getEffectivePlanType, FREE_TRIAL_MINUTES, getIncludedMinutes } from "@/lib/plans"
+import { getPlanUsageNudge } from "@/lib/plan-usage"
+import { UsageUpgradeNudge } from "@/components/billing/UsageUpgradeNudge"
 import { subDays } from "date-fns"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -42,13 +44,15 @@ export default async function DashboardPage() {
   let monthlyLeads = 0
   let trial: TrialStatus = defaultTrial
   let weekReporting: { weekCalls: number; weekMinutes: number; leadsByTag: { tag: string; count: number }[] } | null = null
+  let monthlyMinutesUsed = 0
 
+  const billingPeriod = new Date().toISOString().slice(0, 7)
   const monthStart = new Date()
   monthStart.setDate(1)
   monthStart.setHours(0, 0, 0, 0)
 
   try {
-    ;[business, recentCalls, stats, trial, monthlyLeads] = await Promise.all([
+    ;[business, recentCalls, stats, trial, monthlyLeads, monthlyMinutesUsed] = await Promise.all([
       db.business.findUnique({
         where: { id: user.businessId },
       }),
@@ -74,6 +78,12 @@ export default async function DashboardPage() {
           ],
         },
       }),
+      db.usage
+        .findFirst({
+          where: { businessId: user.businessId, billingPeriod },
+          select: { minutesUsed: true },
+        })
+        .then((row) => row?.minutesUsed ?? 0),
     ])
   } catch (err) {
     console.error("Dashboard page data fetch error:", err)
@@ -126,12 +136,32 @@ export default async function DashboardPage() {
   const phoneNumber = business?.retellPhoneNumber ?? null
   const ownerPhone = user.phoneNumber ?? null
 
+  const effectivePlan = business?.planType ? getEffectivePlanType(business.planType) : null
+  const minutesIncluded = trial.isOnTrial
+    ? FREE_TRIAL_MINUTES
+    : effectivePlan
+      ? getIncludedMinutes(effectivePlan)
+      : 0
+  const minutesUsedForNudge = trial.isOnTrial ? trial.minutesUsed : monthlyMinutesUsed
+  const usageNudge = getPlanUsageNudge({
+    planType: effectivePlan,
+    minutesUsed: minutesUsedForNudge,
+    minutesIncluded,
+    isOnTrial: trial.isOnTrial,
+  })
+
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-background via-background to-muted/20">
       <div className="container mx-auto max-w-7xl px-4 py-8">
         <DashboardPageHeader title={business?.name ?? "Dashboard"} subtitle="Overview of calls, leads, and setup">
           <DashboardNav />
         </DashboardPageHeader>
+
+        {usageNudge && (
+          <div className="mb-8">
+            <UsageUpgradeNudge nudge={usageNudge} />
+          </div>
+        )}
 
         {/* Top row: Trial (if on trial) + Setup */}
         <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2" id="trial">

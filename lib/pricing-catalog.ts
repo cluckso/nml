@@ -13,6 +13,7 @@ import {
   PLAN_TYPE_BY_DISPLAY_KEY,
   type PricingTierKey,
 } from "./plan-labels"
+import { formatIncludedUsageShort } from "./plan-usage"
 
 export { OVERAGE_RATE_PER_MIN, getIncludedMinutes, getMonthlyPrice }
 export type { PricingTierKey }
@@ -30,6 +31,8 @@ export interface PricingTier {
   features: string[]
   /** Short subtitle under plan name on landing */
   subtitle: string
+  /** One-line guidance on who this tier fits (shown on pricing cards) */
+  usageNote: string
 }
 
 /** Single source for pricing page, landing, and checkout cards. Amounts come from lib/plans.ts. */
@@ -38,12 +41,14 @@ export const PRICING_TIERS: PricingTier[] = [
     key: PLAN_SOLO_OWNER,
     planType: PLAN_TYPE_BY_DISPLAY_KEY[PLAN_SOLO_OWNER],
     name: PLAN_SOLO_OWNER,
-    description: "Low call volume — owner-operators and one-person shops",
+    description:
+      "Covers missed and after-hours calls for most one-truck shops—not full-time 24/7 answering.",
     price: MONTHLY_PRICES[PlanType.STARTER],
     includedMinutes: INCLUDED_MINUTES[PlanType.STARTER],
     badge: "Best value",
     popular: false,
-    subtitle: "Low volume · solo owner or one truck",
+    subtitle: "Missed & after-hours · one truck",
+    usageNote: "Best when you're on a job or closed—not every ring all day",
     features: [
       "Missed call capture",
       "Spam call filtering",
@@ -56,12 +61,13 @@ export const PRICING_TIERS: PricingTier[] = [
     key: PLAN_MID_VOLUME,
     planType: PLAN_TYPE_BY_DISPLAY_KEY[PLAN_MID_VOLUME],
     name: PLAN_MID_VOLUME,
-    description: "Growing sales — shops with a crew and steady inbound calls",
+    description: "Your always-on receptionist when the team is busy and calls shouldn't wait.",
     price: MONTHLY_PRICES[PlanType.PRO],
     includedMinutes: INCLUDED_MINUTES[PlanType.PRO],
     badge: "Most popular",
     popular: true,
-    subtitle: "Mid volume · growing team & booking needs",
+    subtitle: "24/7 front desk · growing crew",
+    usageNote: "Built for shops that answer most inbound calls",
     features: [
       "24/7 call answering",
       "Industry intake flows",
@@ -76,11 +82,12 @@ export const PRICING_TIERS: PricingTier[] = [
     key: PLAN_HIGH_VOLUME,
     planType: PLAN_TYPE_BY_DISPLAY_KEY[PLAN_HIGH_VOLUME],
     name: PLAN_HIGH_VOLUME,
-    description: "Premium coverage — busy operations, multiple crews, or locations",
+    description: "Premium coverage for busy operations, multiple crews, or high inbound volume.",
     price: MONTHLY_PRICES[PlanType.ELITE],
     includedMinutes: INCLUDED_MINUTES[PlanType.ELITE],
     popular: false,
-    subtitle: "High volume · multi-crew & premium ops",
+    subtitle: "Busy shop · multi-crew",
+    usageNote: "For operations answering every line, all day",
     features: [
       "Premium ElevenLabs voice included",
       "Voice branding controls",
@@ -116,3 +123,6 @@ export const AVG_JOB_VALUE_HIGH = 600
 export function formatJobRoiLine(): string {
   return `Average job: $${AVG_JOB_VALUE_LOW}–$${AVG_JOB_VALUE_HIGH}. One captured lead pays for months of service.`
 }
+
+/** Re-export for pricing UI — "~100 calls/mo (~3 min each)" */
+export { formatIncludedUsageShort }

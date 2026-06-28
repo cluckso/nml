@@ -35,6 +35,11 @@ export const PRODUCT_FAQ: FaqItem[] = [
   {
     question: "How much does CallGrabbr cost after the trial?",
     answer:
-      "Plans start at $99/month (Solo Owner), $159/month (Mid Volume), and $279/month (High Volume). Each plan includes a monthly minute allowance; additional minutes are billed at $0.22/min.",
+      "Plans start at $99/month (Solo Owner, ~100 intake calls), $159/month (Mid Volume, ~265 calls—built for 24/7 answering), and $279/month (High Volume, ~500 calls). Estimates assume ~3 minutes per call. Additional minutes are billed at $0.22/min.",
+  },
+  {
+    question: "Which plan should I choose?",
+    answer:
+      "Solo Owner fits most one-truck shops using CallGrabbr for missed and after-hours calls. Mid Volume is for growing crews that want the assistant to answer most inbound calls. High Volume is for busy, multi-crew operations. You can upgrade anytime as call volume grows.",
   },
 ]

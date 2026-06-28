@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, Loader2 } from "lucide-react"
 import { PRICING_TIERS_BY_KEY } from "@/lib/pricing-catalog"
+import { formatIncludedUsageLabel } from "@/lib/plan-usage"
 
 export function PlanCard({
   name,
@@ -81,9 +82,14 @@ export function PlanCard({
           <span className="text-muted-foreground">/month</span>
         </div>
         {includedMinutes != null && (
-          <p className="text-sm font-medium text-foreground mt-2">
-            {includedMinutes.toLocaleString()} included minutes/month
-          </p>
+          <div className="mt-2 space-y-1">
+            <p className="text-sm font-medium text-foreground">
+              {formatIncludedUsageLabel(includedMinutes)}
+            </p>
+            {plan.usageNote && (
+              <p className="text-xs text-muted-foreground">{plan.usageNote}</p>
+            )}
+          </div>
         )}
         {annualPrice != null && annualLabel && (
           <p className="text-sm text-muted-foreground mt-2">

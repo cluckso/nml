@@ -56,6 +56,7 @@ export default async function PricingPage() {
       </p>
       <p className="mt-2 text-muted-foreground">
         7-day free trial. No card required. Overage {formatOverageRate()} after included minutes.
+        Estimates assume ~3 min per intake call.
       </p>
       {isLoggedIn && !hasStartedTrial && (
         <p className="mt-2 text-sm text-primary font-medium">
@@ -77,7 +78,8 @@ export default async function PricingPage() {
             7-day free trial. We won&apos;t charge until you choose a plan. Includes 40 call minutes. One trial per business number.
           </p>
           <p className="text-sm text-muted-foreground mb-6">
-            Most solo owners start on <strong>{PLAN_SOLO_OWNER}</strong> — upgrade to {PLAN_MID_VOLUME} when call volume and crew size grow.
+            Most solo owners start on <strong>{PLAN_SOLO_OWNER}</strong> for missed and after-hours calls.
+            Move to {PLAN_MID_VOLUME} when you want 24/7 answering for a growing crew.
           </p>
           {isLoggedIn ? (
             <Button size="lg" asChild>

@@ -4,6 +4,9 @@ import { db } from "@/lib/db"
 import { getEffectivePlanType, FREE_TRIAL_MINUTES, MONTHLY_PRICES, INCLUDED_MINUTES, SETUP_FEES, OVERAGE_RATE_PER_MIN } from "@/lib/plans"
 import { getPlanDisplayName, PLAN_SOLO_OWNER, PLAN_MID_VOLUME, PLAN_HIGH_VOLUME } from "@/lib/plan-labels"
 import { getTrialStatus } from "@/lib/trial"
+import { getPlanUsageNudge } from "@/lib/plan-usage"
+import { formatIncludedUsageShort } from "@/lib/pricing-catalog"
+import { UsageUpgradeNudge } from "@/components/billing/UsageUpgradeNudge"
 import { getIntakeNumberForIndustry, hasIntakeNumberConfigured } from "@/lib/intake-routing"
 import { formatPhoneForDisplay } from "@/lib/utils"
 import { PlanType } from "@prisma/client"
@@ -67,6 +70,12 @@ export default async function BillingPage() {
   const minutesIncluded = isOnTrial ? FREE_TRIAL_MINUTES : (planDetails?.minutes ?? 0)
   const overageMinutes = isOnTrial ? 0 : Math.max(0, minutesUsed - minutesIncluded)
   const overageCost = overageMinutes * OVERAGE_RATE_PER_MIN
+  const usageNudge = getPlanUsageNudge({
+    planType: currentPlan,
+    minutesUsed,
+    minutesIncluded,
+    isOnTrial,
+  })
   // Prefer business's dedicated Retell number, fall back to shared intake number
   const intakeNumber = business?.retellPhoneNumber || getIntakeNumberForIndustry(business?.industry ?? null)
   const showIntakeNumber = !!intakeNumber
@@ -90,6 +99,12 @@ export default async function BillingPage() {
             <p className="text-xl font-mono font-semibold">{formatPhoneForDisplay(intakeNumber) || intakeNumber}</p>
           </CardContent>
         </Card>
+      )}
+
+      {usageNudge && (
+        <div className="mb-6">
+          <UsageUpgradeNudge nudge={usageNudge} />
+        </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -124,7 +139,7 @@ export default async function BillingPage() {
                 <div className="space-y-2">
                   <p className="text-2xl font-bold">${planDetails.price}/month</p>
                   <p className="text-sm text-muted-foreground">
-                    Includes {planDetails.minutes} minutes
+                    Includes {planDetails.minutes.toLocaleString()} min ({formatIncludedUsageShort(planDetails.minutes)})
                   </p>
                   {business?.currentPeriodEnd && (
                     <p className="text-sm text-muted-foreground">
@@ -158,7 +173,11 @@ export default async function BillingPage() {
               )}
               <div className="w-full bg-muted rounded-full h-2 mt-4">
                 <div
-                  className="bg-primary h-2 rounded-full"
+                  className={`h-2 rounded-full ${
+                    minutesIncluded > 0 && minutesUsed / minutesIncluded >= 0.8
+                      ? "bg-amber-500"
+                      : "bg-primary"
+                  }`}
                   style={{
                     width: `${Math.min(100, minutesIncluded > 0 ? (minutesUsed / minutesIncluded) * 100 : 0)}%`,
                   }}
