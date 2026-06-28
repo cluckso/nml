@@ -77,6 +77,7 @@ model User {
   smsConsentAt       DateTime? // Timestamp of SMS opt-in
   smsOptedOut        Boolean   @default(false)  // User texted STOP or opted out
   smsOptedOutAt      DateTime? // Timestamp of opt-out
+  termsAcceptedAt    DateTime? // Terms of Service + Privacy Policy accepted at signup
   pushToken          String?   // FCM push token for mobile app notifications
   pushPlatform       String?   // android or ios
   reviewEmailSentAt  DateTime? // When review request email was sent (null = not sent yet)

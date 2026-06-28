@@ -1,4 +1,5 @@
 import { requireAuth } from "@/lib/auth"
+import { PersistTermsConsent } from "@/components/legal/PersistTermsConsent"
 
 export const dynamic = "force-dynamic"
 
@@ -12,5 +13,10 @@ export default async function OnboardingLayout({
   children: React.ReactNode
 }) {
   await requireAuth()
-  return <>{children}</>
+  return (
+    <>
+      <PersistTermsConsent />
+      {children}
+    </>
+  )
 }

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { PersistTermsConsent } from "@/components/legal/PersistTermsConsent"
 
 export const dynamic = "force-dynamic"
 
@@ -28,5 +29,10 @@ export default async function DashboardLayout({
     redirect("/onboarding")
   }
 
-  return <>{children}</>
+  return (
+    <>
+      <PersistTermsConsent />
+      {children}
+    </>
+  )
 }

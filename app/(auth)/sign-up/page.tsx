@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { validateEmail, validatePasswordSignUp } from "@/lib/utils"
 import { loadFunnelTrialContext } from "@/lib/funnel/funnel-trial-bridge"
 import { getSafeRedirectPath } from "@/lib/safe-redirect"
+import { TERMS_ACCEPTED_STORAGE_KEY } from "@/lib/user-legal"
 import { LegalConsentCheckbox } from "@/components/legal/LegalConsentCheckbox"
 
 const AUTH_NEXT_KEY = "callgrabbr_auth_next"
@@ -112,6 +113,14 @@ function SignUpForm() {
       }
       setLoading(false)
     } else {
+      try {
+        sessionStorage.setItem(TERMS_ACCEPTED_STORAGE_KEY, "1")
+      } catch {
+        // ignore
+      }
+      void fetch("/api/user/accept-terms", { method: "POST" }).catch(() => {
+        // PersistTermsConsent will retry after email confirmation
+      })
       router.push(`/confirm-email?email=${encodeURIComponent(emailResult.email)}`)
     }
   }
@@ -176,7 +185,7 @@ function SignUpForm() {
               Sign in
             </a>
             {" "}·{" "}
-            <a href="/trial/start" className="text-primary hover:underline">
+            <a href="/sign-up?next=%2Ftrial%2Fstart" className="text-primary hover:underline">
               Start free trial
             </a>
           </p>

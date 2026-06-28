@@ -6,6 +6,7 @@ import { TRIAL_DAYS } from "@/lib/plans"
 import { Industry } from "@prisma/client"
 import { ClientStatus } from "@prisma/client"
 import { funnelSlugToIndustry } from "@/lib/funnel/funnel-trial-bridge"
+import { hasAcceptedTerms } from "@/lib/user-legal"
 
 /**
  * POST /api/trial/start
@@ -36,10 +37,17 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    if (body?.termsAccepted !== true) {
+    const dbUser = await db.user.findUnique({
+      where: { id: user.id },
+      select: { termsAcceptedAt: true },
+    })
+    if (!hasAcceptedTerms(dbUser)) {
       return NextResponse.json(
-        { error: "You must agree to the Terms of Service and Privacy Policy to start a trial." },
-        { status: 400 }
+        {
+          error:
+            "Please agree to the Terms of Service and Privacy Policy when creating your account before starting a trial.",
+        },
+        { status: 403 }
       )
     }
 
