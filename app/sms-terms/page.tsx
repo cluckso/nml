@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "SMS Opt-In & Messaging Terms - CallGrabbr",
   description:
     "SMS opt-in form and messaging terms for CallGrabbr. Subscribe to call alerts and account notifications.",
+  alternates: { canonical: "/sms-terms" },
 }
 
 /**

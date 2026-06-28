@@ -30,11 +30,13 @@ import type {
   ReportSettings,
   QuestionDepth,
 } from "@/lib/business-settings"
-import { SECTION_LABELS, SECTION_MIN_TIER } from "@/lib/business-settings"
+import { SECTION_LABELS, SECTION_MIN_TIER, SECTION_UPGRADE_DESCRIPTIONS } from "@/lib/business-settings"
 import { formatRingDelayLabel } from "@/lib/call-routing"
-import { getUpgradeTierLabel } from "@/lib/plan-labels"
+import { getUpgradeTierLabel, PLAN_VOLUME_TAGS } from "@/lib/plan-labels"
 import { PlanType } from "@prisma/client"
 import { PhoneInputWithCountry } from "@/components/ui/phone-input-with-country"
+import { PlanUpgradeDialog } from "@/components/settings/PlanUpgradeDialog"
+import { cn } from "@/lib/utils"
 
 const TABS: { section: SettingsSection; tier: "starter" | "pro" | "local_plus" }[] = [
   { section: "greeting", tier: "starter" },
@@ -55,6 +57,8 @@ const TABS: { section: SettingsSection; tier: "starter" | "pro" | "local_plus" }
   { section: "aiBehavior", tier: "local_plus" },
   { section: "reporting", tier: "local_plus" },
 ]
+
+const TIER_GROUP_LABELS = PLAN_VOLUME_TAGS
 
 export function SettingsClient() {
   const [settings, setSettings] = useState<BusinessSettings | null>(null)
@@ -80,6 +84,7 @@ export function SettingsClient() {
   } | null>(null)
   const [agentPreviewVerified, setAgentPreviewVerified] = useState(false)
   const [verifyingAgentPreview, setVerifyingAgentPreview] = useState(false)
+  const [upgradeDialogSection, setUpgradeDialogSection] = useState<SettingsSection | null>(null)
 
   const refreshAgentPreview = useCallback(async (opts?: { markVerified?: boolean }) => {
     try {
@@ -161,32 +166,53 @@ export function SettingsClient() {
   const isLocked = (s: SettingsSection) => !allowed.includes(s)
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6">
+    <div className="flex flex-col lg:flex-row gap-8">
       {/* Sidebar nav */}
-      <nav className="lg:w-56 shrink-0">
-        <div className="space-y-0.5">
-          {TABS.map(({ section, tier }) => {
+      <nav className="lg:w-60 shrink-0">
+        <div className="lg:sticky lg:top-6 rounded-xl border border-border/50 bg-card/40 backdrop-blur-sm p-2 space-y-4">
+          {TABS.map(({ section, tier }, index) => {
             const locked = isLocked(section)
+            const prevTier = index > 0 ? TABS[index - 1].tier : null
+            const showGroupHeader = tier !== prevTier
+
             return (
-              <button
-                key={section}
-                onClick={() => !locked && setActiveTab(section)}
-                className={`w-full text-left px-3 py-2 rounded text-sm flex items-center gap-2 ${
-                  activeTab === section
-                    ? "bg-primary/10 text-primary font-medium"
-                    : locked
-                    ? "text-muted-foreground/50 cursor-not-allowed"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                }`}
-              >
-                {locked && <Lock className="h-3 w-3 shrink-0" />}
-                <span className="truncate">{SECTION_LABELS[section]}</span>
-                {locked && (
-                  <Badge variant="outline" className="ml-auto text-[10px] px-1 py-0">
-                    {getUpgradeTierLabel(tier === "pro" ? PlanType.PRO : PlanType.ELITE)}
-                  </Badge>
+              <div key={section}>
+                {showGroupHeader && (
+                  <p className="px-3 pb-1.5 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/70">
+                    {TIER_GROUP_LABELS[tier]}
+                  </p>
                 )}
-              </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (locked) {
+                      setUpgradeDialogSection(section)
+                      return
+                    }
+                    setActiveTab(section)
+                  }}
+                  className={cn(
+                    "w-full text-left px-3 py-2.5 rounded-lg text-sm flex items-center gap-2 transition-colors",
+                    activeTab === section && !locked
+                      ? "bg-primary/15 text-primary font-medium shadow-sm"
+                      : locked
+                      ? "text-muted-foreground hover:bg-muted/40 hover:text-foreground cursor-pointer"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  )}
+                >
+                  {locked ? (
+                    <Lock className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" />
+                  ) : (
+                    <span className="w-3.5 shrink-0" aria-hidden />
+                  )}
+                  <span className="truncate">{SECTION_LABELS[section]}</span>
+                  {locked && (
+                    <Badge variant="outline" className="ml-auto text-[10px] px-1.5 py-0 border-primary/30 text-primary/90">
+                      {getUpgradeTierLabel(tier === "pro" ? PlanType.PRO : PlanType.ELITE)}
+                    </Badge>
+                  )}
+                </button>
+              </div>
             )
           })}
         </div>
@@ -237,6 +263,15 @@ export function SettingsClient() {
           </>
         )}
       </div>
+
+      <PlanUpgradeDialog
+        section={upgradeDialogSection}
+        currentPlan={planType}
+        open={upgradeDialogSection !== null}
+        onOpenChange={(open) => {
+          if (!open) setUpgradeDialogSection(null)
+        }}
+      />
     </div>
   )
 }
@@ -364,20 +399,20 @@ function Slider({ label, value, onChange, min = 0, max = 1, step = 0.1 }: { labe
 function LockedSection({ section }: { section: SettingsSection }) {
   const tier = SECTION_MIN_TIER[section]
   return (
-    <Card className="border-dashed opacity-70">
+    <Card className="glass-card border-dashed border-primary/20">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Lock className="h-5 w-5" />
+          <Lock className="h-5 w-5 text-primary/80" />
           {SECTION_LABELS[section]}
         </CardTitle>
         <CardDescription>
-          This feature requires the {getUpgradeTierLabel(tier)} plan.
+          {SECTION_UPGRADE_DESCRIPTIONS[section]} Available on the {getUpgradeTierLabel(tier)} plan.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Link href="/billing">
-          <Button variant="outline">Upgrade to {getUpgradeTierLabel(tier)}</Button>
-        </Link>
+        <Button asChild>
+          <Link href="/billing">Upgrade Now</Link>
+        </Button>
       </CardContent>
     </Card>
   )

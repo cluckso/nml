@@ -1,5 +1,6 @@
 import { Business, Call } from "@prisma/client"
 import { Resend } from "resend"
+import { sanitizeIssueDescription } from "@/lib/parse-lead-from-transcript"
 import twilio from "twilio"
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
@@ -55,7 +56,7 @@ export function buildLeadSummarySmsBodies(
   const name = (intake.name || "—").trim()
   const phone = (intake.phone || "—").trim()
   const address = formatLeadAddress(intake)
-  const issue = (intake.issue_description || "").trim() || "—"
+  const issue = sanitizeIssueDescription(intake.issue_description) || "—"
   const vehicle = [intake.vehicle_year, intake.vehicle_make, intake.vehicle_model, intake.year, intake.make, intake.model]
     .filter(Boolean)
     .map((s) => String(s).trim())
@@ -132,6 +133,7 @@ export async function sendEmailNotification(
   }
 
   const emergencyBadge = intake.emergency ? "🚨 EMERGENCY" : ""
+  const issueDescription = sanitizeIssueDescription(intake.issue_description)
   const subject = intake.emergency
     ? `🚨 EMERGENCY: New Call from ${intake.name || "Unknown"}`
     : `New Call from ${intake.name || "Unknown"}`
@@ -157,10 +159,10 @@ export async function sendEmailNotification(
             ${intake.city ? `<p><strong>City:</strong> ${intake.city}</p>` : ""}
           </div>
 
-          ${intake.issue_description ? `
+          ${issueDescription ? `
             <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
-              <h2 style="margin-top: 0;">Issue Description</h2>
-              <p>${intake.issue_description}</p>
+              <h2 style="margin-top: 0;">Reason for call</h2>
+              <p>${issueDescription}</p>
             </div>
           ` : ""}
 

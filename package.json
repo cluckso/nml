@@ -12,6 +12,7 @@
     "lint": "next lint",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:transcript-audit": "vitest run lib/__tests__/audit-call-transcript.test.ts",
     "test:usage": "node scripts/test-usage-tracking.cjs",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",

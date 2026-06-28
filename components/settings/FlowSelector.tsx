@@ -9,6 +9,7 @@ import { FlowPreview } from "./FlowPreview"
 import { Industry } from "@prisma/client"
 import { PlanType } from "@prisma/client"
 import { Lock } from "lucide-react"
+import { PLAN_SOLO_OWNER, PLAN_MID_VOLUME, MID_AND_HIGH_VOLUME_LABEL } from "@/lib/plan-labels"
 
 interface FlowSelectorProps {
   planType: PlanType | null | undefined
@@ -34,7 +35,7 @@ export function FlowSelector({
       <div className="space-y-2">
         <Label>Conversation flow</Label>
         <p className="text-sm text-muted-foreground">
-          Solo plans use the simple name / number / reason flow. Team and Pro can choose an industry flow.
+          {PLAN_SOLO_OWNER} plans use the simple name / number / reason flow. {MID_AND_HIGH_VOLUME_LABEL} plans can choose an industry flow.
         </p>
       </div>
 
@@ -63,7 +64,7 @@ export function FlowSelector({
                       <span className="font-medium text-muted-foreground">{flow.label}</span>
                       <Link href="/billing">
                         <Button variant="link" size="sm" className="p-0 h-auto text-primary">
-                          Upgrade to Team
+                          Upgrade to {PLAN_MID_VOLUME}
                         </Button>
                       </Link>
                     </>

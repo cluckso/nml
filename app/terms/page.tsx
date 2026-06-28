@@ -5,6 +5,7 @@ import { LEGAL_LAST_UPDATED, SUPPORT_EMAIL } from "@/lib/site-contact"
 export const metadata: Metadata = {
   title: "Terms of Service - CallGrabbr",
   description: "Terms of service for CallGrabbr.",
+  alternates: { canonical: "/terms" },
 }
 
 export default function TermsPage() {

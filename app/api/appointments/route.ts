@@ -5,6 +5,8 @@ import { db } from "@/lib/db"
 import { mergeWithDefaults, type BusinessSettings } from "@/lib/business-settings"
 import { getAvailableSlots } from "@/lib/appointments"
 import { getEffectivePlanType } from "@/lib/plans"
+import { getPlanDisplayName } from "@/lib/plan-labels"
+import { PlanType } from "@prisma/client"
 import { isSectionAllowed } from "@/lib/business-settings"
 
 /** GET /api/appointments — list appointments. Query: from, to (ISO date), status */
@@ -56,7 +58,10 @@ export async function POST(req: NextRequest) {
     })
     if (!business) return NextResponse.json({ error: "Business not found" }, { status: 404 })
     if (!isSectionAllowed("booking", getEffectivePlanType(business.planType))) {
-      return NextResponse.json({ error: "Booking requires Pro plan" }, { status: 403 })
+      return NextResponse.json(
+        { error: `Booking requires the ${getPlanDisplayName(PlanType.PRO)} plan or higher` },
+        { status: 403 }
+      )
     }
 
     const body = await req.json()

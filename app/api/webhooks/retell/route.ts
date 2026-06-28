@@ -23,7 +23,12 @@ import { buildAgentOverride } from "@/lib/agent-override"
 import { hasActionableInfo, isLikelySpam, isKnownSpamOrTestNumber } from "@/lib/call-filter"
 import { parseAppointmentRequest } from "@/lib/appointments"
 import { isSpamByTwilioLookup } from "@/lib/twilio-lookup"
-import { parseLeadFromSummaryOrTranscript, isLikelyPhysicalAddress } from "@/lib/parse-lead-from-transcript"
+import {
+  parseLeadFromSummaryOrTranscript,
+  isLikelyPhysicalAddress,
+  resolveIssueDescription,
+} from "@/lib/parse-lead-from-transcript"
+import { auditCallTranscript } from "@/lib/audit-call-transcript"
 import { fireZapierLeadHook } from "@/lib/zapier"
 
 /** Retell expects 204 No Content on success. Use 200 + body only for call_inbound (required) and test/ping. */
@@ -466,31 +471,17 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
     structuredIntake.address = undefined
   }
 
-  const summary =
-    analysis.summary || analysis.call_summary || (analysis.transcript ? String(analysis.transcript).slice(0, 500) : null)
+  const summary = analysis.summary || analysis.call_summary || null
   const transcriptStr = analysis.transcript || event.call?.transcript
 
-  // Fallback: if no issue_description but we have summary or transcript, use it so lead report isn't empty
-  if (!structuredIntake.issue_description && (summary || transcriptStr)) {
-    const fallback = typeof summary === "string" && summary.trim()
-      ? summary.trim().slice(0, 500)
-      : typeof transcriptStr === "string"
-        ? transcriptStr.trim().slice(0, 500)
-        : null
-    if (fallback) structuredIntake.issue_description = fallback
-  }
-
-  // When extracted_variables are missing, parse transcript/summary so SMS shows Name / Phone / Address / Reason for call
+  // When extracted_variables are missing, parse transcript/summary for name / address / city
   const textToParse = typeof transcriptStr === "string" && transcriptStr.trim()
     ? transcriptStr
     : typeof summary === "string" && summary.trim()
       ? summary
       : null
   const needsParsing =
-    textToParse &&
-    (!structuredIntake.name ||
-      !structuredIntake.address ||
-      (typeof structuredIntake.issue_description === "string" && structuredIntake.issue_description.length > 180))
+    textToParse && (!structuredIntake.name || !structuredIntake.address)
   if (needsParsing && textToParse) {
     const parsed = parseLeadFromSummaryOrTranscript(textToParse)
     if (parsed.name && !structuredIntake.name) structuredIntake.name = parsed.name
@@ -498,10 +489,27 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
       structuredIntake.address = parsed.address
     }
     if (parsed.city && !structuredIntake.city) structuredIntake.city = parsed.city
-    if (parsed.issue_description) {
-      // Prefer short parsed reason over long summary blob so SMS is clear
-      const current = String(structuredIntake.issue_description || "")
-      if (!current || current.length > 180) structuredIntake.issue_description = parsed.issue_description
+  }
+
+  // Caller reason only — never raw transcript blobs or agent greeting lines
+  structuredIntake.issue_description = resolveIssueDescription({
+    fromAnalysis:
+      typeof structuredIntake.issue_description === "string"
+        ? structuredIntake.issue_description
+        : undefined,
+    summary: typeof summary === "string" ? summary : undefined,
+    transcript: typeof transcriptStr === "string" ? transcriptStr : undefined,
+  })
+
+  if (typeof transcriptStr === "string" && transcriptStr.trim()) {
+    const transcriptAudit = auditCallTranscript(transcriptStr)
+    if (!transcriptAudit.ok || transcriptAudit.issues.length > 0) {
+      console.warn("[CallTranscriptAudit] Agent conversation quality", {
+        callId,
+        ok: transcriptAudit.ok,
+        metrics: transcriptAudit.metrics,
+        issues: transcriptAudit.issues,
+      })
     }
   }
 

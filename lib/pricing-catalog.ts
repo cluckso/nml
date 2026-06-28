@@ -6,11 +6,16 @@ import {
   getIncludedMinutes,
   getMonthlyPrice,
 } from "./plans"
-import { PLAN_TYPE_BY_DISPLAY_KEY } from "./plan-labels"
+import {
+  PLAN_HIGH_VOLUME,
+  PLAN_MID_VOLUME,
+  PLAN_SOLO_OWNER,
+  PLAN_TYPE_BY_DISPLAY_KEY,
+  type PricingTierKey,
+} from "./plan-labels"
 
 export { OVERAGE_RATE_PER_MIN, getIncludedMinutes, getMonthlyPrice }
-
-export type PricingTierKey = "Solo" | "Team" | "Pro"
+export type { PricingTierKey }
 
 export interface PricingTier {
   key: PricingTierKey
@@ -30,15 +35,15 @@ export interface PricingTier {
 /** Single source for pricing page, landing, and checkout cards. Amounts come from lib/plans.ts. */
 export const PRICING_TIERS: PricingTier[] = [
   {
-    key: "Solo",
-    planType: PLAN_TYPE_BY_DISPLAY_KEY.Solo,
-    name: "Solo",
-    description: "For one-person shops — missed call capture and lead alerts",
+    key: PLAN_SOLO_OWNER,
+    planType: PLAN_TYPE_BY_DISPLAY_KEY[PLAN_SOLO_OWNER],
+    name: PLAN_SOLO_OWNER,
+    description: "Low call volume — owner-operators and one-person shops",
     price: MONTHLY_PRICES[PlanType.STARTER],
     includedMinutes: INCLUDED_MINUTES[PlanType.STARTER],
     badge: "Best value",
     popular: false,
-    subtitle: "Best for solo operators",
+    subtitle: "Low volume · solo owner or one truck",
     features: [
       "Missed call capture",
       "Spam call filtering",
@@ -48,15 +53,15 @@ export const PRICING_TIERS: PricingTier[] = [
     ],
   },
   {
-    key: "Team",
-    planType: PLAN_TYPE_BY_DISPLAY_KEY.Team,
-    name: "Team",
-    description: "For growing shops — 24/7 answering, booking, and follow-up",
+    key: PLAN_MID_VOLUME,
+    planType: PLAN_TYPE_BY_DISPLAY_KEY[PLAN_MID_VOLUME],
+    name: PLAN_MID_VOLUME,
+    description: "Growing sales — shops with a crew and steady inbound calls",
     price: MONTHLY_PRICES[PlanType.PRO],
     includedMinutes: INCLUDED_MINUTES[PlanType.PRO],
     badge: "Most popular",
     popular: true,
-    subtitle: "Best for growing teams",
+    subtitle: "Mid volume · growing team & booking needs",
     features: [
       "24/7 call answering",
       "Industry intake flows",
@@ -67,14 +72,14 @@ export const PRICING_TIERS: PricingTier[] = [
     ],
   },
   {
-    key: "Pro",
-    planType: PLAN_TYPE_BY_DISPLAY_KEY.Pro,
-    name: "Pro",
-    description: "For high-volume and multi-location trades",
+    key: PLAN_HIGH_VOLUME,
+    planType: PLAN_TYPE_BY_DISPLAY_KEY[PLAN_HIGH_VOLUME],
+    name: PLAN_HIGH_VOLUME,
+    description: "Premium coverage — busy operations, multiple crews, or locations",
     price: MONTHLY_PRICES[PlanType.ELITE],
     includedMinutes: INCLUDED_MINUTES[PlanType.ELITE],
     popular: false,
-    subtitle: "Best for high call volume",
+    subtitle: "High volume · multi-crew & premium ops",
     features: [
       "Premium branded voice",
       "Multi-department routing",
@@ -90,12 +95,12 @@ export const PRICING_TIERS_BY_KEY: Record<PricingTierKey, PricingTier> = Object.
   PRICING_TIERS.map((t) => [t.key, t])
 ) as Record<PricingTierKey, PricingTier>
 
-/** For meta tags and hero copy — e.g. "Solo $99, Team $159, Pro $279/mo" */
+/** For meta tags and hero copy */
 export function formatPricingSummary(): string {
-  const solo = PRICING_TIERS_BY_KEY.Solo
-  const team = PRICING_TIERS_BY_KEY.Team
-  const pro = PRICING_TIERS_BY_KEY.Pro
-  return `Solo $${solo.price}, Team $${team.price}, Pro $${pro.price}/mo`
+  const solo = PRICING_TIERS_BY_KEY[PLAN_SOLO_OWNER]
+  const mid = PRICING_TIERS_BY_KEY[PLAN_MID_VOLUME]
+  const high = PRICING_TIERS_BY_KEY[PLAN_HIGH_VOLUME]
+  return `${PLAN_SOLO_OWNER} $${solo.price}, ${PLAN_MID_VOLUME} $${mid.price}, ${PLAN_HIGH_VOLUME} $${high.price}/mo`
 }
 
 export function formatOverageRate(): string {

@@ -4,6 +4,8 @@ import { getAvailableSlots } from "@/lib/appointments"
 import { mergeWithDefaults, type BusinessSettings } from "@/lib/business-settings"
 import { db } from "@/lib/db"
 import { getEffectivePlanType } from "@/lib/plans"
+import { getPlanDisplayName } from "@/lib/plan-labels"
+import { PlanType } from "@prisma/client"
 import { isSectionAllowed } from "@/lib/business-settings"
 
 /** GET /api/appointments/available-slots?date=YYYY-MM-DD&duration=60 — get available slots for a date */
@@ -19,7 +21,10 @@ export async function GET(req: NextRequest) {
     })
     if (!business) return NextResponse.json({ error: "Business not found" }, { status: 404 })
     if (!isSectionAllowed("booking", getEffectivePlanType(business.planType))) {
-      return NextResponse.json({ error: "Booking requires Pro plan" }, { status: 403 })
+      return NextResponse.json(
+        { error: `Booking requires the ${getPlanDisplayName(PlanType.PRO)} plan or higher` },
+        { status: 403 }
+      )
     }
 
     const settings = mergeWithDefaults(business.settings as Partial<BusinessSettings> | null)

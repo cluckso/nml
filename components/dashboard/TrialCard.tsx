@@ -27,7 +27,7 @@ export function TrialCard({ trial, hasAgent }: TrialCardProps) {
   }
 
   return (
-    <Card className="border-emerald-200 bg-emerald-50/50 dark:border-emerald-900 dark:bg-emerald-950/20">
+    <Card className="glass-card border-emerald-500/20 bg-emerald-950/10">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-emerald-800 dark:text-emerald-200">
           <Zap className="h-5 w-5" />

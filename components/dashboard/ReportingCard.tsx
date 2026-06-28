@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart3, Mail } from "lucide-react"
+import { PLAN_HIGH_VOLUME } from "@/lib/plan-labels"
 
 type TagCount = { tag: string; count: number }
 
@@ -11,13 +12,13 @@ interface ReportingCardProps {
 
 export function ReportingCard({ weekCalls, weekMinutes, leadsByTag }: ReportingCardProps) {
   return (
-    <Card className="border-primary/30 bg-primary/5 md:col-span-2">
+    <Card className="glass-card border-primary/20">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center gap-2">
           <BarChart3 className="h-5 w-5 text-primary" />
           Reporting dashboard
         </CardTitle>
-        <CardDescription>Last 7 days · Pro plan</CardDescription>
+        <CardDescription>Last 7 days · {PLAN_HIGH_VOLUME} plan</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-3">

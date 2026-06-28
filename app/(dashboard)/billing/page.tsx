@@ -2,7 +2,7 @@ import { redirect } from "next/navigation"
 import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { getEffectivePlanType, FREE_TRIAL_MINUTES, MONTHLY_PRICES, INCLUDED_MINUTES, SETUP_FEES, OVERAGE_RATE_PER_MIN } from "@/lib/plans"
-import { getPlanDisplayName } from "@/lib/plan-labels"
+import { getPlanDisplayName, PLAN_SOLO_OWNER, PLAN_MID_VOLUME, PLAN_HIGH_VOLUME } from "@/lib/plan-labels"
 import { getTrialStatus } from "@/lib/trial"
 import { getIntakeNumberForIndustry, hasIntakeNumberConfigured } from "@/lib/intake-routing"
 import { formatPhoneForDisplay } from "@/lib/utils"
@@ -111,7 +111,7 @@ export default async function BillingPage() {
               <div className="space-y-2">
                 <p className="text-2xl font-bold">Free trial</p>
                 <p className="text-sm text-muted-foreground">
-                  7-day free trial. Upgrade to Solo, Team, or Pro when you&apos;re ready.
+                  7-day free trial. Upgrade to {PLAN_SOLO_OWNER}, {PLAN_MID_VOLUME}, or {PLAN_HIGH_VOLUME} when you&apos;re ready.
                 </p>
                 {(trial.isExhausted || trial.isExpired) && (
                   <Button asChild className="mt-2">

@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Phone } from "lucide-react"
 import Link from "next/link"
 import { SettingsClient } from "@/components/settings/SettingsClient"
+import { DashboardNav } from "@/components/dashboard/DashboardNav"
+import { DashboardPageHeader } from "@/components/dashboard/DashboardShell"
 
 export default async function SettingsPage() {
   let user
@@ -38,11 +40,14 @@ export default async function SettingsPage() {
   const intakeNumber = business?.retellPhoneNumber || getIntakeNumberForIndustry(business?.industry ?? null)
 
   return (
-    <div className="container mx-auto max-w-5xl py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6">Settings</h1>
+    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-background via-background to-muted/20">
+      <div className="container mx-auto max-w-6xl px-4 py-8">
+        <DashboardPageHeader title="Settings" subtitle="Configure your call assistant and notifications">
+          <DashboardNav />
+        </DashboardPageHeader>
 
-      {/* Forwarding number card */}
-      <Card className="mb-6">
+        {/* Forwarding number card */}
+        <Card className="glass-card mb-8">
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
             <Phone className="h-4 w-4" />
@@ -63,6 +68,7 @@ export default async function SettingsPage() {
 
       {/* Full settings panel */}
       <SettingsClient />
+      </div>
     </div>
   )
 }

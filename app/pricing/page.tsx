@@ -5,7 +5,7 @@ import { db } from "@/lib/db"
 import { PricingPlansWithAgreement } from "@/components/pricing/PricingPlansWithAgreement"
 import { AudioExamples } from "@/components/marketing/AudioExamples"
 import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
-import { MARKETING_IMAGES } from "@/lib/marketing-images"
+import { MARKETING_IMAGES, MARKETING_IMAGE_ALT } from "@/lib/marketing-images"
 import { Button } from "@/components/ui/button"
 import {
   formatJobRoiLine,
@@ -13,10 +13,12 @@ import {
   formatPricingSummary,
   PRICING_TIERS,
 } from "@/lib/pricing-catalog"
+import { PLAN_SOLO_OWNER, PLAN_MID_VOLUME } from "@/lib/plan-labels"
 
 export const metadata: Metadata = {
   title: "Pricing - CallGrabbr",
   description: `Stop losing jobs to voicemail. ${formatPricingSummary()}. ${formatJobRoiLine()} 7-day free trial, no card required.`,
+  alternates: { canonical: "/pricing" },
 }
 
 export default async function PricingPage() {
@@ -42,7 +44,7 @@ export default async function PricingPage() {
   <>
     <SectionBackdrop
       src={MARKETING_IMAGES.teamTrust}
-      alt=""
+      alt={MARKETING_IMAGE_ALT.teamTrust}
       overlay="heavy"
       className="py-20 border-b border-border/50"
       contentClassName="container mx-auto px-4 text-center"
@@ -74,7 +76,7 @@ export default async function PricingPage() {
             7-day free trial. We won&apos;t charge until you choose a plan. Includes 40 call minutes. One trial per business number.
           </p>
           <p className="text-sm text-muted-foreground mb-6">
-            Most solo shops start on <strong>Solo</strong> — upgrade to Team when you need booking and CRM tools.
+            Most solo owners start on <strong>{PLAN_SOLO_OWNER}</strong> — upgrade to {PLAN_MID_VOLUME} when call volume and crew size grow.
           </p>
           {isLoggedIn ? (
             <Button size="lg" asChild>

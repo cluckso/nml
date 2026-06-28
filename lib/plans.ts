@@ -32,7 +32,7 @@ export const FREE_TRIAL_MINUTES = 40
 /** Free trial: validity window in days (trial ends at 7 days or trial minute cap, whichever comes first) */
 export const TRIAL_DAYS = 7
 
-/** Monthly price per plan (USD) — Solo $99, Team $159, Pro $279 */
+/** Monthly price per plan (USD) — Solo Owner $99, Mid Volume $159, High Volume $279 */
 export const MONTHLY_PRICES: Record<PlanType, number> = {
   [PlanType.STARTER]: 99,
   [PlanType.PRO]: 159,

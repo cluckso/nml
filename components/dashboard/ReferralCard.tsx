@@ -42,7 +42,7 @@ export function ReferralCard() {
   const earned = (stats.earnedCents / 100).toFixed(0)
 
   return (
-    <Card className="border-primary/30 bg-primary/5">
+    <Card className="glass-card border-primary/20">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <Gift className="h-5 w-5 text-primary" />

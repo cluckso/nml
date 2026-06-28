@@ -8,11 +8,17 @@ import { TrialCard } from "@/components/dashboard/TrialCard"
 import { ROICard } from "@/components/dashboard/ROICard"
 import { ReferralCard } from "@/components/dashboard/ReferralCard"
 import { ReportingCard } from "@/components/dashboard/ReportingCard"
-import { hasWeeklyReports, getEffectivePlanType } from "@/lib/plans"
+import { hasWeeklyReports, getEffectivePlanType, FREE_TRIAL_MINUTES } from "@/lib/plans"
 import { subDays } from "date-fns"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Phone, Clock, AlertTriangle, ChevronRight, Calendar } from "lucide-react"
+import { Phone, Clock, AlertTriangle, ChevronRight } from "lucide-react"
+import { DashboardNav } from "@/components/dashboard/DashboardNav"
+import {
+  DashboardPageHeader,
+  DashboardSection,
+  DashboardStatCard,
+} from "@/components/dashboard/DashboardShell"
 
 export default async function DashboardPage() {
   const user = await requireAuth()
@@ -24,7 +30,7 @@ export default async function DashboardPage() {
   const defaultTrial: TrialStatus = {
     isOnTrial: false,
     minutesUsed: 0,
-    minutesRemaining: 50,
+    minutesRemaining: FREE_TRIAL_MINUTES,
     isExhausted: false,
     isExpired: false,
     trialEndsAt: null,
@@ -121,128 +127,71 @@ export default async function DashboardPage() {
   const ownerPhone = user.phoneNumber ?? null
 
   return (
-    <div className="container mx-auto max-w-7xl py-6 px-4">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">{business?.name}</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">Dashboard</p>
-        </div>
-        <nav className="flex items-center gap-1">
-          <Link href="/calls">
-            <Button variant="ghost" size="sm" className="gap-2">
-              <Phone className="h-4 w-4" />
-              Calls
-            </Button>
-          </Link>
-          <Link href="/appointments">
-            <Button variant="ghost" size="sm" className="gap-2">
-              <Calendar className="h-4 w-4" />
-              Appointments
-            </Button>
-          </Link>
-          <Link href="/billing">
-            <Button variant="ghost" size="sm">Billing</Button>
-          </Link>
-          <Link href="/settings">
-            <Button variant="ghost" size="sm">Settings</Button>
-          </Link>
-          <Link href="/agency">
-            <Button variant="ghost" size="sm">Partner</Button>
-          </Link>
-        </nav>
-      </div>
+    <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-background via-background to-muted/20">
+      <div className="container mx-auto max-w-7xl px-4 py-8">
+        <DashboardPageHeader title={business?.name ?? "Dashboard"} subtitle="Overview of calls, leads, and setup">
+          <DashboardNav />
+        </DashboardPageHeader>
 
-      {/* Top row: Trial (if on trial) + Setup */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6" id="trial">
-        {trial.isOnTrial && (
-          <div id="trial-card">
-            <TrialCard trial={trial} hasAgent={hasAgent} />
+        {/* Top row: Trial (if on trial) + Setup */}
+        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2" id="trial">
+          {trial.isOnTrial && (
+            <div id="trial-card">
+              <TrialCard trial={trial} hasAgent={hasAgent} />
+            </div>
+          )}
+          <div className={trial.isOnTrial ? "" : "md:col-span-2"} id="setup">
+            <SetupAICard
+              hasAgent={hasAgent}
+              phoneNumber={phoneNumber}
+              businessName={business?.name ?? "your business"}
+              ownerPhone={ownerPhone}
+              trialStatus={trial}
+              compact
+            />
+          </div>
+        </div>
+
+        {/* Stats row */}
+        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <DashboardStatCard label="Total calls" value={stats._count} icon={Phone} />
+          <DashboardStatCard label="Minutes used" value={Math.ceil(totalMinutes)} icon={Clock} />
+          <DashboardStatCard label="Urgent" value={emergencyCalls} icon={AlertTriangle} tone="danger" />
+        </div>
+
+        {business?.industry && (
+          <div className="mb-8">
+            <ROICard leadsThisMonth={monthlyLeads} industry={business.industry} />
           </div>
         )}
-        <div className={trial.isOnTrial ? "" : "md:col-span-2"} id="setup">
-          <SetupAICard
-            hasAgent={hasAgent}
-            phoneNumber={phoneNumber}
-            businessName={business?.name ?? "your business"}
-            ownerPhone={ownerPhone}
-            trialStatus={trial}
-            compact
-          />
+
+        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2">
+          {weekReporting && (
+            <ReportingCard
+              weekCalls={weekReporting.weekCalls}
+              weekMinutes={weekReporting.weekMinutes}
+              leadsByTag={weekReporting.leadsByTag}
+            />
+          )}
+          <ReferralCard />
         </div>
-      </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-        <Card className="border-border/80 bg-card">
-          <CardContent className="pt-5 pb-5">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-primary/10 p-2.5">
-                <Phone className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Total calls</p>
-                <p className="text-2xl font-bold tracking-tight">{stats._count}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-border/80 bg-card">
-          <CardContent className="pt-5 pb-5">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-primary/10 p-2.5">
-                <Clock className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Minutes used</p>
-                <p className="text-2xl font-bold tracking-tight">{Math.ceil(totalMinutes)}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-border/80 bg-card">
-          <CardContent className="pt-5 pb-5">
-            <div className="flex items-center gap-3">
-              <div className="rounded-lg bg-destructive/10 p-2.5">
-                <AlertTriangle className="h-5 w-5 text-destructive" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Urgent</p>
-                <p className="text-2xl font-bold tracking-tight text-destructive">{emergencyCalls}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <DashboardSection
+          title="Recent calls"
+          action={
+            <Link href="/calls">
+              <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground hover:text-foreground">
+                View all
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          }
+        >
+          <div className="glass-card overflow-hidden rounded-xl">
+            <CallLog calls={recentCalls} />
+          </div>
+        </DashboardSection>
       </div>
-
-      {business?.industry && (
-        <div className="grid grid-cols-1 mb-6">
-          <ROICard leadsThisMonth={monthlyLeads} industry={business.industry} />
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        {weekReporting && (
-          <ReportingCard
-            weekCalls={weekReporting.weekCalls}
-            weekMinutes={weekReporting.weekMinutes}
-            leadsByTag={weekReporting.leadsByTag}
-          />
-        )}
-        <ReferralCard />
-      </div>
-
-      {/* Recent calls */}
-      <div className="flex items-center justify-between gap-2 mb-3">
-        <h2 className="text-base font-semibold">Recent calls</h2>
-        <Link href="/calls">
-          <Button variant="ghost" size="sm" className="gap-1 text-muted-foreground hover:text-foreground">
-            View all
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </Link>
-      </div>
-      <CallLog calls={recentCalls} />
     </div>
   )
 }

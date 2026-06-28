@@ -7,7 +7,7 @@ import { getEffectivePlanType } from "./plans"
  * Use {{variable_name}} in prompts — Retell replaces these per call from our webhook response.
  */
 
-/** Standard-tier voice (lower Retell TTS cost). Default for Solo. */
+/** Standard-tier voice (lower Retell TTS cost). Default for Solo Owner plan. */
 export const STANDARD_RETELL_VOICE = {
   voice_id: "openai-Alloy",
   voice_temperature: 0.85,
@@ -17,7 +17,7 @@ export const STANDARD_RETELL_VOICE = {
   max_call_duration_ms: 7 * 60 * 1000,
 } as const
 
-/** Premium ElevenLabs voice — Team+ and branded Pro settings. */
+/** Premium ElevenLabs voice — Mid Volume+ and branded High Volume settings. */
 export const DEFAULT_RETELL_VOICE = {
   voice_id: "11labs-Chloe",
   voice_temperature: 0.88,
@@ -36,7 +36,7 @@ export type RetellVoiceConfig = {
   max_call_duration_ms: number
 }
 
-/** Pick voice engine by plan: Solo uses standard TTS; Team+ uses ElevenLabs. */
+/** Pick voice engine by plan: Solo Owner uses standard TTS; Mid Volume+ uses ElevenLabs. */
 export function getRetellVoiceConfig(
   planType: PlanType | null | undefined,
   voiceGender?: string | null

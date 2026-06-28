@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 import {
   Card,
@@ -7,11 +8,21 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { JsonLd } from "@/components/seo/JsonLd"
+import { PRODUCT_FAQ } from "@/lib/faq-data"
+import { faqPageJsonLd } from "@/lib/structured-data"
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Help & FAQ - CallGrabbr",
   description:
-    "How to forward your business line to your CallGrabbr call assistant. Step-by-step instructions by carrier.",
+    "Answers about CallGrabbr plus step-by-step call forwarding instructions for AT&T, Verizon, T-Mobile, and other carriers.",
+  alternates: { canonical: "/docs/faq" },
+  openGraph: {
+    title: "Help & FAQ - CallGrabbr",
+    description:
+      "How CallGrabbr works, pricing and trial details, and carrier call forwarding setup guides.",
+    type: "website",
+  },
 }
 
 // Force dynamic so Vercel builder gets a lambda for this route (static pages don't emit one).
@@ -285,11 +296,34 @@ const CARRIERS = [
 export default function DocsFaqPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
+      <JsonLd data={faqPageJsonLd(PRODUCT_FAQ)} />
       <div className="mb-10">
         <h1 className="text-3xl font-bold mb-2">Help & FAQ</h1>
         <p className="text-muted-foreground">
-          How to forward your business line to CallGrabbr. Pick your carrier below for exact steps.
+          Common questions about CallGrabbr, plus carrier-specific call forwarding steps.
         </p>
+      </div>
+
+      <div className="space-y-4 mb-10">
+        <h2 className="text-xl font-semibold">Frequently asked questions</h2>
+        <div className="space-y-2">
+          {PRODUCT_FAQ.map((item) => (
+            <details
+              key={item.question}
+              className="group rounded-lg border bg-card text-card-foreground shadow-sm"
+            >
+              <summary className="cursor-pointer list-none px-4 py-3 font-medium flex items-center justify-between">
+                <span>{item.question}</span>
+                <span className="text-muted-foreground text-sm group-open:rotate-180 transition-transform">
+                  ▼
+                </span>
+              </summary>
+              <div className="px-4 pb-4 pt-0 border-t">
+                <p className="pt-4 text-sm text-muted-foreground leading-relaxed">{item.answer}</p>
+              </div>
+            </details>
+          ))}
+        </div>
       </div>
 
       <Card className="mb-10">

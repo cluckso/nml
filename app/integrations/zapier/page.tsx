@@ -3,10 +3,12 @@ import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Zap, Webhook, Key, ArrowRight } from "lucide-react"
+import { MID_AND_HIGH_VOLUME_LABEL } from "@/lib/plan-labels"
 
 export const metadata: Metadata = {
   title: "Zapier Integration - CallGrabbr",
   description: "Connect CallGrabbr to 6,000+ apps with Zapier. Automatically send new leads to your CRM, Slack, Google Sheets, and more.",
+  alternates: { canonical: "/integrations/zapier" },
 }
 
 const STEPS = [
@@ -142,7 +144,7 @@ export default function ZapierIntegrationPage() {
       </div>
 
       <p className="text-center text-sm text-muted-foreground mt-8">
-        Available on Team and Pro plans. Also works with the Zapier webhook URL in Settings → CRM.
+        Available on {MID_AND_HIGH_VOLUME_LABEL} plans. Also works with the Zapier webhook URL in Settings → CRM.
       </p>
     </div>
   )

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { getAuthUserFromRequest } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { getEffectivePlanType } from "@/lib/plans"
+import { getPlanDisplayName } from "@/lib/plan-labels"
+import { PlanType } from "@prisma/client"
 import { isSectionAllowed, mergeWithDefaults } from "@/lib/business-settings"
 import { sendGoogleReviewRequest } from "@/lib/notifications"
 
@@ -24,7 +26,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       select: { planType: true },
     })
     if (!business || !isSectionAllowed("booking", getEffectivePlanType(business.planType))) {
-      return NextResponse.json({ error: "Booking requires Pro plan" }, { status: 403 })
+      return NextResponse.json(
+        { error: `Booking requires the ${getPlanDisplayName(PlanType.PRO)} plan or higher` },
+        { status: 403 }
+      )
     }
 
     const body = await req.json()

@@ -1,4 +1,6 @@
 import Link from "next/link"
+import type { Metadata } from "next"
+import { MID_AND_HIGH_VOLUME_LABEL, PLAN_MID_VOLUME, PLAN_HIGH_VOLUME, PLAN_SOLO_OWNER } from "@/lib/plan-labels"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { AudioExamples } from "@/components/marketing/AudioExamples"
@@ -8,7 +10,7 @@ import { HomeHero } from "@/components/marketing/HomeHero"
 import { IndustryPhotoCards } from "@/components/marketing/IndustryPhotoCards"
 import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
 import { TrustStrip } from "@/components/marketing/TrustStrip"
-import { MARKETING_IMAGES } from "@/lib/marketing-images"
+import { MARKETING_IMAGES, MARKETING_IMAGE_ALT } from "@/lib/marketing-images"
 import { formatJobRoiLine, formatOverageRate, PRICING_TIERS } from "@/lib/pricing-catalog"
 import {
   ArrowRight,
@@ -26,16 +28,24 @@ import {
   Phone,
 } from "lucide-react"
 
+import { JsonLd } from "@/components/seo/JsonLd"
+import { softwareApplicationJsonLd } from "@/lib/structured-data"
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+}
+
 export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen">
+      <JsonLd data={softwareApplicationJsonLd()} />
       <HomeHero />
       <TrustStrip />
 
       {/* From first ring to lead — outcome narrative */}
       <SectionBackdrop
         src={MARKETING_IMAGES.workflow}
-        alt=""
+        alt={MARKETING_IMAGE_ALT.workflow}
         overlay="light"
         className="border-y border-border/50 py-16"
         contentClassName="container mx-auto px-4"
@@ -62,7 +72,7 @@ export default function HomePage() {
               </div>
               <h3 className="font-semibold text-lg mb-2">Captures lead details</h3>
               <p className="text-sm text-muted-foreground">
-                Name, phone, service need, urgency, and preferred time when shared. Appointment booking on Team and Pro.
+                Name, phone, service need, urgency, and preferred time when shared. Appointment booking on {MID_AND_HIGH_VOLUME_LABEL}.
               </p>
             </div>
             <div className="text-center">
@@ -71,7 +81,7 @@ export default function HomePage() {
               </div>
               <h3 className="font-semibold text-lg mb-2">Delivers to your stack</h3>
               <p className="text-sm text-muted-foreground">
-                Summaries by email and SMS. CRM webhook on Team and Pro. No data lock-in — you own the leads.
+                Summaries by email and SMS. CRM webhook on {MID_AND_HIGH_VOLUME_LABEL}. No data lock-in — you own the leads.
               </p>
             </div>
           </div>
@@ -137,7 +147,7 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Appointment booking on Team and Pro. Qualified leads with name, phone, and details.
+                Appointment booking on {MID_AND_HIGH_VOLUME_LABEL}. Qualified leads with name, phone, and details.
               </p>
             </CardContent>
           </Card>
@@ -150,7 +160,7 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Email and SMS summaries. CRM webhook on Team and Pro. Works with your existing phone number.
+                Email and SMS summaries. CRM webhook on {MID_AND_HIGH_VOLUME_LABEL}. Works with your existing phone number.
               </p>
             </CardContent>
           </Card>
@@ -160,7 +170,7 @@ export default function HomePage() {
       {/* Why This Matters */}
       <SectionBackdrop
         src={MARKETING_IMAGES.whyMatters}
-        alt=""
+        alt={MARKETING_IMAGE_ALT.whyMatters}
         overlay="medium"
         className="py-16 border-y border-border/50"
         contentClassName="container mx-auto px-4"
@@ -222,7 +232,7 @@ export default function HomePage() {
             </div>
             <h3 className="font-semibold text-lg mb-2">Step 4 — You get the lead</h3>
             <p className="text-muted-foreground text-sm">
-              SMS and email summary with captured details. CRM webhook on Team and Pro.
+              SMS and email summary with captured details. CRM webhook on {MID_AND_HIGH_VOLUME_LABEL}.
             </p>
           </div>
         </div>
@@ -264,7 +274,7 @@ export default function HomePage() {
             </div>
             <div className="flex items-center gap-3 rounded-lg border border-border/50 bg-card/50 px-5 py-3">
               <Calendar className="h-6 w-6 text-primary" aria-hidden />
-              <span className="font-medium">Appointments (Team & Pro)</span>
+              <span className="font-medium">Appointments ({PLAN_MID_VOLUME} & {PLAN_HIGH_VOLUME})</span>
             </div>
             <div className="flex items-center gap-3 rounded-lg border border-border/50 bg-card/50 px-5 py-3">
               <Phone className="h-6 w-6 text-primary" aria-hidden />
@@ -337,7 +347,7 @@ export default function HomePage() {
       {/* What You Receive — with SMS preview */}
       <SectionBackdrop
         src={MARKETING_IMAGES.leadCapture}
-        alt=""
+        alt={MARKETING_IMAGE_ALT.leadCapture}
         overlay="light"
         className="py-16 border-y border-border/50"
         contentClassName="container mx-auto px-4"
@@ -371,7 +381,7 @@ export default function HomePage() {
                 ))}
               </ul>
               <p className="text-sm text-muted-foreground mt-6">
-                CRM delivery available on Team and Pro plans.
+                CRM delivery available on {MID_AND_HIGH_VOLUME_LABEL} plans.
               </p>
               <p className="text-sm text-muted-foreground mt-2">
                 Spam and robocalls filtered when possible — alerts focus on actionable leads.
@@ -567,7 +577,7 @@ export default function HomePage() {
       {/* Final CTA */}
       <SectionBackdrop
         src={MARKETING_IMAGES.finalCta}
-        alt=""
+        alt={MARKETING_IMAGE_ALT.finalCta}
         overlay="heavy"
         className="py-20"
         contentClassName="container mx-auto px-4 text-center"

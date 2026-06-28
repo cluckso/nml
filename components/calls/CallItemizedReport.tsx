@@ -2,6 +2,8 @@
  * Itemized call/lead report as a polished two-column table.
  * Shows time, contact info, vehicle (if present), reason, appointment preference, and address fields.
  */
+import { sanitizeIssueDescription } from "@/lib/parse-lead-from-transcript"
+
 export type StructuredIntake = {
   name?: string | null
   phone?: string | null
@@ -170,10 +172,10 @@ export function buildCallItemizedProps(
   const availability = baseAvailability ? baseAvailability + slotInfo : null
 
   const reasonForCall =
-    call.issueDescription?.trim() ||
-    intake?.issue_description?.trim() ||
-    intake?.reason_for_call?.trim() ||
-    intake?.reason?.trim() ||
+    sanitizeIssueDescription(call.issueDescription) ||
+    sanitizeIssueDescription(intake?.issue_description) ||
+    sanitizeIssueDescription(intake?.reason_for_call) ||
+    sanitizeIssueDescription(intake?.reason) ||
     null
 
   const vehicleYear = intake?.vehicle_year?.trim() || intake?.year?.trim() || null

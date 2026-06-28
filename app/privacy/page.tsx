@@ -5,6 +5,7 @@ import { LEGAL_LAST_UPDATED, SUPPORT_EMAIL } from "@/lib/site-contact"
 export const metadata: Metadata = {
   title: "Privacy Policy - CallGrabbr",
   description: "Privacy policy for CallGrabbr.",
+  alternates: { canonical: "/privacy" },
 }
 
 export default function PrivacyPage() {

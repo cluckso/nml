@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
-import { MARKETING_IMAGES } from "@/lib/marketing-images"
+import { MARKETING_IMAGES, MARKETING_IMAGE_ALT } from "@/lib/marketing-images"
 import {
   ArrowRight,
   Clock,
@@ -15,7 +15,7 @@ export function HomeHero() {
   return (
     <SectionBackdrop
       src={MARKETING_IMAGES.hero}
-      alt=""
+      alt={MARKETING_IMAGE_ALT.hero}
       overlay="hero"
       priority
       className="min-h-[88vh] flex flex-col items-center justify-center px-4 py-24"

@@ -400,6 +400,27 @@ export const SECTION_MIN_TIER: Record<SettingsSection, PlanType> = {
   reporting: PlanType.ELITE,
 }
 
+/** Short upgrade prompt copy shown when a locked settings section is clicked. */
+export const SECTION_UPGRADE_DESCRIPTIONS: Record<SettingsSection, string> = {
+  greeting: "Customize how your call assistant greets callers.",
+  intakeFields: "Choose which lead fields to capture on every call.",
+  availability: "Set business hours, holidays, and after-hours behavior.",
+  notifications: "Control SMS, email, and emergency alert preferences.",
+  callRouting: "Configure ring delay and how calls reach your assistant.",
+  missedCallRecovery: "Send automatic SMS replies when a call is missed.",
+  followUpSms: "Send confirmation and follow-up texts to callers after a lead is captured.",
+  reputation: "Request Google reviews from satisfied callers via automated SMS.",
+  intakeTemplate: "Use industry-specific intake scripts tailored to your trade.",
+  questionDepth: "Choose how many questions your assistant asks per call.",
+  booking: "Control appointment booking rules and availability windows.",
+  leadTags: "Auto-tag leads by urgency, service type, and custom rules.",
+  crm: "Forward leads to your CRM or webhook integration automatically.",
+  departments: "Route calls to different departments with separate intake flows.",
+  voiceBrand: "Select premium voice options and branded caller experience.",
+  aiBehavior: "Fine-tune escalation, spam filtering, and call-handling rules.",
+  reporting: "Customize weekly usage and lead reports delivered to your inbox.",
+}
+
 // ─── MERGE HELPER ────────────────────────────────────────────────────────
 
 /** Deep-merge a section update into current settings (avoids wiping sibling fields on partial updates). */

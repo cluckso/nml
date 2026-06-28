@@ -6,29 +6,45 @@ import "./globals.css"
 import { Providers } from "./providers"
 import { Nav } from "@/components/nav"
 import { SUPPORT_EMAIL } from "@/lib/site-contact"
+import { SITE_URL } from "@/lib/site-url"
+import { JsonLd } from "@/components/seo/JsonLd"
+import { organizationJsonLd, webSiteJsonLd } from "@/lib/structured-data"
 
 const inter = Inter({ subsets: ["latin"] })
 
-const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.callgrabbr.com"
 const googleSiteVerification =
   process.env.GOOGLE_SITE_VERIFICATION || "vbp7kMaN9FYqtyLddH0hqILwUGQLAq6l8XbER6JwCJ0"
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "CallGrabbr - Stop Losing Jobs to Voicemail",
   description: "80% of callers won't leave voicemail — they call the next business. CallGrabbr answers missed calls and texts you the lead in seconds. 7-day free trial.",
   icons: { icon: "/icon.png" },
   verification: { google: googleSiteVerification },
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     title: "CallGrabbr - Stop Losing Jobs to Voicemail",
     description: "80% of callers won't leave voicemail. Live answering captures 80-95% of leads vs voicemail's 5-15%. We answer when you can't and text you the lead instantly.",
-    url: siteUrl,
+    url: SITE_URL,
     siteName: "CallGrabbr",
     type: "website",
+    locale: "en_US",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "CallGrabbr — Stop losing jobs to voicemail",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "CallGrabbr - Stop Losing Jobs to Voicemail",
     description: "80% of callers won't leave voicemail. CallGrabbr answers missed calls and texts you the lead in seconds. 7-day free trial.",
+    images: ["/opengraph-image"],
   },
 }
 
@@ -40,6 +56,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.className} flex min-h-screen flex-col bg-background text-foreground`}>
+        <JsonLd data={[organizationJsonLd(), webSiteJsonLd()]} />
         {/* Meta Pixel */}
         <Script
           id="meta-pixel"

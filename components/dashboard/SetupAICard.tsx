@@ -47,7 +47,7 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
   if (hasAgent && phoneNumber) {
     if (compact) {
       return (
-        <Card className="border-green-200 bg-green-50/50 dark:border-green-900 dark:bg-green-950/20 py-3 px-4">
+        <Card className="glass-card border-green-500/20 bg-green-950/10 py-3 px-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2 min-w-0">
               <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />

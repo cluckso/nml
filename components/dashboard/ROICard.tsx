@@ -13,7 +13,7 @@ export function ROICard({ leadsThisMonth, industry }: ROICardProps) {
   const potentialRevenue = calculatePotentialRevenue(leadsThisMonth, industry)
 
   return (
-    <Card className="border-emerald-500/30 bg-emerald-950/20 md:col-span-3">
+    <Card className="glass-card border-emerald-500/20">
       <CardContent className="pt-5 pb-5">
         <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <div className="rounded-lg bg-emerald-500/15 p-2.5 shrink-0">

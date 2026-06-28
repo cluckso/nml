@@ -1,7 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { HOMEPAGE_INDUSTRY_LINKS } from "@/lib/industry-data"
-import { getIndustryImage } from "@/lib/marketing-images"
+import { getIndustryImage, getIndustryImageAlt } from "@/lib/marketing-images"
 import { ArrowRight } from "lucide-react"
 
 export function IndustryPhotoCards() {
@@ -19,7 +19,7 @@ export function IndustryPhotoCards() {
         >
           <Image
             src={getIndustryImage(slug)}
-            alt=""
+            alt={getIndustryImageAlt(name)}
             fill
             className="object-cover transition duration-500 group-hover:scale-105"
             sizes="(max-width: 768px) 50vw, 25vw"
