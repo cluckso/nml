@@ -18,6 +18,7 @@ import type {
   RingBeforeAnswerSeconds,
   RingBeforeAnswerRings,
   RingDelayMode,
+  RingDelayProfile,
   MissedCallRecoverySettings,
   FollowUpSmsSettings,
   ReputationSettings,
@@ -31,7 +32,7 @@ import type {
   QuestionDepth,
 } from "@/lib/business-settings"
 import { SECTION_LABELS, SECTION_MIN_TIER, SECTION_UPGRADE_DESCRIPTIONS } from "@/lib/business-settings"
-import { formatRingDelayLabel } from "@/lib/call-routing"
+import { formatRingDelayLabel, formatScheduledRingDelaySummary } from "@/lib/call-routing"
 import { getUpgradeTierLabel, PLAN_VOLUME_TAGS } from "@/lib/plan-labels"
 import { PlanType } from "@prisma/client"
 import { PhoneInputWithCountry } from "@/components/ui/phone-input-with-country"
@@ -76,6 +77,8 @@ export function SettingsClient() {
     summary?: {
       answerAllCalls?: boolean
       ringDelayLabel?: string
+      scheduledRingDelayLabel?: string
+      scheduleByBusinessHours?: boolean
       ringBeforeAnswerSeconds?: number
       tone?: string
       questionDepth?: string
@@ -289,6 +292,8 @@ function AgentPreviewCard({
     summary?: {
       answerAllCalls?: boolean
       ringDelayLabel?: string
+      scheduledRingDelayLabel?: string
+      scheduleByBusinessHours?: boolean
       ringBeforeAnswerSeconds?: number
       tone?: string
       questionDepth?: string
@@ -343,10 +348,15 @@ function AgentPreviewCard({
         {summary ? (
           <ul className="space-y-1 text-muted-foreground">
             <li>
-              {summary.answerAllCalls
-                ? "Answer all calls immediately"
-                : `Ring delay: ${summary.ringDelayLabel ?? `${summary.ringBeforeAnswerSeconds ?? 0} sec`}`}
+              {summary.scheduleByBusinessHours
+                ? summary.scheduledRingDelayLabel ?? "Scheduled by business hours"
+                : summary.answerAllCalls
+                  ? "Answer all calls immediately"
+                  : `Ring delay: ${summary.ringDelayLabel ?? `${summary.ringBeforeAnswerSeconds ?? 0} sec`}`}
             </li>
+            {summary.scheduleByBusinessHours && (
+              <li className="text-xs">Active now: {summary.ringDelayLabel ?? "—"}</li>
+            )}
             <li>Tone: {summary.tone ?? "—"}</li>
             <li>Question depth: {summary.questionDepth ?? "—"}</li>
             {agentPreview?.ringDurationMs != null && agentPreview.ringDurationMs > 0 && (
@@ -702,6 +712,104 @@ const RING_COUNT_OPTIONS: { value: RingBeforeAnswerRings; label: string }[] = [
   { value: 6, label: "6 rings (~30 seconds)" },
 ]
 
+function RingDelayProfileControls({
+  profile,
+  onChange,
+  namePrefix,
+}: {
+  profile: RingDelayProfile
+  onChange: (profile: RingDelayProfile) => void
+  namePrefix: string
+}) {
+  const handleAnswerAllChange = (answerAll: boolean) => {
+    onChange({
+      ...profile,
+      answerAllCalls: answerAll,
+      ringBeforeAnswerSeconds: answerAll ? profile.ringBeforeAnswerSeconds : profile.ringBeforeAnswerSeconds || 10,
+    })
+  }
+
+  return (
+    <div className="space-y-4">
+      <Toggle
+        label="Answer immediately"
+        checked={profile.answerAllCalls}
+        onChange={handleAnswerAllChange}
+        description="When on, your call assistant picks up right away for this schedule window."
+      />
+      {!profile.answerAllCalls && (
+        <div className="space-y-4 rounded-lg border border-border bg-muted/20 p-4">
+          <div className="space-y-2">
+            <Label>Delay before assistant answers</Label>
+            <div className="flex flex-wrap gap-4">
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input
+                  type="radio"
+                  name={`${namePrefix}-ringDelayMode`}
+                  checked={profile.ringDelayMode === "seconds"}
+                  onChange={() => onChange({ ...profile, ringDelayMode: "seconds" as RingDelayMode })}
+                />
+                Seconds
+              </label>
+              <label className="flex items-center gap-2 text-sm cursor-pointer">
+                <input
+                  type="radio"
+                  name={`${namePrefix}-ringDelayMode`}
+                  checked={profile.ringDelayMode === "rings"}
+                  onChange={() => onChange({ ...profile, ringDelayMode: "rings" as RingDelayMode })}
+                />
+                Number of rings
+              </label>
+            </div>
+          </div>
+          {profile.ringDelayMode === "seconds" ? (
+            <div className="space-y-2">
+              <Label>Seconds to ring</Label>
+              <select
+                className="w-full rounded border border-input bg-background px-3 py-2 text-sm"
+                value={profile.ringBeforeAnswerSeconds}
+                onChange={(e) =>
+                  onChange({
+                    ...profile,
+                    ringBeforeAnswerSeconds: Number(e.target.value) as RingBeforeAnswerSeconds,
+                  })
+                }
+              >
+                {RING_SECOND_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <Label>Rings before assistant answers</Label>
+              <select
+                className="w-full rounded border border-input bg-background px-3 py-2 text-sm"
+                value={profile.ringBeforeAnswerRings}
+                onChange={(e) =>
+                  onChange({
+                    ...profile,
+                    ringBeforeAnswerRings: Number(e.target.value) as RingBeforeAnswerRings,
+                  })
+                }
+              >
+                {RING_COUNT_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <p className="text-xs text-muted-foreground">Current: {formatRingDelayLabel(profile)}</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function CallRoutingSection({ value, onSave, saving }: { value: CallRoutingSettings; onSave: (v: CallRoutingSettings) => void; saving: boolean }) {
   const [d, setD] = useState(value)
 
@@ -709,12 +817,24 @@ function CallRoutingSection({ value, onSave, saving }: { value: CallRoutingSetti
     setD(value)
   }, [value])
 
-  const handleAnswerAllChange = (answerAll: boolean) => {
-    setD({
-      ...d,
-      answerAllCalls: answerAll,
-      ringBeforeAnswerSeconds: answerAll ? d.ringBeforeAnswerSeconds : d.ringBeforeAnswerSeconds || 10,
-    })
+  const handleScheduleToggle = (enabled: boolean) => {
+    if (enabled) {
+      setD({
+        ...d,
+        scheduleByBusinessHours: true,
+        duringHours: {
+          answerAllCalls: d.answerAllCalls,
+          ringDelayMode: d.ringDelayMode,
+          ringBeforeAnswerSeconds: d.ringBeforeAnswerSeconds,
+          ringBeforeAnswerRings: d.ringBeforeAnswerRings,
+        },
+        afterHours: d.afterHours?.answerAllCalls != null
+          ? d.afterHours
+          : { ...d.afterHours, answerAllCalls: true, ringDelayMode: d.ringDelayMode, ringBeforeAnswerSeconds: d.ringBeforeAnswerSeconds, ringBeforeAnswerRings: d.ringBeforeAnswerRings },
+      })
+      return
+    }
+    setD({ ...d, scheduleByBusinessHours: false })
   }
 
   return (
@@ -727,81 +847,44 @@ function CallRoutingSection({ value, onSave, saving }: { value: CallRoutingSetti
       </CardHeader>
       <CardContent className="space-y-4">
         <Toggle
-          label="Answer all calls immediately"
-          checked={d.answerAllCalls}
-          onChange={handleAnswerAllChange}
-          description="When on, every forwarded call is answered by your call assistant right away. When off, the line rings for your chosen delay first (use unconditional call forwarding at your carrier)."
+          label="Different behavior during vs after business hours"
+          checked={d.scheduleByBusinessHours}
+          onChange={handleScheduleToggle}
+          description="Example: ring 10 seconds during the day so you can answer first, then answer immediately after hours. Uses your Hours & Availability settings."
         />
-        {!d.answerAllCalls && (
-          <div className="space-y-4 rounded-lg border border-border bg-muted/30 p-4">
-            <div className="space-y-2">
-              <Label>Delay before assistant answers</Label>
-              <div className="flex flex-wrap gap-4">
-                <label className="flex items-center gap-2 text-sm cursor-pointer">
-                  <input
-                    type="radio"
-                    name="ringDelayMode"
-                    checked={d.ringDelayMode === "seconds"}
-                    onChange={() => setD({ ...d, ringDelayMode: "seconds" as RingDelayMode })}
-                  />
-                  Seconds
-                </label>
-                <label className="flex items-center gap-2 text-sm cursor-pointer">
-                  <input
-                    type="radio"
-                    name="ringDelayMode"
-                    checked={d.ringDelayMode === "rings"}
-                    onChange={() => setD({ ...d, ringDelayMode: "rings" as RingDelayMode })}
-                  />
-                  Number of rings
-                </label>
-              </div>
+
+        {d.scheduleByBusinessHours ? (
+          <div className="space-y-6">
+            <div className="rounded-lg border border-border p-4 space-y-3">
+              <h4 className="text-sm font-medium">During business hours</h4>
+              <RingDelayProfileControls
+                profile={d.duringHours}
+                onChange={(duringHours) => setD({ ...d, duringHours })}
+                namePrefix="during"
+              />
             </div>
-            {d.ringDelayMode === "seconds" ? (
-              <div className="space-y-2">
-                <Label>Seconds to ring</Label>
-                <select
-                  className="w-full rounded border border-input bg-background px-3 py-2 text-sm"
-                  value={d.ringBeforeAnswerSeconds}
-                  onChange={(e) =>
-                    setD({
-                      ...d,
-                      ringBeforeAnswerSeconds: Number(e.target.value) as RingBeforeAnswerSeconds,
-                    })
-                  }
-                >
-                  {RING_SECOND_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <Label>Rings before assistant answers</Label>
-                <select
-                  className="w-full rounded border border-input bg-background px-3 py-2 text-sm"
-                  value={d.ringBeforeAnswerRings}
-                  onChange={(e) =>
-                    setD({
-                      ...d,
-                      ringBeforeAnswerRings: Number(e.target.value) as RingBeforeAnswerRings,
-                    })
-                  }
-                >
-                  {RING_COUNT_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-            <p className="text-xs text-muted-foreground">
-              Current setting: {formatRingDelayLabel(d)}. Use unconditional forwarding at your carrier so calls reach your CallGrabbr number; this delay controls how long your assistant waits before answering.
-            </p>
+            <div className="rounded-lg border border-border p-4 space-y-3">
+              <h4 className="text-sm font-medium">After hours & closed days</h4>
+              <RingDelayProfileControls
+                profile={d.afterHours}
+                onChange={(afterHours) => setD({ ...d, afterHours })}
+                namePrefix="after"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">{formatScheduledRingDelaySummary(d)}</p>
           </div>
+        ) : (
+          <RingDelayProfileControls
+            profile={d}
+            onChange={(profile) => setD({ ...d, ...profile })}
+            namePrefix="default"
+          />
+        )}
+
+        {!d.scheduleByBusinessHours && !d.answerAllCalls && (
+          <p className="text-xs text-muted-foreground">
+            Current setting: {formatRingDelayLabel(d)}. Use unconditional forwarding at your carrier so calls reach your CallGrabbr number; this delay controls how long your assistant waits before answering.
+          </p>
         )}
         <Toggle label="Forward emergencies" checked={d.emergencyForward} onChange={(v) => setD({ ...d, emergencyForward: v })} description="Immediately forward emergency calls to a phone number." />
         {d.emergencyForward && (

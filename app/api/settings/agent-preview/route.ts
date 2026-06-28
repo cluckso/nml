@@ -3,7 +3,7 @@ import { getAuthUserFromRequest } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { mergeWithDefaults, type BusinessSettings } from "@/lib/business-settings"
 import { buildAgentOverride } from "@/lib/agent-override"
-import { formatRingDelayLabel } from "@/lib/call-routing"
+import { formatRingDelayLabel, formatScheduledRingDelaySummary } from "@/lib/call-routing"
 
 /**
  * GET /api/settings/agent-preview
@@ -26,12 +26,8 @@ export async function GET(req: NextRequest) {
     const businessName = settings.greeting.businessNamePronunciation || String(business.name ?? "").trim() || "our office"
     const serviceAreas = Array.isArray(business.serviceAreas) ? business.serviceAreas : []
 
-    const { agentOverride, dynamicVars, beginMessage, ringDurationMs } = buildAgentOverride(
-      settings,
-      businessName,
-      serviceAreas,
-      business.planType
-    )
+    const { agentOverride, dynamicVars, beginMessage, ringDurationMs, effectiveRingProfile } =
+      buildAgentOverride(settings, businessName, serviceAreas, business.planType)
 
     return NextResponse.json({
       agentOverride,
@@ -39,11 +35,13 @@ export async function GET(req: NextRequest) {
       beginMessage,
       ringDurationMs,
       summary: {
-        answerAllCalls: settings.callRouting.answerAllCalls,
-        ringDelayLabel: formatRingDelayLabel(settings.callRouting),
-        ringBeforeAnswerSeconds: settings.callRouting.ringBeforeAnswerSeconds,
-        ringDelayMode: settings.callRouting.ringDelayMode,
-        ringBeforeAnswerRings: settings.callRouting.ringBeforeAnswerRings,
+        answerAllCalls: effectiveRingProfile.answerAllCalls,
+        ringDelayLabel: formatRingDelayLabel(effectiveRingProfile),
+        scheduledRingDelayLabel: formatScheduledRingDelaySummary(settings.callRouting),
+        scheduleByBusinessHours: settings.callRouting.scheduleByBusinessHours,
+        ringBeforeAnswerSeconds: effectiveRingProfile.ringBeforeAnswerSeconds,
+        ringDelayMode: effectiveRingProfile.ringDelayMode,
+        ringBeforeAnswerRings: effectiveRingProfile.ringBeforeAnswerRings,
         voiceSpeed: agentOverride.agent?.voice_speed,
         maxCallDurationMs: agentOverride.agent?.max_call_duration_ms,
         tone: settings.greeting.tone,

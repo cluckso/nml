@@ -6,9 +6,10 @@ import {
   type RingBeforeAnswerRings,
   type RingBeforeAnswerSeconds,
   type RingDelayMode,
+  type RingDelayProfile,
 } from "./call-routing"
 
-export type { CallRoutingSettings, RingBeforeAnswerRings, RingBeforeAnswerSeconds, RingDelayMode }
+export type { CallRoutingSettings, RingBeforeAnswerRings, RingBeforeAnswerSeconds, RingDelayMode, RingDelayProfile }
 
 // ─── TYPES ───────────────────────────────────────────────────────────────
 

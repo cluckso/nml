@@ -7,7 +7,7 @@ import {
   hasBrandedVoice,
   getEffectivePlanType,
 } from "./plans"
-import { computeRingDurationMs, normalizeCallRouting, ringDurationMsForRetellAgent, DEFAULT_CALL_ROUTING } from "./call-routing"
+import { computeRingDurationMsForInbound, normalizeCallRouting, ringDurationMsForRetellAgent, DEFAULT_CALL_ROUTING } from "./call-routing"
 import { DEFAULT_RETELL_VOICE, RETELL_GLOBAL_PROMPT_TEMPLATE, getRetellVoiceConfig } from "./retell-agent-template"
 import { AGENT_PROMPT_CONFIG } from "@/config/agent-prompt"
 import { buildStevePersonalPromptContext, STEVE_PERSONAL_AGENT_CONFIG } from "@/config/steve-personal-agent"
@@ -567,12 +567,8 @@ export type SyncSettings = {
   greeting?: { customGreeting?: string | null; tone?: string; voiceGender?: "male" | "female" | null }
   questionDepth?: string
   voiceBrand?: { speed?: number; conciseness?: number }
-  callRouting?: {
-    answerAllCalls?: boolean
-    ringDelayMode?: "seconds" | "rings"
-    ringBeforeAnswerSeconds?: number
-    ringBeforeAnswerRings?: number
-  }
+  callRouting?: Partial<import("./call-routing").CallRoutingSettings>
+  availability?: Partial<import("./business-settings").AvailabilitySettings>
   aiBehavior?: { maxCallLengthMinutes?: number }
 }
 
@@ -660,9 +656,19 @@ export async function syncRetellAgentFromBusiness(
   const maxCallMinutes = Math.min(7, Math.max(1, settings?.aiBehavior?.maxCallLengthMinutes ?? 7))
   const maxCallDurationMs = maxCallMinutes * 60 * 1000
 
-  const ringDurationMs = settings?.callRouting
-    ? computeRingDurationMs(normalizeCallRouting(settings.callRouting, DEFAULT_CALL_ROUTING))
-    : 0
+  const routing = settings?.callRouting
+    ? normalizeCallRouting(settings.callRouting, DEFAULT_CALL_ROUTING)
+    : DEFAULT_CALL_ROUTING
+  const availability = {
+    businessHours: settings?.availability?.businessHours ?? {
+      open: "08:00",
+      close: "17:00",
+      days: ["monday", "tuesday", "wednesday", "thursday", "friday"],
+    },
+    holidayOverrides: settings?.availability?.holidayOverrides ?? [],
+    afterHoursBehavior: settings?.availability?.afterHoursBehavior ?? "take_message",
+  }
+  const ringDurationMs = computeRingDurationMsForInbound(routing, availability)
   const ringDurationMsPayload = ringDurationMsForRetellAgent(ringDurationMs)
 
   await updateAgent(apiKey, business.retellAgentId, {

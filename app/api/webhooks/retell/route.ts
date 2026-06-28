@@ -213,6 +213,8 @@ export async function POST(req: NextRequest) {
       )
       if (ringDurationMs > 0) {
         console.info("Retell call_inbound: ring delay", ringDurationMs, "ms from call routing settings")
+      } else {
+        console.info("Retell call_inbound: answer immediately (ring delay 0ms)")
       }
 
       const response = {

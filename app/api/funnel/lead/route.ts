@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import type { FunnelLeadPayload } from "@/lib/funnel/funnel-config"
 import { getFunnelConfig } from "@/lib/funnel/industry-configs"
+import { notifyHighScoreFunnelLead } from "@/lib/funnel/lead-notifications"
 
 export async function POST(req: NextRequest) {
   try {
@@ -56,9 +57,35 @@ export async function POST(req: NextRequest) {
           phone: phone ?? null,
         },
       })
+
+      void notifyHighScoreFunnelLead({
+        leadId: lead.id,
+        industry,
+        score,
+        name: name ?? null,
+        email: email ?? null,
+        phone: phone ?? null,
+        responses,
+        roiSnapshot: body.roiSnapshot,
+        utm,
+      }).catch((err) => console.warn("[funnel/lead] Notification error:", err))
+
       return NextResponse.json({ success: true, leadId: lead.id })
     } catch (dbError) {
       console.warn("[funnel/lead] DB insert failed, logged only:", dbError)
+
+      void notifyHighScoreFunnelLead({
+        leadId: null,
+        industry,
+        score,
+        name: name ?? null,
+        email: email ?? null,
+        phone: phone ?? null,
+        responses,
+        roiSnapshot: body.roiSnapshot,
+        utm,
+      }).catch((err) => console.warn("[funnel/lead] Notification error:", err))
+
       return NextResponse.json({ success: true, leadId: null, persisted: false })
     }
   } catch (error) {

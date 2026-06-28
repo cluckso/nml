@@ -1,12 +1,14 @@
 import { describe, it, expect } from "vitest"
 import {
   computeRingDurationMs,
+  computeRingDurationMsForInbound,
   normalizeCallRouting,
-  formatRingDelayLabel,
-  ringDurationMsForRetellAgent,
+  resolveEffectiveRingDelayProfile,
+  DEFAULT_CALL_ROUTING,
+  DEFAULT_DURING_HOURS_PROFILE,
+  DEFAULT_AFTER_HOURS_PROFILE,
 } from "../call-routing"
-import { DEFAULT_CALL_ROUTING } from "../call-routing"
-import type { CallRoutingSettings } from "../business-settings"
+import type { AvailabilitySettings } from "../business-settings"
 
 describe("normalizeCallRouting", () => {
   it("defaults to answer all when legacy ringBeforeAnswerSeconds is 0", () => {
@@ -14,65 +16,97 @@ describe("normalizeCallRouting", () => {
     expect(r.answerAllCalls).toBe(true)
   })
 
-  it("infers delay mode when legacy seconds > 0", () => {
-    const r = normalizeCallRouting({ ringBeforeAnswerSeconds: 15 }, DEFAULT_CALL_ROUTING)
-    expect(r.answerAllCalls).toBe(false)
-    expect(r.ringBeforeAnswerSeconds).toBe(15)
-  })
-
-  it("respects explicit answerAllCalls", () => {
+  it("respects schedule profiles", () => {
     const r = normalizeCallRouting(
-      { answerAllCalls: false, ringDelayMode: "rings", ringBeforeAnswerRings: 3 },
+      {
+        scheduleByBusinessHours: true,
+        duringHours: { ...DEFAULT_DURING_HOURS_PROFILE, answerAllCalls: false, ringBeforeAnswerSeconds: 15 },
+        afterHours: { ...DEFAULT_AFTER_HOURS_PROFILE, answerAllCalls: true },
+      },
       DEFAULT_CALL_ROUTING
     )
-    expect(r.answerAllCalls).toBe(false)
-    expect(r.ringDelayMode).toBe("rings")
-    expect(r.ringBeforeAnswerRings).toBe(3)
+    expect(r.scheduleByBusinessHours).toBe(true)
+    expect(r.duringHours.ringBeforeAnswerSeconds).toBe(15)
+    expect(r.afterHours.answerAllCalls).toBe(true)
+  })
+})
+
+describe("resolveEffectiveRingDelayProfile", () => {
+  const availability: AvailabilitySettings = {
+    businessHours: {
+      open: "09:00",
+      close: "17:00",
+      days: ["monday", "tuesday", "wednesday", "thursday", "friday"],
+    },
+    holidayOverrides: [],
+    afterHoursBehavior: "take_message",
+  }
+
+  it("uses top-level routing when schedule is disabled", () => {
+    const routing = normalizeCallRouting({ answerAllCalls: false, ringBeforeAnswerSeconds: 20 })
+    const profile = resolveEffectiveRingDelayProfile(routing, availability)
+    expect(profile.ringBeforeAnswerSeconds).toBe(20)
+  })
+
+  it("uses duringHours profile on weekday midday", () => {
+    const routing = normalizeCallRouting({
+      scheduleByBusinessHours: true,
+      duringHours: { ...DEFAULT_DURING_HOURS_PROFILE, answerAllCalls: false, ringBeforeAnswerSeconds: 15 },
+      afterHours: { ...DEFAULT_AFTER_HOURS_PROFILE, answerAllCalls: true },
+    })
+    const at = new Date("2026-06-29T12:00:00")
+    const profile = resolveEffectiveRingDelayProfile(routing, availability, at)
+    expect(profile.ringBeforeAnswerSeconds).toBe(15)
+    expect(profile.answerAllCalls).toBe(false)
+  })
+
+  it("uses afterHours profile on Sunday", () => {
+    const routing = normalizeCallRouting({
+      scheduleByBusinessHours: true,
+      duringHours: { ...DEFAULT_DURING_HOURS_PROFILE, answerAllCalls: false, ringBeforeAnswerSeconds: 15 },
+      afterHours: { ...DEFAULT_AFTER_HOURS_PROFILE, answerAllCalls: true },
+    })
+    const at = new Date("2026-06-28T12:00:00")
+    const profile = resolveEffectiveRingDelayProfile(routing, availability, at)
+    expect(profile.answerAllCalls).toBe(true)
   })
 })
 
 describe("computeRingDurationMs", () => {
-  const base: CallRoutingSettings = { ...DEFAULT_CALL_ROUTING }
-
   it("returns 0 when answer all is enabled", () => {
-    expect(computeRingDurationMs({ ...base, answerAllCalls: true })).toBe(0)
+    expect(computeRingDurationMs({ ...DEFAULT_CALL_ROUTING, answerAllCalls: true })).toBe(0)
   })
 
   it("converts seconds to ms", () => {
     expect(
       computeRingDurationMs({
-        ...base,
+        ...DEFAULT_CALL_ROUTING,
         answerAllCalls: false,
         ringDelayMode: "seconds",
         ringBeforeAnswerSeconds: 15,
       })
     ).toBe(15000)
   })
-
-  it("converts rings to ms (~5s per ring)", () => {
-    expect(
-      computeRingDurationMs({
-        ...base,
-        answerAllCalls: false,
-        ringDelayMode: "rings",
-        ringBeforeAnswerRings: 4,
-      })
-    ).toBe(20000)
-  })
 })
 
-describe("formatRingDelayLabel", () => {
-  it("formats answer all", () => {
-    expect(
-      formatRingDelayLabel({ ...DEFAULT_CALL_ROUTING, answerAllCalls: true })
-    ).toBe("Answer immediately")
-  })
-})
+describe("computeRingDurationMsForInbound", () => {
+  const availability: AvailabilitySettings = {
+    businessHours: {
+      open: "09:00",
+      close: "17:00",
+      days: ["monday", "tuesday", "wednesday", "thursday", "friday"],
+    },
+    holidayOverrides: [],
+    afterHoursBehavior: "take_message",
+  }
 
-describe("ringDurationMsForRetellAgent", () => {
-  it("omits values outside Retell range", () => {
-    expect(ringDurationMsForRetellAgent(0)).toBeUndefined()
-    expect(ringDurationMsForRetellAgent(5000)).toBe(5000)
-    expect(ringDurationMsForRetellAgent(15000)).toBe(15000)
+  it("returns 0 after hours when afterHours answers immediately", () => {
+    const routing = normalizeCallRouting({
+      scheduleByBusinessHours: true,
+      duringHours: { ...DEFAULT_DURING_HOURS_PROFILE, answerAllCalls: false, ringBeforeAnswerSeconds: 10 },
+      afterHours: { ...DEFAULT_AFTER_HOURS_PROFILE, answerAllCalls: true },
+    })
+    const at = new Date("2026-06-28T20:00:00")
+    expect(computeRingDurationMsForInbound(routing, availability, at)).toBe(0)
   })
 })

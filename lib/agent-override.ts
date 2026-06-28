@@ -1,7 +1,11 @@
 import { getRetellVoiceConfig } from "./retell-agent-template"
 import { PlanType } from "@prisma/client"
 import { getEffectivePlanType, hasBrandedVoice } from "./plans"
-import { computeRingDurationMs, ringDurationMsForRetellAgent } from "./call-routing"
+import {
+  computeRingDurationMsForInbound,
+  resolveEffectiveRingDelayProfile,
+  ringDurationMsForRetellAgent,
+} from "./call-routing"
 import type { BusinessSettings } from "./business-settings"
 
 /**
@@ -12,7 +16,8 @@ export function buildAgentOverride(
   settings: BusinessSettings,
   businessName: string,
   serviceAreas: string | string[],
-  planType?: PlanType | null
+  planType?: PlanType | null,
+  at: Date = new Date()
 ): {
   agentOverride: {
     agent?: Record<string, unknown>
@@ -22,6 +27,7 @@ export function buildAgentOverride(
   dynamicVars: Record<string, string>
   beginMessage: string
   ringDurationMs: number
+  effectiveRingProfile: ReturnType<typeof resolveEffectiveRingDelayProfile>
 } {
   const effectivePlan = getEffectivePlanType(planType)
   const brandedVoice = hasBrandedVoice(effectivePlan)
@@ -69,7 +75,16 @@ export function buildAgentOverride(
     spam_handling: settings.callRouting.spamHandling,
   }
 
-  const ringDurationMs = computeRingDurationMs(settings.callRouting)
+  const effectiveRingProfile = resolveEffectiveRingDelayProfile(
+    settings.callRouting,
+    settings.availability,
+    at
+  )
+  const ringDurationMs = computeRingDurationMsForInbound(
+    settings.callRouting,
+    settings.availability,
+    at
+  )
 
   const voiceGender = settings.greeting.voiceGender
   const voiceBase = getRetellVoiceConfig(effectivePlan, voiceGender)
@@ -112,5 +127,5 @@ export function buildAgentOverride(
     },
   }
 
-  return { agentOverride, dynamicVars, beginMessage, ringDurationMs }
+  return { agentOverride, dynamicVars, beginMessage, ringDurationMs, effectiveRingProfile }
 }

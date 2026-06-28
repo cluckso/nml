@@ -1,3 +1,6 @@
+import { isWithinBusinessHours } from "./business-hours"
+import type { AvailabilitySettings } from "./business-settings"
+
 /** Typical US carrier ring cycle (~5 seconds per ring). */
 export const SECONDS_PER_RING = 5
 
@@ -9,16 +12,22 @@ export type RingDelayMode = "seconds" | "rings"
 export type RingBeforeAnswerSeconds = 5 | 10 | 15 | 20 | 25 | 30
 export type RingBeforeAnswerRings = 1 | 2 | 3 | 4 | 5 | 6
 
-/** Call routing rules */
-export interface CallRoutingSettings {
-  /** When true, AI answers every forwarded call immediately (no ring delay). */
+/** Ring delay profile — used for default routing and per-schedule windows. */
+export interface RingDelayProfile {
   answerAllCalls: boolean
-  /** Delay unit when answerAllCalls is false. */
   ringDelayMode: RingDelayMode
-  /** Seconds before AI answers (when ringDelayMode is "seconds"). Retell min 5s. */
   ringBeforeAnswerSeconds: RingBeforeAnswerSeconds
-  /** Number of rings before AI answers (when ringDelayMode is "rings", ~5s per ring). */
   ringBeforeAnswerRings: RingBeforeAnswerRings
+}
+
+/** Call routing rules */
+export interface CallRoutingSettings extends RingDelayProfile {
+  /** When true, use duringHours / afterHours based on business hours. */
+  scheduleByBusinessHours: boolean
+  /** Applied during configured business hours when scheduleByBusinessHours is true. */
+  duringHours: RingDelayProfile
+  /** Applied outside business hours when scheduleByBusinessHours is true. */
+  afterHours: RingDelayProfile
   emergencyForward: boolean
   emergencyForwardNumber: string | null
   vipCallerList: string[]
@@ -26,11 +35,28 @@ export interface CallRoutingSettings {
   spamHandling: "block" | "short_response" | "voicemail"
 }
 
+export const DEFAULT_DURING_HOURS_PROFILE: RingDelayProfile = {
+  answerAllCalls: false,
+  ringDelayMode: "seconds",
+  ringBeforeAnswerSeconds: 10,
+  ringBeforeAnswerRings: 4,
+}
+
+export const DEFAULT_AFTER_HOURS_PROFILE: RingDelayProfile = {
+  answerAllCalls: true,
+  ringDelayMode: "seconds",
+  ringBeforeAnswerSeconds: 10,
+  ringBeforeAnswerRings: 4,
+}
+
 export const DEFAULT_CALL_ROUTING: CallRoutingSettings = {
   answerAllCalls: true,
   ringDelayMode: "seconds",
   ringBeforeAnswerSeconds: 10,
   ringBeforeAnswerRings: 4,
+  scheduleByBusinessHours: false,
+  duringHours: { ...DEFAULT_DURING_HOURS_PROFILE },
+  afterHours: { ...DEFAULT_AFTER_HOURS_PROFILE },
   emergencyForward: false,
   emergencyForwardNumber: null,
   vipCallerList: [],
@@ -60,29 +86,16 @@ function coerceRings(value: unknown): RingBeforeAnswerRings {
   return 4
 }
 
-/** Normalize saved/partial call routing (legacy ringBeforeAnswerSeconds=0 supported). */
-export function normalizeCallRouting(
-  saved: Partial<{
-    answerAllCalls: boolean
-    ringDelayMode: RingDelayMode
-    ringBeforeAnswerSeconds: number
-    ringBeforeAnswerRings: number
-    emergencyForward: boolean
-    emergencyForwardNumber: string | null
-    vipCallerList: string[]
-    repeatCallerPriorityTag: boolean
-    spamHandling: "block" | "short_response" | "voicemail"
-  }> | null | undefined,
-  defaults: CallRoutingSettings = DEFAULT_CALL_ROUTING
-): CallRoutingSettings {
-  const merged = { ...defaults, ...(saved ?? {}) }
-  const legacyRaw = saved?.ringBeforeAnswerSeconds
+function normalizeRingDelayProfile(
+  saved: (Partial<RingDelayProfile> & { ringBeforeAnswerSeconds?: number }) | null | undefined,
+  defaults: RingDelayProfile
+): RingDelayProfile {
+  const legacySeconds = saved?.ringBeforeAnswerSeconds as number | undefined
   const answerAllCalls =
     saved?.answerAllCalls ??
-    (legacyRaw !== undefined ? legacyRaw === 0 : defaults.answerAllCalls)
+    (legacySeconds !== undefined ? legacySeconds === 0 : defaults.answerAllCalls)
 
   return {
-    ...merged,
     answerAllCalls,
     ringDelayMode: saved?.ringDelayMode === "rings" ? "rings" : "seconds",
     ringBeforeAnswerSeconds: coerceSeconds(
@@ -94,28 +107,79 @@ export function normalizeCallRouting(
   }
 }
 
-/** Retell ring_duration_ms: 0 = answer immediately; otherwise clamped to [5000, 90000]. */
-export function computeRingDurationMs(routing: CallRoutingSettings): number {
-  if (routing.answerAllCalls) return 0
+/** Normalize saved/partial call routing (legacy ringBeforeAnswerSeconds=0 supported). */
+export function normalizeCallRouting(
+  saved: Partial<CallRoutingSettings> | null | undefined,
+  defaults: CallRoutingSettings = DEFAULT_CALL_ROUTING
+): CallRoutingSettings {
+  const merged = { ...defaults, ...(saved ?? {}) }
+  const baseProfile = normalizeRingDelayProfile(saved, defaults)
 
-  if (routing.ringDelayMode === "rings") {
-    const rings = coerceRings(routing.ringBeforeAnswerRings)
+  return {
+    ...merged,
+    ...baseProfile,
+    scheduleByBusinessHours: saved?.scheduleByBusinessHours === true,
+    duringHours: normalizeRingDelayProfile(
+      saved?.duringHours ?? baseProfile,
+      defaults.duringHours
+    ),
+    afterHours: normalizeRingDelayProfile(saved?.afterHours, defaults.afterHours),
+  }
+}
+
+/** Pick the ring-delay profile that applies right now. */
+export function resolveEffectiveRingDelayProfile(
+  routing: CallRoutingSettings,
+  availability: AvailabilitySettings,
+  at: Date = new Date()
+): RingDelayProfile {
+  if (!routing.scheduleByBusinessHours) {
+    return {
+      answerAllCalls: routing.answerAllCalls,
+      ringDelayMode: routing.ringDelayMode,
+      ringBeforeAnswerSeconds: routing.ringBeforeAnswerSeconds,
+      ringBeforeAnswerRings: routing.ringBeforeAnswerRings,
+    }
+  }
+
+  return isWithinBusinessHours(availability, at) ? routing.duringHours : routing.afterHours
+}
+
+/** Retell ring_duration_ms: 0 = answer immediately; otherwise clamped to [5000, 90000]. */
+export function computeRingDurationMs(profile: RingDelayProfile): number {
+  if (profile.answerAllCalls) return 0
+
+  if (profile.ringDelayMode === "rings") {
+    const rings = coerceRings(profile.ringBeforeAnswerRings)
     return clampRingMs(rings * SECONDS_PER_RING * 1000)
   }
 
-  const seconds = coerceSeconds(routing.ringBeforeAnswerSeconds)
+  const seconds = coerceSeconds(profile.ringBeforeAnswerSeconds)
   return clampRingMs(seconds * 1000)
 }
 
-export function formatRingDelayLabel(routing: CallRoutingSettings): string {
-  if (routing.answerAllCalls) return "Answer immediately"
-  if (routing.ringDelayMode === "rings") {
-    const rings = coerceRings(routing.ringBeforeAnswerRings)
+export function computeRingDurationMsForInbound(
+  routing: CallRoutingSettings,
+  availability: AvailabilitySettings,
+  at: Date = new Date()
+): number {
+  return computeRingDurationMs(resolveEffectiveRingDelayProfile(routing, availability, at))
+}
+
+export function formatRingDelayLabel(profile: RingDelayProfile): string {
+  if (profile.answerAllCalls) return "Answer immediately"
+  if (profile.ringDelayMode === "rings") {
+    const rings = coerceRings(profile.ringBeforeAnswerRings)
     const sec = rings * SECONDS_PER_RING
     return `${rings} ring${rings === 1 ? "" : "s"} (~${sec}s)`
   }
-  const sec = coerceSeconds(routing.ringBeforeAnswerSeconds)
+  const sec = coerceSeconds(profile.ringBeforeAnswerSeconds)
   return `${sec} seconds`
+}
+
+export function formatScheduledRingDelaySummary(routing: CallRoutingSettings): string {
+  if (!routing.scheduleByBusinessHours) return formatRingDelayLabel(routing)
+  return `During hours: ${formatRingDelayLabel(routing.duringHours)} · After hours: ${formatRingDelayLabel(routing.afterHours)}`
 }
 
 export function ringDurationMsForRetellAgent(ms: number): number | undefined {
