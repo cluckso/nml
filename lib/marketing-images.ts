@@ -3,6 +3,14 @@
 const unsplash = (id: string, w = 1920) =>
   `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${w}&q=80`
 
+/** Custom funnel / industry hero art (stored in public/marketing/funnel/). */
+export const FUNNEL_HERO_IMAGES = {
+  plumbing: "/marketing/funnel/plumbing.png",
+  electrical: "/marketing/funnel/electrical.png",
+  "auto-repair": "/marketing/funnel/auto-repair.png",
+  handyman: "/marketing/funnel/handyman.png",
+} as const
+
 export const MARKETING_IMAGES = {
   hero: unsplash("photo-1621905251918-48416bd8575a"),
   workflow: unsplash("photo-1581092160562-40aa08e78837", 1600),
@@ -23,10 +31,10 @@ export const MARKETING_IMAGE_ALT: Record<keyof typeof MARKETING_IMAGES, string> 
 
 export const INDUSTRY_IMAGES: Record<string, string> = {
   hvac: unsplash("photo-1621905251918-48416bd8575a", 800),
-  plumbing: unsplash("photo-1607472586893-edb57bdc0e38", 800),
-  electrical: unsplash("photo-1621905252507-b214d08b9b1a", 800),
-  "auto-repair": unsplash("photo-1486260324663-41e7e79122a5", 800),
-  handyman: unsplash("photo-1581578731548-c64695cc6952", 800),
+  plumbing: FUNNEL_HERO_IMAGES.plumbing,
+  electrical: FUNNEL_HERO_IMAGES.electrical,
+  "auto-repair": FUNNEL_HERO_IMAGES["auto-repair"],
+  handyman: FUNNEL_HERO_IMAGES.handyman,
   cleaning: unsplash("photo-1585421514738-01798e2a7b0d", 800),
   landscaping: unsplash("photo-1416879595882-3373a048125b", 800),
   roofing: unsplash("photo-1632759144336-25898c81d662", 800),
@@ -41,5 +49,14 @@ export function getIndustryImage(slug: string): string {
 }
 
 export function getIndustryImageAlt(name: string): string {
+  const lower = name.toLowerCase()
+  if (lower.includes("plumb"))
+    return "Plumber responding to an emergency call — CallGrabbr captures plumbing leads 24/7"
+  if (lower.includes("electr"))
+    return "Electrician on an emergency service call — CallGrabbr AI call assistant"
+  if (lower.includes("auto"))
+    return "Auto repair shop capturing missed-call leads with CallGrabbr"
+  if (lower.includes("handyman"))
+    return "Handyman on a job site — CallGrabbr turns missed calls into booked jobs"
   return `${name} service business — CallGrabbr call answering`
 }
