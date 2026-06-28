@@ -1,5 +1,5 @@
 import { PlanType } from "@prisma/client"
-import { getEffectivePlanType } from "./plans"
+import { getEffectivePlanType, hasPremiumElevenLabsVoice } from "./plans"
 
 /**
  * Retell agent template: global prompt and variable names.
@@ -7,9 +7,13 @@ import { getEffectivePlanType } from "./plans"
  * Use {{variable_name}} in prompts — Retell replaces these per call from our webhook response.
  */
 
-/** Standard-tier voice (lower Retell TTS cost). Default for Solo Owner plan. */
+/** Cartesia platform voices (~$0.015/min) — standard tier for Solo Owner and Mid Volume default. */
+export const STANDARD_CARTESIA_FEMALE_VOICE_ID = "cartesia-Emily"
+export const STANDARD_CARTESIA_MALE_VOICE_ID = "cartesia-Nico"
+
+/** Standard-tier voice (Cartesia TTS). Default for Solo Owner and Mid Volume without premium add-on. */
 export const STANDARD_RETELL_VOICE = {
-  voice_id: "openai-Alloy",
+  voice_id: STANDARD_CARTESIA_FEMALE_VOICE_ID,
   voice_temperature: 0.85,
   voice_speed: 0.95,
   volume: 1.0,
@@ -17,7 +21,7 @@ export const STANDARD_RETELL_VOICE = {
   max_call_duration_ms: 7 * 60 * 1000,
 } as const
 
-/** Premium ElevenLabs voice — Mid Volume+ and branded High Volume settings. */
+/** Premium ElevenLabs voice — Elite always; Mid Volume when premiumVoice enabled. */
 export const DEFAULT_RETELL_VOICE = {
   voice_id: "11labs-Chloe",
   voice_temperature: 0.88,
@@ -36,17 +40,21 @@ export type RetellVoiceConfig = {
   max_call_duration_ms: number
 }
 
-/** Pick voice engine by plan: Solo Owner uses standard TTS; Mid Volume+ uses ElevenLabs. */
+/** Pick voice engine by plan: Cartesia for Starter and Pro default; ElevenLabs for Elite or Pro + premiumVoice. */
 export function getRetellVoiceConfig(
   planType: PlanType | null | undefined,
-  voiceGender?: string | null
+  voiceGender?: string | null,
+  premiumVoice?: boolean
 ): RetellVoiceConfig {
   const effective = getEffectivePlanType(planType)
-  const premium = effective !== PlanType.STARTER
-  const base = premium ? DEFAULT_RETELL_VOICE : STANDARD_RETELL_VOICE
-  if (!premium) return { ...base }
+  const useElevenLabs = hasPremiumElevenLabsVoice(effective, premiumVoice)
+  if (!useElevenLabs) {
+    const voice_id =
+      voiceGender === "male" ? STANDARD_CARTESIA_MALE_VOICE_ID : STANDARD_CARTESIA_FEMALE_VOICE_ID
+    return { ...STANDARD_RETELL_VOICE, voice_id }
+  }
   const voice_id = voiceGender === "male" ? "11labs-Ethan" : "11labs-Chloe"
-  return { ...base, voice_id }
+  return { ...DEFAULT_RETELL_VOICE, voice_id }
 }
 
 /** Variable names we send in call_inbound dynamic_variables. Use these in agent prompts with {{name}}. */

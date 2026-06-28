@@ -50,7 +50,7 @@ All features from `PRICING_FEATURES.md` are implemented and automated as follows
 | After-hours emergency handling | `afterHoursEmergencyPhone` + prompt logic. |
 | Lead tagging | `detectLeadTag()` in webhook; `hasLeadTagging(ELITE)`. |
 | Weekly usage & lead reports | `lib/reports.ts` + `POST /api/reports/weekly`; `hasWeeklyReports(ELITE)`. |
-| Premium branded voice | `getRetellVoiceConfig()` — ElevenLabs on Team+; Solo uses standard voice. |
+| Premium branded voice | `getRetellVoiceConfig()` — ElevenLabs on Elite always; Mid Volume optional via `premiumVoice`; Solo uses Cartesia standard voice. |
 
 ---
 

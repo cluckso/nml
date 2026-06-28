@@ -8,6 +8,7 @@ import {
   type RingDelayMode,
   type RingDelayProfile,
 } from "./call-routing"
+import { getEffectivePlanType } from "./plans"
 
 export type { CallRoutingSettings, RingBeforeAnswerRings, RingBeforeAnswerSeconds, RingDelayMode, RingDelayProfile }
 
@@ -71,6 +72,8 @@ export interface GreetingSettings {
   voiceGender: "male" | "female" | null
   voiceStyle: string | null // e.g. "professional", "warm", "casual"
   tone: "formal" | "friendly" | "direct"
+  /** Mid Volume add-on: ElevenLabs premium voice (Elite always uses ElevenLabs regardless). */
+  premiumVoice?: boolean
 }
 
 /** Intake template selection — Pro+ */
@@ -200,6 +203,7 @@ export const DEFAULT_SETTINGS: BusinessSettings = {
     voiceGender: null,
     voiceStyle: null,
     tone: "friendly",
+    premiumVoice: false,
   },
   intakeFields: DEFAULT_INTAKE_FIELDS,
   availability: {
@@ -445,6 +449,15 @@ export function mergeSectionInto<T extends Record<string, unknown>>(
     }
   }
   return out
+}
+
+/** Strip premiumVoice for plans that cannot use the Mid Volume add-on. */
+export function normalizeGreetingForPlan(greeting: GreetingSettings, planType: PlanType): GreetingSettings {
+  const effective = getEffectivePlanType(planType)
+  if (effective !== PlanType.PRO) {
+    return { ...greeting, premiumVoice: false }
+  }
+  return { ...greeting, premiumVoice: !!greeting.premiumVoice }
 }
 
 /** Deep-merge saved settings over defaults so new fields always exist. */

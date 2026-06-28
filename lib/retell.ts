@@ -655,7 +655,7 @@ export async function syncRetellAgentFromBusiness(
   })
 
   const voiceGender = settings?.greeting?.voiceGender
-  const voiceBase = getRetellVoiceConfig(effectivePlan, voiceGender)
+  const voiceBase = getRetellVoiceConfig(effectivePlan, voiceGender, settings?.greeting?.premiumVoice)
   const voiceId = voiceBase.voice_id
   const vs = business.voiceSettings as { speed?: number; temperature?: number; volume?: number } | null | undefined
   const voiceBrand = hasBrandedVoice(effectivePlan) ? settings?.voiceBrand : undefined

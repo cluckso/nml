@@ -108,6 +108,17 @@ export function hasBrandedVoice(planType: PlanType): boolean {
   return isEliteTier(planType)
 }
 
+/** Whether plan uses premium ElevenLabs TTS (Elite always; Pro when premiumVoice add-on enabled). */
+export function hasPremiumElevenLabsVoice(
+  planType: PlanType | null | undefined,
+  premiumVoice?: boolean
+): boolean {
+  const effective = getEffectivePlanType(planType)
+  if (effective === PlanType.ELITE) return true
+  if (effective === PlanType.PRO && premiumVoice) return true
+  return false
+}
+
 /** Whether plan shows urgency/emergency flags in dashboard (Growth+) */
 export function hasUrgencyFlags(planType: PlanType): boolean {
   return isProOrElite(planType)

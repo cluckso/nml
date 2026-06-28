@@ -34,6 +34,7 @@ import type {
 import { SECTION_LABELS, SECTION_MIN_TIER, SECTION_UPGRADE_DESCRIPTIONS } from "@/lib/business-settings"
 import { formatRingDelayLabel, formatScheduledRingDelaySummary } from "@/lib/call-routing"
 import { getUpgradeTierLabel, PLAN_VOLUME_TAGS } from "@/lib/plan-labels"
+import { hasPremiumElevenLabsVoice } from "@/lib/plans"
 import { PlanType } from "@prisma/client"
 import { PhoneInputWithCountry } from "@/components/ui/phone-input-with-country"
 import { PlanUpgradeDialog } from "@/components/settings/PlanUpgradeDialog"
@@ -237,7 +238,14 @@ export function SettingsClient() {
           <LockedSection section={activeTab} />
         ) : (
           <>
-            {activeTab === "greeting" && <GreetingSection value={settings.greeting} onSave={(v) => save("greeting", v)} saving={saving} />}
+            {activeTab === "greeting" && (
+              <GreetingSection
+                value={settings.greeting}
+                planType={planType}
+                onSave={(v) => save("greeting", v)}
+                saving={saving}
+              />
+            )}
             {activeTab === "intakeFields" && <IntakeFieldsSection value={settings.intakeFields} onSave={(v) => save("intakeFields", v)} saving={saving} />}
             {activeTab === "availability" && <AvailabilitySection value={settings.availability} onSave={(v) => save("availability", v)} saving={saving} />}
             {activeTab === "notifications" && (
@@ -430,8 +438,20 @@ function LockedSection({ section }: { section: SettingsSection }) {
 
 // ─── STARTER SECTIONS ────────────────────────────────────────────────────
 
-function GreetingSection({ value, onSave, saving }: { value: GreetingSettings; onSave: (v: GreetingSettings) => void; saving: boolean }) {
+function GreetingSection({
+  value,
+  planType,
+  onSave,
+  saving,
+}: {
+  value: GreetingSettings
+  planType: PlanType | null
+  onSave: (v: GreetingSettings) => void
+  saving: boolean
+}) {
   const [d, setD] = useState(value)
+  const showPremiumToggle = planType === PlanType.PRO
+  const premiumIncluded = planType != null && hasPremiumElevenLabsVoice(planType, true)
   return (
     <Card>
       <CardHeader>
@@ -479,6 +499,19 @@ function GreetingSection({ value, onSave, saving }: { value: GreetingSettings; o
             </select>
           </div>
         </div>
+        {showPremiumToggle && (
+          <Toggle
+            label="Premium ElevenLabs voice"
+            checked={!!d.premiumVoice}
+            onChange={(v) => setD({ ...d, premiumVoice: v })}
+            description="Upgrade to natural ElevenLabs TTS. Included on High Volume plans."
+          />
+        )}
+        {premiumIncluded && planType !== PlanType.PRO && (
+          <p className="text-xs text-muted-foreground">
+            Your plan includes premium ElevenLabs voice. Customize speed and warmth in Voice &amp; Branding.
+          </p>
+        )}
         <SaveBtn saving={saving} onClick={() => onSave(d)} />
       </CardContent>
     </Card>

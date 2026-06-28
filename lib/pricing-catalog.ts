@@ -69,6 +69,7 @@ export const PRICING_TIERS: PricingTier[] = [
       "SMS follow-up to callers",
       "CRM email forwarding",
       "Lead tagging",
+      "Optional premium ElevenLabs voice",
     ],
   },
   {
@@ -81,7 +82,8 @@ export const PRICING_TIERS: PricingTier[] = [
     popular: false,
     subtitle: "High volume · multi-crew & premium ops",
     features: [
-      "Premium branded voice",
+      "Premium ElevenLabs voice included",
+      "Voice branding controls",
       "Multi-department routing",
       "After-hours emergency handling",
       "Weekly usage & lead reports",

@@ -149,7 +149,7 @@ export function buildAgentOverride(
   )
 
   const voiceGender = settings.greeting.voiceGender
-  const voiceBase = getRetellVoiceConfig(effectivePlan, voiceGender)
+  const voiceBase = getRetellVoiceConfig(effectivePlan, voiceGender, settings.greeting.premiumVoice)
   const voiceId = voiceBase.voice_id
 
   const voiceSpeed = brandedVoice

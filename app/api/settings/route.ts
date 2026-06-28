@@ -4,9 +4,11 @@ import { db } from "@/lib/db"
 import {
   mergeWithDefaults,
   mergeSectionInto,
+  normalizeGreetingForPlan,
   getAllowedSections,
   isSectionAllowed,
   type BusinessSettings,
+  type GreetingSettings,
   type SettingsSection,
 } from "@/lib/business-settings"
 import { getEffectivePlanType } from "@/lib/plans"
@@ -118,7 +120,11 @@ export async function PATCH(req: NextRequest) {
               incoming !== null &&
               !Array.isArray(incoming)
             ) {
-              return { ...acc, [k]: mergeSectionInto(cur as unknown as Record<string, unknown>, incoming as Record<string, unknown>) }
+              const merged = mergeSectionInto(cur as unknown as Record<string, unknown>, incoming as Record<string, unknown>)
+              if (k === "greeting") {
+                return { ...acc, [k]: normalizeGreetingForPlan(merged as GreetingSettings, planType) }
+              }
+              return { ...acc, [k]: merged }
             }
             return { ...acc, [k]: incoming }
           },
