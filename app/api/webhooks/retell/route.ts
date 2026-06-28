@@ -18,7 +18,7 @@ import { hasSmsToCallers, hasCrmForwarding, hasLeadTagging, hasAppointmentCaptur
 import { rateLimit } from "@/lib/rate-limit"
 import { getAgentIdForInbound, getAgentIdForIndustry } from "@/lib/intake-routing"
 import { ClientStatus } from "@prisma/client"
-import { mergeWithDefaults, type BusinessSettings } from "@/lib/business-settings"
+import { mergeWithDefaults, DEFAULT_SETTINGS, type BusinessSettings } from "@/lib/business-settings"
 import { buildAgentOverride } from "@/lib/agent-override"
 import { hasActionableInfo, isLikelySpam, isKnownSpamOrTestNumber } from "@/lib/call-filter"
 import { parseAppointmentRequest } from "@/lib/appointments"
@@ -119,10 +119,25 @@ export async function POST(req: NextRequest) {
 
       if (isDemoNumber && demoAgentId) {
         console.info("Retell inbound: demo call, routing to demo agent", { to_number: toNumber })
+        const demoSettings = mergeWithDefaults({
+          greeting: {
+            ...DEFAULT_SETTINGS.greeting,
+            customGreeting:
+              "Hi, thanks for calling — you've reached the CallGrabbr demo. I'll take your information so our team can follow up, just like a real business would. Who am I speaking with?",
+          },
+        } satisfies Partial<BusinessSettings>)
+        const { agentOverride, dynamicVars } = buildAgentOverride(
+          demoSettings,
+          "CallGrabbr",
+          [],
+          null
+        )
         return NextResponse.json({
           call_inbound: {
             override_agent_id: demoAgentId,
             metadata: { demo_call: true },
+            dynamic_variables: dynamicVars,
+            agent_override: agentOverride,
           },
         })
       }

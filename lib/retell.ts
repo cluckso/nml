@@ -20,7 +20,14 @@ import {
   FLOW_DEMO_END,
   FLOW_END_POLITE,
   FLOW_NAME_USAGE,
+  FLOW_START_GREETING,
+  FLOW_DEMO_START,
 } from "./conversation-flow-instructions"
+import {
+  buildQuestionDepthGuidance,
+  buildStrictnessGuidance,
+  buildWarmthGuidance,
+} from "./agent-override"
 
 const RETELL_API_BASE = process.env.RETELL_API_BASE ?? "https://api.retellai.com"
 
@@ -522,6 +529,7 @@ async function updateAgent(
     volume?: number
     max_call_duration_ms?: number
     ring_duration_ms?: number
+    interruption_sensitivity?: number
     response_engine?: { type: "conversation-flow"; conversation_flow_id: string; version: number }
   }
 ): Promise<void> {
@@ -566,10 +574,10 @@ export type BusinessForSync = {
 export type SyncSettings = {
   greeting?: { customGreeting?: string | null; tone?: string; voiceGender?: "male" | "female" | null }
   questionDepth?: string
-  voiceBrand?: { speed?: number; conciseness?: number }
+  voiceBrand?: { speed?: number; conciseness?: number; warmth?: number; strictness?: number }
   callRouting?: Partial<import("./call-routing").CallRoutingSettings>
   availability?: Partial<import("./business-settings").AvailabilitySettings>
-  aiBehavior?: { maxCallLengthMinutes?: number }
+  aiBehavior?: { maxCallLengthMinutes?: number; interruptTolerance?: number }
 }
 
 /**
@@ -608,21 +616,36 @@ export async function syncRetellAgentFromBusiness(
       includeAppointmentCapture: hasAppointmentCapture(effectivePlan),
     }
   )
-  if (settings?.greeting?.tone || settings?.questionDepth) {
+  if (settings?.greeting?.tone || settings?.questionDepth || settings?.voiceBrand) {
     const parts: string[] = []
     if (settings.greeting?.tone) parts.push(`Use a ${settings.greeting.tone} tone.`)
-    if (settings.questionDepth) parts.push(`Question depth: ${settings.questionDepth}.`)
+    if (settings.questionDepth) {
+      parts.push(
+        `Question depth: ${settings.questionDepth} — ${buildQuestionDepthGuidance(settings.questionDepth as import("./business-settings").QuestionDepth)}`
+      )
+    }
+    if (settings.voiceBrand) {
+      if (typeof settings.voiceBrand.strictness === "number") {
+        parts.push(buildStrictnessGuidance(settings.voiceBrand.strictness))
+      }
+      if (typeof settings.voiceBrand.warmth === "number") {
+        parts.push(buildWarmthGuidance(settings.voiceBrand.warmth))
+      }
+    }
     if (parts.length) globalPrompt = globalPrompt + "\n\n" + parts.join(" ")
   }
 
   let flow = buildConversationFlow(business.name, business.industry, business.serviceAreas)
   const customGreeting = settings?.greeting?.customGreeting?.trim()
   if (customGreeting) {
-    const startText = customGreeting.replace(/\[business\]/gi, business.name).trimEnd() + "\n"
+    const startText = customGreeting.replace(/\[business\]/gi, business.name).trim()
     const startNodeId = flow.start_node_id
     const node = flow.nodes?.find((n: { id: string }) => n.id === startNodeId)
-    if (node?.instruction?.type === "static_text") {
-      node.instruction = { type: "static_text", text: startText }
+    if (node?.instruction) {
+      node.instruction = {
+        type: "prompt",
+        text: `Deliver this greeting naturally (vary wording slightly): "${startText}" Then ask for their name if not already included.`,
+      }
     }
   }
 
@@ -641,13 +664,21 @@ export async function syncRetellAgentFromBusiness(
       ? Math.max(0.5, Math.min(2, 0.75 + voiceBrand.speed * 0.75))
       : vs != null && typeof vs.speed === "number"
         ? Math.max(0.5, Math.min(2, 0.5 + vs.speed * 1.5))
-        : DEFAULT_RETELL_VOICE.voice_speed
+        : voiceBase.voice_speed
   const voiceTemp =
     voiceBrand != null && typeof voiceBrand.conciseness === "number"
-      ? Math.max(0, Math.min(2, 0.2 + voiceBrand.conciseness * 0.6))
+      ? Math.max(
+          0,
+          Math.min(
+            2,
+            0.2 +
+              voiceBrand.conciseness * 0.35 +
+              (typeof voiceBrand.warmth === "number" ? voiceBrand.warmth * 0.35 : 0.25)
+          )
+        )
       : vs != null && typeof vs.temperature === "number"
         ? Math.max(0, Math.min(2, vs.temperature * 2))
-        : DEFAULT_RETELL_VOICE.voice_temperature
+        : voiceBase.voice_temperature
   const voiceVol =
     vs != null && typeof vs.volume === "number"
       ? Math.max(0, Math.min(2, vs.volume * 2))
@@ -678,6 +709,8 @@ export async function syncRetellAgentFromBusiness(
     voice_speed: voiceSpeed,
     volume: voiceVol,
     max_call_duration_ms: maxCallDurationMs,
+    interruption_sensitivity:
+      settings?.aiBehavior?.interruptTolerance ?? voiceBase.interruption_sensitivity,
     ...(ringDurationMsPayload != null ? { ring_duration_ms: ringDurationMsPayload } : {}),
     response_engine: { type: "conversation-flow", conversation_flow_id: flowId, version },
   })
@@ -715,7 +748,7 @@ function buildPropertyServiceFlow(businessName: string, serviceAreas: string[]):
         id: "start-node",
         type: "conversation",
         name: "Welcome Node",
-        instruction: { type: "static_text", text: `Hi, thanks for calling ${businessName}! Who am I speaking with today?\n` },
+        instruction: { type: "prompt", text: FLOW_START_GREETING(businessName) },
         edges: [{ id: "edge-1", destination_node_id: "collect-reason", transition_condition: { type: "prompt", prompt: "User provided name" } }],
         start_speaker: "agent",
       },
@@ -809,7 +842,7 @@ function buildAutoRepairFlow(businessName: string): any {
         id: "start-node",
         type: "conversation",
         name: "Welcome Node",
-        instruction: { type: "static_text", text: `Hi, thanks for calling ${businessName}! Who am I speaking with today?\n` },
+        instruction: { type: "prompt", text: FLOW_START_GREETING(businessName) },
         edges: [{ id: "edge-1", destination_node_id: "collect-reason", transition_condition: { type: "prompt", prompt: "User provided name" } }],
         start_speaker: "agent",
       },
@@ -882,7 +915,7 @@ function buildChildcareFlow(businessName: string): any {
         id: "start-node",
         type: "conversation",
         name: "Welcome Node",
-        instruction: { type: "static_text", text: `Hi, thanks for calling ${businessName}! Who am I speaking with today?\n` },
+        instruction: { type: "prompt", text: FLOW_START_GREETING(businessName) },
         edges: [{ id: "edge-1", destination_node_id: "collect-reason", transition_condition: { type: "prompt", prompt: "User provided name" } }],
         start_speaker: "agent",
       },
@@ -952,7 +985,7 @@ function buildGenericFlow(businessName: string): any {
         id: "start-node",
         type: "conversation",
         name: "Welcome Node",
-        instruction: { type: "static_text", text: `Hi, thanks for calling ${businessName}! Who am I speaking with today?\n` },
+        instruction: { type: "prompt", text: FLOW_START_GREETING(businessName) },
         edges: [{ id: "edge-1", destination_node_id: "collect-reason", transition_condition: { type: "prompt", prompt: "User provided name" } }],
         start_speaker: "agent",
       },
@@ -1017,10 +1050,7 @@ function buildDemoConversationFlow(): any {
         id: "start-node",
         type: "conversation",
         name: "Welcome Node",
-        instruction: {
-          type: "static_text",
-          text: "Hi, thanks for calling — you've reached the CallGrabbr demo. I'll take your information so our team can follow up, just like a real business would. Who am I speaking with?\n",
-        },
+        instruction: { type: "prompt", text: FLOW_DEMO_START },
         edges: [{ id: "edge-1", destination_node_id: "collect-reason", transition_condition: { type: "prompt", prompt: "User provided name" } }],
         start_speaker: "agent",
       },

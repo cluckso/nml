@@ -280,7 +280,7 @@ export const DEFAULT_SETTINGS: BusinessSettings = {
     compliancePhrases: [],
   },
   aiBehavior: {
-    interruptTolerance: 0.5,
+    interruptTolerance: 0.6,
     maxCallLengthMinutes: 7,
     questionRetryCount: 2,
     escalateToHumanAfterRetries: false,

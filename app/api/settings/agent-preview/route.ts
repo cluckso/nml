@@ -46,6 +46,13 @@ export async function GET(req: NextRequest) {
         maxCallDurationMs: agentOverride.agent?.max_call_duration_ms,
         tone: settings.greeting.tone,
         questionDepth: settings.questionDepth,
+        strictness: settings.voiceBrand.strictness,
+        warmth: settings.voiceBrand.warmth,
+        strictnessGuidance: dynamicVars.strictness_guidance,
+        warmthGuidance: dynamicVars.warmth_guidance,
+        questionDepthGuidance: dynamicVars.question_depth_guidance,
+        modelTemperature: agentOverride.conversation_flow?.model_temperature,
+        interruptionSensitivity: agentOverride.agent?.interruption_sensitivity,
       },
     })
   } catch (error) {

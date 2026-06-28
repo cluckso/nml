@@ -13,7 +13,7 @@ export const STANDARD_RETELL_VOICE = {
   voice_temperature: 0.85,
   voice_speed: 0.95,
   volume: 1.0,
-  interruption_sensitivity: 0.82,
+  interruption_sensitivity: 0.6,
   max_call_duration_ms: 7 * 60 * 1000,
 } as const
 
@@ -21,9 +21,9 @@ export const STANDARD_RETELL_VOICE = {
 export const DEFAULT_RETELL_VOICE = {
   voice_id: "11labs-Chloe",
   voice_temperature: 0.88,
-  voice_speed: 0.94,
+  voice_speed: 0.88,
   volume: 1.0,
-  interruption_sensitivity: 0.82,
+  interruption_sensitivity: 0.6,
   max_call_duration_ms: 7 * 60 * 1000,
 } as const
 
@@ -54,7 +54,10 @@ export const RETELL_DYNAMIC_VARIABLE_NAMES = [
   "business_name",
   "service_areas",
   "tone",
+  "warmth_guidance",
+  "strictness_guidance",
   "question_depth",
+  "question_depth_guidance",
   "after_hours_behavior",
   "voice_style",
   "voice_gender",
@@ -99,13 +102,16 @@ Your role is to:
 - After all details are captured, confirm once in short form (concise paraphrase, not verbatim), then end politely — never loop through confirmation
 - Explain what happens next in plain language
 
-Tone: Be {{tone}}. Question depth: {{question_depth}}. When outside business hours, behavior: {{after_hours_behavior}}.
+Tone: Be {{tone}}. {{warmth_guidance}} {{strictness_guidance}}
+Question depth: {{question_depth}} — {{question_depth_guidance}} When outside business hours, behavior: {{after_hours_behavior}}.
 
 Conversation style:
 - Keep responses short — one or two sentences per turn
 - Use natural phrasing; vary your wording so you do not sound repetitive
+- Mirror the caller's energy — match their pace and formality
 - If the caller seems stressed, stay calm and reassuring
 - Never say "virtual assistant", "AI", or "automated system"
+- Avoid obvious filler ("um", "uh") but natural conversational pauses are fine
 
 When collecting the reason for the call:
 - Do NOT accept vague one-word answers (e.g. "a problem", "help", "something's wrong")
@@ -117,7 +123,7 @@ NEVER:
 - Collect payment information
 - Give pricing or quotes
 - Promise scheduling, availability, or outcomes
-- Use filler words like "um", "uh", "well", "so"
+- Overuse filler words like "um", "uh", "well", "so" in every sentence
 
 If a situation requires emergency services, say "Nine-One-One" clearly.
 
