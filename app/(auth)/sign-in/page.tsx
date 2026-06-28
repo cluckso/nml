@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, Suspense } from "react"
+import { useState, Suspense, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { useSearchParams } from "next/navigation"
@@ -11,6 +11,10 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
 import { validateEmail, validatePasswordSignIn } from "@/lib/utils"
+import { loadFunnelTrialContext } from "@/lib/funnel/funnel-trial-bridge"
+import { getSafeRedirectPath } from "@/lib/safe-redirect"
+
+const AUTH_NEXT_KEY = "callgrabbr_auth_next"
 
 function SignInContent() {
   const [email, setEmail] = useState("")
@@ -21,6 +25,19 @@ function SignInContent() {
   const searchParams = useSearchParams()
   const message = searchParams.get("message")
   const supabase = createClient()
+
+  useEffect(() => {
+    const next = getSafeRedirectPath(searchParams.get("next"))
+    if (next) {
+      try {
+        sessionStorage.setItem(AUTH_NEXT_KEY, next)
+      } catch {
+        // ignore
+      }
+    }
+    const ctx = loadFunnelTrialContext()
+    if (ctx?.contactEmail) setEmail(ctx.contactEmail)
+  }, [searchParams])
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,7 +72,15 @@ function SignInContent() {
       }
       setLoading(false)
     } else {
-      router.push("/dashboard")
+      let next: string | null = null
+      try {
+        next = getSafeRedirectPath(sessionStorage.getItem(AUTH_NEXT_KEY))
+        sessionStorage.removeItem(AUTH_NEXT_KEY)
+      } catch {
+        // ignore
+      }
+      if (!next) next = getSafeRedirectPath(searchParams.get("next"))
+      router.push(next ?? "/dashboard")
       router.refresh()
     }
   }
@@ -115,7 +140,7 @@ function SignInContent() {
           </form>
           <p className="mt-4 text-center text-sm text-muted-foreground">
             Don't have an account?{" "}
-            <a href="/sign-up" className="text-primary hover:underline">
+            <a href={`/sign-up?next=${encodeURIComponent("/trial/start")}`} className="text-primary hover:underline">
               Sign up
             </a>
           </p>

@@ -61,7 +61,9 @@ export function FunnelPricingCta({ config, onCtaClick, className = "" }: FunnelP
             </Button>
           )}
           <Button size="lg" variant="outline" asChild>
-            <Link href="/sign-up">Create account</Link>
+            <Link href={`/sign-up?next=${encodeURIComponent(href)}`}>
+              Create account
+            </Link>
           </Button>
           <Button size="lg" variant="ghost" asChild>
             <Link href="/pricing">Compare plans</Link>

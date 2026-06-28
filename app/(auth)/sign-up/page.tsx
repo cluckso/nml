@@ -8,6 +8,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { validateEmail, validatePasswordSignUp } from "@/lib/utils"
+import { loadFunnelTrialContext } from "@/lib/funnel/funnel-trial-bridge"
+import { getSafeRedirectPath } from "@/lib/safe-redirect"
+
+const AUTH_NEXT_KEY = "callgrabbr_auth_next"
 
 export default function SignUpPage() {
   return (
@@ -29,6 +33,14 @@ function SignUpForm() {
   useEffect(() => {
     const ref = searchParams.get("ref")
     const agency = searchParams.get("agency")
+    const next = getSafeRedirectPath(searchParams.get("next"))
+    if (next) {
+      try {
+        sessionStorage.setItem(AUTH_NEXT_KEY, next)
+      } catch {
+        // ignore
+      }
+    }
     if (ref) {
       try {
         sessionStorage.setItem("callgrabbr_referral", ref.toUpperCase())
@@ -43,6 +55,8 @@ function SignUpForm() {
         // ignore storage errors
       }
     }
+    const ctx = loadFunnelTrialContext()
+    if (ctx?.contactEmail) setEmail(ctx.contactEmail)
   }, [searchParams])
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -64,7 +78,14 @@ function SignUpForm() {
     const baseUrl =
       (typeof process.env.NEXT_PUBLIC_APP_URL === "string" && process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "")) ||
       (typeof window !== "undefined" ? window.location.origin : "")
-    const emailRedirectTo = baseUrl ? `${baseUrl}/dashboard` : undefined
+    let redirectPath = "/dashboard"
+    try {
+      const stored = getSafeRedirectPath(sessionStorage.getItem(AUTH_NEXT_KEY))
+      if (stored) redirectPath = stored
+    } catch {
+      // ignore
+    }
+    const emailRedirectTo = baseUrl ? `${baseUrl}${redirectPath}` : undefined
 
     const { error } = await supabase.auth.signUp({
       email: emailResult.email,

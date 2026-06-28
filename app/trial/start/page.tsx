@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
-import { requireAuth } from "@/lib/auth"
+import { Suspense } from "react"
+import { getCurrentUser } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { TrialStartClient } from "./TrialStartClient"
 
@@ -17,10 +18,18 @@ export const dynamic = "force-dynamic"
  * After eligibility + card, user lands on onboarding. If business exists, redirect accordingly.
  */
 export default async function TrialStartPage() {
-  const user = await requireAuth()
+  const user = await getCurrentUser()
+
+  if (!user) {
+    redirect("/sign-up?next=" + encodeURIComponent("/trial/start"))
+  }
 
   if (!user.businessId) {
-    return <TrialStartClient />
+    return (
+      <Suspense fallback={<div className="container mx-auto max-w-md py-12 text-center text-muted-foreground">Loading…</div>}>
+        <TrialStartClient />
+      </Suspense>
+    )
   }
 
   const business = await db.business.findUnique({

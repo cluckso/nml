@@ -1,5 +1,6 @@
 import type { FunnelConfig, FunnelStep } from "./funnel-config"
 import { getIndustryImage } from "@/lib/marketing-images"
+import { buildFunnelTrialStartUrl } from "./funnel-trial-bridge"
 
 const VOLUME_OPTIONS = [
   { value: "under-20", label: "Under 20 calls/week", score: 10 },
@@ -331,7 +332,7 @@ export function getFunnelCalendlyUrl(): string | undefined {
 
 export function getFunnelCtaHref(config: FunnelConfig): string {
   if (config.cta.type === "calendly") {
-    return getFunnelCalendlyUrl() ?? "/trial/start"
+    return getFunnelCalendlyUrl() ?? buildFunnelTrialStartUrl(config.slug)
   }
-  return "/trial/start"
+  return buildFunnelTrialStartUrl(config.slug)
 }

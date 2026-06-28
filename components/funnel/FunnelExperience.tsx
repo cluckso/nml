@@ -15,7 +15,10 @@ import { FunnelTestimonial } from "./FunnelTestimonial"
 import { FunnelPricingCta } from "./FunnelPricingCta"
 import { useFunnelLead } from "./useFunnelLead"
 import { Card, CardContent } from "@/components/ui/card"
-import { CheckCircle2 } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { CheckCircle2, ArrowRight } from "lucide-react"
+import Link from "next/link"
+import { saveFunnelTrialContext, buildFunnelTrialStartUrl } from "@/lib/funnel/funnel-trial-bridge"
 
 interface FunnelExperienceProps {
   config: FunnelConfig
@@ -42,7 +45,7 @@ export function FunnelExperience({ config }: FunnelExperienceProps) {
     })
     const score = calculateLeadScore(values, config.leadScoring)
 
-    await submitLead({
+    const result = await submitLead({
       industry: config.slug,
       responses: values,
       score,
@@ -52,7 +55,20 @@ export function FunnelExperience({ config }: FunnelExperienceProps) {
         recoveredRevenuePerMonth: roi.recoveredRevenuePerMonth,
       },
     })
+
+    if (result.ok) {
+      saveFunnelTrialContext({
+        industry: config.slug,
+        displayName: config.displayName,
+        contactName: values.contactName?.trim() || undefined,
+        contactEmail: values.contactEmail?.trim() || undefined,
+        contactPhone: values.contactPhone?.trim() || undefined,
+        leadId: result.leadId,
+      })
+    }
   }
+
+  const trialHref = buildFunnelTrialStartUrl(config.slug)
 
   const heroImage = config.heroImage ?? ""
   const heroAlt = getIndustryImageAlt(config.displayName)
@@ -94,10 +110,16 @@ export function FunnelExperience({ config }: FunnelExperienceProps) {
               <CardContent className="pt-8 pb-8 text-center">
                 <CheckCircle2 className="h-12 w-12 text-primary mx-auto mb-4" />
                 <h3 className="text-xl font-bold mb-2">You&apos;re all set!</h3>
-                <p className="text-muted-foreground mb-4">
-                  Your personalized ROI snapshot is ready. Start your free trial below — no credit
-                  card required.
+                <p className="text-muted-foreground mb-6">
+                  Your personalized ROI snapshot is ready. Start your free trial below — we&apos;ve
+                  saved your contact info so you won&apos;t need to enter it again.
                 </p>
+                <Button size="lg" asChild onClick={() => trackFunnelConversion(config.slug, "trial")}>
+                  <Link href={trialHref}>
+                    Start free trial
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
           )}

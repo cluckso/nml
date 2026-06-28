@@ -8,7 +8,8 @@ interface UseFunnelLeadResult {
   submitting: boolean
   submitted: boolean
   error: string | null
-  submitLead: (payload: FunnelLeadPayload) => Promise<boolean>
+  leadId: string | null
+  submitLead: (payload: FunnelLeadPayload) => Promise<{ ok: boolean; leadId?: string }>
 }
 
 function getUtmParams(): FunnelLeadPayload["utm"] {
@@ -29,8 +30,9 @@ export function useFunnelLead(): UseFunnelLeadResult {
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [leadId, setLeadId] = useState<string | null>(null)
 
-  const submitLead = useCallback(async (payload: FunnelLeadPayload): Promise<boolean> => {
+  const submitLead = useCallback(async (payload: FunnelLeadPayload): Promise<{ ok: boolean; leadId?: string }> => {
     setSubmitting(true)
     setError(null)
 
@@ -48,16 +50,20 @@ export function useFunnelLead(): UseFunnelLeadResult {
         throw new Error(data.error ?? "Failed to submit")
       }
 
+      const data = (await res.json().catch(() => ({}))) as { leadId?: string }
+      const id = data.leadId
+      if (id) setLeadId(id)
+
       trackFunnelLeadSubmit(payload.industry, payload.score)
       setSubmitted(true)
-      return true
+      return { ok: true, leadId: id }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong")
-      return false
+      return { ok: false }
     } finally {
       setSubmitting(false)
     }
   }, [])
 
-  return { submitting, submitted, error, submitLead }
+  return { submitting, submitted, error, leadId, submitLead }
 }

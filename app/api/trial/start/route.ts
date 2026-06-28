@@ -5,6 +5,7 @@ import { checkTrialEligibility, releasePrimaryForwardingNumberFromOtherBusinesse
 import { TRIAL_DAYS } from "@/lib/plans"
 import { Industry } from "@prisma/client"
 import { ClientStatus } from "@prisma/client"
+import { funnelSlugToIndustry } from "@/lib/funnel/funnel-trial-bridge"
 
 /**
  * POST /api/trial/start
@@ -21,6 +22,13 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}))
     const businessPhone = body?.businessPhone
     const smsConsent = body?.smsConsent === true
+    const funnelIndustry =
+      typeof body?.funnelIndustry === "string" ? body.funnelIndustry.trim().toLowerCase() : ""
+    const contactName =
+      typeof body?.contactName === "string" ? body.contactName.trim() : ""
+    const contactEmail =
+      typeof body?.contactEmail === "string" ? body.contactEmail.trim() : ""
+    const resolvedIndustry = funnelIndustry ? funnelSlugToIndustry(funnelIndustry) : Industry.GENERIC
     if (typeof businessPhone !== "string" || !businessPhone.trim()) {
       return NextResponse.json(
         { error: "Missing businessPhone" },
@@ -65,9 +73,10 @@ export async function POST(req: NextRequest) {
     } else if (!business) {
       business = await db.business.create({
         data: {
-          name: "My Business",
-          industry: Industry.GENERIC,
+          name: contactName || "My Business",
+          industry: resolvedIndustry,
           primaryForwardingNumber: normalizedPhone,
+          forwardToEmail: contactEmail || undefined,
           onboardingComplete: false,
           status: ClientStatus.ACTIVE,
           users: { connect: { id: user.id } },
@@ -92,6 +101,13 @@ export async function POST(req: NextRequest) {
         trialEndsAt,
         trialMinutesUsed: 0,
         status: ClientStatus.ACTIVE,
+        ...(business.industry === Industry.GENERIC && resolvedIndustry !== Industry.GENERIC
+          ? { industry: resolvedIndustry }
+          : {}),
+        ...(contactName && (business.name === "My Business" || !business.name.trim())
+          ? { name: contactName }
+          : {}),
+        ...(contactEmail && !business.forwardToEmail ? { forwardToEmail: contactEmail } : {}),
       },
     })
 
