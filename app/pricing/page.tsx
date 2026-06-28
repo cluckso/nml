@@ -17,7 +17,7 @@ import { PLAN_SOLO_OWNER, PLAN_MID_VOLUME } from "@/lib/plan-labels"
 
 export const metadata: Metadata = {
   title: "Pricing - CallGrabbr",
-  description: `Stop losing jobs to voicemail. ${formatPricingSummary()}. ${formatJobRoiLine()} 7-day free trial, no card required.`,
+  description: `Plans for every call volume. ${formatPricingSummary()}. ${formatJobRoiLine()} 7-day free trial, no credit card required.`,
   alternates: { canonical: "/pricing" },
 }
 
@@ -50,13 +50,15 @@ export default async function PricingPage() {
       className="py-20 border-b border-border/50"
       contentClassName="container mx-auto px-4 text-center"
     >
-      <h1 className="text-4xl font-bold mb-4">Missed call = lost job. Pick your coverage.</h1>
-      <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+      <h1 className="text-4xl font-bold tracking-tight mb-4 max-w-3xl mx-auto">
+        Plans that match how you handle calls
+      </h1>
+      <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
         {formatJobRoiLine()}
       </p>
-      <p className="mt-2 text-muted-foreground">
-        7-day free trial. No card required. Overage {formatOverageRate()} after included minutes.
-        Estimates assume ~3 min per intake call.
+      <p className="mt-4 text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
+        7-day free trial · No credit card required · Overage {formatOverageRate()} beyond included
+        minutes · Estimates based on ~3 min per call
       </p>
       {isLoggedIn && !hasStartedTrial && (
         <p className="mt-2 text-sm text-primary font-medium">
@@ -72,14 +74,16 @@ export default async function PricingPage() {
 
     <div className="container mx-auto px-4 py-16">
       {!hasStartedTrial && (
-        <div className="max-w-2xl mx-auto mb-12 p-8 rounded-xl border-2 border-primary/20 bg-primary/5 text-center">
-          <h2 className="text-2xl font-bold mb-2">Free trial — no card required</h2>
-          <p className="text-muted-foreground mb-4">
-            7-day free trial. We won&apos;t charge until you choose a plan. Includes 40 call minutes. One trial per business number.
+        <div className="max-w-2xl mx-auto mb-14 p-8 rounded-xl border border-primary/20 bg-primary/5 text-center">
+          <h2 className="text-2xl font-bold tracking-tight mb-3">Try it free for 7 days</h2>
+          <p className="text-muted-foreground mb-3 leading-relaxed">
+            No charge until you choose a plan. Includes 40 call minutes—one trial per business
+            number.
           </p>
-          <p className="text-sm text-muted-foreground mb-6">
-            Most solo owners start on <strong>{PLAN_SOLO_OWNER}</strong> for missed and after-hours calls.
-            Move to {PLAN_MID_VOLUME} when you want 24/7 answering for a growing crew.
+          <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+            Most owners start on <strong>{PLAN_SOLO_OWNER}</strong> for missed and after-hours
+            coverage, then move to <strong>{PLAN_MID_VOLUME}</strong> when the team grows and calls
+            need a full-time answer.
           </p>
           {isLoggedIn ? (
             <Button size="lg" asChild>

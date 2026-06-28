@@ -41,19 +41,18 @@ export const PRICING_TIERS: PricingTier[] = [
     key: PLAN_SOLO_OWNER,
     planType: PLAN_TYPE_BY_DISPLAY_KEY[PLAN_SOLO_OWNER],
     name: PLAN_SOLO_OWNER,
-    description:
-      "Covers missed and after-hours calls for most one-truck shops—not full-time 24/7 answering.",
+    description: "Missed and after-hours coverage for owner-operators and one-truck shops.",
     price: MONTHLY_PRICES[PlanType.STARTER],
     includedMinutes: INCLUDED_MINUTES[PlanType.STARTER],
     badge: "Best value",
     popular: false,
-    subtitle: "Missed & after-hours · one truck",
-    usageNote: "Best when you're on a job or closed—not every ring all day",
+    subtitle: "Solo operator · one truck",
+    usageNote: "Ideal when you're on a job or closed—not every call, all day",
     features: [
       "Missed call capture",
       "Spam call filtering",
-      "Name, phone & reason captured",
-      "Email & SMS summaries",
+      "Caller name, phone, and reason",
+      "Email and SMS summaries",
       "No setup fee",
     ],
   },
@@ -61,39 +60,39 @@ export const PRICING_TIERS: PricingTier[] = [
     key: PLAN_MID_VOLUME,
     planType: PLAN_TYPE_BY_DISPLAY_KEY[PLAN_MID_VOLUME],
     name: PLAN_MID_VOLUME,
-    description: "Your always-on receptionist when the team is busy and calls shouldn't wait.",
+    description: "Always-on answering for growing teams that can't afford to miss inbound calls.",
     price: MONTHLY_PRICES[PlanType.PRO],
     includedMinutes: INCLUDED_MINUTES[PlanType.PRO],
     badge: "Most popular",
     popular: true,
-    subtitle: "24/7 front desk · growing crew",
-    usageNote: "Built for shops that answer most inbound calls",
+    subtitle: "Growing crew · steady inbound volume",
+    usageNote: "Built for shops that answer most incoming calls",
     features: [
+      "Everything in Solo Owner",
       "24/7 call answering",
-      "Industry intake flows",
-      "Appointment & emergency logic",
+      "Industry-specific intake flows",
+      "Appointment and emergency handling",
       "SMS follow-up to callers",
       "CRM email forwarding",
-      "Lead tagging",
-      "Optional premium ElevenLabs voice",
+      "Lead tagging and priority rules",
     ],
   },
   {
     key: PLAN_HIGH_VOLUME,
     planType: PLAN_TYPE_BY_DISPLAY_KEY[PLAN_HIGH_VOLUME],
     name: PLAN_HIGH_VOLUME,
-    description: "Premium coverage for busy operations, multiple crews, or high inbound volume.",
+    description: "Full coverage for busy shops, multiple crews, and high daily call volume.",
     price: MONTHLY_PRICES[PlanType.ELITE],
     includedMinutes: INCLUDED_MINUTES[PlanType.ELITE],
     popular: false,
-    subtitle: "Busy shop · multi-crew",
-    usageNote: "For operations answering every line, all day",
+    subtitle: "Multi-crew · high call volume",
+    usageNote: "For operations answering every line throughout the day",
     features: [
-      "Premium ElevenLabs voice included",
-      "Voice branding controls",
+      "Everything in Mid Volume",
+      "Branded voice and scripting",
       "Multi-department routing",
-      "After-hours emergency handling",
-      "Weekly usage & lead reports",
+      "After-hours emergency routing",
+      "Weekly usage and lead reports",
       "Advanced call handling controls",
       "Priority support",
     ],
@@ -109,7 +108,7 @@ export function formatPricingSummary(): string {
   const solo = PRICING_TIERS_BY_KEY[PLAN_SOLO_OWNER]
   const mid = PRICING_TIERS_BY_KEY[PLAN_MID_VOLUME]
   const high = PRICING_TIERS_BY_KEY[PLAN_HIGH_VOLUME]
-  return `${PLAN_SOLO_OWNER} $${solo.price}, ${PLAN_MID_VOLUME} $${mid.price}, ${PLAN_HIGH_VOLUME} $${high.price}/mo`
+  return `${PLAN_SOLO_OWNER} from $${solo.price}/mo, ${PLAN_MID_VOLUME} $${mid.price}/mo, ${PLAN_HIGH_VOLUME} $${high.price}/mo`
 }
 
 export function formatOverageRate(): string {
@@ -121,8 +120,8 @@ export const AVG_JOB_VALUE_LOW = 350
 export const AVG_JOB_VALUE_HIGH = 600
 
 export function formatJobRoiLine(): string {
-  return `Average job: $${AVG_JOB_VALUE_LOW}–$${AVG_JOB_VALUE_HIGH}. One captured lead pays for months of service.`
+  return `Average job value: $${AVG_JOB_VALUE_LOW}–$${AVG_JOB_VALUE_HIGH}. One captured lead can cover months of service.`
 }
 
-/** Re-export for pricing UI — "~100 calls/mo (~3 min each)" */
+/** Re-export for pricing UI */
 export { formatIncludedUsageShort }

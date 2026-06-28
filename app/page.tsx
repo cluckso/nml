@@ -403,11 +403,14 @@ export default function HomePage() {
       {/* Pricing (Simple and Predictable) */}
       <section className="bg-muted/30 py-16 border-y border-border/50">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-3">Simple, predictable pricing</h2>
-          <p className="text-center text-muted-foreground mb-10 max-w-xl mx-auto">
-            No setup fees. No hidden charges. Overage {formatOverageRate()} after included minutes. Cancel anytime.
+          <h2 className="text-3xl font-bold tracking-tight text-center mb-3">
+            Pricing that scales with call volume
+          </h2>
+          <p className="text-center text-muted-foreground mb-4 max-w-xl mx-auto leading-relaxed">
+            No setup fees. No hidden charges. Overage {formatOverageRate()} beyond included minutes.
+            Cancel anytime.
           </p>
-          <p className="text-center text-sm text-muted-foreground mb-8 max-w-lg mx-auto">
+          <p className="text-center text-sm text-muted-foreground mb-10 max-w-lg mx-auto leading-relaxed">
             {formatJobRoiLine()}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
@@ -420,10 +423,10 @@ export default function HomePage() {
                     : "glass-card"
                 }
               >
-                <CardHeader>
+                <CardHeader className="space-y-2">
                   {tier.badge && (
                     <span
-                      className={`mb-2 inline-block w-fit rounded px-2 py-1 text-xs font-semibold ${
+                      className={`mb-1 inline-block w-fit rounded px-2 py-1 text-xs font-semibold uppercase tracking-wide ${
                         tier.badge === "Best value"
                           ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
                           : "bg-primary text-primary-foreground"
@@ -432,23 +435,22 @@ export default function HomePage() {
                       {tier.badge}
                     </span>
                   )}
-                  <CardTitle>
-                    {tier.name} — ${tier.price}/mo
+                  <CardTitle className="text-xl tracking-tight">
+                    {tier.name}
+                    <span className="block text-base font-semibold text-muted-foreground mt-1">
+                      ${tier.price}/month
+                    </span>
                   </CardTitle>
-                  <p className="text-sm text-muted-foreground font-normal">
-                    {tier.subtitle}
-                  </p>
-                  <p className="text-sm text-foreground/90 font-normal mt-1">
+                  <p className="text-sm text-muted-foreground leading-relaxed">{tier.subtitle}</p>
+                  <p className="text-sm text-foreground/90 leading-snug">
                     {formatIncludedUsageShort(tier.includedMinutes)}
                   </p>
-                  <p className="text-xs text-muted-foreground font-normal mt-1">
-                    {tier.usageNote}
-                  </p>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{tier.usageNote}</p>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className="space-y-2 pt-0">
                   {tier.features.map((f) => (
-                    <p key={f} className="text-sm text-muted-foreground flex items-center gap-2">
-                      <Check className="h-4 w-4 text-primary shrink-0" />
+                    <p key={f} className="text-sm text-muted-foreground flex items-start gap-2 leading-snug">
+                      <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" aria-hidden />
                       {f}
                     </p>
                   ))}
@@ -457,7 +459,9 @@ export default function HomePage() {
             ))}
           </div>
           <div className="text-center mt-10">
-            <p className="text-sm text-muted-foreground mb-4">Start with a 7-day free trial. No card required.</p>
+            <p className="text-sm text-muted-foreground mb-4">
+              Start with a 7-day free trial. No credit card required.
+            </p>
             <Link href="/pricing">
               <Button size="lg" className="gap-2">
                 See full pricing & start free trial

@@ -30,12 +30,12 @@ export function approxCallsPerMonth(
 
 export function formatIncludedUsageLabel(includedMinutes: number): string {
   const calls = approxCallsPerMonth(includedMinutes)
-  return `${includedMinutes.toLocaleString()} included min/mo (≈${calls} calls at ~${TYPICAL_INTAKE_CALL_MINUTES} min each)`
+  return `${includedMinutes.toLocaleString()} min/month · ~${calls} calls (avg. ${TYPICAL_INTAKE_CALL_MINUTES} min)`
 }
 
 export function formatIncludedUsageShort(includedMinutes: number): string {
   const calls = approxCallsPerMonth(includedMinutes)
-  return `≈${calls} calls/mo (~${TYPICAL_INTAKE_CALL_MINUTES} min each)`
+  return `~${calls} calls/month · avg. ${TYPICAL_INTAKE_CALL_MINUTES} min each`
 }
 
 export function getUsagePercent(minutesUsed: number, minutesIncluded: number): number {

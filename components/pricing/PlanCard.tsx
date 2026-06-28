@@ -63,47 +63,44 @@ export function PlanCard({
   }
 
   return (
-    <Card className={plan.popular ? "border-primary border-2 shadow-lg" : ""}>
-      <CardHeader>
+    <Card className={`flex flex-col h-full ${plan.popular ? "border-primary border-2 shadow-lg" : ""}`}>
+      <CardHeader className="space-y-3 pb-4">
         {plan.badge && (
-          <span className="mb-2 inline-block rounded bg-primary/15 px-2 py-1 text-xs font-semibold text-primary">
+          <span className="inline-block w-fit rounded bg-primary/15 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
             {plan.badge}
           </span>
         )}
-        {plan.popular && !plan.badge && (
-          <span className="mb-2 inline-block rounded bg-primary px-2 py-1 text-xs font-semibold text-primary-foreground">
-            Most Popular
-          </span>
-        )}
-        <CardTitle className="text-2xl">{plan.name}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-        <div className="mt-4">
-          <span className="text-4xl font-bold">${plan.price}</span>
-          <span className="text-muted-foreground">/month</span>
+        <div>
+          <CardTitle className="text-2xl tracking-tight">{plan.name}</CardTitle>
+          <CardDescription className="mt-1.5 text-sm leading-relaxed">{description}</CardDescription>
+        </div>
+        <div className="pt-1">
+          <span className="text-4xl font-bold tracking-tight">${plan.price}</span>
+          <span className="text-muted-foreground text-sm"> / month</span>
         </div>
         {includedMinutes != null && (
-          <div className="mt-2 space-y-1">
-            <p className="text-sm font-medium text-foreground">
+          <div className="rounded-lg border bg-muted/30 px-3 py-2.5 space-y-1">
+            <p className="text-sm font-medium leading-snug text-foreground">
               {formatIncludedUsageLabel(includedMinutes)}
             </p>
             {plan.usageNote && (
-              <p className="text-xs text-muted-foreground">{plan.usageNote}</p>
+              <p className="text-xs leading-relaxed text-muted-foreground">{plan.usageNote}</p>
             )}
           </div>
         )}
         {annualPrice != null && annualLabel && (
-          <p className="text-sm text-muted-foreground mt-2">
+          <p className="text-sm text-muted-foreground">
             Annual: ${annualPrice}/year ({annualLabel})
           </p>
         )}
-        <p className="text-sm text-muted-foreground mt-1">No setup fee</p>
+        <p className="text-xs text-muted-foreground">No setup fee</p>
       </CardHeader>
-      <CardContent className="flex flex-col">
-        <ul className="space-y-3 mb-6 flex-1">
-          {features.map((feature, index) => (
-            <li key={index} className="flex items-start gap-2">
-              <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-              <span className="text-sm">{feature}</span>
+      <CardContent className="flex flex-col flex-1 pt-0">
+        <ul className="space-y-2.5 mb-6 flex-1">
+          {features.map((feature) => (
+            <li key={feature} className="flex items-start gap-2.5">
+              <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" aria-hidden />
+              <span className="text-sm leading-snug text-foreground/90">{feature}</span>
             </li>
           ))}
         </ul>
@@ -138,7 +135,7 @@ export function PlanCard({
               </span>
             </label>
             <Button
-              className="w-full"
+              className="w-full mt-auto"
               variant={plan.popular ? "default" : "outline"}
               onClick={handleGetStarted}
               disabled={loading || !agreedToLegal}

@@ -25,7 +25,7 @@ describe("approxCallsPerMonth", () => {
 
 describe("formatIncludedUsageLabel", () => {
   it("includes minutes and approximate calls", () => {
-    expect(formatIncludedUsageLabel(300)).toMatch(/300.*≈100 calls.*~3 min/)
+    expect(formatIncludedUsageLabel(300)).toMatch(/300 min\/month · ~100 calls \(avg\. 3 min\)/)
   })
 })
 
