@@ -43,9 +43,9 @@ export default async function PricingPage() {
   return (
   <>
     <SectionBackdrop
-      src={MARKETING_IMAGES.teamTrust}
-      alt={MARKETING_IMAGE_ALT.teamTrust}
-      overlay="heavy"
+      src={MARKETING_IMAGES.hero}
+      alt={MARKETING_IMAGE_ALT.hero}
+      overlay="hero"
       className="py-20 border-b border-border/50"
       contentClassName="container mx-auto px-4 text-center"
     >

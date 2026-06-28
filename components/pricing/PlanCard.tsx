@@ -7,7 +7,6 @@ import { trackSubscribe } from "@/lib/analytics"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, Loader2 } from "lucide-react"
-import { PlanType } from "@prisma/client"
 import { PRICING_TIERS_BY_KEY } from "@/lib/pricing-catalog"
 
 export function PlanCard({
@@ -18,7 +17,6 @@ export function PlanCard({
   annualPrice,
   annualLabel,
   isLoggedIn,
-  agreedToLegal = true,
 }: {
   name: string
   description: string
@@ -27,13 +25,15 @@ export function PlanCard({
   annualPrice?: number
   annualLabel?: string
   isLoggedIn: boolean
-  agreedToLegal?: boolean
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
+  const [agreedToLegal, setAgreedToLegal] = useState(false)
   const plan = PRICING_TIERS_BY_KEY[name as keyof typeof PRICING_TIERS_BY_KEY]
   if (!plan) return null
+
+  const legalFieldId = `legal-${plan.planType}`
 
   const handleGetStarted = async () => {
     if (!isLoggedIn) {
@@ -92,8 +92,8 @@ export function PlanCard({
         )}
         <p className="text-sm text-muted-foreground mt-1">No setup fee</p>
       </CardHeader>
-      <CardContent>
-        <ul className="space-y-3 mb-6">
+      <CardContent className="flex flex-col">
+        <ul className="space-y-3 mb-6 flex-1">
           {features.map((feature, index) => (
             <li key={index} className="flex items-start gap-2">
               <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
@@ -108,6 +108,29 @@ export function PlanCard({
                 {checkoutError}
               </p>
             )}
+            <label
+              htmlFor={legalFieldId}
+              className="mb-4 flex items-start gap-3 cursor-pointer rounded-lg border bg-muted/40 p-3"
+            >
+              <input
+                id={legalFieldId}
+                type="checkbox"
+                checked={agreedToLegal}
+                onChange={(e) => setAgreedToLegal(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-input accent-primary"
+              />
+              <span className="text-xs text-muted-foreground leading-relaxed">
+                I agree to the{" "}
+                <Link href="/terms" className="text-primary underline hover:no-underline">
+                  Terms of Service
+                </Link>{" "}
+                and{" "}
+                <Link href="/privacy" className="text-primary underline hover:no-underline">
+                  Privacy Policy
+                </Link>
+                .
+              </span>
+            </label>
             <Button
               className="w-full"
               variant={plan.popular ? "default" : "outline"}
@@ -123,14 +146,9 @@ export function PlanCard({
                 "Choose plan"
               )}
             </Button>
-            {!agreedToLegal && (
-              <p className="text-xs text-muted-foreground mt-2 text-center">
-                Accept Terms and Privacy above to continue.
-              </p>
-            )}
           </>
         ) : (
-          <Link href="/sign-up?next=/pricing" className="block">
+          <Link href="/sign-up?next=/pricing" className="block mt-auto">
             <Button className="w-full" variant={plan.popular ? "default" : "outline"}>
               Get started
             </Button>
