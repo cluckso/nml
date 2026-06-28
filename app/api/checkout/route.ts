@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getAuthUserFromRequest } from "@/lib/auth"
-import { createCheckoutSession, stripe } from "@/lib/stripe"
+import { createCheckoutSession, shouldUpgradeInPlace, stripe, upgradeSubscriptionInPlace } from "@/lib/stripe"
 import { db } from "@/lib/db"
 import { PlanType } from "@prisma/client"
 import { Industry } from "@prisma/client"
 import { SETUP_FEES } from "@/lib/plans"
-import Stripe from "stripe"
 
 /** Plan-first flow: create minimal business so user can checkout before onboarding. */
 export async function POST(req: NextRequest) {
@@ -58,6 +57,25 @@ export async function POST(req: NextRequest) {
         where: { id: user.id },
         data: { businessId },
       })
+    }
+
+    const business = await db.business.findUnique({
+      where: { id: businessId },
+      select: {
+        stripeSubscriptionId: true,
+        subscriptionStatus: true,
+      },
+    })
+
+    // Existing subscribers: upgrade in-place with proration (avoid duplicate Checkout subscriptions)
+    if (business && shouldUpgradeInPlace(business) && !founderDeal) {
+      const result = await upgradeSubscriptionInPlace(businessId, planType as PlanType)
+      const baseUrl = appUrl.replace(/\/$/, "")
+      const redirectUrl =
+        "alreadyOnPlan" in result
+          ? `${baseUrl}/billing?plan=current`
+          : `${baseUrl}/billing?upgraded=1`
+      return NextResponse.json({ url: redirectUrl, inPlaceUpgrade: true })
     }
 
     const session = await createCheckoutSession(

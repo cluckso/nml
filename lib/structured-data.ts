@@ -1,3 +1,4 @@
+import { GOOGLE_PLAY_STORE_URL } from "@/lib/mobile-app"
 import { SUPPORT_EMAIL } from "@/lib/site-contact"
 import { SITE_URL } from "@/lib/site-url"
 
@@ -61,8 +62,9 @@ export function softwareApplicationJsonLd() {
     "@type": "SoftwareApplication",
     name: "CallGrabbr",
     applicationCategory: "BusinessApplication",
-    operatingSystem: "Web",
+    operatingSystem: ["Web", "Android"],
     url: SITE_URL,
+    downloadUrl: GOOGLE_PLAY_STORE_URL,
     description:
       "AI call answering for HVAC, plumbing, auto repair, and other local service businesses. Captures lead details and sends instant text or email summaries.",
     offers: {

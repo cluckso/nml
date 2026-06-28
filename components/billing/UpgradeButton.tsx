@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { PlanType } from "@prisma/client"
 
@@ -12,7 +11,6 @@ interface UpgradeButtonProps {
 }
 
 export function UpgradeButton({ planType, currentPlan, agreedToLegal = true }: UpgradeButtonProps) {
-  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -29,7 +27,7 @@ export function UpgradeButton({ planType, currentPlan, agreedToLegal = true }: U
 
       const data = await response.json()
       if (data.url) {
-        router.push(data.url)
+        window.location.href = data.url
         return
       }
       const message = data.error || data.details || (response.ok ? "" : `Checkout failed${data.details ? `: ${data.details}` : ""}`)

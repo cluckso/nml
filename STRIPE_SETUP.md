@@ -18,7 +18,9 @@ STRIPE_PRICE_STARTER=price_1SvQxbDcWEGGVqRpfuSnJfLy       # Solo $99/mo
 STRIPE_PRICE_PRO=price_1TmpyODcWEGGVqRpMX75b7oD             # Team $159/mo
 STRIPE_PRICE_LOCAL_PLUS=price_1TmpyODcWEGGVqRpHlavDS9m      # Pro $279/mo
 STRIPE_PRICE_ELITE=price_1TmpyODcWEGGVqRpHlavDS9m           # Pro $279/mo (same as LOCAL_PLUS)
-STRIPE_USAGE_PRICE_ID=price_1Tmpz2DcWEGGVqRpcG3uI6MG        # Overage $0.22/min
+STRIPE_USAGE_PRICE_ID=price_1Tmpz2DcWEGGVqRpcG3uI6MG        # Overage $0.22/min (Billing Meter)
+# Optional override if meter event_name cannot be resolved from the price:
+# STRIPE_USAGE_METER_EVENT_NAME=callgrabbr_call_minutes
 ```
 
 **Note:** Stripe prices are immutable. When pricing changes, create **new** prices and update env vars. Existing subscribers stay on their original price until you migrate them.
@@ -155,7 +157,10 @@ Use **test** keys and **test** price IDs while developing; switch to **live** wh
   Webhook `checkout.session.completed` creates the subscription in your DB and links it to the business.
 
 - **Overage:**  
-  When a call ends, the app computes overage minutes (total minutes − included minutes for the plan). It finds the subscription item for `STRIPE_USAGE_PRICE_ID` and reports only that overage amount with `createUsageRecord`. Stripe then bills $0.22 per reported minute on the next invoice.
+  When a call ends, the app computes overage minutes (total minutes − included minutes for the plan). The live overage price uses **Stripe Billing Meters** (`mtr_61UwEE0eV2tBYHZC741DcWEGGVqRpDa4`). The app sends meter events via `billing.meterEvents.create` with the customer's Stripe ID and incremental overage minutes. Legacy `createUsageRecord` is only used as a fallback when the price has no meter attached.
+
+- **Plan upgrades:**  
+  New subscribers go through Stripe Checkout. Existing active subscribers upgrade **in-place** via `subscriptionItems.update` with proration — the checkout API detects an active subscription and updates the plan line item instead of creating a duplicate subscription.
 
 ---
 

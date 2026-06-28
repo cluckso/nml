@@ -6,6 +6,7 @@ import "./globals.css"
 import { Providers } from "./providers"
 import { Nav } from "@/components/nav"
 import { SUPPORT_EMAIL } from "@/lib/site-contact"
+import { GOOGLE_PLAY_STORE_URL } from "@/lib/mobile-app"
 import { SITE_URL } from "@/lib/site-url"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { organizationJsonLd, webSiteJsonLd } from "@/lib/structured-data"
@@ -146,6 +147,14 @@ rkp("init","PaccPmsytSiq");rkp("event","PAGE_VIEW");
                 <Link href="/docs/faq" className="hover:text-foreground font-medium">
                   Help &amp; FAQ
                 </Link>
+                <a
+                  href={GOOGLE_PLAY_STORE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-foreground font-medium"
+                >
+                  Android app
+                </a>
                 <Link href="/funnel/hvac" className="hover:text-foreground text-xs opacity-70">
                   Funnel demo
                 </Link>

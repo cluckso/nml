@@ -10,6 +10,7 @@ import { HomeHero } from "@/components/marketing/HomeHero"
 import { IndustryPhotoCards } from "@/components/marketing/IndustryPhotoCards"
 import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
 import { TrustStrip } from "@/components/marketing/TrustStrip"
+import { MobileAppDownload } from "@/components/marketing/MobileAppDownload"
 import { MARKETING_IMAGES, MARKETING_IMAGE_ALT } from "@/lib/marketing-images"
 import { formatJobRoiLine, formatOverageRate, formatIncludedUsageShort, PRICING_TIERS } from "@/lib/pricing-catalog"
 import {
@@ -283,6 +284,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <MobileAppDownload />
 
       {/* What Callers Hear */}
       <section className="container mx-auto px-4 py-16">

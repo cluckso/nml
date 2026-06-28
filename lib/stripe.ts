@@ -43,6 +43,76 @@ export const STRIPE_PRODUCTS = {
 // Metered usage price ID for overages ($0.22/min in app; create matching price in Stripe)
 export const STRIPE_USAGE_PRICE_ID = process.env.STRIPE_USAGE_PRICE_ID || "price_usage"
 
+/** Cached event_name from the live overage price's Billing Meter (populated on first usage report). */
+let cachedUsageMeterEventName: string | null = null
+
+async function getUsageMeterEventName(): Promise<string | null> {
+  if (!stripe) return null
+  if (cachedUsageMeterEventName) return cachedUsageMeterEventName
+  if (process.env.STRIPE_USAGE_METER_EVENT_NAME) {
+    cachedUsageMeterEventName = process.env.STRIPE_USAGE_METER_EVENT_NAME
+    return cachedUsageMeterEventName
+  }
+  try {
+    const price = await stripe.prices.retrieve(STRIPE_USAGE_PRICE_ID)
+    const meterRef = price.recurring?.meter
+    const meterId = typeof meterRef === "string" ? meterRef : null
+    if (!meterId) return null
+    const meter = await stripe.billing.meters.retrieve(meterId)
+    cachedUsageMeterEventName = meter.event_name
+    return cachedUsageMeterEventName
+  } catch (error) {
+    console.error("Failed to resolve Stripe usage meter event name:", error)
+    return null
+  }
+}
+
+/** All configured monthly plan price IDs (for finding the plan line item on a subscription). */
+function getAllPlanPriceIds(): string[] {
+  return [
+    process.env.STRIPE_PRICE_STARTER,
+    process.env.STRIPE_PRICE_PRO,
+    process.env.STRIPE_PRICE_LOCAL_PLUS,
+    process.env.STRIPE_PRICE_ELITE,
+  ].filter((id): id is string => !!id && id.startsWith("price_"))
+}
+
+function isPlanPriceId(priceId: string): boolean {
+  return getAllPlanPriceIds().includes(priceId)
+}
+
+/** Reverse-map a Stripe price ID to our PlanType (for webhook sync after in-place upgrades). */
+export function getPlanTypeFromPriceId(priceId: string): PlanType | null {
+  const map: Array<[string | undefined, PlanType]> = [
+    [process.env.STRIPE_PRICE_STARTER, PlanType.STARTER],
+    [process.env.STRIPE_PRICE_PRO, PlanType.PRO],
+    [process.env.STRIPE_PRICE_LOCAL_PLUS, PlanType.LOCAL_PLUS],
+    [process.env.STRIPE_PRICE_ELITE, PlanType.ELITE],
+  ]
+  for (const [envId, planType] of map) {
+    if (envId && envId === priceId) return planType
+  }
+  return null
+}
+
+function findPlanSubscriptionItem(sub: Stripe.Subscription): Stripe.SubscriptionItem | undefined {
+  return sub.items.data.find((item) => {
+    const priceId = typeof item.price === "string" ? item.price : item.price.id
+    return isPlanPriceId(priceId)
+  })
+}
+
+/** Whether this business should upgrade in-place instead of a new Checkout subscription. */
+export function shouldUpgradeInPlace(business: {
+  stripeSubscriptionId: string | null
+  subscriptionStatus: SubscriptionStatus | null
+}): boolean {
+  return !!(
+    business.stripeSubscriptionId &&
+    (business.subscriptionStatus === "ACTIVE" || business.subscriptionStatus === "PAST_DUE")
+  )
+}
+
 /**
  * Create a Stripe Customer for trial (card on file, no charge). Call before creating Business.
  */
@@ -149,6 +219,64 @@ export async function createCheckoutSession(
   return session
 }
 
+/**
+ * Change an existing subscriber's plan with proration (no new Checkout subscription).
+ */
+export async function upgradeSubscriptionInPlace(
+  businessId: string,
+  planType: PlanType
+): Promise<{ upgraded: true } | { alreadyOnPlan: true }> {
+  if (!stripe) {
+    throw new Error("STRIPE_SECRET_KEY is not configured. Add it to .env to enable billing.")
+  }
+
+  const business = await db.business.findUnique({ where: { id: businessId } })
+  if (!business) throw new Error("Business not found")
+  if (!shouldUpgradeInPlace(business)) {
+    throw new Error("No active subscription to upgrade. Use checkout for new subscriptions.")
+  }
+
+  const newPriceId = getPriceIdForPlan(planType)
+  const sub = await stripe.subscriptions.retrieve(business.stripeSubscriptionId!, {
+    expand: ["items.data.price"],
+  })
+  const planItem = findPlanSubscriptionItem(sub)
+  if (!planItem) {
+    throw new Error("Could not find plan subscription item to update.")
+  }
+
+  const currentPriceId =
+    typeof planItem.price === "string" ? planItem.price : (planItem.price as Stripe.Price).id
+  if (currentPriceId === newPriceId) {
+    return { alreadyOnPlan: true }
+  }
+
+  await stripe.subscriptionItems.update(planItem.id, {
+    price: newPriceId,
+    quantity: 1,
+    proration_behavior: "create_prorations",
+  })
+
+  await stripe.subscriptions.update(sub.id, {
+    metadata: { businessId, planType },
+  })
+
+  await db.business.update({
+    where: { id: businessId },
+    data: {
+      planType,
+      subscriptionStatus: "ACTIVE",
+      cancelAtPeriodEnd: false,
+      status: "ACTIVE",
+      trialStartedAt: null,
+      trialEndsAt: null,
+      trialMinutesUsed: 0,
+    },
+  })
+
+  return { upgraded: true }
+}
+
 function getProductIdForPlan(planType: PlanType): string {
   switch (planType) {
     case PlanType.STARTER:
@@ -234,21 +362,46 @@ export async function reportUsageToStripe(businessId: string, minutes: number) {
     },
   })
 
-  // Report only overage minutes to Stripe (incremental); needs subscription item id for metered price
+  // Report only overage minutes to Stripe via Billing Meter events (live overage price uses meters, not legacy usage records)
   if (incrementalOverage > 0) {
     try {
-      const sub = await stripe.subscriptions.retrieve(business.stripeSubscriptionId, {
-        expand: ["items.data.price"],
-      })
-      const overageItem = sub.items.data.find(
-        (item) => (item.price as Stripe.Price).id === STRIPE_USAGE_PRICE_ID
-      )
-      if (overageItem) {
-        await stripe.subscriptionItems.createUsageRecord(overageItem.id, {
-          quantity: Math.ceil(incrementalOverage),
-          timestamp: Math.floor(now.getTime() / 1000),
-        })
+      if (!business.stripeCustomerId) {
+        console.warn(`No Stripe customer for business ${businessId}`)
+        return
       }
+
+      const quantity = Math.ceil(incrementalOverage)
+      const eventName = await getUsageMeterEventName()
+      if (eventName) {
+        const identifier = `overage-${businessId}-${billingPeriod}-${previousTotal + minutes}-${quantity}`
+        await stripe.billing.meterEvents.create({
+          event_name: eventName,
+          payload: {
+            stripe_customer_id: business.stripeCustomerId,
+            value: String(quantity),
+          },
+          identifier,
+        })
+      } else {
+        // Fallback for legacy metered prices without a Billing Meter
+        const sub = await stripe.subscriptions.retrieve(business.stripeSubscriptionId, {
+          expand: ["items.data.price"],
+        })
+        const overageItem = sub.items.data.find(
+          (item) => (item.price as Stripe.Price).id === STRIPE_USAGE_PRICE_ID
+        )
+        if (overageItem) {
+          await stripe.subscriptionItems.createUsageRecord(overageItem.id, {
+            quantity,
+            timestamp: Math.floor(now.getTime() / 1000),
+          })
+        }
+      }
+
+      await db.usage.update({
+        where: { businessId_billingPeriod: { businessId, billingPeriod } },
+        data: { reportedToStripe: true },
+      })
     } catch (error) {
       console.error("Stripe usage reporting error:", error)
       // Don't throw - we'll retry on next call
@@ -328,6 +481,14 @@ export async function handleStripeWebhook(event: Stripe.Event) {
     case "customer.subscription.deleted": {
       const subscription = event.data.object as Stripe.Subscription
       const newStatus = stripeSubscriptionStatusToDb(subscription.status)
+      const planItem = findPlanSubscriptionItem(subscription)
+      const planPriceId =
+        planItem && typeof planItem.price !== "string"
+          ? planItem.price.id
+          : typeof planItem?.price === "string"
+            ? planItem.price
+            : null
+      const planTypeFromStripe = planPriceId ? getPlanTypeFromPriceId(planPriceId) : null
       const businesses = await db.business.findMany({
         where: { stripeSubscriptionId: subscription.id },
         select: { id: true },
@@ -339,6 +500,7 @@ export async function handleStripeWebhook(event: Stripe.Event) {
           currentPeriodStart: new Date(subscription.current_period_start * 1000),
           currentPeriodEnd: new Date(subscription.current_period_end * 1000),
           cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          ...(planTypeFromStripe ? { planType: planTypeFromStripe } : {}),
           ...(newStatus === "CANCELED" ? { status: "PAUSED" as const } : {}),
         },
       })
