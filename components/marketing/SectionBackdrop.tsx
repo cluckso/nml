@@ -19,6 +19,8 @@ type SectionBackdropProps = {
   overlay?: OverlayStrength
   priority?: boolean
   as?: "section" | "div"
+  /** Override Next/Image cover positioning (e.g. object-[center_30%]). */
+  imageClassName?: string
 }
 
 export function SectionBackdrop({
@@ -30,6 +32,7 @@ export function SectionBackdrop({
   overlay = "medium",
   priority = false,
   as: Tag = "section",
+  imageClassName = "object-cover object-center scale-105",
 }: SectionBackdropProps) {
   return (
     <Tag className={cn("relative overflow-hidden", className)}>
@@ -37,7 +40,7 @@ export function SectionBackdrop({
         src={src}
         alt={alt}
         fill
-        className="object-cover object-center scale-105"
+        className={imageClassName}
         priority={priority}
         sizes="100vw"
       />

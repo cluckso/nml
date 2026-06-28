@@ -43,9 +43,10 @@ export default async function PricingPage() {
   return (
   <>
     <SectionBackdrop
-      src={MARKETING_IMAGES.hero}
-      alt={MARKETING_IMAGE_ALT.hero}
+      src={MARKETING_IMAGES.leadCapture}
+      alt={MARKETING_IMAGE_ALT.leadCapture}
       overlay="hero"
+      imageClassName="object-cover object-[center_35%] scale-105"
       className="py-20 border-b border-border/50"
       contentClassName="container mx-auto px-4 text-center"
     >
