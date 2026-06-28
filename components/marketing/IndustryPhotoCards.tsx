@@ -1,7 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { HOMEPAGE_INDUSTRY_LINKS } from "@/lib/industry-data"
-import { getIndustryImage, getIndustryImageAlt } from "@/lib/marketing-images"
+import { getIndustryCardImage, getIndustryImageAlt } from "@/lib/marketing-images"
 import { ArrowRight } from "lucide-react"
 
 export function IndustryPhotoCards() {
@@ -18,14 +18,14 @@ export function IndustryPhotoCards() {
           className="group relative aspect-[4/3] overflow-hidden rounded-xl border border-border/50 shadow-lg shadow-black/20 transition hover:border-primary/40 hover:shadow-primary/10"
         >
           <Image
-            src={getIndustryImage(slug)}
+            src={getIndustryCardImage(slug)}
             alt={getIndustryImageAlt(name)}
             fill
-            className="object-cover transition duration-500 group-hover:scale-105"
+            className="object-cover object-[center_20%] transition duration-500 group-hover:scale-105"
             sizes="(max-width: 768px) 50vw, 25vw"
           />
           <div
-            className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent"
+            className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/25 to-transparent"
             aria-hidden
           />
           <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 p-4">
