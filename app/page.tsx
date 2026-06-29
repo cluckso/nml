@@ -47,7 +47,8 @@ export default function HomePage() {
       <SectionBackdrop
         src={MARKETING_IMAGES.workflow}
         alt={MARKETING_IMAGE_ALT.workflow}
-        overlay="light"
+        overlay="medium"
+        imageClassName="object-cover object-center"
         className="border-y border-border/50 py-16"
         contentClassName="container mx-auto px-4"
       >
@@ -173,6 +174,7 @@ export default function HomePage() {
         src={MARKETING_IMAGES.whyMatters}
         alt={MARKETING_IMAGE_ALT.whyMatters}
         overlay="medium"
+        imageClassName="object-cover object-center"
         className="py-16 border-y border-border/50"
         contentClassName="container mx-auto px-4"
       >
@@ -351,7 +353,8 @@ export default function HomePage() {
       <SectionBackdrop
         src={MARKETING_IMAGES.leadCapture}
         alt={MARKETING_IMAGE_ALT.leadCapture}
-        overlay="light"
+        overlay="medium"
+        imageClassName="object-cover object-[center_40%]"
         className="py-16 border-y border-border/50"
         contentClassName="container mx-auto px-4"
       >
@@ -592,6 +595,7 @@ export default function HomePage() {
         src={MARKETING_IMAGES.finalCta}
         alt={MARKETING_IMAGE_ALT.finalCta}
         overlay="heavy"
+        imageClassName="object-cover object-[center_35%]"
         className="py-20"
         contentClassName="container mx-auto px-4 text-center"
       >

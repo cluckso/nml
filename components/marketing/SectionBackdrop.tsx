@@ -32,7 +32,7 @@ export function SectionBackdrop({
   overlay = "medium",
   priority = false,
   as: Tag = "section",
-  imageClassName = "object-cover object-center scale-105",
+  imageClassName = "object-cover object-center",
 }: SectionBackdropProps) {
   return (
     <Tag className={cn("relative overflow-hidden", className)}>
