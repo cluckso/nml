@@ -30,6 +30,7 @@ yarn-error.log*
 .env.vercel-check
 **/firebase-service-account.json
 dashboard_capacitor/.env.production
+scripts/marketing-section-sources/
 
 # vercel
 .vercel

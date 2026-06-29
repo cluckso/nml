@@ -1,6 +1,8 @@
 /**
  * Generate clean marketing section backdrops (no baked-in text or UI).
- * Run: node scripts/generate-marketing-sections.mjs
+ * For abstract gradients: node scripts/generate-marketing-sections.mjs
+ * For photographic backdrops: add PNGs to scripts/marketing-section-sources/
+ *   then run node scripts/process-marketing-section-photos.mjs
  */
 import fs from "fs"
 import path from "path"

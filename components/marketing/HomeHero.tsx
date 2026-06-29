@@ -18,6 +18,7 @@ export function HomeHero() {
       alt={MARKETING_IMAGE_ALT.hero}
       overlay="hero"
       priority
+      imageClassName="object-cover object-[70%_center]"
       className="min-h-[88vh] flex flex-col items-center justify-center px-4 py-24"
       contentClassName="container mx-auto text-center max-w-4xl"
     >

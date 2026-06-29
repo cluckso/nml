@@ -174,7 +174,7 @@ export default function HomePage() {
         src={MARKETING_IMAGES.whyMatters}
         alt={MARKETING_IMAGE_ALT.whyMatters}
         overlay="medium"
-        imageClassName="object-cover object-center"
+        imageClassName="object-cover object-[75%_center]"
         className="py-16 border-y border-border/50"
         contentClassName="container mx-auto px-4"
       >
@@ -354,7 +354,7 @@ export default function HomePage() {
         src={MARKETING_IMAGES.leadCapture}
         alt={MARKETING_IMAGE_ALT.leadCapture}
         overlay="medium"
-        imageClassName="object-cover object-[center_40%]"
+        imageClassName="object-cover object-[30%_center]"
         className="py-16 border-y border-border/50"
         contentClassName="container mx-auto px-4"
       >
@@ -595,7 +595,7 @@ export default function HomePage() {
         src={MARKETING_IMAGES.finalCta}
         alt={MARKETING_IMAGE_ALT.finalCta}
         overlay="heavy"
-        imageClassName="object-cover object-[center_35%]"
+        imageClassName="object-cover object-[center_65%]"
         className="py-20"
         contentClassName="container mx-auto px-4 text-center"
       >
