@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
-  appId: 'com.me.mycca',
+  appId: 'com.me.adhd',
   appName: 'CallGrabbr',
   webDir: 'dist',
   server: {

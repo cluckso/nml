@@ -10,7 +10,9 @@ import {
   sendDemoResultSms,
   sendMissedCallTextBack,
   forwardToCrm,
+  type StructuredIntake,
 } from "@/lib/notifications"
+import { sendPushNotification } from "@/lib/push-notifications"
 import { reportUsageToStripe } from "@/lib/stripe"
 import { releaseRetellNumber } from "@/lib/retell"
 import { isSubscriptionActive } from "@/lib/subscription"
@@ -685,6 +687,9 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
         if (notifPrefs.smsAlerts) {
           notifies.push(sendSMSNotification(business, call, intakeForNotification))
         }
+        if (notifPrefs.pushAlerts) {
+          notifies.push(sendPushNotification(business.id, call, intakeForNotification))
+        }
         const intakePhone = typeof intakeForNotify.phone === "string" ? intakeForNotify.phone : null
         if (hasSmsToCallers(planType) && intakePhone) {
           const confirmMsg = callSettings.followUpSms?.enabled
@@ -701,7 +706,13 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
           where: { id: call.id },
           data: updateData,
         })
-        console.info("[Notifications] Sent", { callId, businessId: business.id, email: notifPrefs.emailAlerts, sms: notifPrefs.smsAlerts })
+        console.info("[Notifications] Sent", {
+          callId,
+          businessId: business.id,
+          email: notifPrefs.emailAlerts,
+          sms: notifPrefs.smsAlerts,
+          push: notifPrefs.pushAlerts,
+        })
       } catch (error) {
         console.error("Notification error:", error)
       }

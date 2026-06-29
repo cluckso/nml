@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { getSupabase } from './lib/supabase'
 import { registerPushNotifications } from './lib/notifications'
@@ -15,6 +15,11 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   const [configError, setConfigError] = useState<string | null>(null)
   const navigate = useNavigate()
+  const navigateRef = useRef(navigate)
+
+  useEffect(() => {
+    navigateRef.current = navigate
+  }, [navigate])
 
   useEffect(() => {
     let active = true
@@ -48,26 +53,27 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    if (session) {
-      registerPushNotifications(
-        (token) => {
-          console.log('[App] Push token registered:', token)
-          import('./lib/api').then(({ savePushToken }) => {
-            savePushToken(token).catch(console.error)
-          })
-        },
-        (notification) => {
-          console.log('[App] Notification received in foreground:', notification)
-        },
-        (action) => {
-          console.log('[App] Notification action:', action)
-          if (action.notification.data?.route) {
-            navigate(action.notification.data.route)
-          }
+    if (!session) return
+
+    void registerPushNotifications(
+      (token) => {
+        console.log('[App] Push token registered:', token)
+        import('./lib/api').then(({ savePushToken }) => {
+          savePushToken(token).catch(console.error)
+        })
+      },
+      (notification) => {
+        console.log('[App] Notification received in foreground:', notification)
+      },
+      (action) => {
+        console.log('[App] Notification action:', action)
+        const route = action.notification.data?.route
+        if (typeof route === 'string' && route.length > 0) {
+          navigateRef.current(route)
         }
-      )
-    }
-  }, [session, navigate])
+      }
+    )
+  }, [session])
 
   const handleSignOut = async () => {
     await supabase?.auth.signOut()

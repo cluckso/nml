@@ -2,6 +2,48 @@ import { PushNotifications } from '@capacitor/push-notifications'
 import type { Token, PushNotificationSchema, ActionPerformed } from '@capacitor/push-notifications'
 import { Capacitor } from '@capacitor/core'
 
+type ListenerHandle = Awaited<ReturnType<typeof PushNotifications.addListener>>
+
+let listenersRegistered = false
+let listenerHandles: ListenerHandle[] = []
+
+async function ensureListeners(
+  onToken?: (token: string) => void,
+  onNotification?: (notification: PushNotificationSchema) => void,
+  onAction?: (notification: ActionPerformed) => void
+): Promise<void> {
+  if (listenersRegistered) return
+
+  listenerHandles.push(
+    await PushNotifications.addListener('registration', (token: Token) => {
+      console.log('[Push] Registration token:', token.value)
+      onToken?.(token.value)
+    })
+  )
+
+  listenerHandles.push(
+    await PushNotifications.addListener('registrationError', (error: unknown) => {
+      console.error('[Push] Registration error:', error)
+    })
+  )
+
+  listenerHandles.push(
+    await PushNotifications.addListener('pushNotificationReceived', (notification: PushNotificationSchema) => {
+      console.log('[Push] Notification received:', notification)
+      onNotification?.(notification)
+    })
+  )
+
+  listenerHandles.push(
+    await PushNotifications.addListener('pushNotificationActionPerformed', (notification: ActionPerformed) => {
+      console.log('[Push] Notification action performed:', notification)
+      onAction?.(notification)
+    })
+  )
+
+  listenersRegistered = true
+}
+
 export async function registerPushNotifications(
   onToken?: (token: string) => void,
   onNotification?: (notification: PushNotificationSchema) => void,
@@ -13,6 +55,8 @@ export async function registerPushNotifications(
   }
 
   try {
+    await ensureListeners(onToken, onNotification, onAction)
+
     let permStatus = await PushNotifications.checkPermissions()
 
     if (permStatus.receive === 'prompt') {
@@ -25,28 +69,15 @@ export async function registerPushNotifications(
     }
 
     await PushNotifications.register()
-
-    await PushNotifications.addListener('registration', (token: Token) => {
-      console.log('[Push] Registration token:', token.value)
-      if (onToken) onToken(token.value)
-    })
-
-    await PushNotifications.addListener('registrationError', (error: any) => {
-      console.error('[Push] Registration error:', error)
-    })
-
-    await PushNotifications.addListener('pushNotificationReceived', (notification: PushNotificationSchema) => {
-      console.log('[Push] Notification received:', notification)
-      if (onNotification) onNotification(notification)
-    })
-
-    await PushNotifications.addListener('pushNotificationActionPerformed', (notification: ActionPerformed) => {
-      console.log('[Push] Notification action performed:', notification)
-      if (onAction) onAction(notification)
-    })
   } catch (error) {
     console.error('[Push] Setup error:', error)
   }
+}
+
+export async function unregisterPushListeners(): Promise<void> {
+  await Promise.all(listenerHandles.map((handle) => handle.remove()))
+  listenerHandles = []
+  listenersRegistered = false
 }
 
 export async function getDeliveredNotifications() {

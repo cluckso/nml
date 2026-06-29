@@ -61,6 +61,8 @@ The app registers for push notifications on login and saves the FCM token to the
 - Appointment reminders
 - Custom deep links (via `data.route`)
 
+**Setup:** See [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) for `google-services.json` and Vercel `FIREBASE_SERVICE_ACCOUNT_JSON`.
+
 ## Architecture
 
 - **Authentication:** Supabase Auth (shared session with web app)

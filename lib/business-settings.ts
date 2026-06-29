@@ -40,6 +40,7 @@ export interface AvailabilitySettings {
 export interface NotificationSettings {
   smsAlerts: boolean
   emailAlerts: boolean
+  pushAlerts: boolean
   emergencyOnlyAlerts: boolean
   dailyDigest: boolean
 }
@@ -214,6 +215,7 @@ export const DEFAULT_SETTINGS: BusinessSettings = {
   notifications: {
     smsAlerts: true,
     emailAlerts: true,
+    pushAlerts: true,
     emergencyOnlyAlerts: false,
     dailyDigest: false,
   },

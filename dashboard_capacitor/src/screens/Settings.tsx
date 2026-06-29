@@ -7,10 +7,13 @@ interface SettingsProps {
   onSignOut: () => void
 }
 
+interface MobileNotificationPrefs {
+  pushAlerts: boolean
+  emergencyOnlyAlerts: boolean
+}
+
 export default function Settings({ onSignOut }: SettingsProps) {
-  const [settings, setSettings] = useState<{ notificationsEnabled?: boolean; emergencyAlertsOnly?: boolean } | null>(
-    null
-  )
+  const [settings, setSettings] = useState<MobileNotificationPrefs | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -21,7 +24,11 @@ export default function Settings({ onSignOut }: SettingsProps) {
     setError(null)
     try {
       const res = await getSettings()
-      setSettings(res)
+      const notifications = res.settings?.notifications ?? {}
+      setSettings({
+        pushAlerts: notifications.pushAlerts ?? true,
+        emergencyOnlyAlerts: notifications.emergencyOnlyAlerts ?? false,
+      })
     } catch (e) {
       setError(e instanceof ApiError ? e.message : String(e))
     } finally {
@@ -33,13 +40,15 @@ export default function Settings({ onSignOut }: SettingsProps) {
     load()
   }, [])
 
-  const handleToggle = async (key: string, value: boolean) => {
+  const handleToggle = async (key: keyof MobileNotificationPrefs, value: boolean) => {
     if (!settings) return
     try {
       await Haptics.impact({ style: ImpactStyle.Light })
       setSaving(true)
       const updated = { ...settings, [key]: value }
-      await patchSettings({ [key]: value })
+      await patchSettings({
+        notifications: updated,
+      })
       setSettings(updated)
     } catch (e) {
       setError(e instanceof ApiError ? e.message : String(e))
@@ -79,8 +88,8 @@ export default function Settings({ onSignOut }: SettingsProps) {
                 <span style={{ fontSize: 14 }}>Enable push notifications</span>
                 <input
                   type="checkbox"
-                  checked={settings.notificationsEnabled ?? true}
-                  onChange={(e) => handleToggle('notificationsEnabled', e.target.checked)}
+                  checked={settings.pushAlerts}
+                  onChange={(e) => handleToggle('pushAlerts', e.target.checked)}
                   disabled={saving}
                   style={{ width: 20, height: 20 }}
                 />
@@ -89,8 +98,8 @@ export default function Settings({ onSignOut }: SettingsProps) {
                 <span style={{ fontSize: 14 }}>Emergency alerts only</span>
                 <input
                   type="checkbox"
-                  checked={settings.emergencyAlertsOnly ?? false}
-                  onChange={(e) => handleToggle('emergencyAlertsOnly', e.target.checked)}
+                  checked={settings.emergencyOnlyAlerts}
+                  onChange={(e) => handleToggle('emergencyOnlyAlerts', e.target.checked)}
                   disabled={saving}
                   style={{ width: 20, height: 20 }}
                 />

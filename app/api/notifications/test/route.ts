@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from "next/server"
 import { getAuthUserFromRequest } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { sendEmailNotification, sendSMSNotification } from "@/lib/notifications"
+import { sendPushNotification } from "@/lib/push-notifications"
 import { normalizeE164 } from "@/lib/normalize-phone"
 
 /**
  * POST /api/notifications/test — send a test email and/or SMS to the current user.
- * Body: { type: "email" | "sms" } or { type: "both" }.
+ * Body: { type: "email" | "sms" | "push" | "both" }.
  * SMS is sent to the user's saved notification phone (Settings → Notifications).
+ * Push is sent to the user's saved FCM token (mobile app login).
  * For SMS you must set "Phone number for SMS alerts" and have SMS consent on.
  */
 export async function POST(req: NextRequest) {
@@ -29,8 +31,9 @@ export async function POST(req: NextRequest) {
   const type = (body.type ?? "both") as string
   const doEmail = type === "email" || type === "both"
   const doSms = type === "sms" || type === "both"
+  const doPush = type === "push" || type === "both"
 
-  const results: { email?: string; sms?: string } = {}
+  const results: { email?: string; sms?: string; push?: string } = {}
 
   if (doEmail) {
     try {
@@ -107,6 +110,46 @@ export async function POST(req: NextRequest) {
       } catch (err) {
         console.error("Test SMS error:", err)
         results.sms = err instanceof Error ? err.message : "Failed to send"
+      }
+    }
+  }
+
+  if (doPush) {
+    const dbUser = await db.user.findUnique({
+      where: { id: user.id },
+      select: { pushToken: true },
+    })
+    const pushToken = dbUser?.pushToken
+    if (!pushToken?.trim()) {
+      results.push = "Log in on the Android app and allow notifications first."
+    } else {
+      try {
+        const retellCallId = `test-push-${Date.now()}`
+        const call = await db.call.create({
+          data: {
+            retellCallId,
+            businessId: business.id,
+            duration: 0,
+            minutes: 0,
+            transcript: null,
+            callerName: "Test",
+            callerPhone: null,
+            issueDescription: null,
+            emergencyFlag: false,
+            missedCallRecovery: false,
+          },
+        })
+        const intake = {
+          name: "Test Caller",
+          phone: "+15550000000",
+          issue_description: "This is a test push notification.",
+          emergency: false,
+        }
+        await sendPushNotification(business.id, call, intake)
+        results.push = "sent"
+      } catch (err) {
+        console.error("Test push error:", err)
+        results.push = err instanceof Error ? err.message : "Failed to send"
       }
     }
   }
