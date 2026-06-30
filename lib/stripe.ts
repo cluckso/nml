@@ -199,7 +199,7 @@ export async function createCheckoutSession(
     customer_email: business.stripeCustomerId ? undefined : (business.users?.[0]?.email ?? undefined),
     line_items: lineItems,
     mode: "subscription",
-    success_url: `${baseUrl}/onboarding?session_id={CHECKOUT_SESSION_ID}`,
+    success_url: `${baseUrl}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${baseUrl}/pricing`,
     metadata: {
       businessId,

@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
       const redirectUrl =
         "alreadyOnPlan" in result
           ? `${baseUrl}/billing?plan=current`
-          : `${baseUrl}/billing?upgraded=1`
+          : `${baseUrl}/subscribe/success?upgraded=1`
       return NextResponse.json({ url: redirectUrl, inPlaceUpgrade: true })
     }
 

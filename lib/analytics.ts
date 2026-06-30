@@ -34,3 +34,10 @@ export function trackSubscribe(planName?: string): void {
     window.rkp("event", "PURCHASE")
   }
 }
+
+/** Fired when Stripe checkout completes and the user lands on the purchase success page. */
+export function trackPurchaseSuccess(planName?: string): void {
+  if (typeof window !== "undefined" && window.fbq) {
+    window.fbq("track", "Purchase", planName ? { content_name: planName } : undefined)
+  }
+}
