@@ -63,11 +63,12 @@ npx vercel --prod
 - Ensure Prisma schema is valid and can generate
 
 ### Cron Jobs
-Two cron jobs are configured:
-- `/api/cron/expire-trials` - Daily at 12:00 PM UTC
-- `/api/cron/follow-up` - Daily at 1:00 PM UTC
+Three cron jobs are configured in `vercel.json`:
+- `/api/cron/expire-trials` - Daily at 12:00 UTC (pauses expired/exhausted trials)
+- `/api/cron/follow-up` - Daily at 13:00 UTC (24h caller follow-up SMS)
+- `/api/cron/weekly-reports` - Mondays at 14:00 UTC (Pro weekly email reports)
 
-Make sure your Vercel plan supports cron jobs (Hobby plan supports daily crons only).
+Set `CRON_SECRET` in Vercel; Vercel sends `Authorization: Bearer <CRON_SECRET>` on cron invocations.
 
 ## Recent Updates
 - Updated Node.js to version 22 (latest LTS)

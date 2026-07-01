@@ -198,6 +198,7 @@ CallGrabbr answers every call, asks system type + address + urgency, and texts y
     id: "hvac-quote",
     industry: "hvac",
     format: "quote",
+    title: "HVAC quote — no heat in January",
     slides: [
       {
         headline: '"No heat in January."',
@@ -321,6 +322,7 @@ CallGrabbr answers, gets address + what's wrong + how urgent, texts you in secon
     id: "plumbing-quote",
     industry: "plumbing",
     format: "quote",
+    title: "Plumbing quote — crawl space calls",
     slides: [
       {
         headline: '"Started plumbing to run my own schedule."',
@@ -338,6 +340,7 @@ By the time you call back, they've already booked another plumber.`,
     id: "plumbing-before-after",
     industry: "plumbing",
     format: "before_after",
+    title: "Plumbing before/after — burst pipe calls",
     slides: [
       { headline: "Before", body: "Miss burst-pipe calls in crawl spaces" },
       { headline: "After", body: "Get sewer backup details before you roll the truck" },
@@ -434,6 +437,7 @@ CallGrabbr answers, qualifies the issue, captures address and urgency, texts you
     id: "electrical-quote",
     industry: "electrical",
     format: "quote",
+    title: "Electrical quote — live panel",
     slides: [
       {
         headline: '"Wanted freedom from the 9-to-5."',
@@ -451,6 +455,7 @@ They call the next electrician. Job gone.`,
     id: "electrical-before-after",
     industry: "electrical",
     format: "before_after",
+    title: "Electrical before/after — panel work",
     slides: [
       { headline: "Before", body: "Can't answer during live panel work" },
       { headline: "After", body: 'Qualify "no power" vs "new install" before callback' },

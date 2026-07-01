@@ -12,7 +12,10 @@ import type { AvailabilitySettings } from "../business-settings"
 
 describe("normalizeCallRouting", () => {
   it("defaults to answer all when legacy ringBeforeAnswerSeconds is 0", () => {
-    const r = normalizeCallRouting({ ringBeforeAnswerSeconds: 0 }, DEFAULT_CALL_ROUTING)
+    const r = normalizeCallRouting(
+      { ringBeforeAnswerSeconds: 0 } as unknown as Parameters<typeof normalizeCallRouting>[0],
+      DEFAULT_CALL_ROUTING
+    )
     expect(r.answerAllCalls).toBe(true)
   })
 

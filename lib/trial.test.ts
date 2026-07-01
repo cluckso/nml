@@ -39,7 +39,7 @@ describe("getTrialStatus", () => {
     const result = await getTrialStatus("b1")
     expect(result.isOnTrial).toBe(true)
     expect(result.minutesUsed).toBe(10)
-    expect(result.minutesRemaining).toBe(40)
+    expect(result.minutesRemaining).toBe(FREE_TRIAL_MINUTES - 10)
     expect(result.isExhausted).toBe(false)
     expect(result.daysRemaining).toBeGreaterThanOrEqual(6)
   })
