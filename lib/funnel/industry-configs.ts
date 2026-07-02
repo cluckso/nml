@@ -143,6 +143,7 @@ function fromLanding(
     heroImage: overrides.heroImage ?? getIndustryImage(slug),
     exampleTranscript: overrides.exampleTranscript,
     callSummary: overrides.callSummary,
+    smsPreview: overrides.smsPreview,
     testimonial: overrides.testimonial,
     steps: overrides.steps ?? buildStandardSteps(displayName),
     leadScoring: overrides.leadScoring ?? LEAD_SCORING_WEIGHTS,
@@ -162,8 +163,15 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     averageSale: 475,
     missedCallRate: 0.28,
     exampleTranscript:
-      "Agent: Thanks for calling — how can I help?\nCaller: Our AC stopped working and it's 95 degrees.\nAgent: I'm sorry to hear that. What's the service address?\nCaller: 742 Oak Lane.\nAgent: Got it. Is anyone in the home without cooling right now?",
+      "Agent: Thanks for calling — how can I help?\nCaller: Our AC stopped working and it's 95 degrees.\nAgent: I'm sorry to hear that. What's the service address?\nCaller: 742 Oak Lane.\nAgent: Got it. Is anyone in the home without cooling right now?\nCaller: Yes, the whole house is hot.\nAgent: Can I get your name and callback number?\nCaller: Lisa Torres, (555) 234-5678.",
     callSummary: "AC outage · 742 Oak Lane · High urgency · Callback requested",
+    smsPreview: {
+      name: "Lisa Torres",
+      phone: "(555) 234-5678",
+      address: "742 Oak Lane",
+      job: "AC outage - no cooling",
+      urgency: "High",
+    },
     testimonial: {
       quote: "We captured 12 after-hours leads in the first month. One emergency install paid for a year of CallGrabbr.",
       author: "Mike R.",
@@ -180,8 +188,15 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     averageSale: 380,
     missedCallRate: 0.35,
     exampleTranscript:
-      "Agent: ABC Plumbing, how can I help?\nCaller: Water is leaking under my kitchen sink!\nAgent: Is this active flooding right now?\nCaller: It's dripping pretty bad.\nAgent: What's the address for service?",
-    callSummary: "Kitchen leak · Active drip · Address captured · Emergency flag",
+      "Agent: ABC Plumbing, how can I help?\nCaller: Water is leaking under my kitchen sink!\nAgent: Is this active flooding right now?\nCaller: It's dripping pretty bad.\nAgent: What's the address for service?\nCaller: 42 Maple St.\nAgent: Can I get your name and number?\nCaller: John Martinez, (555) 234-5678.",
+    callSummary: "Kitchen leak · 42 Maple St · Active drip · Emergency flag",
+    smsPreview: {
+      name: "John Martinez",
+      phone: "(555) 234-5678",
+      address: "42 Maple St",
+      job: "Kitchen sink leak",
+      urgency: "High",
+    },
     testimonial: {
       quote: "Our after-hours capture rate went from near zero to most calls answered. Game changer for emergency work.",
       author: "Sarah T.",
@@ -198,8 +213,15 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     averageSale: 420,
     missedCallRate: 0.3,
     exampleTranscript:
-      "Agent: Thanks for calling — what's going on?\nCaller: Half my house lost power and I smell something burning.\nAgent: That sounds urgent. Are you safe to stay in the home?\nCaller: Yes, but I need someone ASAP.",
-    callSummary: "Partial outage · Burning smell · Safety check · Urgent callback",
+      "Agent: Thanks for calling — what's going on?\nCaller: Half my house lost power and I smell something burning.\nAgent: That sounds urgent. Are you safe to stay in the home?\nCaller: Yes, but I need someone ASAP.\nAgent: What's the service address?\nCaller: 88 Cedar Court.\nAgent: Name and callback number?\nCaller: David Kim, (555) 891-2244.",
+    callSummary: "Partial outage · 88 Cedar Court · Burning smell · Urgent callback",
+    smsPreview: {
+      name: "David Kim",
+      phone: "(555) 891-2244",
+      address: "88 Cedar Court",
+      job: "Partial outage - burning smell",
+      urgency: "High",
+    },
   }),
   fromLanding("auto-repair", {
     displayName: "Auto Repair",
@@ -210,8 +232,15 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     averageSale: 550,
     missedCallRate: 0.25,
     exampleTranscript:
-      "Agent: Joe's Auto, how can I help?\nCaller: My 2019 Honda won't start — just clicks.\nAgent: Can you tell me the mileage?\nCaller: About 62,000. I'm stranded at a grocery store.",
-    callSummary: "2019 Honda · No start · Roadside · Location captured",
+      "Agent: Joe's Auto, how can I help?\nCaller: My 2019 Honda won't start — just clicks.\nAgent: Can you tell me the mileage?\nCaller: About 62,000. I'm stranded at a grocery store.\nAgent: What's your name and callback number?\nCaller: Maria Gonzalez, (555) 442-1190.",
+    callSummary: "2019 Honda · No start · Grocery store · Roadside",
+    smsPreview: {
+      name: "Maria Gonzalez",
+      phone: "(555) 442-1190",
+      address: "Grocery store",
+      job: "2019 Honda - won't start (clicks)",
+      urgency: "Medium",
+    },
   }),
   fromLanding("handyman", {
     displayName: "Handyman",
@@ -222,8 +251,15 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     averageSale: 320,
     missedCallRate: 0.32,
     exampleTranscript:
-      "Agent: How can I help you today?\nCaller: I need someone to fix a fence and patch some drywall.\nAgent: What's the property address?\nCaller: 18 Birch Street.",
+      "Agent: How can I help you today?\nCaller: I need someone to fix a fence and patch some drywall.\nAgent: What's the property address?\nCaller: 18 Birch Street.\nAgent: Name and number for a callback?\nCaller: Tom Reed, (555) 330-8871.",
     callSummary: "Fence + drywall · 18 Birch St · Quote requested",
+    smsPreview: {
+      name: "Tom Reed",
+      phone: "(555) 330-8871",
+      address: "18 Birch St",
+      job: "Fence + drywall",
+      urgency: "Medium",
+    },
   }),
   {
     slug: "roofing",
@@ -237,8 +273,15 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     missedCallRate: 0.3,
     heroImage: getIndustryImage("roofing"),
     exampleTranscript:
-      "Agent: Thanks for calling — how can I help?\nCaller: We had hail last night and I think our shingles are damaged.\nAgent: What's the property address?\nCaller: 220 Pine Ridge Drive.",
-    callSummary: "Hail damage · Inspection requested · Address captured",
+      "Agent: Thanks for calling — how can I help?\nCaller: We had hail last night and I think our shingles are damaged.\nAgent: What's the property address?\nCaller: 220 Pine Ridge Drive.\nAgent: Name and callback number?\nCaller: Jennifer Walsh, (555) 612-4400.",
+    callSummary: "Hail damage · 220 Pine Ridge Dr · Inspection requested",
+    smsPreview: {
+      name: "Jennifer Walsh",
+      phone: "(555) 612-4400",
+      address: "220 Pine Ridge Dr",
+      job: "Hail damage - shingle inspection",
+      urgency: "High",
+    },
     steps: buildStandardSteps("Roofing"),
     leadScoring: LEAD_SCORING_WEIGHTS,
     cta: defaultFunnelTrialCta(),
@@ -259,8 +302,15 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     missedCallRate: 0.4,
     heroImage: getIndustryImage("lawyers"),
     exampleTranscript:
-      "Agent: Thank you for calling. How may I direct your call?\nCaller: I need to speak with someone about a car accident case.\nAgent: I'm sorry to hear that. Can I get your name and a callback number?",
+      "Agent: Thank you for calling. How may I direct your call?\nCaller: I need to speak with someone about a car accident case.\nAgent: I'm sorry to hear that. Can I get your name and a callback number?\nCaller: James Mitchell, (555) 778-3301.",
     callSummary: "PI intake · Car accident · Callback requested",
+    smsPreview: {
+      name: "James Mitchell",
+      phone: "(555) 778-3301",
+      address: "Callback requested",
+      job: "Car accident - PI intake",
+      urgency: "High",
+    },
     steps: buildStandardSteps("Law Firm"),
     leadScoring: LEAD_SCORING_WEIGHTS,
     cta: defaultFunnelTrialCta(),
@@ -277,8 +327,15 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     missedCallRate: 0.35,
     heroImage: getIndustryImage("realtors"),
     exampleTranscript:
-      "Agent: Thanks for calling — how can I help?\nCaller: I saw the listing on Maple Street and want to schedule a showing.\nAgent: Great — what's the best number to reach you?",
+      "Agent: Thanks for calling — how can I help?\nCaller: I saw the listing on Maple Street and want to schedule a showing.\nAgent: Great — what's the best number to reach you?\nCaller: Amanda Lee, (555) 201-8899.",
     callSummary: "Showing request · Maple St listing · Buyer lead",
+    smsPreview: {
+      name: "Amanda Lee",
+      phone: "(555) 201-8899",
+      address: "Maple St listing",
+      job: "Buyer - showing request",
+      urgency: "Medium",
+    },
     steps: buildStandardSteps("Real Estate"),
     leadScoring: LEAD_SCORING_WEIGHTS,
     cta: defaultFunnelTrialCta(),
@@ -294,8 +351,15 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     missedCallRate: 0.28,
     heroImage: getIndustryImage("dentists"),
     exampleTranscript:
-      "Agent: Thank you for calling. How can I help?\nCaller: I'm a new patient and need a cleaning appointment.\nAgent: Do you have dental insurance?\nCaller: Yes, Delta Dental.",
+      "Agent: Thank you for calling. How can I help?\nCaller: I'm a new patient and need a cleaning appointment.\nAgent: Do you have dental insurance?\nCaller: Yes, Delta Dental.\nAgent: Name and callback number?\nCaller: Chris Nguyen, (555) 445-7722.",
     callSummary: "New patient · Cleaning · Delta Dental · Callback requested",
+    smsPreview: {
+      name: "Chris Nguyen",
+      phone: "(555) 445-7722",
+      address: "New patient",
+      job: "Cleaning appointment - Delta Dental",
+      urgency: "Low",
+    },
     steps: buildStandardSteps("Dental Practice"),
     leadScoring: LEAD_SCORING_WEIGHTS,
     cta: defaultFunnelTrialCta(),
@@ -312,8 +376,15 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     missedCallRate: 0.3,
     heroImage: getIndustryImage("salons"),
     exampleTranscript:
-      "Agent: Thanks for calling — how can I help?\nCaller: I need a cut and color this Saturday if you have openings.\nAgent: What's your name and the best number to reach you?",
+      "Agent: Thanks for calling — how can I help?\nCaller: I need a cut and color this Saturday if you have openings.\nAgent: What's your name and the best number to reach you?\nCaller: Taylor Brooks, (555) 998-1144.",
     callSummary: "Cut + color · Saturday request · New booking lead",
+    smsPreview: {
+      name: "Taylor Brooks",
+      phone: "(555) 998-1144",
+      address: "Saturday request",
+      job: "Cut + color - Saturday",
+      urgency: "Medium",
+    },
     steps: buildStandardSteps("Salon"),
     leadScoring: LEAD_SCORING_WEIGHTS,
     cta: defaultFunnelTrialCta(),

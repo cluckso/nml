@@ -49,7 +49,7 @@ export function FunnelDemoSection({ config, className = "" }: FunnelDemoSectionP
               <MessageSquare className="h-4 w-4" />
               What you receive
             </div>
-            <SMSPreview />
+            <SMSPreview lead={config.smsPreview} />
           </div>
         </div>
       </div>

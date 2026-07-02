@@ -31,6 +31,15 @@ export interface FunnelTestimonial {
   role?: string
 }
 
+/** Sample lead fields shown in the funnel SMS phone mockup — must match exampleTranscript / callSummary. */
+export interface FunnelSmsPreview {
+  name: string
+  phone: string
+  address: string
+  job: string
+  urgency: "High" | "Medium" | "Low"
+}
+
 export type FunnelCtaType = "trial" | "calendly" | "subscribe"
 
 export interface FunnelCta {
@@ -51,6 +60,8 @@ export interface FunnelConfig {
   heroImage?: string
   exampleTranscript?: string
   callSummary?: string
+  /** SMS mockup on the demo section; should align with exampleTranscript and callSummary. */
+  smsPreview?: FunnelSmsPreview
   testimonial?: FunnelTestimonial
   steps: FunnelStep[]
   /** fieldId → optionValue → score */

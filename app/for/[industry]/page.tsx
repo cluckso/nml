@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, Phone, ArrowRight } from "lucide-react"
 import { getAllIndustrySlugs, getIndustryLandingBySlug, formatCurrency } from "@/lib/industry-data"
+import { getFunnelConfig } from "@/lib/funnel/industry-configs"
 import { DemoUnlock } from "@/components/marketing/DemoUnlock"
 import { SMSPreview } from "@/components/marketing/SMSPreview"
 import { funnelTrialFeatureLabel } from "@/lib/trial-marketing"
@@ -36,6 +37,8 @@ export default async function IndustryLandingPage({ params }: PageProps) {
   const { industry: slug } = await params
   const data = getIndustryLandingBySlug(slug)
   if (!data) notFound()
+
+  const smsPreview = getFunnelConfig(slug)?.smsPreview
 
   return (
     <div className="flex flex-col">
@@ -101,7 +104,7 @@ export default async function IndustryLandingPage({ params }: PageProps) {
 
       <section className="container mx-auto px-4 py-16">
         <div className="grid md:grid-cols-2 gap-10 max-w-5xl mx-auto items-center">
-          <SMSPreview />
+          <SMSPreview lead={smsPreview} />
           <div>
             <h2 className="text-2xl font-bold mb-4">What happens after a completed call?</h2>
             <p className="text-muted-foreground mb-6">
