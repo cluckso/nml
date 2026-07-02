@@ -2,6 +2,9 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
 import { MARKETING_IMAGES, MARKETING_IMAGE_ALT } from "@/lib/marketing-images"
+import { pricingUrl } from "@/lib/monetization-urls"
+import { PlanType } from "@prisma/client"
+import { trialDaysLabel } from "@/lib/trial-marketing"
 import {
   ArrowRight,
   Clock,
@@ -50,6 +53,15 @@ export function HomeHero() {
             <ArrowRight className="h-5 w-5" aria-hidden />
           </Button>
         </Link>
+        <Link href={pricingUrl({ intent: "paid", plan: PlanType.PRO })} className="min-h-[44px] flex items-center">
+          <Button
+            size="lg"
+            variant="secondary"
+            className="gap-2 text-base px-6 sm:px-8 min-h-[44px]"
+          >
+            Subscribe from $99/mo
+          </Button>
+        </Link>
         <Link href="#demo" className="min-h-[44px] flex items-center">
           <Button
             size="lg"
@@ -63,7 +75,7 @@ export function HomeHero() {
       <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-sm text-muted-foreground">
         <span className="inline-flex items-center gap-2">
           <Clock className="h-4 w-4 text-primary/80" aria-hidden />
-          7-day free trial
+          {trialDaysLabel()} free trial
         </span>
         <span className="inline-flex items-center gap-2">
           <CreditCard className="h-4 w-4 text-primary/80" aria-hidden />

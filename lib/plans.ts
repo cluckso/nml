@@ -29,8 +29,8 @@ export const SETUP_FEES: Record<PlanType, number> = {
 /** Free trial: call minutes cap before first paid subscription */
 export const FREE_TRIAL_MINUTES = 40
 
-/** Free trial: validity window in days (trial ends at 7 days or trial minute cap, whichever comes first) */
-export const TRIAL_DAYS = 7
+/** Free trial: validity window in days (trial ends at 14 days or trial minute cap, whichever comes first) */
+export const TRIAL_DAYS = 14
 
 /** Monthly price per plan (USD) — Solo Owner $99, Mid Volume $159, High Volume $279 */
 export const MONTHLY_PRICES: Record<PlanType, number> = {
@@ -40,12 +40,19 @@ export const MONTHLY_PRICES: Record<PlanType, number> = {
   [PlanType.ELITE]: 279,
 }
 
-/** Overage rate per minute (USD) */
-export const OVERAGE_RATE_PER_MIN = 0.22
+/** Months free when paying annually (12 − ANNUAL_FREE_MONTHS months billed). */
+export const ANNUAL_FREE_MONTHS = 2
+
+export function getAnnualPrice(planType: PlanType): number {
+  return MONTHLY_PRICES[planType] * (12 - ANNUAL_FREE_MONTHS)
+}
 
 export function getMonthlyPrice(planType: PlanType): number {
   return MONTHLY_PRICES[planType] ?? 0
 }
+
+/** Overage rate per minute (USD) */
+export const OVERAGE_RATE_PER_MIN = 0.22
 
 /** Max call duration (seconds) we accept from webhooks; longer calls are clamped to prevent abuse. */
 export const MAX_CALL_DURATION_SECONDS = 24 * 60 * 60 // 24 hours

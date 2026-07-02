@@ -149,7 +149,8 @@ export async function createCheckoutSession(
   planType: PlanType,
   setupFee: number,
   appUrl: string = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
-  founderDeal?: boolean
+  founderDeal?: boolean,
+  billingInterval: BillingInterval = "monthly"
 ) {
   if (!stripe) {
     throw new Error("STRIPE_SECRET_KEY is not configured. Add it to .env to enable billing.")
@@ -163,7 +164,12 @@ export async function createCheckoutSession(
     throw new Error("Business not found")
   }
 
-  const priceId = getPriceIdForPlan(planType)
+  const priceId = resolvePlanPriceId(planType, billingInterval)
+  if (billingInterval === "annual" && !getAnnualPriceIdForPlan(planType)) {
+    throw new Error(
+      `Annual billing is not configured for ${planType}. Set STRIPE_PRICE_${planType}_ANNUAL in .env.`
+    )
+  }
 
   // Checkout shows only the plan (no usage charge). We add the metered overage item in the webhook after subscription creation.
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [
@@ -204,6 +210,7 @@ export async function createCheckoutSession(
     metadata: {
       businessId,
       planType,
+      billingInterval,
       ...(founderDeal ? { founderDeal: "true" } : {}),
     },
     subscription_data: {
@@ -217,6 +224,62 @@ export async function createCheckoutSession(
   } as Stripe.Checkout.SessionCreateParams)
 
   return session
+}
+
+/**
+ * Card-on-file trial: Stripe subscription with trial_period_days.
+ * Auto-converts to paid when the trial ends; full plan access during trial.
+ */
+export async function createSubscriptionTrialCheckoutSession(
+  businessId: string,
+  planType: PlanType,
+  appUrl: string = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+) {
+  if (!stripe) {
+    throw new Error("STRIPE_SECRET_KEY is not configured. Add it to .env to enable billing.")
+  }
+
+  const business = await db.business.findUnique({
+    where: { id: businessId },
+    include: { users: { take: 1 } },
+  })
+  if (!business) throw new Error("Business not found")
+
+  let stripeCustomerId = business.stripeCustomerId
+  if (!stripeCustomerId) {
+    const email = business.users?.[0]?.email
+    if (!email) throw new Error("User email required for billing.")
+    stripeCustomerId = await createStripeCustomerForTrial(email)
+    await db.business.update({
+      where: { id: businessId },
+      data: { stripeCustomerId },
+    })
+  }
+
+  const baseUrl = appUrl.replace(/\/$/, "")
+  const priceId = getPriceIdForPlan(planType)
+
+  return stripe.checkout.sessions.create({
+    customer: stripeCustomerId,
+    line_items: [{ price: priceId, quantity: 1 }],
+    mode: "subscription",
+    success_url: `${baseUrl}/subscribe/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${baseUrl}/trial/start?mode=card`,
+    metadata: {
+      businessId,
+      planType,
+      trialCheckout: "true",
+    },
+    subscription_data: {
+      trial_period_days: TRIAL_DAYS,
+      metadata: {
+        businessId,
+        planType,
+        trialCheckout: "true",
+      },
+    },
+    branding_settings: { display_name: "CallGrabbr" },
+  } as Stripe.Checkout.SessionCreateParams)
 }
 
 /**
@@ -293,6 +356,33 @@ function getProductIdForPlan(planType: PlanType): string {
 const PLACEHOLDER_IDS = ["price_starter", "price_pro", "price_local_plus", "price_elite", "price_usage"]
 
 // Monthly price IDs only (STRIPE_PRICE_*). Annual: STRIPE_PRICE_*_ANNUAL for future use.
+export type BillingInterval = "monthly" | "annual"
+
+function getAnnualPriceIdForPlan(planType: PlanType): string | null {
+  const priceIds: Record<PlanType, string | undefined> = {
+    [PlanType.STARTER]: process.env.STRIPE_PRICE_STARTER_ANNUAL,
+    [PlanType.PRO]: process.env.STRIPE_PRICE_PRO_ANNUAL,
+    [PlanType.LOCAL_PLUS]: process.env.STRIPE_PRICE_LOCAL_PLUS_ANNUAL,
+    [PlanType.ELITE]: process.env.STRIPE_PRICE_ELITE_ANNUAL,
+  }
+  const id = priceIds[planType]
+  if (id && id.startsWith("price_") && !PLACEHOLDER_IDS.includes(id)) return id
+  return null
+}
+
+/** Whether annual Stripe prices are configured for this plan. */
+export function isAnnualBillingAvailable(planType: PlanType): boolean {
+  return getAnnualPriceIdForPlan(planType) !== null
+}
+
+function resolvePlanPriceId(planType: PlanType, billingInterval: BillingInterval): string {
+  if (billingInterval === "annual") {
+    const annualId = getAnnualPriceIdForPlan(planType)
+    if (annualId) return annualId
+  }
+  return getPriceIdForPlan(planType)
+}
+
 function getPriceIdForPlan(planType: PlanType): string {
   const priceIds: Record<PlanType, string | undefined> = {
     [PlanType.STARTER]: process.env.STRIPE_PRICE_STARTER,
@@ -435,16 +525,30 @@ export async function handleStripeWebhook(event: Stripe.Event) {
       if (businessId && planType) {
         const stripeSubscriptionId = session.subscription as string
         const now = new Date()
-        const periodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+        let periodStart = now
+        let periodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+        let subscriptionStatus = stripeSubscriptionStatusToDb("active")
+
+        if (stripeSubscriptionId) {
+          try {
+            const sub = await stripe.subscriptions.retrieve(stripeSubscriptionId)
+            periodStart = new Date(sub.current_period_start * 1000)
+            periodEnd = new Date(sub.current_period_end * 1000)
+            subscriptionStatus = stripeSubscriptionStatusToDb(sub.status)
+          } catch (err) {
+            console.error("Failed to retrieve subscription after checkout:", err)
+          }
+        }
+
         const isFounderDeal = session.metadata?.founderDeal === "true"
-        // Store subscription on Business (one row per business); set founder flag when founder deal was used
+        const isTrialCheckout = session.metadata?.trialCheckout === "true"
         await db.business.update({
           where: { id: businessId },
           data: {
             planType,
             stripeSubscriptionId,
-            subscriptionStatus: "ACTIVE",
-            currentPeriodStart: now,
+            subscriptionStatus,
+            currentPeriodStart: periodStart,
             currentPeriodEnd: periodEnd,
             cancelAtPeriodEnd: false,
             status: "ACTIVE",

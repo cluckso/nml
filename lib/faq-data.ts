@@ -15,7 +15,7 @@ export const PRODUCT_FAQ: FaqItem[] = [
   {
     question: "How does the free trial work?",
     answer:
-      "You get a 7-day free trial with 40 included call minutes. No credit card is required to start. One trial per business phone number.",
+      "You get a 14-day free trial with 40 included call minutes. No credit card is required to start. One trial per business phone number.",
   },
   {
     question: "What information does CallGrabbr capture from callers?",

@@ -19,6 +19,20 @@ export function trackStartTrial(): void {
   }
 }
 
+/** Card-on-file trial — Stripe subscription with trial_period_days. */
+export function trackCardTrialStart(planName?: string): void {
+  trackStartTrial()
+  if (typeof window !== "undefined" && window.fbq) {
+    window.fbq("track", "InitiateCheckout", planName ? { content_name: planName } : undefined)
+  }
+}
+
+export function trackPaidIntent(source?: string): void {
+  if (typeof window !== "undefined" && window.fbq) {
+    window.fbq("track", "ViewContent", source ? { content_name: source } : undefined)
+  }
+}
+
 export function trackCompleteRegistration(): void {
   if (typeof window !== "undefined" && window.fbq) {
     window.fbq("track", "CompleteRegistration")

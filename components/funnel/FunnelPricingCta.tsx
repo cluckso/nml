@@ -5,6 +5,7 @@ import type { FunnelConfig } from "@/lib/funnel/funnel-config"
 import { getFunnelCtaHref } from "@/lib/funnel/industry-configs"
 import { PRICING_TIERS } from "@/lib/pricing-catalog"
 import { formatCurrency } from "@/lib/industry-data"
+import { trialDaysLabel, moneyBackGuaranteeLabel } from "@/lib/trial-marketing"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, ArrowRight } from "lucide-react"
@@ -25,7 +26,7 @@ export function FunnelPricingCta({ config, onCtaClick, className = "" }: FunnelP
       <div className="max-w-3xl mx-auto text-center">
         <h2 className="text-2xl md:text-3xl font-bold mb-3">Ready to stop losing {config.displayName.toLowerCase()} leads?</h2>
         <p className="text-muted-foreground mb-8">
-          7-day free trial · No setup fee · Plans from {formatCurrency(starter.price)}/mo
+          {moneyBackGuaranteeLabel()} · {trialDaysLabel()} free trial · Plans from {formatCurrency(starter.price)}/mo
         </p>
 
         <Card className="border-border/50 bg-card/60 backdrop-blur text-left mb-8">
@@ -65,8 +66,8 @@ export function FunnelPricingCta({ config, onCtaClick, className = "" }: FunnelP
               Create account
             </Link>
           </Button>
-          <Button size="lg" variant="ghost" asChild>
-            <Link href="/pricing">Compare plans</Link>
+          <Button size="lg" variant="outline" asChild>
+            <Link href={`/trial/start?from=funnel&industry=${config.slug}`}>Free trial (no card)</Link>
           </Button>
         </div>
       </div>

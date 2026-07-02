@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button"
 import { CheckCircle2, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { saveFunnelTrialContext, buildFunnelTrialStartUrl } from "@/lib/funnel/funnel-trial-bridge"
+import { funnelSubscribeUrl } from "@/lib/monetization-urls"
 
 interface FunnelExperienceProps {
   config: FunnelConfig
@@ -69,6 +70,7 @@ export function FunnelExperience({ config }: FunnelExperienceProps) {
   }
 
   const trialHref = buildFunnelTrialStartUrl(config.slug)
+  const subscribeHref = funnelSubscribeUrl(config.slug)
 
   const heroImage = config.heroImage ?? ""
   const heroAlt = getIndustryImageAlt(config.displayName)
@@ -111,15 +113,20 @@ export function FunnelExperience({ config }: FunnelExperienceProps) {
                 <CheckCircle2 className="h-12 w-12 text-primary mx-auto mb-4" />
                 <h3 className="text-xl font-bold mb-2">You&apos;re all set!</h3>
                 <p className="text-muted-foreground mb-6">
-                  Your personalized ROI snapshot is ready. Start your free trial below — we&apos;ve
-                  saved your contact info so you won&apos;t need to enter it again.
+                  Your personalized ROI snapshot is ready. Subscribe to go live today, or start a
+                  free trial with no card.
                 </p>
-                <Button size="lg" asChild onClick={() => trackFunnelConversion(config.slug, "trial")}>
-                  <Link href={trialHref}>
-                    Start free trial
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Button size="lg" asChild onClick={() => trackFunnelConversion(config.slug, "subscribe")}>
+                    <Link href={subscribeHref}>
+                      Subscribe — 30-day guarantee
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button size="lg" variant="outline" asChild onClick={() => trackFunnelConversion(config.slug, "trial")}>
+                    <Link href={trialHref}>Free trial (no card)</Link>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )}

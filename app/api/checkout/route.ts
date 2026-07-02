@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getAuthUserFromRequest } from "@/lib/auth"
-import { createCheckoutSession, shouldUpgradeInPlace, stripe, upgradeSubscriptionInPlace } from "@/lib/stripe"
+import { createCheckoutSession, shouldUpgradeInPlace, stripe, upgradeSubscriptionInPlace, type BillingInterval } from "@/lib/stripe"
 import { db } from "@/lib/db"
 import { PlanType } from "@prisma/client"
 import { Industry } from "@prisma/client"
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     const user = await getAuthUserFromRequest(req)
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    let body: { planType?: string; founderDeal?: boolean }
+    let body: { planType?: string; founderDeal?: boolean; billingInterval?: string }
     try {
       body = await req.json()
     } catch {
@@ -30,6 +30,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing planType" }, { status: 400 })
     }
     const founderDeal = !!body?.founderDeal
+    const billingInterval: BillingInterval =
+      body?.billingInterval === "annual" ? "annual" : "monthly"
 
     const setupFee = SETUP_FEES[planType as PlanType]
     if (setupFee === undefined) {
@@ -83,7 +85,8 @@ export async function POST(req: NextRequest) {
       planType as PlanType,
       setupFee,
       appUrl,
-      founderDeal
+      founderDeal,
+      billingInterval
     )
 
     return NextResponse.json({ url: session.url })

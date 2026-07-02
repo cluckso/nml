@@ -31,7 +31,7 @@ export interface FunnelTestimonial {
   role?: string
 }
 
-export type FunnelCtaType = "trial" | "calendly"
+export type FunnelCtaType = "trial" | "calendly" | "subscribe"
 
 export interface FunnelCta {
   type: FunnelCtaType

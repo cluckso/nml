@@ -13,10 +13,15 @@ import {
   PRICING_TIERS,
 } from "@/lib/pricing-catalog"
 import { PLAN_SOLO_OWNER, PLAN_MID_VOLUME } from "@/lib/plan-labels"
+import { FREE_TRIAL_MINUTES } from "@/lib/plans"
+import { trialSummaryShort, moneyBackGuaranteeLabel } from "@/lib/trial-marketing"
+import Link from "next/link"
+import { pricingUrl } from "@/lib/monetization-urls"
+import { PlanType } from "@prisma/client"
 
 export const metadata: Metadata = {
   title: "Pricing - CallGrabbr",
-  description: `Plans for every call volume. ${formatPricingSummary()}. ${formatJobRoiLine()} 7-day free trial, no credit card required.`,
+  description: `Plans for every call volume. ${formatPricingSummary()}. ${formatJobRoiLine()} ${trialSummaryShort()}.`,
   alternates: { canonical: "/pricing" },
 }
 
@@ -56,12 +61,15 @@ export default async function PricingPage() {
         {formatJobRoiLine()}
       </p>
       <p className="mt-4 text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
-        7-day free trial · No credit card required · Overage {formatOverageRate()} beyond included
-        minutes · Estimates based on ~3 min per call
+        {trialSummaryShort()} · {moneyBackGuaranteeLabel()} on paid plans · Overage{" "}
+        {formatOverageRate()} beyond included minutes · Estimates based on ~3 min per call
       </p>
       {isLoggedIn && !hasStartedTrial && (
         <p className="mt-2 text-sm text-primary font-medium">
-          Start a free trial or pick a plan below.
+          <Link href={pricingUrl({ intent: "paid", plan: PlanType.PRO })} className="underline">
+            Subscribe now
+          </Link>
+          {" "}or start a free trial below.
         </p>
       )}
       {isLoggedIn && hasStartedTrial && (
@@ -74,15 +82,18 @@ export default async function PricingPage() {
     <div className="container mx-auto px-4 py-16">
       {!hasStartedTrial && (
         <div className="max-w-2xl mx-auto mb-14 p-8 rounded-xl border border-primary/20 bg-primary/5 text-center">
-          <h2 className="text-2xl font-bold tracking-tight mb-3">Try it free for 7 days</h2>
+          <h2 className="text-2xl font-bold tracking-tight mb-3">Try it free first</h2>
           <p className="text-muted-foreground mb-3 leading-relaxed">
-            No charge until you choose a plan. Includes 40 call minutes—one trial per business
-            number.
+            No charge until you choose a plan. Includes {FREE_TRIAL_MINUTES} call minutes—one trial
+            per business number.
           </p>
           <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-            Most owners start on <strong>{PLAN_SOLO_OWNER}</strong> for missed and after-hours
-            coverage, then move to <strong>{PLAN_MID_VOLUME}</strong> when the team grows and calls
-            need a full-time answer.
+            Ready to go live?{" "}
+            <Link href={pricingUrl({ intent: "paid", plan: PlanType.PRO })} className="text-primary underline">
+              Subscribe with {moneyBackGuaranteeLabel()}
+            </Link>
+            . Most owners start on <strong>{PLAN_SOLO_OWNER}</strong>, then move to{" "}
+            <strong>{PLAN_MID_VOLUME}</strong> as call volume grows.
           </p>
           <PricingTrialCta isLoggedIn={isLoggedIn} />
         </div>

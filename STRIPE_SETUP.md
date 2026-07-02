@@ -83,6 +83,11 @@ STRIPE_PRICE_LOCAL_PLUS=price_xxxxx    # Pro $279/mo
 STRIPE_PRICE_ELITE=price_xxxxx         # Pro $279/mo (optional if same as LOCAL_PLUS)
 STRIPE_USAGE_PRICE_ID=price_xxxxx      # Overage $0.22/min
 
+# Optional annual prices (2 months free — 10× monthly). Enables annual toggle on /pricing.
+# STRIPE_PRICE_STARTER_ANNUAL=price_xxxxx
+# STRIPE_PRICE_PRO_ANNUAL=price_xxxxx
+# STRIPE_PRICE_ELITE_ANNUAL=price_xxxxx
+
 # Optional product IDs
 # STRIPE_PRODUCT_STARTER=prod_xxxxx
 # STRIPE_PRODUCT_PRO=prod_xxxxx

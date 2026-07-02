@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Phone, Zap } from "lucide-react"
 import type { TrialStatus } from "@/lib/trial"
 import { FREE_TRIAL_MINUTES } from "@/lib/plans"
+import { trialDaysLabel } from "@/lib/trial-marketing"
 
 interface TrialCardProps {
   trial: TrialStatus
@@ -23,7 +24,7 @@ export function TrialCard({ trial, hasAgent }: TrialCardProps) {
     if (isExhausted)
       return "You've used your trial minutes. Upgrade to keep receiving calls."
     if (isEnded) return "Your trial has ended. Upgrade to a plan to continue."
-    return "7-day free trial. No charge until you upgrade. One trial per business number."
+    return `${trialDaysLabel()} free trial. No charge until you upgrade. One trial per business number.`
   }
 
   return (

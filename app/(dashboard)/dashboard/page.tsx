@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { CallLog } from "@/components/calls/CallLog"
 import { SetupAICard } from "@/components/dashboard/SetupAICard"
 import { TrialCard } from "@/components/dashboard/TrialCard"
+import { TrialActivationChecklist } from "@/components/dashboard/TrialActivationChecklist"
+import { FirstLeadUpgradeBanner } from "@/components/dashboard/FirstLeadUpgradeBanner"
 import { ROICard } from "@/components/dashboard/ROICard"
 import { ReferralCard } from "@/components/dashboard/ReferralCard"
 import { ReportingCard } from "@/components/dashboard/ReportingCard"
@@ -161,6 +163,18 @@ export default async function DashboardPage() {
           <div className="mb-8">
             <UsageUpgradeNudge nudge={usageNudge} />
           </div>
+        )}
+
+        {trial.isOnTrial && (
+          <>
+            <FirstLeadUpgradeBanner callCount={stats._count} />
+            <TrialActivationChecklist
+              onboardingComplete={!!business?.onboardingComplete}
+              hasAgent={hasAgent}
+              hasCalls={stats._count > 0}
+              isEnded={trial.isExhausted || trial.isExpired}
+            />
+          </>
         )}
 
         {/* Top row: Trial (if on trial) + Setup */}

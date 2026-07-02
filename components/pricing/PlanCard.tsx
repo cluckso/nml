@@ -10,6 +10,8 @@ import { Check, Loader2 } from "lucide-react"
 import { PRICING_TIERS_BY_KEY } from "@/lib/pricing-catalog"
 import { formatIncludedUsageLabel } from "@/lib/plan-usage"
 import { LegalConsentCheckbox } from "@/components/legal/LegalConsentCheckbox"
+import { moneyBackGuaranteeLabel } from "@/lib/trial-marketing"
+import type { BillingInterval } from "@/lib/stripe"
 
 export function PlanCard({
   name,
@@ -19,6 +21,9 @@ export function PlanCard({
   annualPrice,
   annualLabel,
   isLoggedIn,
+  billingInterval = "monthly",
+  recommended = false,
+  showMoneyBack = false,
 }: {
   name: string
   description: string
@@ -27,6 +32,9 @@ export function PlanCard({
   annualPrice?: number
   annualLabel?: string
   isLoggedIn: boolean
+  billingInterval?: BillingInterval
+  recommended?: boolean
+  showMoneyBack?: boolean
 }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -36,10 +44,18 @@ export function PlanCard({
   if (!plan) return null
 
   const legalFieldId = `legal-${plan.planType}`
+  const isPopular = plan.popular || recommended
+  const displayPrice =
+    billingInterval === "annual" && annualPrice != null
+      ? Math.round(annualPrice / 12)
+      : plan.price
+  const priceSuffix =
+    billingInterval === "annual" && annualPrice != null ? "/ mo · billed annually" : "/ month"
 
   const handleGetStarted = async () => {
     if (!isLoggedIn) {
-      router.push("/sign-up?next=/pricing")
+      const next = `/pricing?intent=paid&plan=${plan.planType}${billingInterval === "annual" ? "&billing=annual" : ""}`
+      router.push(`/sign-up?next=${encodeURIComponent(next)}`)
       return
     }
     if (!agreedToLegal) return
@@ -49,7 +65,10 @@ export function PlanCard({
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planType: plan.planType }),
+        body: JSON.stringify({
+          planType: plan.planType,
+          billingInterval,
+        }),
       })
       const data = await res.json()
       if (data.url) {
@@ -64,11 +83,13 @@ export function PlanCard({
   }
 
   return (
-    <Card className={`flex flex-col h-full ${plan.popular ? "border-primary border-2 shadow-lg" : ""}`}>
+    <Card
+      className={`flex flex-col h-full ${isPopular ? "border-primary border-2 shadow-lg ring-2 ring-primary/20" : ""}`}
+    >
       <CardHeader className="space-y-3 pb-4">
-        {plan.badge && (
+        {isPopular && (
           <span className="inline-block w-fit rounded bg-primary/15 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-            {plan.badge}
+            {plan.badge ?? "Recommended"}
           </span>
         )}
         <div>
@@ -76,9 +97,14 @@ export function PlanCard({
           <CardDescription className="mt-1.5 text-sm leading-relaxed">{description}</CardDescription>
         </div>
         <div className="pt-1">
-          <span className="text-4xl font-bold tracking-tight">${plan.price}</span>
-          <span className="text-muted-foreground text-sm"> / month</span>
+          <span className="text-4xl font-bold tracking-tight">${displayPrice}</span>
+          <span className="text-muted-foreground text-sm">{priceSuffix}</span>
         </div>
+        {billingInterval === "annual" && annualPrice != null && (
+          <p className="text-sm text-muted-foreground">
+            ${annualPrice.toLocaleString()}/year {annualLabel ? `(${annualLabel})` : ""}
+          </p>
+        )}
         {includedMinutes != null && (
           <div className="rounded-lg border bg-muted/30 px-3 py-2.5 space-y-1">
             <p className="text-sm font-medium leading-snug text-foreground">
@@ -89,10 +115,8 @@ export function PlanCard({
             )}
           </div>
         )}
-        {annualPrice != null && annualLabel && (
-          <p className="text-sm text-muted-foreground">
-            Annual: ${annualPrice}/year ({annualLabel})
-          </p>
+        {showMoneyBack && (
+          <p className="text-xs text-primary font-medium">{moneyBackGuaranteeLabel()}</p>
         )}
         <p className="text-xs text-muted-foreground">No setup fee</p>
       </CardHeader>
@@ -119,7 +143,7 @@ export function PlanCard({
             />
             <Button
               className="w-full mt-auto"
-              variant={plan.popular ? "default" : "outline"}
+              variant={isPopular ? "default" : "outline"}
               onClick={handleGetStarted}
               disabled={loading || !agreedToLegal}
             >
@@ -129,13 +153,16 @@ export function PlanCard({
                   Redirecting…
                 </>
               ) : (
-                "Choose plan"
+                "Subscribe"
               )}
             </Button>
           </>
         ) : (
-          <Link href="/sign-up?next=/pricing" className="block mt-auto">
-            <Button className="w-full" variant={plan.popular ? "default" : "outline"}>
+          <Link
+            href={`/sign-up?next=${encodeURIComponent(`/pricing?intent=paid&plan=${plan.planType}`)}`}
+            className="block mt-auto"
+          >
+            <Button className="w-full" variant={isPopular ? "default" : "outline"}>
               Get started
             </Button>
           </Link>

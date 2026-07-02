@@ -1,6 +1,7 @@
 import type { FunnelConfig, FunnelStep } from "./funnel-config"
 import { getIndustryImage } from "@/lib/marketing-images"
 import { buildFunnelTrialStartUrl } from "./funnel-trial-bridge"
+import { funnelSubscribeUrl } from "@/lib/monetization-urls"
 
 const VOLUME_OPTIONS = [
   { value: "under-20", label: "Under 20 calls/week", score: 10 },
@@ -144,7 +145,7 @@ function fromLanding(
     testimonial: overrides.testimonial,
     steps: overrides.steps ?? buildStandardSteps(displayName),
     leadScoring: overrides.leadScoring ?? LEAD_SCORING_WEIGHTS,
-    cta: overrides.cta ?? { type: "trial", label: "Start free 7-day trial" },
+    cta: overrides.cta ?? { type: "subscribe", label: "Subscribe — 30-day guarantee" },
   }
 }
 
@@ -333,6 +334,9 @@ export function getFunnelCalendlyUrl(): string | undefined {
 export function getFunnelCtaHref(config: FunnelConfig): string {
   if (config.cta.type === "calendly") {
     return getFunnelCalendlyUrl() ?? buildFunnelTrialStartUrl(config.slug)
+  }
+  if (config.cta.type === "subscribe") {
+    return funnelSubscribeUrl(config.slug)
   }
   return buildFunnelTrialStartUrl(config.slug)
 }
