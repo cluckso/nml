@@ -33,6 +33,29 @@ If you still see "max clients" after switching `DATABASE_URL` to the pooler, con
 
 ---
 
+## "Prepared statement does not exist" / "already exists" (Prisma on Vercel)
+
+Symptoms in runtime logs:
+
+- `prepared statement "s11" does not exist`
+- `prepared statement "s20" already exists`
+- `bind message supplies N parameters, but prepared statement requires M`
+
+**Cause:** `DATABASE_URL` points at Supabase **pooler** (port 6543) but is missing `?pgbouncer=true`, or you're using **Session** pooler instead of **Transaction** pooler.
+
+**Fix:**
+
+1. Supabase → **Project Settings** → **Database** → **Connection pooling** → **Transaction** mode
+2. Copy the URI (host `aws-0-….pooler.supabase.com`, user `postgres.sbfwaopvqpfgjfdzxnaq`, port **6543**)
+3. Ensure the URL ends with `?pgbouncer=true` (or `&pgbouncer=true` if other query params exist)
+4. Set that as `DATABASE_URL` in Vercel → redeploy
+
+`DIRECT_URL` stays the direct host `db.sbfwaopvqpfgjfdzxnaq.supabase.co:5432` with user `postgres` — **only for migrations**, not runtime.
+
+`lib/db.ts` auto-appends `pgbouncer=true` when it detects a Supabase pooler URL without it, but you should still fix the env var in Vercel.
+
+---
+
 ## "Authentication failed" / "credentials for postgres are not valid"
 
 This means the **pooler** is being used (host `pooler.supabase.com`) but the **username or password is wrong** for the pooler.
