@@ -8,6 +8,7 @@ import { Check, Phone, ArrowRight } from "lucide-react"
 import { getAllIndustrySlugs, getIndustryLandingBySlug, formatCurrency } from "@/lib/industry-data"
 import { DemoUnlock } from "@/components/marketing/DemoUnlock"
 import { SMSPreview } from "@/components/marketing/SMSPreview"
+import { funnelTrialFeatureLabel } from "@/lib/trial-marketing"
 
 type PageProps = { params: Promise<{ industry: string }> }
 
@@ -123,7 +124,7 @@ export default async function IndustryLandingPage({ params }: PageProps) {
               ))}
             </ul>
             <ul className="space-y-2 text-sm">
-              {["24/7 call answering (when forwarded)", `Industry-specific intake on ${PLAN_MID_VOLUME} & ${PLAN_HIGH_VOLUME}`, `Emergency flagging on ${PLAN_MID_VOLUME} & ${PLAN_HIGH_VOLUME}`, "No setup fee · 7-day trial"].map((f) => (
+              {["24/7 call answering (when forwarded)", `Industry-specific intake on ${PLAN_MID_VOLUME} & ${PLAN_HIGH_VOLUME}`, `Emergency flagging on ${PLAN_MID_VOLUME} & ${PLAN_HIGH_VOLUME}`, funnelTrialFeatureLabel()].map((f) => (
                 <li key={f} className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-primary" />
                   {f}

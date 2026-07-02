@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og"
+import { trialHeadlineLabel } from "@/lib/trial-marketing"
 
 export const runtime = "edge"
 export const alt = "CallGrabbr — Stop losing jobs to voicemail"
@@ -80,7 +81,7 @@ export default function OpenGraphImage() {
             fontWeight: 600,
           }}
         >
-          <span>7-day free trial</span>
+          <span>{trialHeadlineLabel()}</span>
           <span>·</span>
           <span>No card required</span>
         </div>

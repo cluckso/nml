@@ -119,7 +119,7 @@ model Business {
   // Trial (one per business; no separate TrialClaim table)
   trialStartedAt            DateTime?     // When trial started
   trialEndsAt               DateTime?     // trialStartedAt + 7 days
-  trialMinutesUsed          Float        @default(0) // Minutes counting toward 50-minute trial cap
+  trialMinutesUsed          Float        @default(0) // Minutes counting toward 40-minute trial cap (FREE_TRIAL_MINUTES)
   // Subscription (merged from Subscription table; one plan per business)
   planType                  PlanType?
   stripeSubscriptionId      String?       @unique

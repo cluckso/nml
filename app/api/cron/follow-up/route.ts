@@ -3,6 +3,7 @@ import { db } from "@/lib/db"
 import { sendFollowUpSMS } from "@/lib/notifications"
 import { mergeWithDefaults } from "@/lib/business-settings"
 import { hasSmsToCallers, getEffectivePlanType } from "@/lib/plans"
+import { captureRouteError } from "@/lib/capture-error"
 
 /** Cron: send 24hr follow-up SMS to callers who haven't booked an appointment */
 export async function GET(req: NextRequest) {
@@ -12,6 +13,16 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
+  try {
+    return await runFollowUpCron()
+  } catch (error) {
+    console.error("[Cron follow-up] Failed:", error)
+    captureRouteError(error, { route: "cron/follow-up" })
+    return NextResponse.json({ error: "Cron failed" }, { status: 500 })
+  }
+}
+
+async function runFollowUpCron() {
   const now = new Date()
   const delayHoursDefault = 24
   const minAge = new Date(now.getTime() - 48 * 60 * 60 * 1000)

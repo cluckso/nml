@@ -32,6 +32,7 @@ import {
 } from "@/lib/parse-lead-from-transcript"
 import { auditCallTranscript } from "@/lib/audit-call-transcript"
 import { fireZapierLeadHook } from "@/lib/zapier"
+import { captureRouteError } from "@/lib/capture-error"
 
 /** Retell expects 204 No Content on success. Use 200 + body only for call_inbound (required) and test/ping. */
 const RETELL_SUCCESS = new NextResponse(null, { status: 204 })
@@ -263,6 +264,7 @@ export async function POST(req: NextRequest) {
     return RETELL_SUCCESS
   } catch (error) {
     console.error("Retell webhook error:", error)
+    captureRouteError(error, { route: "webhooks/retell" })
     return NextResponse.json({ error: "Webhook processing failed" }, { status: 500 })
   }
 }

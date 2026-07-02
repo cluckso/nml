@@ -1,6 +1,7 @@
 import type { FunnelConfig, FunnelStep } from "./funnel-config"
 import { getIndustryImage } from "@/lib/marketing-images"
 import { buildFunnelTrialStartUrl } from "./funnel-trial-bridge"
+import { defaultFunnelTrialCta } from "@/lib/trial-marketing"
 import { funnelSubscribeUrl } from "@/lib/monetization-urls"
 
 const VOLUME_OPTIONS = [
@@ -145,7 +146,7 @@ function fromLanding(
     testimonial: overrides.testimonial,
     steps: overrides.steps ?? buildStandardSteps(displayName),
     leadScoring: overrides.leadScoring ?? LEAD_SCORING_WEIGHTS,
-    cta: overrides.cta ?? { type: "subscribe", label: "Subscribe — 30-day guarantee" },
+    cta: overrides.cta ?? defaultFunnelTrialCta(),
   }
 }
 
@@ -240,7 +241,7 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     callSummary: "Hail damage · Inspection requested · Address captured",
     steps: buildStandardSteps("Roofing"),
     leadScoring: LEAD_SCORING_WEIGHTS,
-    cta: { type: "trial", label: "Start free 7-day trial" },
+    cta: defaultFunnelTrialCta(),
     testimonial: {
       quote: "After the last storm we booked 8 inspections from calls we would have missed on the roof.",
       author: "Dan K.",
@@ -262,7 +263,7 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     callSummary: "PI intake · Car accident · Callback requested",
     steps: buildStandardSteps("Law Firm"),
     leadScoring: LEAD_SCORING_WEIGHTS,
-    cta: { type: "trial", label: "Start free 7-day trial" },
+    cta: defaultFunnelTrialCta(),
   },
   {
     slug: "realtors",
@@ -280,7 +281,7 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     callSummary: "Showing request · Maple St listing · Buyer lead",
     steps: buildStandardSteps("Real Estate"),
     leadScoring: LEAD_SCORING_WEIGHTS,
-    cta: { type: "trial", label: "Start free 7-day trial" },
+    cta: defaultFunnelTrialCta(),
   },
   {
     slug: "dentists",
@@ -297,7 +298,7 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     callSummary: "New patient · Cleaning · Delta Dental · Callback requested",
     steps: buildStandardSteps("Dental Practice"),
     leadScoring: LEAD_SCORING_WEIGHTS,
-    cta: { type: "trial", label: "Start free 7-day trial" },
+    cta: defaultFunnelTrialCta(),
   },
   {
     slug: "salons",
@@ -315,7 +316,7 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     callSummary: "Cut + color · Saturday request · New booking lead",
     steps: buildStandardSteps("Salon"),
     leadScoring: LEAD_SCORING_WEIGHTS,
-    cta: { type: "trial", label: "Start free 7-day trial" },
+    cta: defaultFunnelTrialCta(),
   },
 ]
 

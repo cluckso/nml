@@ -4,10 +4,11 @@ import { Suspense } from "react"
 import { getCurrentUser } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { TrialStartClient } from "./TrialStartClient"
+import { trialStartMetaDescription } from "@/lib/trial-marketing"
 
 export const metadata: Metadata = {
   title: "Start Free Trial - CallGrabbr",
-  description: "Start your 7-day free trial. No card required. Add your business phone to get your call assistant.",
+  description: trialStartMetaDescription(),
   alternates: { canonical: "/trial/start" },
 }
 

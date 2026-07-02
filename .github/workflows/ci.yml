@@ -25,3 +25,11 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+
+  smoke:
+    runs-on: ubuntu-latest
+    needs: quality
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Production health check
+        run: curl -fsS https://www.callgrabbr.com/api/health

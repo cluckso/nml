@@ -1,8 +1,9 @@
 import type { Metadata } from "next"
+import { authMetaDescription } from "@/lib/trial-marketing"
 
 export const metadata: Metadata = {
   title: "Account - CallGrabbr",
-  description: "Sign in or sign up for CallGrabbr. Start your 7-day free trial with no card required.",
+  description: authMetaDescription(),
 }
 
 export default function AuthLayout({

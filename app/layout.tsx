@@ -8,6 +8,7 @@ import { Nav } from "@/components/nav"
 import { SUPPORT_EMAIL } from "@/lib/site-contact"
 import { GOOGLE_PLAY_STORE_URL } from "@/lib/mobile-app"
 import { SITE_URL } from "@/lib/site-url"
+import { siteMetaDescription, trialSummaryShort } from "@/lib/trial-marketing"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { organizationJsonLd, webSiteJsonLd } from "@/lib/structured-data"
 
@@ -22,7 +23,7 @@ const gtmId = process.env.NEXT_PUBLIC_GTM_ID?.trim()
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "CallGrabbr - Stop Losing Jobs to Voicemail",
-  description: "80% of callers won't leave voicemail — they call the next business. CallGrabbr answers missed calls and texts you the lead in seconds. 7-day free trial.",
+  description: siteMetaDescription(),
   icons: { icon: "/icon.png" },
   verification: { google: googleSiteVerification },
   alternates: {
@@ -47,7 +48,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "CallGrabbr - Stop Losing Jobs to Voicemail",
-    description: "80% of callers won't leave voicemail. CallGrabbr answers missed calls and texts you the lead in seconds. 7-day free trial.",
+    description: `80% of callers won't leave voicemail. CallGrabbr answers missed calls and texts you the lead in seconds. ${trialSummaryShort()}.`,
     images: ["/opengraph-image"],
   },
 }

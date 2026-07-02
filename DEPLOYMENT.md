@@ -42,6 +42,12 @@ Ensure these are set in your Vercel project settings:
 ### Application
 - `NEXT_PUBLIC_APP_URL` (your production URL)
 
+### Observability (optional)
+- `SENTRY_DSN` — server-side error reporting (Retell webhooks, crons, API routes)
+- `NEXT_PUBLIC_SENTRY_DSN` — same DSN for client-side errors (optional; can match `SENTRY_DSN`)
+
+Sentry only sends events when `NODE_ENV=production` and a DSN is set.
+
 ## Deployment Steps
 
 ### Option 1: Git Integration (Recommended)

@@ -29,8 +29,8 @@ export const SETUP_FEES: Record<PlanType, number> = {
 /** Free trial: call minutes cap before first paid subscription */
 export const FREE_TRIAL_MINUTES = 40
 
-/** Free trial: validity window in days (trial ends at 14 days or trial minute cap, whichever comes first) */
-export const TRIAL_DAYS = 14
+/** Free trial: validity window in days (trial ends at TRIAL_DAYS or trial minute cap, whichever comes first) */
+export const TRIAL_DAYS = 7
 
 /** Monthly price per plan (USD) — Solo Owner $99, Mid Volume $159, High Volume $279 */
 export const MONTHLY_PRICES: Record<PlanType, number> = {

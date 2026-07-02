@@ -1,6 +1,7 @@
 import { GOOGLE_PLAY_STORE_URL } from "@/lib/mobile-app"
 import { SUPPORT_EMAIL } from "@/lib/site-contact"
 import { SITE_URL } from "@/lib/site-url"
+import { pricingSchemaTrialDescription } from "@/lib/trial-marketing"
 
 export function organizationJsonLd() {
   return {
@@ -71,7 +72,7 @@ export function softwareApplicationJsonLd() {
       "@type": "Offer",
       price: "99",
       priceCurrency: "USD",
-      description: "Plans from $99/month with a 7-day free trial",
+      description: pricingSchemaTrialDescription(),
     },
   }
 }

@@ -8,6 +8,7 @@ import Link from "next/link"
 import { Phone, CheckCircle2, Loader2, Smartphone } from "lucide-react"
 import type { TrialStatus } from "@/lib/trial"
 import { formatPhoneForDisplay } from "@/lib/utils"
+import { trialDaysLabel } from "@/lib/trial-marketing"
 
 interface SetupAICardProps {
   hasAgent: boolean
@@ -171,7 +172,7 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
       <CardContent className="space-y-6">
         {onTrial && !trialEnded && (
           <p className="text-sm text-muted-foreground rounded-md bg-muted/50 p-3">
-            You&apos;re on the 7-day free trial{trialStatus?.daysRemaining != null && trialStatus.daysRemaining > 0 ? ` (${trialStatus.daysRemaining} days left)` : ""}{trialStatus?.minutesRemaining != null && trialStatus.minutesRemaining > 0 ? ` · ${Math.ceil(trialStatus.minutesRemaining)} min left` : ""}. Upgrade from <Link href="/billing" className="text-primary underline">Billing</Link> when you&apos;re ready.
+            You&apos;re on the {trialDaysLabel()} free trial{trialStatus?.daysRemaining != null && trialStatus.daysRemaining > 0 ? ` (${trialStatus.daysRemaining} days left)` : ""}{trialStatus?.minutesRemaining != null && trialStatus.minutesRemaining > 0 ? ` · ${Math.ceil(trialStatus.minutesRemaining)} min left` : ""}. Upgrade from <Link href="/billing" className="text-primary underline">Billing</Link> when you&apos;re ready.
           </p>
         )}
         {trialEnded && (

@@ -31,6 +31,7 @@ import {
 
 import { JsonLd } from "@/components/seo/JsonLd"
 import { softwareApplicationJsonLd } from "@/lib/structured-data"
+import { trialHeadlineLabel, trialWithNoCardSentence } from "@/lib/trial-marketing"
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
@@ -466,7 +467,7 @@ export default function HomePage() {
           </div>
           <div className="text-center mt-10">
             <p className="text-sm text-muted-foreground mb-4">
-              Start with a 7-day free trial. No credit card required.
+              {trialWithNoCardSentence()}
             </p>
             <Link href="/pricing">
               <Button size="lg" className="gap-2">
@@ -565,7 +566,7 @@ export default function HomePage() {
               <div className="h-12 w-12 rounded-full bg-primary/15 flex items-center justify-center mb-3">
                 <Clock className="h-6 w-6 text-primary" />
               </div>
-              <p className="font-medium">7-day free trial</p>
+              <p className="font-medium">{trialHeadlineLabel()}</p>
               <p className="text-sm text-muted-foreground">Test with real calls</p>
             </div>
             <div className="flex flex-col items-center p-4">
@@ -605,7 +606,7 @@ export default function HomePage() {
             Stop losing jobs to voicemail. Forward your line, capture lead details, and get summaries by text or email — usually within seconds.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
-            <span className="opacity-90">7-day free trial</span>
+            <span className="opacity-90">{trialHeadlineLabel()}</span>
             <span className="opacity-60">·</span>
             <span className="opacity-90">No card required</span>
             <span className="opacity-60">·</span>

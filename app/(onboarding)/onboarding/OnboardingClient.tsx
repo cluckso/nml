@@ -12,6 +12,7 @@ import { PlanType } from "@prisma/client"
 import { formatPhoneForDisplay } from "@/lib/utils"
 import { Phone } from "lucide-react"
 import Link from "next/link"
+import { trialOnboardingHint } from "@/lib/trial-marketing"
 
 type OnboardingStep = "industry" | "business-info" | "complete" | "manual-setup"
 
@@ -200,7 +201,7 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Welcome to CallGrabbr</h1>
         <p className="text-muted-foreground">
-          Set up your business in a few minutes. {planType ? "You've already chosen your plan." : "You're on the 7-day free trial. Upgrade anytime from Billing."}
+          Set up your business in a few minutes. {planType ? "You've already chosen your plan." : trialOnboardingHint()}
         </p>
       </div>
 
