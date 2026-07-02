@@ -1399,9 +1399,7 @@ type TemplateAgentEntry = {
   version?: number
 }
 
-/**
- * Update one industry template agent's flow and voice from retell-agents-by-industry.json.
- */
+/** Update one industry template agent's flow and voice (used by sync script). */
 export async function updateTemplateAgentForIndustry(
   apiKey: string,
   industry: Industry,
@@ -1421,25 +1419,4 @@ export async function updateTemplateAgentForIndustry(
     },
   })
   return { version }
-}
-
-/**
- * Sync all industry template agents from retell-agents-by-industry.json.
- * Run: npx tsx scripts/sync-retell-agents.ts
- */
-export async function updateAllTemplateAgents(): Promise<void> {
-  const apiKey = process.env.RETELL_API_KEY
-  if (!apiKey) throw new Error("RETELL_API_KEY required")
-
-  const fs = await import("fs/promises")
-  const path = await import("path")
-  const configPath = path.join(process.cwd(), "retell-agents-by-industry.json")
-  const raw = await fs.readFile(configPath, "utf-8")
-  const config = JSON.parse(raw) as Record<string, TemplateAgentEntry>
-
-  for (const [industryKey, entry] of Object.entries(config)) {
-    const industry = industryKey as Industry
-    const { version } = await updateTemplateAgentForIndustry(apiKey, industry, entry)
-    console.info(`Updated ${industry} template agent to flow version`, version)
-  }
 }

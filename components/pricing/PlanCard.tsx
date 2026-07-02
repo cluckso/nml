@@ -11,7 +11,7 @@ import { PRICING_TIERS_BY_KEY } from "@/lib/pricing-catalog"
 import { formatIncludedUsageLabel } from "@/lib/plan-usage"
 import { LegalConsentCheckbox } from "@/components/legal/LegalConsentCheckbox"
 import { moneyBackGuaranteeLabel } from "@/lib/trial-marketing"
-import type { BillingInterval } from "@/lib/stripe"
+import type { BillingInterval } from "@/lib/stripe-billing"
 
 export function PlanCard({
   name,

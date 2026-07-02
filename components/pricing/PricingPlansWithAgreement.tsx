@@ -11,7 +11,7 @@ import {
   parseBillingFromParams,
   parseHighlightPlanFromParams,
 } from "@/components/pricing/PricingIntentBanner"
-import { isAnnualBillingAvailable, type BillingInterval } from "@/lib/stripe"
+import { isAnnualBillingAvailable, type BillingInterval } from "@/lib/stripe-billing"
 import { getAnnualPrice } from "@/lib/plans"
 import { PRICING_TIERS_BY_KEY, type PricingTierKey } from "@/lib/pricing-catalog"
 import { PLAN_MID_VOLUME } from "@/lib/plan-labels"

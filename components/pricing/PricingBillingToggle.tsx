@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { annualSavingsLabel } from "@/lib/trial-marketing"
-import type { BillingInterval } from "@/lib/stripe"
+import type { BillingInterval } from "@/lib/stripe-billing"
 
 export function PricingBillingToggle({
   value,

@@ -5,7 +5,7 @@
  */
 
 import "dotenv/config"
-import { updateAllTemplateAgents } from "../lib/retell"
+import { updateAllTemplateAgents } from "../lib/retell-template-sync"
 
 async function main() {
   await updateAllTemplateAgents()

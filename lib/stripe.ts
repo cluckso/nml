@@ -2,9 +2,16 @@ import Stripe from "stripe"
 import { db } from "./db"
 import { PlanType, SubscriptionStatus } from "@prisma/client"
 import { getIncludedMinutes, getOverageMinutes, TRIAL_DAYS } from "./plans"
-import { releaseRetellNumber } from "./retell"
 import { convertReferralOnSubscription } from "@/lib/referrals"
 import { processAgencyCommissionOnSubscription } from "@/lib/agency"
+import {
+  getAnnualStripePriceId,
+  type BillingInterval,
+  isAnnualBillingAvailable,
+} from "./stripe-billing"
+
+export type { BillingInterval } from "./stripe-billing"
+export { isAnnualBillingAvailable } from "./stripe-billing"
 
 /** Map Stripe subscription status to our DB SubscriptionStatus (single place for mapping). */
 function stripeSubscriptionStatusToDb(stripeStatus: string): SubscriptionStatus {
@@ -355,24 +362,8 @@ function getProductIdForPlan(planType: PlanType): string {
 
 const PLACEHOLDER_IDS = ["price_starter", "price_pro", "price_local_plus", "price_elite", "price_usage"]
 
-// Monthly price IDs only (STRIPE_PRICE_*). Annual: STRIPE_PRICE_*_ANNUAL for future use.
-export type BillingInterval = "monthly" | "annual"
-
 function getAnnualPriceIdForPlan(planType: PlanType): string | null {
-  const priceIds: Record<PlanType, string | undefined> = {
-    [PlanType.STARTER]: process.env.STRIPE_PRICE_STARTER_ANNUAL,
-    [PlanType.PRO]: process.env.STRIPE_PRICE_PRO_ANNUAL,
-    [PlanType.LOCAL_PLUS]: process.env.STRIPE_PRICE_LOCAL_PLUS_ANNUAL,
-    [PlanType.ELITE]: process.env.STRIPE_PRICE_ELITE_ANNUAL,
-  }
-  const id = priceIds[planType]
-  if (id && id.startsWith("price_") && !PLACEHOLDER_IDS.includes(id)) return id
-  return null
-}
-
-/** Whether annual Stripe prices are configured for this plan. */
-export function isAnnualBillingAvailable(planType: PlanType): boolean {
-  return getAnnualPriceIdForPlan(planType) !== null
+  return getAnnualStripePriceId(planType)
 }
 
 function resolvePlanPriceId(planType: PlanType, billingInterval: BillingInterval): string {
@@ -609,7 +600,10 @@ export async function handleStripeWebhook(event: Stripe.Event) {
         },
       })
       for (const b of businesses) {
-        if (newStatus === "CANCELED") await releaseRetellNumber(b.id)
+        if (newStatus === "CANCELED") {
+          const { releaseRetellNumber } = await import("./retell")
+          await releaseRetellNumber(b.id)
+        }
       }
       break
     }
