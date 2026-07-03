@@ -20,6 +20,9 @@
 import fs from "fs"
 import path from "path"
 import { fileURLToPath } from "url"
+import dotenv from "dotenv"
+
+dotenv.config({ path: path.join(path.dirname(fileURLToPath(import.meta.url)), "../.env") })
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const JSON_PATH = path.join(__dirname, "../campaign-exports/phone-slave/buffer-schedule.json")
@@ -110,7 +113,9 @@ async function listProfiles(): Promise<void> {
   }
 
   if (!data.profiles?.length) {
-    console.log("No profiles found. Connect channels in Buffer first.")
+    console.log(
+      "No profiles found. If using a Publish API token, use: npm run campaign:schedule-mcp"
+    )
     return
   }
 

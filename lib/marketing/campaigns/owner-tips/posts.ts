@@ -1,24 +1,27 @@
 import type { CampaignPost } from "@/lib/marketing/campaigns/types"
 
 const SOFT_CTA =
-  "\n\n—\nRunning a service business? More tips at callgrabbr.com · Free 7-day trial, no card."
+  "\n\n—\nKeep every opportunity moving with CallGrabbr · callgrabbr.com · Free 7-day trial, no card."
 
 const TRIAL_CTA =
-  "\n\n—\nStop losing jobs to voicemail → callgrabbr.com/sign-up · 7-day free trial, no card."
+  "\n\n—\nStop losing jobs to missed calls and voicemail → callgrabbr.com/sign-up · Free 7-day trial, no card."
 
-/** Daily owner tips — educational, adjacent to missed calls, intake, and local service ops. */
+/**
+ * Daily owner tips designed to educate while reinforcing CallGrabbr's core value:
+ * every caller gets a natural answer, key details are captured, and the owner stays in control.
+ */
 export const OWNER_TIPS_POSTS: Record<string, CampaignPost> = {
   "tip-01-speed-to-lead": {
     id: "tip-01-speed-to-lead",
     industry: "general",
     format: "tip",
     title: "Day 1 — Speed to lead",
-    slides: [{ headline: "Call back within 5 minutes", body: "Leads go cold fast. Same-hour callback wins jobs your competitor just missed." }],
-    caption: `Trade tip #1: Speed beats polish on the first touch.
+    slides: [{ headline: "The first real response has the advantage", body: "Answer now. Capture the job. Follow up with context." }],
+    caption: `Trade tip #1: Customers rarely stop after one unanswered call.
 
-Homeowners and property managers often call 2–3 companies. The first helpful callback — not the fanciest website — gets the dispatch.
+The faster they reach a real conversation, the less reason they have to call the next company. Your first response does not need to solve the job — it needs to acknowledge the customer, capture the request, and set a clear next step.
 
-Set a shop rule: every missed call gets a callback attempt within 5 minutes during business hours.${SOFT_CTA}`,
+CallGrabbr handles that first conversation while you stay focused on the work in front of you.${SOFT_CTA}`,
     hashtags: ["SmallBusiness", "ContractorTips", "LeadGeneration", "CallGrabbr"],
   },
 
@@ -27,12 +30,12 @@ Set a shop rule: every missed call gets a callback attempt within 5 minutes duri
     industry: "general",
     format: "tip",
     title: "Day 2 — Voicemail reality",
-    slides: [{ headline: "Voicemail is not a safety net", body: "Most callers won't leave a message. They dial the next listing." }],
-    caption: `Trade tip #2: Voicemail captures a small fraction of callers — often cited around 5–15%.
+    slides: [{ headline: "Voicemail is not a conversation", body: "Give callers an answer, not a tone." }],
+    caption: `Trade tip #2: Voicemail asks the customer to do more work after you were unavailable.
 
-If you're on a roof or under a sink, voicemail feels like coverage. For the customer, it's often a dead end.
+A live, natural conversation keeps the caller engaged and gives you useful information: who they are, what they need, where the job is, and how urgent it sounds.
 
-Live answer (or fast text-back) keeps the conversation alive.${SOFT_CTA}`,
+CallGrabbr replaces the dead end with a captured lead and an instant summary.${TRIAL_CTA}`,
     hashtags: ["MissedCalls", "LocalBusiness", "TradesLife", "CallGrabbr"],
   },
 
@@ -41,10 +44,12 @@ Live answer (or fast text-back) keeps the conversation alive.${SOFT_CTA}`,
     industry: "general",
     format: "tip",
     title: "Day 3 — After-hours value",
-    slides: [{ headline: "After-hours calls are often your best jobs", body: "Emergencies pay premium rates — if you capture them." }],
-    caption: `Trade tip #3: Night and weekend calls skew urgent — no heat, active leak, electrical smell.
+    slides: [{ headline: "Your business can answer after you clock out", body: "Capture urgent jobs without living on your phone." }],
+    caption: `Trade tip #3: Nights and weekends often bring high-intent calls — no heat, active leaks, electrical concerns, lockouts, and breakdowns.
 
-Owners who only answer 9–5 leave high-intent work on the table. You don't need to be on the phone 24/7 yourself — you need a system that captures name, address, and urgency so you can decide when to roll a truck.${SOFT_CTA}`,
+You do not need to personally answer every ring. You need a reliable intake system that captures the details and lets you decide what deserves an immediate response.
+
+CallGrabbr answers, qualifies, and texts you the lead so you stay in control.${SOFT_CTA}`,
     hashtags: ["AfterHours", "HVAC", "Plumber", "CallGrabbr"],
   },
 
@@ -53,15 +58,17 @@ Owners who only answer 9–5 leave high-intent work on the table. You don't need
     industry: "general",
     format: "tip",
     title: "Day 4 — What to capture",
-    slides: [{ headline: "Four fields every intake should aim for", body: "Name · Callback number · What's wrong · Service address" }],
-    caption: `Trade tip #4: Before you quote or dispatch, you need the same basics every time.
+    slides: [{ headline: "Four details turn a call into a usable lead", body: "Name · Callback number · Job details · Service address" }],
+    caption: `Trade tip #4: A ringing phone is not yet a usable lead.
+
+A solid intake should capture:
 
 1. Caller name
 2. Best callback number
-3. Clear problem description (not just "something's wrong")
+3. Clear description of the problem
 4. Service address
 
-Urgency and preferred timing are bonuses. Consistent intake = faster quotes and fewer back-and-forth texts.${SOFT_CTA}`,
+Add urgency and preferred timing, and you can follow up prepared instead of starting the conversation over. That is exactly what CallGrabbr is built to collect.${SOFT_CTA}`,
     hashtags: ["CustomerService", "FieldService", "CallGrabbr"],
   },
 
@@ -70,12 +77,12 @@ Urgency and preferred timing are bonuses. Consistent intake = faster quotes and 
     industry: "general",
     format: "tip",
     title: "Day 5 — Google reviews",
-    slides: [{ headline: "Reply to every Google review within 24 hours", body: "Prospects read your responses, not just your star rating." }],
-    caption: `Trade tip #5: Your Google Business Profile is often the first impression after a missed call search.
+    slides: [{ headline: "Great marketing still needs someone to answer", body: "Do not pay for attention and send it to voicemail." }],
+    caption: `Trade tip #5: Reviews help customers choose who to call. Your phone experience helps them decide who to hire.
 
-Reply to reviews within a day — thank happy customers, professionally address complaints.
+A strong Google profile can create the opportunity, but an unanswered call can still send that customer elsewhere. Make sure the experience after the click is as reliable as the reputation that earned it.
 
-Short, human replies signal you're an active, accountable shop.${SOFT_CTA}`,
+CallGrabbr helps turn that hard-earned visibility into captured opportunities.${SOFT_CTA}`,
     hashtags: ["GoogleBusiness", "LocalSEO", "Reputation", "CallGrabbr"],
   },
 
@@ -84,10 +91,12 @@ Short, human replies signal you're an active, accountable shop.${SOFT_CTA}`,
     industry: "hvac",
     format: "tip",
     title: "Day 6 — Peak season phones",
-    slides: [{ headline: "Plan your phone before peak season hits", body: "Call volume spikes when you're already buried in jobs." }],
-    caption: `HVAC tip #6: Peak heat and cold weeks double ring volume while your techs are maxed out.
+    slides: [{ headline: "Busy season exposes weak phone coverage", body: "More calls arrive when your team is least available." }],
+    caption: `HVAC tip #6: Peak weather creates the exact problem most shops struggle with — more calls while every technician is already busy.
 
-Before the rush: confirm forwarding, who gets lead texts, and after-hours rules. A bad phone week during peak season can cost more than a slow month in spring.${SOFT_CTA}`,
+Before the rush, test your forwarding, confirm who receives lead alerts, and decide whether CallGrabbr answers every call or only the calls you cannot take.
+
+The goal is simple: high call volume should create more booked work, not more missed opportunities.${TRIAL_CTA}`,
     hashtags: ["HVAC", "HVACLife", "PeakSeason", "CallGrabbr"],
   },
 
@@ -96,12 +105,12 @@ Before the rush: confirm forwarding, who gets lead texts, and after-hours rules.
     industry: "general",
     format: "tip",
     title: "Day 7 — Ring first or answer all?",
-    slides: [{ headline: "Let your line ring if you want to answer first", body: "Forward unanswered calls — don't replace your cell on every ring." }],
-    caption: `Trade tip #7: Many owners want the phone to ring on their cell for 15–20 seconds, then backup answers.
+    slides: [{ headline: "Choose how CallGrabbr answers", body: "Every call, or only when you do not pick up." }],
+    caption: `Trade tip #7: Phone coverage should fit the way you already work.
 
-That's smart — you keep personal control when you're free, and you don't lose the call when you're not.
+Prefer to answer when you are available? Let your business line ring first, then forward unanswered calls to CallGrabbr. Want complete coverage from the first ring? Route every call directly to the AI receptionist.
 
-Check your carrier's conditional forwarding options.${SOFT_CTA}`,
+Either way, you keep control without sending callers to voicemail.${TRIAL_CTA}`,
     hashtags: ["PhoneTips", "SmallBusinessOwner", "CallGrabbr"],
   },
 
@@ -109,13 +118,13 @@ Check your carrier's conditional forwarding options.${SOFT_CTA}`,
     id: "tip-08-text-first",
     industry: "general",
     format: "tip",
-    title: "Day 8 — Text-back habit",
-    slides: [{ headline: "Can't talk? Text in 60 seconds", body: '"Got your call — on a job, calling you back shortly."' }],
-    caption: `Trade tip #8: A fast text beats silence.
+    title: "Day 8 — Context before callback",
+    slides: [{ headline: "Do not call back blind", body: "Know who called, what they need, and how urgent it is." }],
+    caption: `Trade tip #8: A missed-call alert tells you almost nothing.
 
-Template: "Thanks for calling [Shop] — on a job site, will call you back within [X] minutes. Reply URGENT if this is an emergency."
+A useful lead summary tells you who called, what happened, where the job is, and whether it sounds urgent. That lets you return the call with context — or decide that it can wait until your current job is finished.
 
-Even a short text keeps you in the race while you're hands-on.${SOFT_CTA}`,
+CallGrabbr sends the captured details straight to your phone after the conversation ends.${SOFT_CTA}`,
     hashtags: ["CustomerExperience", "TradesBusiness", "CallGrabbr"],
   },
 
@@ -123,11 +132,13 @@ Even a short text keeps you in the race while you're hands-on.${SOFT_CTA}`,
     id: "tip-09-no-blind-quotes",
     industry: "general",
     format: "tip",
-    title: "Day 9 — Don't quote blind",
-    slides: [{ headline: "Big jobs need details before a number", body: "Price on the phone without scope = rework and margin loss." }],
-    caption: `Trade tip #9: It's tempting to throw a range on the first call. For installs, replacements, and multi-trade work, under-quoting kills profit.
+    title: "Day 9 — Do not quote blind",
+    slides: [{ headline: "Capture scope before discussing price", body: "Good intake protects your time and margin." }],
+    caption: `Trade tip #9: The first call should gather facts, not force a final price.
 
-Capture scope and address first. Schedule an on-site or diagnostic when needed. Your intake script should gather facts — not promise a final price.${SOFT_CTA}`,
+For installs, replacements, repairs, and multi-step work, incomplete information leads to weak estimates and wasted trips. Capture the issue, address, urgency, and relevant details before you promise anything.
+
+CallGrabbr handles intake without committing your business to pricing or arrival times.${SOFT_CTA}`,
     hashtags: ["Pricing", "ContractorLife", "CallGrabbr"],
   },
 
@@ -135,15 +146,13 @@ Capture scope and address first. Schedule an on-site or diagnostic when needed. 
     id: "tip-10-who-answers",
     industry: "general",
     format: "tip",
-    title: "Day 10 — Who answers?",
-    slides: [{ headline: "Assign phone ownership on the crew chart", body: "If everyone thinks someone else will pick up, nobody does." }],
-    caption: `Trade tip #10: On teams of 3+, decide explicitly:
+    title: "Day 10 — One dependable first response",
+    slides: [{ headline: "Do not make the crew race for the phone", body: "Let the team work while one system captures every caller." }],
+    caption: `Trade tip #10: When every crew member feels responsible for the phone, every ring becomes an interruption.
 
-• Who answers during business hours?
-• Who gets after-hours texts?
-• Who dispatches emergencies?
+Create one dependable first-response system. Let CallGrabbr answer and capture the lead, then route the summary to the right owner, dispatcher, or on-call person.
 
-Write it on the whiteboard. Confusion on the phone costs real jobs.${SOFT_CTA}`,
+Your team should know who follows up — not who has to stop working and answer.${SOFT_CTA}`,
     hashtags: ["TeamManagement", "ServiceBusiness", "CallGrabbr"],
   },
 
@@ -151,13 +160,13 @@ Write it on the whiteboard. Confusion on the phone costs real jobs.${SOFT_CTA}`,
     id: "tip-11-emergency-keywords",
     industry: "general",
     format: "tip",
-    title: "Day 11 — Flag emergencies early",
-    slides: [{ headline: "Train intake to spot urgency words", body: "No heat · Active leak · Burning smell · Gas odor · Sparks" }],
-    caption: `Trade tip #11: Emergencies need a different path than "quote next week."
+    title: "Day 11 — Flag urgency early",
+    slides: [{ headline: "Urgent calls should look urgent", body: "No heat · Active leak · Burning smell · Gas odor · Sparks" }],
+    caption: `Trade tip #11: Not every lead belongs in the same callback queue.
 
-Flag these on intake: no heat/AC, active flooding, sewage, burning smell, sparking, gas odor.
+Your intake should identify urgency indicators such as active flooding, no heat in dangerous weather, sewage, sparks, burning smells, or a reported gas odor. The caller should be directed to emergency services when immediate danger is present.
 
-Sort urgent leads to the top of your callback list — not the bottom of voicemail.${SOFT_CTA}`,
+CallGrabbr captures the caller's wording so you can recognize urgent jobs quickly and respond appropriately.${SOFT_CTA}`,
     hashtags: ["EmergencyService", "Plumbing", "Electrical", "CallGrabbr"],
   },
 
@@ -166,12 +175,12 @@ Sort urgent leads to the top of your callback list — not the bottom of voicema
     industry: "general",
     format: "tip",
     title: "Day 12 — Weekend without burnout",
-    slides: [{ headline: "Cover weekends without living on your phone", body: "Capture leads automatically; you choose which trucks roll." }],
-    caption: `Trade tip #12: Weekend coverage doesn't mean you personally answer every ring.
+    slides: [{ headline: "Coverage does not require constant availability", body: "Let calls get answered while you choose when to respond." }],
+    caption: `Trade tip #12: Weekend coverage should protect revenue without taking over your life.
 
-A system that captures caller details lets you batch callbacks between family time — or dispatch only true emergencies.
+CallGrabbr can answer the caller, collect the job details, and send you the summary. You decide whether to respond immediately, dispatch an emergency, or follow up during your next callback window.
 
-Boundaries + coverage beats heroics + burnout.${SOFT_CTA}`,
+The customer gets an answer. You keep your boundaries.${TRIAL_CTA}`,
     hashtags: ["WorkLifeBalance", "Contractor", "CallGrabbr"],
   },
 
@@ -179,13 +188,13 @@ Boundaries + coverage beats heroics + burnout.${SOFT_CTA}`,
     id: "tip-13-missed-call-audit",
     industry: "general",
     format: "tip",
-    title: "Day 13 — Weekly missed-call audit",
-    slides: [{ headline: "Review missed calls every Monday", body: "10 minutes · How many? · Any become jobs? · Any go to competitors?" }],
-    caption: `Trade tip #13: Pull your carrier or shop missed-call log once a week.
+    title: "Day 13 — Audit lost opportunities",
+    slides: [{ headline: "Measure what happens when you cannot answer", body: "Missed calls · Captured leads · Booked jobs · Unqualified calls" }],
+    caption: `Trade tip #13: Do not judge phone coverage by how busy the phone feels.
 
-Ask: How many? Did we call back? Did any turn into booked work? Any we never returned?
+Track the outcomes: how many calls were answered, how many became qualified leads, how many were booked, and how many were spam or unrelated.
 
-What you measure on the phone, you fix on the phone.${SOFT_CTA}`,
+Structured CallGrabbr lead summaries make that review far more useful than a list of unknown missed numbers.${SOFT_CTA}`,
     hashtags: ["BusinessOps", "KPIs", "CallGrabbr"],
   },
 
@@ -193,11 +202,13 @@ What you measure on the phone, you fix on the phone.${SOFT_CTA}`,
     id: "tip-14-callback-discipline",
     industry: "general",
     format: "tip",
-    title: "Day 14 — Callback discipline",
-    slides: [{ headline: "Same number, same day", body: "Call back from the number customers recognize — ideally before 5 PM." }],
-    caption: `Trade tip #14: Customers ignore unknown numbers. Return calls from your main shop line when possible.
+    title: "Day 14 — Better callbacks",
+    slides: [{ headline: "Return the call with the details in front of you", body: "A prepared callback feels faster and more professional." }],
+    caption: `Trade tip #14: The quality of the callback matters as much as the speed.
 
-If you miss them once, a same-day second attempt is still worth it. After 24 hours, conversion drops hard.${SOFT_CTA}`,
+Before you dial, know the customer's name, service address, problem, and urgency. Open with their situation instead of asking them to repeat the entire call.
+
+CallGrabbr gives you the context needed to make the follow-up feel like a continuation — not a restart.${SOFT_CTA}`,
     hashtags: ["SalesTips", "LocalBusiness", "CallGrabbr"],
   },
 
@@ -206,10 +217,12 @@ If you miss them once, a same-day second attempt is still worth it. After 24 hou
     industry: "general",
     format: "tip",
     title: "Day 15 — Service area clarity",
-    slides: [{ headline: "Confirm address before you dispatch", body: "Out-of-area jobs waste drive time and margin." }],
-    caption: `Trade tip #15: Ask for the service address early — before you promise timing or pricing.
+    slides: [{ headline: "Capture the address before you dispatch", body: "Qualify location before it costs drive time." }],
+    caption: `Trade tip #15: The service address should be part of every intake.
 
-If you're not clear on towns you serve, say so on intake. A polite "we don't cover that zip" saves hours.${SOFT_CTA}`,
+It helps you confirm the caller is inside your coverage area, estimate travel, assign the right technician, and avoid promising service somewhere you do not go.
+
+CallGrabbr can collect the address during the first conversation so you receive a lead that is ready to evaluate.${SOFT_CTA}`,
     hashtags: ["FieldService", "Dispatch", "CallGrabbr"],
   },
 
@@ -217,14 +230,13 @@ If you're not clear on towns you serve, say so on intake. A polite "we don't cov
     id: "tip-16-plumbing-2am",
     industry: "plumbing",
     format: "tip",
-    title: "Day 16 — 2 AM leak mindset",
-    slides: [{ headline: "Active drip = treat as urgent", body: "Ask: Is water still flowing? Can they shut off a valve?" }],
-    caption: `Plumbing tip #16: Night calls need two quick safety questions:
+    title: "Day 16 — 2 AM plumbing calls",
+    slides: [{ headline: "Capture the situation before you roll", body: "Is water active? Where is the leak? What is the service address?" }],
+    caption: `Plumbing tip #16: An after-hours plumbing call needs clear facts before you decide what happens next.
 
-• Is water actively flowing right now?
-• Do they know where the shutoff is?
+Capture whether water is actively flowing, where the issue is located, whether the caller has taken any safe steps, and the exact service address. Avoid remote troubleshooting that could create additional risk.
 
-You get better intel before you roll a truck — and the homeowner feels heard.${SOFT_CTA}`,
+CallGrabbr gathers the caller's description so you can judge urgency before leaving home.${SOFT_CTA}`,
     hashtags: ["Plumber", "PlumbingLife", "EmergencyPlumber", "CallGrabbr"],
   },
 
@@ -233,28 +245,29 @@ You get better intel before you roll a truck — and the homeowner feels heard.$
     industry: "electrical",
     format: "tip",
     title: "Day 17 — Electrical safety first",
-    slides: [{ headline: "Burning smell or sparks = priority", body: "Ask if they're safe. Tell them to leave the panel alone." }],
-    caption: `Electrical tip #17: On intake, safety beats scheduling.
+    slides: [{ headline: "Capture danger signs clearly", body: "Sparks · Smoke · Burning smell · Shock · Power loss" }],
+    caption: `Electrical tip #17: Safety comes before scheduling.
 
-If they report sparks, burning smell, or shock — confirm they're safe, don't troubleshoot over the phone, prioritize callback.
+When a caller reports sparks, smoke, a burning smell, shock, or another immediate danger, they should avoid the hazard and contact emergency services when appropriate. Your intake should document exactly what they reported without attempting risky remote diagnosis.
 
-Document urgency in your lead notes so dispatch sees it first.${SOFT_CTA}`,
+CallGrabbr gives you a clear summary so urgent electrical calls stand out immediately.${SOFT_CTA}`,
     hashtags: ["Electrician", "ElectricalSafety", "CallGrabbr"],
   },
 
   "tip-18-auto-ymm": {
     id: "tip-18-auto-ymm",
-    industry: "general",
+    industry: "auto",
     format: "tip",
     title: "Day 18 — Year, make, model",
-    slides: [{ headline: "Shops: capture YMM + symptom", body: "Wrong parts and wrong bay time start with vague intake." }],
-    caption: `Auto tip #18: Minimum viable intake for repair calls:
+    slides: [{ headline: "Better auto intake starts with YMM + symptom", body: "Know the vehicle before you schedule the bay." }],
+    caption: `Auto shop tip #18: A useful repair lead should include:
 
-• Year, make, model
-• What's it doing (or not doing)?
-• Can they drive it in, or are they roadside?
+• Year, make, and model
+• What the vehicle is doing — or not doing
+• Whether it can be driven or needs a tow
+• The customer's preferred timing
 
-That trio lets you slot the right bay and parts before they hang up.${SOFT_CTA}`,
+CallGrabbr can collect those details before you call back, helping you schedule the right bay and ask better follow-up questions.${SOFT_CTA}`,
     hashtags: ["AutoRepair", "MechanicLife", "CallGrabbr"],
   },
 
@@ -262,13 +275,13 @@ That trio lets you slot the right bay and parts before they hang up.${SOFT_CTA}`
     id: "tip-19-review-timing",
     industry: "general",
     format: "tip",
-    title: "Day 19 — Review timing",
-    slides: [{ headline: "Ask for reviews after the job is done", body: "Not at the door with tools in hand — follow up by text next day." }],
-    caption: `Trade tip #19: The best review ask is 12–24 hours after completion — when relief is fresh.
+    title: "Day 19 — Reviews start with the first call",
+    slides: [{ headline: "Customer experience begins before the job", body: "A professional first answer builds confidence." }],
+    caption: `Trade tip #19: Reviews are influenced by more than the finished repair.
 
-Keep it simple: "Glad we could help — if you have a minute, a Google review helps local folks find us."
+Customers remember whether someone answered, whether they felt heard, and whether the next step was clear. A professional intake experience builds confidence before a technician ever arrives.
 
-Happy customers often will — they just need a nudge.${SOFT_CTA}`,
+CallGrabbr helps your business make that first interaction consistent, even when nobody on the crew can pick up.${SOFT_CTA}`,
     hashtags: ["Reviews", "ReputationManagement", "CallGrabbr"],
   },
 
@@ -276,13 +289,13 @@ Happy customers often will — they just need a nudge.${SOFT_CTA}`,
     id: "tip-20-gbp-hours",
     industry: "general",
     format: "tip",
-    title: "Day 20 — GBP hours accuracy",
-    slides: [{ headline: "Wrong hours = missed trust", body: "Update Google Business hours for holidays and summer Fridays." }],
-    caption: `Trade tip #20: Customers check hours before they call. Outdated Google hours frustrate people who drove across town.
+    title: "Day 20 — Hours and phone coverage",
+    slides: [{ headline: "Closed does not have to mean unreachable", body: "Keep after-hours callers from reaching a dead end." }],
+    caption: `Trade tip #20: Keep your Google Business hours accurate — then decide what callers experience outside those hours.
 
-Set a quarterly reminder: verify hours, holiday closures, and "open now" status.
+You may be closed for regular service while still wanting to capture tomorrow's work or identify a true emergency. CallGrabbr can answer after hours, explain the next step, and collect the lead for follow-up.
 
-Accuracy is free marketing.${SOFT_CTA}`,
+Clear hours plus reliable call coverage creates better expectations.${SOFT_CTA}`,
     hashtags: ["GoogleBusinessProfile", "LocalSEO", "CallGrabbr"],
   },
 
@@ -291,10 +304,12 @@ Accuracy is free marketing.${SOFT_CTA}`,
     industry: "general",
     format: "tip",
     title: "Day 21 — Competitor reality",
-    slides: [{ headline: "You're racing the next listing", body: "Not perfection — whoever responds first with confidence." }],
-    caption: `Trade tip #21: Your competitor isn't necessarily better — they might just be faster on the phone.
+    slides: [{ headline: "The next listing is one tap away", body: "Give callers a reason to stop searching." }],
+    caption: `Trade tip #21: Your competitor does not have to be better to win the job. They may simply be the first business that answers and sounds ready to help.
 
-Speed + clear next step ("I'll call you back in 10" or "tech en route window") wins more than a perfect pitch.${TRIAL_CTA}`,
+A natural greeting, a few relevant questions, and a clear next step can keep the customer from continuing down the search results.
+
+CallGrabbr makes sure an unavailable owner does not become an unavailable business.${TRIAL_CTA}`,
     hashtags: ["CompetitiveAdvantage", "MissedCalls", "CallGrabbr"],
   },
 
@@ -302,13 +317,13 @@ Speed + clear next step ("I'll call you back in 10" or "tech en route window") w
     id: "tip-22-hold-music",
     industry: "general",
     format: "tip",
-    title: "Day 22 — Hold music hurts",
-    slides: [{ headline: "Long hold = hang-up", body: "Customers want answers, not loops." }],
-    caption: `Trade tip #22: If callers hit hold music or phone trees, many bail.
+    title: "Day 22 — Skip the phone maze",
+    slides: [{ headline: "Customers called for help, not a menu", body: "Use a natural conversation instead of a phone tree." }],
+    caption: `Trade tip #22: Local service callers usually have one goal — explain the problem and find out what happens next.
 
-Local service businesses win with a human (or human-sounding) greeting and quick questions — not "press 1 for sales."
+Long menus, repeated transfers, and hold loops add friction before the relationship even starts. A direct, natural conversation is a better fit for a local business.
 
-Every extra 30 seconds is another chance to lose the job.${SOFT_CTA}`,
+CallGrabbr asks the questions your business needs without making callers navigate a robotic menu.${TRIAL_CTA}`,
     hashtags: ["CustomerService", "CallGrabbr"],
   },
 
@@ -316,13 +331,13 @@ Every extra 30 seconds is another chance to lose the job.${SOFT_CTA}`,
     id: "tip-23-batch-callbacks",
     industry: "general",
     format: "tip",
-    title: "Day 23 — Batch callbacks",
-    slides: [{ headline: "Between jobs, return 3 calls at once", body: "Block 15 minutes after each dispatch for phone time." }],
-    caption: `Trade tip #23: Constant phone interruptions on site kill productivity.
+    title: "Day 23 — Protect productive time",
+    slides: [{ headline: "Stop letting every ring interrupt the job", body: "Capture calls now. Return qualified leads at the right moment." }],
+    caption: `Trade tip #23: Constant phone interruptions slow the work, frustrate the customer in front of you, and increase mistakes.
 
-Try batching: after you finish a job or hit a natural break, return all pending leads in one 15-minute window.
+Let CallGrabbr handle the first conversation while you finish the task safely. Then review the lead summaries and return the qualified calls during your next natural break.
 
-Faster for you, still same-day for them.${SOFT_CTA}`,
+The caller gets answered immediately. You regain control of your schedule.${TRIAL_CTA}`,
     hashtags: ["Productivity", "ContractorTips", "CallGrabbr"],
   },
 
@@ -330,15 +345,13 @@ Faster for you, still same-day for them.${SOFT_CTA}`,
     id: "tip-24-dont-promise",
     industry: "general",
     format: "tip",
-    title: "Day 24 — What not to promise",
-    slides: [{ headline: "Intake captures — it doesn't commit", body: "No exact arrival times or prices unless you're sure." }],
-    caption: `Trade tip #24: Front-desk (or call assistant) should avoid:
+    title: "Day 24 — Intake without overpromising",
+    slides: [{ headline: "Capture the request — do not commit the schedule", body: "No firm price or arrival time without your approval." }],
+    caption: `Trade tip #24: A good receptionist gathers information and sets expectations without making promises the field team cannot keep.
 
-• Guaranteed arrival times
-• Firm pricing without seeing the job
-• "We'll definitely be there today" without dispatch sign-off
+Avoid guaranteed arrival times, final pricing without proper scope, or claims that a technician will definitely arrive the same day.
 
-Set expectations: "Someone will call you back shortly with next steps."${SOFT_CTA}`,
+CallGrabbr is designed to capture the lead and communicate the next step while leaving pricing, scheduling, and dispatch decisions with you.${SOFT_CTA}`,
     hashtags: ["Operations", "ServiceBusiness", "CallGrabbr"],
   },
 
@@ -347,12 +360,12 @@ Set expectations: "Someone will call you back shortly with next steps."${SOFT_CT
     industry: "general",
     format: "tip",
     title: "Day 25 — Seasonal prep",
-    slides: [{ headline: "Two weeks before busy season", body: "Test forwarding · Update greeting · Confirm who gets lead texts" }],
-    caption: `Trade tip #25: Seasonal rushes expose weak phones before weak marketing.
+    slides: [{ headline: "Test your call flow before the rush", body: "Forwarding · Greeting · Lead alerts · After-hours rules" }],
+    caption: `Trade tip #25: Busy season is the wrong time to discover that calls are forwarding incorrectly or alerts are going to the wrong person.
 
-Two weeks before your busy stretch: test a forwarded call end-to-end, update voicemail greeting dates, and confirm lead texts hit the right person.
+Before demand rises, place a full test call. Confirm the greeting, verify the right questions are being asked, and make sure the summary reaches the correct phone and email.
 
-Systems beat panic.${SOFT_CTA}`,
+CallGrabbr should feel invisible to your workflow — until it saves a job you would have missed.${SOFT_CTA}`,
     hashtags: ["SeasonalBusiness", "HVAC", "CallGrabbr"],
   },
 
@@ -360,13 +373,13 @@ Systems beat panic.${SOFT_CTA}`,
     id: "tip-26-one-greeting",
     industry: "general",
     format: "tip",
-    title: "Day 26 — One voicemail greeting",
-    slides: [{ headline: "Update your voicemail monthly", body: "Mention callback window · Alternate number · Holiday closures" }],
-    caption: `Trade tip #26: Stale voicemail messages confuse people.
+    title: "Day 26 — Make the greeting sound like your business",
+    slides: [{ headline: "Your first answer should match your brand", body: "Business name · Services · Tone · Next step" }],
+    caption: `Trade tip #26: The first few seconds of a call shape how professional your business feels.
 
-Record a fresh greeting monthly: shop name, callback window, and emergency instructions.
+Use a greeting that clearly identifies the company, sounds natural, and moves quickly into the caller's reason for calling. Avoid generic scripts that could belong to any business.
 
-If you forward to backup answering, make sure the carrier path actually works — test it yourself.${SOFT_CTA}`,
+Customize CallGrabbr so the AI receptionist represents your shop — not a faceless call center.${SOFT_CTA}`,
     hashtags: ["PhoneEtiquette", "SmallBusiness", "CallGrabbr"],
   },
 
@@ -374,15 +387,13 @@ If you forward to backup answering, make sure the carrier path actually works �
     id: "tip-27-lead-definition",
     industry: "general",
     format: "tip",
-    title: "Day 27 — Define a lead",
-    slides: [{ headline: "A lead = name + phone + real job", body: "Wrong numbers and vendor spam don't count." }],
-    caption: `Trade tip #27: Track leads honestly.
+    title: "Day 27 — Define a qualified lead",
+    slides: [{ headline: "A ring is not a lead", body: "Name + contact + real service need + usable details" }],
+    caption: `Trade tip #27: Track real opportunities, not raw call volume.
 
-Count: name, callback number, and a real service request.
+A qualified lead should include a reachable person, a genuine service request, and enough information to evaluate the job. Spam, vendors, wrong numbers, and unrelated calls should not inflate the number.
 
-Don't inflate numbers with robocalls, suppliers, or "how much do you charge for everything" tire-kickers with no address.
-
-Clean metrics = better decisions.${SOFT_CTA}`,
+CallGrabbr helps separate useful opportunities from phone noise so your metrics reflect actual business potential.${SOFT_CTA}`,
     hashtags: ["Metrics", "LeadGeneration", "CallGrabbr"],
   },
 
@@ -390,13 +401,13 @@ Clean metrics = better decisions.${SOFT_CTA}`,
     id: "tip-28-auto-ack-text",
     industry: "general",
     format: "tip",
-    title: "Day 28 — Auto-acknowledge",
-    slides: [{ headline: "Instant text: 'We got your message'", body: "Buys you time without losing the customer." }],
-    caption: `Trade tip #28: An immediate acknowledgment text — even before a full callback — reduces hang-ups and bad reviews.
+    title: "Day 28 — Instant owner notification",
+    slides: [{ headline: "The caller talks. You get the summary.", body: "No voicemail playback. No mystery number. No lost details." }],
+    caption: `Trade tip #28: The best notification is not “you missed a call.”
 
-"We received your request and will call shortly" is enough.
+It is a structured summary with the caller's name, callback number, address, job details, and urgency. That gives you enough information to prioritize the lead without replaying voicemail or returning every unknown number.
 
-Silence makes people call the next company.${TRIAL_CTA}`,
+CallGrabbr sends the information directly to you as soon as the call ends.${TRIAL_CTA}`,
     hashtags: ["SMS", "CustomerExperience", "CallGrabbr"],
   },
 
@@ -404,13 +415,13 @@ Silence makes people call the next company.${TRIAL_CTA}`,
     id: "tip-29-hire-vs-forward",
     industry: "general",
     format: "tip",
-    title: "Day 29 — Hire vs forward",
-    slides: [{ headline: "Reception at ~30+ calls/day", body: "Below that, smart forwarding + lead capture often wins." }],
-    caption: `Trade tip #29: Hiring front desk makes sense at steady high volume — often 30+ inbound calls per day.
+    title: "Day 29 — Add coverage before overhead",
+    slides: [{ headline: "You may need phone coverage — not another full-time employee", body: "Scale your answering capacity with your call volume." }],
+    caption: `Trade tip #29: A full-time receptionist can be valuable, but many growing service businesses need reliable coverage before they need another full-time payroll commitment.
 
-Below that, many shops do better forwarding unanswered calls and getting structured lead texts.
+CallGrabbr can cover every call, overflow, after-hours traffic, or only the calls you miss. That gives you room to improve customer response without changing your entire staffing model.
 
-Run your numbers: salary + benefits vs captured jobs from better phone coverage.${SOFT_CTA}`,
+Add the coverage you need now. Keep the option to hire when the broader role truly justifies it.${TRIAL_CTA}`,
     hashtags: ["BusinessGrowth", "Hiring", "CallGrabbr"],
   },
 
@@ -419,12 +430,12 @@ Run your numbers: salary + benefits vs captured jobs from better phone coverage.
     industry: "general",
     format: "tip",
     title: "Day 30 — Systems beat heroics",
-    slides: [{ headline: "You can't personally answer every ring", body: "Build a phone system that works when you're on the job." }],
-    caption: `Trade tip #30: The best owners aren't phone heroes — they have phone systems.
+    slides: [{ headline: "You should not have to choose between the job and the phone", body: "Let CallGrabbr answer while you keep working." }],
+    caption: `Trade tip #30: Growth should not require the owner to personally catch every ring.
 
-Forward when you're busy. Capture details. Callback in batches. Flag emergencies. Measure missed calls weekly.
+Build a system that answers consistently, captures the right details, flags urgency, sends the lead instantly, and leaves business decisions in your hands.
 
-That's how you grow without missing the work that pays the bills.${TRIAL_CTA}`,
+CallGrabbr helps you protect the work you already have without losing the next job that pays the bills.${TRIAL_CTA}`,
     hashtags: ["ContractorLife", "Systems", "CallGrabbr"],
     boost: true,
   },

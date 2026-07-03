@@ -23,6 +23,8 @@
     "campaign:export": "npx tsx scripts/export-phone-slave-campaign.ts",
     "campaign:export-tips": "npx tsx scripts/export-owner-tips-campaign.ts",
     "campaign:schedule": "npx tsx scripts/schedule-buffer-posts.ts",
+    "campaign:schedule-tips": "npx tsx scripts/schedule-buffer-posts.ts --json=campaign-exports/owner-tips/buffer-schedule.json",
+    "campaign:schedule-mcp": "npx tsx scripts/schedule-buffer-mcp.ts --json=campaign-exports/owner-tips/buffer-schedule.json",
     "campaign:buffer-profiles": "npx tsx scripts/schedule-buffer-posts.ts --profiles"
   },
   "dependencies": {
