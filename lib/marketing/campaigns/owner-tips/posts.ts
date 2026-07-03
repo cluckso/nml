@@ -256,7 +256,7 @@ CallGrabbr gives you a clear summary so urgent electrical calls stand out immedi
 
   "tip-18-auto-ymm": {
     id: "tip-18-auto-ymm",
-    industry: "auto",
+    industry: "general",
     format: "tip",
     title: "Day 18 — Year, make, model",
     slides: [{ headline: "Better auto intake starts with YMM + symptom", body: "Know the vehicle before you schedule the bay." }],
