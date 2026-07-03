@@ -8,6 +8,7 @@ import {
   getEffectivePlanType,
 } from "./plans"
 import { computeRingDurationMsForInbound, normalizeCallRouting, ringDurationMsForRetellAgent, DEFAULT_CALL_ROUTING } from "./call-routing"
+import { DEFAULT_BUSINESS_TIMEZONE, normalizeBusinessTimezone } from "./business-timezone"
 import { DEFAULT_RETELL_VOICE, RETELL_GLOBAL_PROMPT_TEMPLATE, getRetellVoiceConfig } from "./retell-agent-template"
 import { AGENT_PROMPT_CONFIG } from "@/config/agent-prompt"
 import { buildStevePersonalPromptContext, STEVE_PERSONAL_AGENT_CONFIG } from "@/config/steve-personal-agent"
@@ -691,6 +692,7 @@ export async function syncRetellAgentFromBusiness(
     ? normalizeCallRouting(settings.callRouting, DEFAULT_CALL_ROUTING)
     : DEFAULT_CALL_ROUTING
   const availability = {
+    timezone: normalizeBusinessTimezone(settings?.availability?.timezone ?? DEFAULT_BUSINESS_TIMEZONE),
     businessHours: settings?.availability?.businessHours ?? {
       open: "08:00",
       close: "17:00",

@@ -36,6 +36,7 @@ describe("normalizeCallRouting", () => {
 
 describe("resolveEffectiveRingDelayProfile", () => {
   const availability: AvailabilitySettings = {
+    timezone: "America/Chicago",
     businessHours: {
       open: "09:00",
       close: "17:00",
@@ -57,7 +58,7 @@ describe("resolveEffectiveRingDelayProfile", () => {
       duringHours: { ...DEFAULT_DURING_HOURS_PROFILE, answerAllCalls: false, ringBeforeAnswerSeconds: 15 },
       afterHours: { ...DEFAULT_AFTER_HOURS_PROFILE, answerAllCalls: true },
     })
-    const at = new Date("2026-06-29T12:00:00")
+    const at = new Date("2026-06-29T17:00:00.000Z")
     const profile = resolveEffectiveRingDelayProfile(routing, availability, at)
     expect(profile.ringBeforeAnswerSeconds).toBe(15)
     expect(profile.answerAllCalls).toBe(false)
@@ -69,7 +70,7 @@ describe("resolveEffectiveRingDelayProfile", () => {
       duringHours: { ...DEFAULT_DURING_HOURS_PROFILE, answerAllCalls: false, ringBeforeAnswerSeconds: 15 },
       afterHours: { ...DEFAULT_AFTER_HOURS_PROFILE, answerAllCalls: true },
     })
-    const at = new Date("2026-06-28T12:00:00")
+    const at = new Date("2026-06-28T17:00:00.000Z")
     const profile = resolveEffectiveRingDelayProfile(routing, availability, at)
     expect(profile.answerAllCalls).toBe(true)
   })
@@ -94,6 +95,7 @@ describe("computeRingDurationMs", () => {
 
 describe("computeRingDurationMsForInbound", () => {
   const availability: AvailabilitySettings = {
+    timezone: "America/Chicago",
     businessHours: {
       open: "09:00",
       close: "17:00",
@@ -109,7 +111,7 @@ describe("computeRingDurationMsForInbound", () => {
       duringHours: { ...DEFAULT_DURING_HOURS_PROFILE, answerAllCalls: false, ringBeforeAnswerSeconds: 10 },
       afterHours: { ...DEFAULT_AFTER_HOURS_PROFILE, answerAllCalls: true },
     })
-    const at = new Date("2026-06-28T20:00:00")
+    const at = new Date("2026-06-29T02:00:00.000Z")
     expect(computeRingDurationMsForInbound(routing, availability, at)).toBe(0)
   })
 })

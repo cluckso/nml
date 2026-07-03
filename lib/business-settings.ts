@@ -8,6 +8,7 @@ import {
   type RingDelayMode,
   type RingDelayProfile,
 } from "./call-routing"
+import { normalizeBusinessTimezone } from "./business-timezone"
 import { getEffectivePlanType } from "./plans"
 
 export type { CallRoutingSettings, RingBeforeAnswerRings, RingBeforeAnswerSeconds, RingDelayMode, RingDelayProfile }
@@ -31,6 +32,8 @@ export type AfterHoursBehavior = "take_message" | "book_future" | "emergency_red
 
 /** Hours & availability */
 export interface AvailabilitySettings {
+  /** IANA timezone for interpreting business hours (e.g. America/Chicago). */
+  timezone: string
   businessHours: { open: string; close: string; days: string[] }
   holidayOverrides: { date: string; closed: boolean; note?: string }[]
   afterHoursBehavior: AfterHoursBehavior
@@ -208,6 +211,7 @@ export const DEFAULT_SETTINGS: BusinessSettings = {
   },
   intakeFields: DEFAULT_INTAKE_FIELDS,
   availability: {
+    timezone: "America/Chicago",
     businessHours: { open: "08:00", close: "17:00", days: ["monday", "tuesday", "wednesday", "thursday", "friday"] },
     holidayOverrides: [],
     afterHoursBehavior: "take_message",
@@ -468,7 +472,11 @@ export function mergeWithDefaults(saved: Partial<BusinessSettings> | null | unde
   return {
     greeting: { ...DEFAULT_SETTINGS.greeting, ...(saved.greeting ?? {}) },
     intakeFields: { ...DEFAULT_SETTINGS.intakeFields, ...(saved.intakeFields ?? {}) },
-    availability: { ...DEFAULT_SETTINGS.availability, ...(saved.availability ?? {}) },
+    availability: {
+      ...DEFAULT_SETTINGS.availability,
+      ...(saved.availability ?? {}),
+      timezone: normalizeBusinessTimezone(saved.availability?.timezone),
+    },
     notifications: { ...DEFAULT_SETTINGS.notifications, ...(saved.notifications ?? {}) },
     callRouting: normalizeCallRouting(saved.callRouting, DEFAULT_CALL_ROUTING),
     missedCallRecovery: { ...DEFAULT_SETTINGS.missedCallRecovery, ...(saved.missedCallRecovery ?? {}) },

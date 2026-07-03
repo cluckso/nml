@@ -1,21 +1,5 @@
 import type { AvailabilitySettings } from "./business-settings"
-
-const DAY_NAMES = [
-  "sunday",
-  "monday",
-  "tuesday",
-  "wednesday",
-  "thursday",
-  "friday",
-  "saturday",
-] as const
-
-function localDateKey(at: Date): string {
-  const y = at.getFullYear()
-  const m = String(at.getMonth() + 1).padStart(2, "0")
-  const d = String(at.getDate()).padStart(2, "0")
-  return `${y}-${m}-${d}`
-}
+import { DEFAULT_BUSINESS_TIMEZONE, getZonedWallClock, normalizeBusinessTimezone } from "./business-timezone"
 
 function parseTimeToMinutes(time: string): number | null {
   const match = /^(\d{1,2}):(\d{2})$/.exec(time.trim())
@@ -26,18 +10,18 @@ function parseTimeToMinutes(time: string): number | null {
   return hours * 60 + minutes
 }
 
-/** Whether `at` falls inside configured business hours (local timezone). */
+/** Whether `at` falls inside configured business hours (business timezone). */
 export function isWithinBusinessHours(
   availability: AvailabilitySettings,
   at: Date = new Date()
 ): boolean {
   const { businessHours, holidayOverrides } = availability
-  const dateKey = localDateKey(at)
+  const timeZone = normalizeBusinessTimezone(availability.timezone ?? DEFAULT_BUSINESS_TIMEZONE)
+  const { dateKey, dayName, minutesSinceMidnight } = getZonedWallClock(at, timeZone)
 
   const holiday = holidayOverrides.find((h) => h.date === dateKey)
   if (holiday?.closed) return false
 
-  const dayName = DAY_NAMES[at.getDay()]
   if (!businessHours.days.includes(dayName)) return false
 
   const openMinutes = parseTimeToMinutes(businessHours.open)
@@ -46,6 +30,5 @@ export function isWithinBusinessHours(
     return false
   }
 
-  const nowMinutes = at.getHours() * 60 + at.getMinutes()
-  return nowMinutes >= openMinutes && nowMinutes < closeMinutes
+  return minutesSinceMidnight >= openMinutes && minutesSinceMidnight < closeMinutes
 }

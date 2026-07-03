@@ -33,6 +33,7 @@ import type {
 } from "@/lib/business-settings"
 import { SECTION_LABELS, SECTION_MIN_TIER, SECTION_UPGRADE_DESCRIPTIONS } from "@/lib/business-settings"
 import { formatRingDelayLabel, formatScheduledRingDelaySummary } from "@/lib/call-routing"
+import { BUSINESS_TIMEZONE_OPTIONS } from "@/lib/business-timezone"
 import { getUpgradeTierLabel, PLAN_VOLUME_TAGS } from "@/lib/plan-labels"
 import { hasPremiumElevenLabsVoice } from "@/lib/plans"
 import { PlanType } from "@prisma/client"
@@ -568,6 +569,23 @@ function AvailabilitySection({ value, onSave, saving }: { value: AvailabilitySet
         <CardDescription>Set business hours and after-hours behavior.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label>Business timezone</Label>
+          <select
+            className="w-full rounded border border-input bg-background px-3 py-2 text-sm"
+            value={d.timezone}
+            onChange={(e) => setD({ ...d, timezone: e.target.value })}
+          >
+            {BUSINESS_TIMEZONE_OPTIONS.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-muted-foreground">
+            Open and close times apply in this timezone. Used for call routing schedules and after-hours detection.
+          </p>
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label>Open</Label>
