@@ -1,0 +1,60 @@
+﻿---
+description: CallGrabbr brand voice, colors, and logo — required for marketing copy, social posts, ads, and graphics
+globs: docs/**/*,lib/marketing/**/*,components/marketing/**/*,components/funnel/**/*,public/**/*,scripts/export-*-campaign.ts,scripts/schedule-buffer-posts.ts
+alwaysApply: false
+---
+
+# CallGrabbr brand (voice, colors, logo)
+
+Full guide: `docs/BRAND_VOICE.md` · Tokens: `lib/brand.ts`
+
+## Brand reference image (mandatory)
+
+Before creating or editing **any** marketing visual (social graphic, ad, carousel, email header, Canva template):
+
+1. Open **`public/brand_ref.png`** (`nml-main/public/brand_ref.png`).
+2. Match its **navy background**, **electric-blue accent**, **cyan→blue→violet hero gradient**, and **logo placement**.
+3. Do not invent new palettes or logo treatments. If `brand_ref.png` and `lib/brand.ts` disagree, **`brand_ref.png` wins** — then update `lib/brand.ts`.
+
+## Logo — strict rules
+
+| Asset | Path | Use |
+|-------|------|-----|
+| Brand board | `public/brand_ref.png` | Reference only — not for publication |
+| Full wordmark (HD) | `public/logo_HD.png` | Ads, print, large hero |
+| Full wordmark | `public/logo.png` | Web, email |
+| Icon | `public/icon.png` / `public/logo_icon.png` | Favicon, avatars, small marks |
+
+**Do:** Use official PNGs only; dark navy backgrounds; clear space ≥ height of the "C" in the wordmark; HD logo above ~200px wide.
+
+**Do not:** Recolor, outline, or gradient-fill the logo; stretch or crop; place on busy photos without a dark scrim; use "Call Grabbr" or "CallGrabber".
+
+## Colors (`lib/brand.ts`)
+
+| Role | HEX |
+|------|-----|
+| Background | `#050B18` |
+| Surface | `#0A1224` |
+| Primary | `#3B8FF6` |
+| Text | `#F1F5F9` |
+| Muted | `#94A3B8` |
+| Urgent | `#DC2626` |
+| Hero gradient | `#67E8F9` → `#60A5FA` → `#A78BFA` |
+
+Marketing creative **defaults to dark navy** per `brand_ref.png`.
+
+## Voice (summary)
+
+- **Audience:** Local service business owners (trades first).
+- **Lead with pain:** missed calls, voicemail, competitor gets the job.
+- **Promise:** We answer when you can't and text the lead in seconds.
+- **Say:** call assistant, capture, forward, lead, job.
+- **Avoid:** AI bot, virtual assistant, guaranteed bookings, corporate jargon.
+- **Trial:** `lib/trial-marketing.ts` — 7-day, 40 min, no card, from $99/mo.
+- **Honesty:** "when callers share them", "usually within seconds".
+
+## Campaigns
+
+- Owner Tips (educational): `lib/marketing/campaigns/owner-tips/`
+- Phone Slave (conversion): `lib/marketing/campaigns/phone-slave/`
+- CTAs: `Start free trial` → `https://www.callgrabbr.com/sign-up` with UTMs in `lib/marketing/campaign-urls.ts`

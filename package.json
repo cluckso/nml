@@ -21,6 +21,7 @@
     "db:studio": "prisma studio",
     "db:add-recycled-numbers": "npx tsx scripts/add-recycled-numbers.ts",
     "campaign:export": "npx tsx scripts/export-phone-slave-campaign.ts",
+    "campaign:export-tips": "npx tsx scripts/export-owner-tips-campaign.ts",
     "campaign:schedule": "npx tsx scripts/schedule-buffer-posts.ts",
     "campaign:buffer-profiles": "npx tsx scripts/schedule-buffer-posts.ts --profiles"
   },

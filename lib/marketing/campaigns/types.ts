@@ -12,6 +12,7 @@ export type PostFormat =
   | "thread"
   | "google_business"
   | "engagement"
+  | "tip"
 
 export type CampaignPost = {
   id: string
