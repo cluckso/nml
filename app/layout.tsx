@@ -20,6 +20,9 @@ const googleSiteVerification =
 // Google Tag Manager — set NEXT_PUBLIC_GTM_ID in your host env (e.g. GTM-XXXXXXX).
 const gtmId = process.env.NEXT_PUBLIC_GTM_ID?.trim()
 
+/** Google Analytics (gtag.js) — measurement ID for all pages. */
+const GA_MEASUREMENT_ID = "G-F7EPPRSNR1"
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "CallGrabbr - Stop Losing Jobs to Voicemail",
@@ -73,6 +76,23 @@ export default function RootLayout({
           </noscript>
         )}
         <JsonLd data={[organizationJsonLd(), webSiteJsonLd()]} />
+        {/* Google Analytics (gtag.js) */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script
+          id="google-analytics"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', '${GA_MEASUREMENT_ID}');
+            `.trim(),
+          }}
+        />
         {/* Google Tag Manager — dataLayer events from lib/funnel/analytics.ts */}
         {gtmId && (
           <Script
