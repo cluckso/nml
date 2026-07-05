@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
     const intakeNumbers = getConfiguredIntakeNumbersE164()
     if (intakeNumbers.length && intakeNumbers.includes(primaryForwardingNumberNormalized)) {
       return NextResponse.json(
-        { error: "Use your business phone number (the line that forwards to CallGrabbr), not the CallGrabbr intake number. The forwarding number is shown above for reference — your customers call your business line, which forwards to that number." },
+        { error: "Enter your business phone number — the line customers call — not the CallGrabbr forwarding number shown in onboarding." },
         { status: 400 }
       )
     }

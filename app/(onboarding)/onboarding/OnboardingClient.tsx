@@ -13,6 +13,8 @@ import { formatPhoneForDisplay } from "@/lib/utils"
 import { Phone } from "lucide-react"
 import Link from "next/link"
 import { onboardingCompleteNextStep, onboardingWelcomeSubtitle } from "@/lib/trial-marketing"
+import type { OnboardingIntakeNumbers } from "@/lib/intake-routing"
+import { resolveIntakeForIndustry } from "@/lib/intake-routing"
 
 type OnboardingStep = "industry" | "business-info" | "complete" | "manual-setup"
 
@@ -54,17 +56,21 @@ interface OnboardingClientProps {
     forwardToEmail?: string | null
     afterHoursEmergencyPhone?: string | null
   }
-  /** AI number to forward calls to (by industry); shown on setup steps */
-  intakeNumber?: string | null
+  /** Intake numbers by industry — shown on business-info step after industry is selected */
+  intakeNumbers?: OnboardingIntakeNumbers
 }
 
-export function OnboardingClient({ planType, initialIndustry, initialBusiness, intakeNumber }: OnboardingClientProps) {
+export function OnboardingClient({ planType, initialIndustry, initialBusiness, intakeNumbers }: OnboardingClientProps) {
   const router = useRouter()
   const [step, setStep] = useState<OnboardingStep>("industry")
   const [data, setData] = useState<OnboardingData>({ industry: initialIndustry ?? undefined })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [provisioningWarning, setProvisioningWarning] = useState<string | null>(null)
+
+  const intakeNumber = intakeNumbers
+    ? resolveIntakeForIndustry(data.industry ?? initialIndustry, intakeNumbers)
+    : null
 
   const handleIndustrySelect = async (industry: Industry) => {
     setData({ ...data, industry })
@@ -237,10 +243,11 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
               <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 mb-6 flex items-start gap-3">
                 <Phone className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-semibold">Forward calls to this number</p>
+                  <p className="text-sm font-semibold">Later: forward your line to this CallGrabbr number</p>
                   <p className="text-lg font-mono font-semibold mt-1">{formatPhoneForDisplay(intakeNumber) || intakeNumber}</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    After saving, set your business line to forward to this number. <Link href="/docs/faq" className="text-primary underline">Help & FAQ</Link>
+                    Save your details first, then set call forwarding at your carrier.{" "}
+                    <Link href="/docs/faq" className="text-primary underline">Help & FAQ</Link>
                   </p>
                 </div>
               </div>
@@ -251,6 +258,7 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
               onBack={() => setStep("industry")}
               planType={planType}
               disabled={isSubmitting}
+              intakeNumberShown={!!intakeNumber}
             />
           </div>
         )}

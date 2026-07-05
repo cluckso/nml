@@ -2,6 +2,7 @@ import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { redirect } from "next/navigation"
 import { OnboardingClient } from "./OnboardingClient"
+import { getOnboardingIntakeNumbers } from "@/lib/intake-routing"
 
 export const dynamic = "force-dynamic"
 
@@ -20,7 +21,7 @@ export default async function OnboardingPage() {
   }
 
   const planType = business.planType ?? null
-  // Forward-to number is not shown during onboarding; it appears on the dashboard after agent creation.
+  const intakeNumbers = getOnboardingIntakeNumbers()
   const ownerPhone = (user as { phoneNumber?: string | null }).phoneNumber ?? undefined
   const initialBusiness = {
     name: business.name,
@@ -43,7 +44,7 @@ export default async function OnboardingPage() {
       planType={planType}
       initialIndustry={business?.industry ?? null}
       initialBusiness={initialBusiness}
-      intakeNumber={null}
+      intakeNumbers={intakeNumbers}
     />
   )
 }

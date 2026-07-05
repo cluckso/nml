@@ -58,6 +58,27 @@ export function getAgentIdForInbound(toNumber: string | null | undefined): strin
   return AGENT_ID_SERVICE
 }
 
+/** Serializable intake numbers for onboarding UI (server → client). */
+export type OnboardingIntakeNumbers = {
+  service: string | null
+  childcare: string | null
+}
+
+export function getOnboardingIntakeNumbers(): OnboardingIntakeNumbers {
+  const service = normalizeE164(INTAKE_NUMBER_SERVICE) ?? normalizeE164(INTAKE_NUMBER_SHARED)
+  const childcare = normalizeE164(INTAKE_NUMBER_CHILDCARE)
+  return { service, childcare }
+}
+
+/** Pick the forwarding target for an industry from preloaded onboarding numbers. */
+export function resolveIntakeForIndustry(
+  industry: Industry | null | undefined,
+  numbers: OnboardingIntakeNumbers
+): string | null {
+  if (industry === "CHILDCARE" && numbers.childcare) return numbers.childcare
+  return numbers.service
+}
+
 /**
  * Intake number the business should forward to, based on industry.
  * Service industries (HVAC, plumbing, etc.) → service number; CHILDCARE → childcare number.

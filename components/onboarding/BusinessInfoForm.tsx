@@ -35,6 +35,8 @@ interface BusinessInfoFormProps {
   planType?: "STARTER" | "PRO" | "LOCAL_PLUS" | "ELITE" | null
   /** Disable submit (e.g. while saving) to prevent double-submit */
   disabled?: boolean
+  /** When true, helper text references the CallGrabbr forwarding number shown above */
+  intakeNumberShown?: boolean
 }
 
 export function BusinessInfoForm({
@@ -43,6 +45,7 @@ export function BusinessInfoForm({
   onBack,
   planType = null,
   disabled = false,
+  intakeNumberShown = false,
 }: BusinessInfoFormProps) {
   const showProFeatures = planType === "PRO" || planType === "LOCAL_PLUS" || planType === "ELITE"
   const showLocalPlusFeatures = false
@@ -160,7 +163,7 @@ export function BusinessInfoForm({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="phoneNumber">Business phone (the number that forwards to CallGrabbr) *</Label>
+        <Label htmlFor="phoneNumber">Your business phone number *</Label>
         <Input
           id="phoneNumber"
           type="tel"
@@ -170,7 +173,9 @@ export function BusinessInfoForm({
           placeholder="(608) 555-1234"
         />
         <p className="text-xs text-muted-foreground">
-          Your business line — the one you set to forward to CallGrabbr. Not the CallGrabbr intake number shown above. One trial per business number.
+          {intakeNumberShown
+            ? "The number customers call today — not the CallGrabbr forwarding number shown above. One trial per business number."
+            : "The number customers call today. You'll forward this line to CallGrabbr after setup. One trial per business number."}
         </p>
       </div>
 
