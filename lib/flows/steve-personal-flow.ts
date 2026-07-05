@@ -1,14 +1,21 @@
 import { STEVE_PERSONAL_AGENT_CONFIG } from "@/config/steve-personal-agent"
 import {
-  FLOW_ACKNOWLEDGE,
-  FLOW_COLLECT_PHONE,
-  FLOW_CONFIRM_EDGE,
-  FLOW_CONFIRM_ONCE,
-  FLOW_EMPATHY_PRIORITY,
-  FLOW_END_POLITE,
+  TASK_CALLER_TYPE,
+  TASK_CHECK_URGENCY,
+  TASK_CONFIRM,
+  TASK_END,
+  TASK_FOLLOWUP_APPLICANT,
+  TASK_FOLLOWUP_CORPORATE,
+  TASK_FOLLOWUP_CUSTOMER,
+  TASK_FOLLOWUP_EMPLOYEE,
+  TASK_FOLLOWUP_OTHER,
+  TASK_FOLLOWUP_VENDOR,
+  TASK_PHONE_STEVE,
+  TASK_PRIORITY_NOTE,
+  TASK_SAVE_STEVE,
+  TRANSITION_CONFIRM_DONE,
   TRANSITION_NAME_PROVIDED,
   TRANSITION_PHONE_PROVIDED,
-  withGlobalNodes,
 } from "@/lib/conversation-flow-instructions"
 
 export const STEVE_EXTRACT_MESSAGE_TOOL = {
@@ -38,16 +45,13 @@ export const STEVE_EXTRACT_MESSAGE_TOOL = {
   ],
 }
 
-const SAVE_LEAD_INSTRUCTION =
-  "Call store_message_details once with all gathered fields. Do not read details back to the caller in this step — only invoke the tool, then move on."
-
 const TYPE_FOLLOWUP: Record<string, string> = {
-  employee: `${FLOW_ACKNOWLEDGE} What's this regarding — a shift, call-off, schedule question, or something else? If it's a call-off, what shift or time? Never promise schedule changes.`,
-  customer: `${FLOW_ACKNOWLEDGE} Can you briefly describe what happened — an order, a visit, or feedback? Do NOT offer refunds, comps, or policy decisions.`,
-  vendor: `${FLOW_ACKNOWLEDGE} What company are you with, and what's the purpose of your call?`,
-  applicant: `${FLOW_ACKNOWLEDGE} What role are you interested in? ${STEVE_PERSONAL_AGENT_CONFIG.hiringMessage}`,
-  corporate: `${FLOW_ACKNOWLEDGE} Which department or person were you trying to reach, and what's your message?`,
-  other: `${FLOW_ACKNOWLEDGE} What message should I pass along to Steve?`,
+  employee: TASK_FOLLOWUP_EMPLOYEE,
+  customer: TASK_FOLLOWUP_CUSTOMER,
+  vendor: TASK_FOLLOWUP_VENDOR,
+  applicant: TASK_FOLLOWUP_APPLICANT,
+  corporate: TASK_FOLLOWUP_CORPORATE,
+  other: TASK_FOLLOWUP_OTHER,
 }
 
 const URGENT_TYPES = new Set(["employee", "customer"])
@@ -78,13 +82,10 @@ export function buildStevePersonalConversationFlow(): {
   start_speaker: "agent"
   nodes: unknown[]
 } {
-  const owner = STEVE_PERSONAL_AGENT_CONFIG.ownerFirstName
-  const endLabel = `${owner}'s line`
-
   return {
     start_node_id: "start-node",
     start_speaker: "agent",
-    nodes: withGlobalNodes([
+    nodes: [
       {
         id: "start-node",
         type: "conversation",
@@ -106,10 +107,7 @@ export function buildStevePersonalConversationFlow(): {
         id: "collect-type",
         type: "conversation",
         name: "Caller Type",
-        instruction: {
-          type: "prompt",
-          text: `${FLOW_ACKNOWLEDGE} Ask whether they're calling as a store employee, a customer, a vendor or delivery driver, about a job application, from corporate or district, or something else.`,
-        },
+        instruction: { type: "prompt", text: TASK_CALLER_TYPE },
         edges: [
           { id: "edge-t-employee", destination_node_id: "followup-employee", transition_condition: { type: "prompt", prompt: "Employee or store staff" } },
           { id: "edge-t-customer", destination_node_id: "followup-customer", transition_condition: { type: "prompt", prompt: "Customer or guest" } },
@@ -129,10 +127,7 @@ export function buildStevePersonalConversationFlow(): {
         id: "check-urgency",
         type: "conversation",
         name: "Check Urgency",
-        instruction: {
-          type: "prompt",
-          text: `${FLOW_ACKNOWLEDGE} Is this urgent — like equipment down, a safety issue, or trouble opening or staffing the store? If yes, flag it as priority for Steve.`,
-        },
+        instruction: { type: "prompt", text: TASK_CHECK_URGENCY },
         edges: [
           {
             id: "edge-urgent-yes",
@@ -150,10 +145,7 @@ export function buildStevePersonalConversationFlow(): {
         id: "priority-note",
         type: "conversation",
         name: "Priority Note",
-        instruction: {
-          type: "prompt",
-          text: FLOW_EMPATHY_PRIORITY.replace("the team", "Steve"),
-        },
+        instruction: { type: "prompt", text: TASK_PRIORITY_NOTE },
         edges: [
           {
             id: "edge-priority",
@@ -166,10 +158,7 @@ export function buildStevePersonalConversationFlow(): {
         id: "collect-phone",
         type: "conversation",
         name: "Collect Phone",
-        instruction: {
-          type: "prompt",
-          text: FLOW_COLLECT_PHONE.replace("the team", "Steve"),
-        },
+        instruction: { type: "prompt", text: TASK_PHONE_STEVE },
         edges: [
           {
             id: "edge-phone",
@@ -182,7 +171,7 @@ export function buildStevePersonalConversationFlow(): {
         id: "save-lead",
         type: "conversation",
         name: "Save Message",
-        instruction: { type: "prompt", text: SAVE_LEAD_INSTRUCTION },
+        instruction: { type: "prompt", text: TASK_SAVE_STEVE },
         tools: [STEVE_EXTRACT_MESSAGE_TOOL],
         edges: [
           {
@@ -196,12 +185,12 @@ export function buildStevePersonalConversationFlow(): {
         id: "confirm-details",
         type: "conversation",
         name: "Confirm Details",
-        instruction: { type: "prompt", text: FLOW_CONFIRM_ONCE },
+        instruction: { type: "prompt", text: TASK_CONFIRM },
         edges: [
           {
             id: "edge-confirm",
             destination_node_id: "end-call",
-            transition_condition: { type: "prompt", prompt: FLOW_CONFIRM_EDGE },
+            transition_condition: { type: "prompt", prompt: TRANSITION_CONFIRM_DONE },
           },
         ],
       },
@@ -212,9 +201,9 @@ export function buildStevePersonalConversationFlow(): {
         speak_during_execution: true,
         instruction: {
           type: "prompt",
-          text: FLOW_END_POLITE(endLabel),
+          text: TASK_END,
         },
       },
-    ]),
+    ],
   }
 }

@@ -3,6 +3,14 @@ import { AGENT_PROMPT_CONFIG } from "@/config/agent-prompt"
 import { buildStevePersonalPromptContext } from "@/config/steve-personal-agent"
 import type { BusinessHoursInput } from "./prompts"
 
+const FLEX_MODE_PLAYBOOK_INTRO = `## Call Flow (Flex Mode)
+Tasks in the flow mark progress — follow this playbook for what to collect and in what order.
+- Skip any step the caller already answered; never re-ask captured details.
+- One question at a time. Validate urgency before location when appropriate.
+- Confirm only once at the end (name, callback number, short paraphrase of need).
+- If caller wants a manager now: take message and callback number; no promised callback time.
+- If caller asks pricing: defer to team follow-up — no quotes on the phone.`
+
 /** Shared personality sections — used by template, dedicated, demo, and Steve agents. */
 const RECEPTIONIST_CORE_SECTIONS = {
   styleAndEmotionalDelivery: `## Style & Emotional Delivery
@@ -28,6 +36,73 @@ const RECEPTIONIST_CORE_SECTIONS = {
 - If they already gave info you were about to ask for: acknowledge it and move on — never re-ask.`,
 }
 
+const FLEX_PLAYBOOKS = {
+  propertyService: (serviceAreas: string) => `${FLEX_MODE_PLAYBOOK_INTRO}
+1. Greet — thank them for calling; get name.
+2. Reason — what they need; one follow-up if vague. If emergency (flood, no heat, gas smell, sparks, etc.): validate and flag priority.
+3. City — property city.
+4. Verify area — service areas: ${serviceAreas}. Do not read the full list aloud. If not supported, apologize and end politely.
+5. Address — full service address when in area.
+6. Phone — best callback number; accept calling-from number if offered.
+7. Confirm — one natural read-back, then close warmly.`,
+
+  autoRepair: `${FLEX_MODE_PLAYBOOK_INTRO}
+1. Greet — get name.
+2. Reason — new issue, maintenance, status on existing repair, or scheduling. One follow-up if vague; note symptoms and drivability for new issues.
+3. Branch: status check → drop-off date; otherwise → vehicle year/make/model.
+4. Vehicle — year, make, model (skip if status-only call).
+5. Appointment preference — only if scheduling (optional).
+6. Phone — callback number.
+7. Confirm — one read-back, then close. No service address or service area.`,
+
+  childcare: `${FLEX_MODE_PLAYBOOK_INTRO}
+1. Greet — get name.
+2. Reason — enrolling, existing enrollment, or other.
+3. Child age — age or range.
+4. Care type — full-time, part-time, drop-in, etc.
+5. Tour preference — if they want a tour.
+6. Phone — callback number.
+7. Confirm — one read-back. Do not confirm availability or enrollment.`,
+
+  generic: `${FLEX_MODE_PLAYBOOK_INTRO}
+1. Greet — get name.
+2. Reason — what they need; one follow-up if vague.
+3. Phone — callback number.
+4. Confirm — one read-back, then close.`,
+
+  demo: `${FLEX_MODE_PLAYBOOK_INTRO}
+1. Greet — mention demo line once; get name.
+2. Reason — what they need; collect city/address for home service, vehicle for auto, or appointment pref if relevant.
+3. Phone — callback number.
+4. Confirm — save details silently, one read-back. Mention "demo" only in opening.`,
+
+  steve: `${FLEX_MODE_PLAYBOOK_INTRO}
+1. Greet — static welcome; get name.
+2. Caller type — employee, customer, vendor, applicant, corporate, or other.
+3. Type follow-up — one question tailored to caller type (see GM boundaries).
+4. Urgency — for employee/customer only: equipment, safety, opening, or staffing emergency.
+5. Phone — callback number for Steve.
+6. Save — invoke store_message_details silently.
+7. Confirm — one read-back; Steve will follow up, no exact time promised.`,
+}
+
+export function getFlexPlaybookForIndustry(industry: Industry, serviceAreas: string[]): string {
+  switch (industry) {
+    case Industry.AUTO_REPAIR:
+      return FLEX_PLAYBOOKS.autoRepair
+    case Industry.CHILDCARE:
+      return FLEX_PLAYBOOKS.childcare
+    case Industry.GENERIC:
+      return FLEX_PLAYBOOKS.generic
+    case Industry.HVAC:
+    case Industry.PLUMBING:
+    case Industry.ELECTRICIAN:
+    case Industry.HANDYMAN:
+    default:
+      return FLEX_PLAYBOOKS.propertyService(serviceAreas.join(", ") || "see business settings")
+  }
+}
+
 function buildIdentitySection(businessLabel: string): string {
   return `## Identity
 You are the front-desk receptionist for ${businessLabel} — warm, calm, and helpful, like a great customer service rep at a local business.
@@ -45,7 +120,8 @@ If {{escalate_after_retries}} is true and the caller is still unclear after {{qu
 
   return `## Guardrails
 - Never collect payment information, give pricing or quotes, diagnose problems, or promise scheduling, availability, or specific callback times.
-- Follow the current conversation step. Don't recap or confirm until the confirm step — there, one natural read-back, then stop after they respond. Never loop confirmations.
+- Follow the Call Flow playbook; flow nodes mark task progress only — do not repeat confirmations.
+- One natural read-back at Confirm, then stop after they respond. Never loop confirmations.
 - Explain what happens next in plain language.
 - If a situation requires emergency services, say "Nine-One-One" clearly.${capacity}`
 }
@@ -61,19 +137,29 @@ function buildTemplateIntakeSection(): string {
 }
 
 /** Global prompt for shared template agents — uses {{variables}} from inbound webhook. */
-export function buildTemplateGlobalPrompt(): string {
+export function buildTemplateGlobalPrompt(industry: Industry = Industry.HVAC): string {
+  const playbook =
+    industry === Industry.AUTO_REPAIR
+      ? FLEX_PLAYBOOKS.autoRepair
+      : industry === Industry.CHILDCARE
+        ? FLEX_PLAYBOOKS.childcare
+        : industry === Industry.GENERIC
+          ? FLEX_PLAYBOOKS.generic
+          : FLEX_PLAYBOOKS.propertyService("{{service_areas}}")
+
   return [
     buildIdentitySection("{{business_name}}"),
     RECEPTIONIST_CORE_SECTIONS.styleAndEmotionalDelivery,
     RECEPTIONIST_CORE_SECTIONS.responseGuidelines,
+    playbook,
     buildTemplateIntakeSection(),
     RECEPTIONIST_CORE_SECTIONS.empathyAndObjections,
     buildGuardrailsSection({ includeCapacity: true }),
   ].join("\n\n")
 }
 
-/** Backward-compatible export name used across retell.ts and sync scripts. */
-export const RETELL_GLOBAL_PROMPT_TEMPLATE = buildTemplateGlobalPrompt()
+/** Backward-compatible export — property-service template default; industry agents use buildTemplateGlobalPrompt(industry) at sync. */
+export const RETELL_GLOBAL_PROMPT_TEMPLATE = buildTemplateGlobalPrompt(Industry.HVAC)
 
 export type DedicatedPromptOptions = {
   businessHours?: BusinessHoursInput
@@ -123,14 +209,13 @@ export function buildDedicatedGlobalPrompt(
   const appointmentBlock = options?.includeAppointmentCapture ? cfg.appointmentBlockTemplate : ""
   const tagBlock = cfg.tagBlockTemplate
   const industryBlock = getIndustryBlock(industry, serviceAreas)
+  const playbook = getFlexPlaybookForIndustry(industry, serviceAreas)
 
   return [
     buildIdentitySection(businessName),
     RECEPTIONIST_CORE_SECTIONS.styleAndEmotionalDelivery,
     RECEPTIONIST_CORE_SECTIONS.responseGuidelines,
-    `## Intake Rules
-- Collect only what this business type needs.
-- Follow industry-specific instructions below.`,
+    playbook,
     RECEPTIONIST_CORE_SECTIONS.empathyAndObjections,
     buildGuardrailsSection({ includeCapacity: false }),
     businessHoursBlock,
@@ -149,6 +234,7 @@ export function buildDemoGlobalPrompt(): string {
     buildIdentitySection("CallGrabbr's demo line"),
     RECEPTIONIST_CORE_SECTIONS.styleAndEmotionalDelivery,
     RECEPTIONIST_CORE_SECTIONS.responseGuidelines,
+    FLEX_PLAYBOOKS.demo,
     AGENT_PROMPT_CONFIG.demoTaskBlock,
     RECEPTIONIST_CORE_SECTIONS.empathyAndObjections,
     buildGuardrailsSection({ includeCapacity: false }),
@@ -160,6 +246,7 @@ export function buildSteveGlobalPrompt(): string {
   return [
     RECEPTIONIST_CORE_SECTIONS.styleAndEmotionalDelivery,
     RECEPTIONIST_CORE_SECTIONS.responseGuidelines,
+    FLEX_PLAYBOOKS.steve,
     AGENT_PROMPT_CONFIG.steveTaskBlock,
     RECEPTIONIST_CORE_SECTIONS.empathyAndObjections,
     AGENT_PROMPT_CONFIG.steveBoundariesBlock,

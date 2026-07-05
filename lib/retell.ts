@@ -10,37 +10,35 @@ import {
 import { computeRingDurationMsForInbound, normalizeCallRouting, ringDurationMsForRetellAgent, DEFAULT_CALL_ROUTING } from "./call-routing"
 import { DEFAULT_BUSINESS_TIMEZONE, normalizeBusinessTimezone } from "./business-timezone"
 import { DEFAULT_RETELL_VOICE, RETELL_GLOBAL_PROMPT_TEMPLATE, getRetellVoiceConfig, receptionistAgentFields } from "./retell-agent-template"
-import { buildDemoGlobalPrompt, buildSteveGlobalPrompt } from "./receptionist-prompt"
+import { buildDemoGlobalPrompt, buildSteveGlobalPrompt, buildTemplateGlobalPrompt } from "./receptionist-prompt"
 import { STEVE_PERSONAL_AGENT_CONFIG } from "@/config/steve-personal-agent"
 import { buildStevePersonalConversationFlow } from "./flows/steve-personal-flow"
 import {
-  DEMO_COLLECT_PHONE,
-  DEMO_COLLECT_REASON,
-  DEMO_CONFIRM_INSTRUCTION,
-  FLOW_COLLECT_ADDRESS,
-  FLOW_COLLECT_APPOINTMENT,
-  FLOW_COLLECT_CITY,
-  FLOW_COLLECT_DROPOFF,
-  FLOW_COLLECT_PHONE,
-  FLOW_COLLECT_REASON,
-  FLOW_COLLECT_REASON_AUTO,
-  FLOW_COLLECT_VEHICLE,
-  FLOW_CHILD_AGE,
-  FLOW_CHILD_CARE_TYPE,
-  FLOW_CHILD_REASON,
-  FLOW_CHILD_TOUR,
-  FLOW_CONFIRM_EDGE,
-  FLOW_CONFIRM_ONCE,
-  FLOW_DEMO_END,
-  FLOW_EMPATHY_URGENT,
-  FLOW_END_POLITE,
-  FLOW_START_GREETING,
-  FLOW_DEMO_START,
-  FLOW_VERIFY_SERVICE_AREA,
+  TASK_ADDRESS,
+  TASK_APPOINTMENT,
+  TASK_CHILD_AGE,
+  TASK_CHILD_CARE,
+  TASK_CHILD_REASON,
+  TASK_CHILD_TOUR,
+  TASK_CITY,
+  TASK_CONFIRM,
+  TASK_CONFIRM_DEMO,
+  TASK_DROPOFF,
+  TASK_END,
+  TASK_GREET,
+  TASK_GREET_DEMO,
+  TASK_NOT_SUPPORTED,
+  TASK_PHONE,
+  TASK_REASON,
+  TASK_REASON_AUTO,
+  TASK_REASON_DEMO,
+  TASK_URGENCY,
+  TASK_VEHICLE,
+  TASK_VERIFY_AREA,
+  TRANSITION_CONFIRM_DONE,
   TRANSITION_NAME_PROVIDED,
   TRANSITION_PHONE_PROVIDED,
   TRANSITION_REASON_CLEAR,
-  withGlobalNodes,
 } from "./conversation-flow-instructions"
 import {
   buildQuestionDepthGuidance,
@@ -756,12 +754,12 @@ function buildPropertyServiceFlow(businessName: string, serviceAreas: string[]):
   return {
     start_node_id: "start-node",
     start_speaker: "agent",
-    nodes: withGlobalNodes([
+    nodes: [
       {
         id: "start-node",
         type: "conversation",
         name: "Welcome Node",
-        instruction: { type: "prompt", text: FLOW_START_GREETING(businessName) },
+        instruction: { type: "prompt", text: TASK_GREET },
         edges: [{ id: "edge-1", destination_node_id: "collect-reason", transition_condition: { type: "prompt", prompt: TRANSITION_NAME_PROVIDED } }],
         start_speaker: "agent",
       },
@@ -769,7 +767,7 @@ function buildPropertyServiceFlow(businessName: string, serviceAreas: string[]):
         id: "collect-reason",
         type: "conversation",
         name: "Collect Reason",
-        instruction: { type: "prompt", text: FLOW_COLLECT_REASON },
+        instruction: { type: "prompt", text: TASK_REASON },
         edges: [
           { id: "edge-2a", destination_node_id: "emergency-flag", transition_condition: { type: "prompt", prompt: "If urgent or emergency, e.g. flooding, no heat, gas smell, burst pipe, no power, sparks" } },
           { id: "edge-2b", destination_node_id: "collect-city", transition_condition: { type: "prompt", prompt: TRANSITION_REASON_CLEAR } },
@@ -779,21 +777,21 @@ function buildPropertyServiceFlow(businessName: string, serviceAreas: string[]):
         id: "emergency-flag",
         type: "conversation",
         name: "Emergency Detected",
-        instruction: { type: "prompt", text: FLOW_EMPATHY_URGENT },
+        instruction: { type: "prompt", text: TASK_URGENCY },
         edges: [{ id: "edge-3", destination_node_id: "collect-city", transition_condition: { type: "prompt", prompt: "Always" } }],
       },
       {
         id: "collect-city",
         type: "conversation",
         name: "Collect City",
-        instruction: { type: "prompt", text: FLOW_COLLECT_CITY },
+        instruction: { type: "prompt", text: TASK_CITY },
         edges: [{ id: "edge-4", destination_node_id: "verify-city", transition_condition: { type: "prompt", prompt: "Caller provided city" } }],
       },
       {
         id: "verify-city",
         type: "conversation",
         name: "City Verified",
-        instruction: { type: "prompt", text: FLOW_VERIFY_SERVICE_AREA(areas) },
+        instruction: { type: "prompt", text: TASK_VERIFY_AREA(areas) },
         edges: [
           { id: "edge-5a", destination_node_id: "collect-address", transition_condition: { type: "prompt", prompt: "if city IS supported" } },
           { id: "edge-5b", destination_node_id: "not-supported", transition_condition: { type: "prompt", prompt: "if city IS NOT supported" } },
@@ -803,28 +801,28 @@ function buildPropertyServiceFlow(businessName: string, serviceAreas: string[]):
         id: "collect-address",
         type: "conversation",
         name: "Ask Address",
-        instruction: { type: "prompt", text: FLOW_COLLECT_ADDRESS },
+        instruction: { type: "prompt", text: TASK_ADDRESS },
         edges: [{ id: "edge-6", destination_node_id: "collect-phone", transition_condition: { type: "prompt", prompt: "If address is provided" } }],
       },
       {
         id: "collect-phone",
         type: "conversation",
         name: "Collect Phone",
-        instruction: { type: "prompt", text: FLOW_COLLECT_PHONE },
+        instruction: { type: "prompt", text: TASK_PHONE },
         edges: [{ id: "edge-6b", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: TRANSITION_PHONE_PROVIDED } }],
       },
       {
         id: "confirm-details",
         type: "conversation",
         name: "Confirm Details",
-        instruction: { type: "prompt", text: FLOW_CONFIRM_ONCE },
-        edges: [{ id: "edge-7", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: FLOW_CONFIRM_EDGE } }],
+        instruction: { type: "prompt", text: TASK_CONFIRM },
+        edges: [{ id: "edge-7", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: TRANSITION_CONFIRM_DONE } }],
       },
       {
         id: "not-supported",
         type: "conversation",
         name: "Not supported",
-        instruction: { type: "prompt", text: `Apologize warmly — you don't currently provide services in that area. Offer that they can call back if plans change.` },
+        instruction: { type: "prompt", text: TASK_NOT_SUPPORTED },
         edges: [{ id: "edge-11", destination_node_id: "end-call-not-supported", transition_condition: { type: "prompt", prompt: "Always" } }],
       },
       {
@@ -832,16 +830,16 @@ function buildPropertyServiceFlow(businessName: string, serviceAreas: string[]):
         type: "end",
         name: "End Call",
         speak_during_execution: true,
-        instruction: { type: "prompt", text: FLOW_END_POLITE(businessName) },
+        instruction: { type: "prompt", text: TASK_END },
       },
       {
         id: "end-call-not-supported",
         type: "end",
         name: "End Call",
         speak_during_execution: true,
-        instruction: { type: "prompt", text: `Thank them politely and end the call warmly.` },
+        instruction: { type: "prompt", text: TASK_END },
       },
-    ]),
+    ],
   }
 }
 
@@ -850,12 +848,12 @@ function buildAutoRepairFlow(businessName: string): any {
   return {
     start_node_id: "start-node",
     start_speaker: "agent",
-    nodes: withGlobalNodes([
+    nodes: [
       {
         id: "start-node",
         type: "conversation",
         name: "Welcome Node",
-        instruction: { type: "prompt", text: FLOW_START_GREETING(businessName) },
+        instruction: { type: "prompt", text: TASK_GREET },
         edges: [{ id: "edge-1", destination_node_id: "collect-reason", transition_condition: { type: "prompt", prompt: TRANSITION_NAME_PROVIDED } }],
         start_speaker: "agent",
       },
@@ -863,7 +861,7 @@ function buildAutoRepairFlow(businessName: string): any {
         id: "collect-reason",
         type: "conversation",
         name: "Reason for Call",
-        instruction: { type: "prompt", text: FLOW_COLLECT_REASON_AUTO },
+        instruction: { type: "prompt", text: TASK_REASON_AUTO },
         edges: [
           { id: "edge-2a", destination_node_id: "collect-vehicle", transition_condition: { type: "prompt", prompt: "If new issue, maintenance, or scheduling" } },
           { id: "edge-2b", destination_node_id: "collect-dropoff", transition_condition: { type: "prompt", prompt: "If checking on existing repair or status" } },
@@ -873,7 +871,7 @@ function buildAutoRepairFlow(businessName: string): any {
         id: "collect-vehicle",
         type: "conversation",
         name: "Vehicle Info",
-        instruction: { type: "prompt", text: FLOW_COLLECT_VEHICLE },
+        instruction: { type: "prompt", text: TASK_VEHICLE },
         edges: [
           { id: "edge-3a", destination_node_id: "collect-appointment-pref", transition_condition: { type: "prompt", prompt: "If scheduling or appointment" } },
           { id: "edge-3b", destination_node_id: "collect-phone", transition_condition: { type: "prompt", prompt: "If not scheduling" } },
@@ -883,38 +881,38 @@ function buildAutoRepairFlow(businessName: string): any {
         id: "collect-dropoff",
         type: "conversation",
         name: "When Dropped Off",
-        instruction: { type: "prompt", text: FLOW_COLLECT_DROPOFF },
+        instruction: { type: "prompt", text: TASK_DROPOFF },
         edges: [{ id: "edge-4", destination_node_id: "collect-phone", transition_condition: { type: "prompt", prompt: "Caller provided date or time" } }],
       },
       {
         id: "collect-phone",
         type: "conversation",
         name: "Collect Phone",
-        instruction: { type: "prompt", text: FLOW_COLLECT_PHONE },
+        instruction: { type: "prompt", text: TASK_PHONE },
         edges: [{ id: "edge-5", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: TRANSITION_PHONE_PROVIDED } }],
       },
       {
         id: "collect-appointment-pref",
         type: "conversation",
         name: "Appointment Preference",
-        instruction: { type: "prompt", text: FLOW_COLLECT_APPOINTMENT },
+        instruction: { type: "prompt", text: TASK_APPOINTMENT },
         edges: [{ id: "edge-6", destination_node_id: "collect-phone", transition_condition: { type: "prompt", prompt: "Caller provided preference or said no preference" } }],
       },
       {
         id: "confirm-details",
         type: "conversation",
         name: "Confirm Details",
-        instruction: { type: "prompt", text: FLOW_CONFIRM_ONCE },
-        edges: [{ id: "edge-7", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: FLOW_CONFIRM_EDGE } }],
+        instruction: { type: "prompt", text: TASK_CONFIRM },
+        edges: [{ id: "edge-7", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: TRANSITION_CONFIRM_DONE } }],
       },
       {
         id: "end-call",
         type: "end",
         name: "End Call",
         speak_during_execution: true,
-        instruction: { type: "prompt", text: FLOW_END_POLITE(businessName) },
+        instruction: { type: "prompt", text: TASK_END },
       },
-    ]),
+    ],
   }
 }
 
@@ -923,12 +921,12 @@ function buildChildcareFlow(businessName: string): any {
   return {
     start_node_id: "start-node",
     start_speaker: "agent",
-    nodes: withGlobalNodes([
+    nodes: [
       {
         id: "start-node",
         type: "conversation",
         name: "Welcome Node",
-        instruction: { type: "prompt", text: FLOW_START_GREETING(businessName) },
+        instruction: { type: "prompt", text: TASK_GREET },
         edges: [{ id: "edge-1", destination_node_id: "collect-reason", transition_condition: { type: "prompt", prompt: TRANSITION_NAME_PROVIDED } }],
         start_speaker: "agent",
       },
@@ -936,21 +934,21 @@ function buildChildcareFlow(businessName: string): any {
         id: "collect-reason",
         type: "conversation",
         name: "Call Reason",
-        instruction: { type: "prompt", text: FLOW_CHILD_REASON },
+        instruction: { type: "prompt", text: TASK_CHILD_REASON },
         edges: [{ id: "edge-2", destination_node_id: "collect-child-age", transition_condition: { type: "prompt", prompt: "Caller described reason" } }],
       },
       {
         id: "collect-child-age",
         type: "conversation",
         name: "Child Age",
-        instruction: { type: "prompt", text: FLOW_CHILD_AGE },
+        instruction: { type: "prompt", text: TASK_CHILD_AGE },
         edges: [{ id: "edge-3", destination_node_id: "collect-care-type", transition_condition: { type: "prompt", prompt: "Caller provided age or range" } }],
       },
       {
         id: "collect-care-type",
         type: "conversation",
         name: "Type of Care",
-        instruction: { type: "prompt", text: FLOW_CHILD_CARE_TYPE },
+        instruction: { type: "prompt", text: TASK_CHILD_CARE },
         edges: [
           { id: "edge-4a", destination_node_id: "collect-phone", transition_condition: { type: "prompt", prompt: "If not requesting a tour" } },
           { id: "edge-4b", destination_node_id: "collect-tour-pref", transition_condition: { type: "prompt", prompt: "If requesting a tour or visit" } },
@@ -960,31 +958,31 @@ function buildChildcareFlow(businessName: string): any {
         id: "collect-tour-pref",
         type: "conversation",
         name: "Tour Preference",
-        instruction: { type: "prompt", text: FLOW_CHILD_TOUR },
+        instruction: { type: "prompt", text: TASK_CHILD_TOUR },
         edges: [{ id: "edge-5", destination_node_id: "collect-phone", transition_condition: { type: "prompt", prompt: "Caller provided preference or said no preference" } }],
       },
       {
         id: "collect-phone",
         type: "conversation",
         name: "Collect Phone",
-        instruction: { type: "prompt", text: FLOW_COLLECT_PHONE },
+        instruction: { type: "prompt", text: TASK_PHONE },
         edges: [{ id: "edge-6", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: TRANSITION_PHONE_PROVIDED } }],
       },
       {
         id: "confirm-details",
         type: "conversation",
         name: "Confirm Details",
-        instruction: { type: "prompt", text: FLOW_CONFIRM_ONCE },
-        edges: [{ id: "edge-7", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: FLOW_CONFIRM_EDGE } }],
+        instruction: { type: "prompt", text: TASK_CONFIRM },
+        edges: [{ id: "edge-7", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: TRANSITION_CONFIRM_DONE } }],
       },
       {
         id: "end-call",
         type: "end",
         name: "End Call",
         speak_during_execution: true,
-        instruction: { type: "prompt", text: FLOW_END_POLITE(businessName) },
+        instruction: { type: "prompt", text: TASK_END },
       },
-    ]),
+    ],
   }
 }
 
@@ -993,12 +991,12 @@ function buildGenericFlow(businessName: string): any {
   return {
     start_node_id: "start-node",
     start_speaker: "agent",
-    nodes: withGlobalNodes([
+    nodes: [
       {
         id: "start-node",
         type: "conversation",
         name: "Welcome Node",
-        instruction: { type: "prompt", text: FLOW_START_GREETING(businessName) },
+        instruction: { type: "prompt", text: TASK_GREET },
         edges: [{ id: "edge-1", destination_node_id: "collect-reason", transition_condition: { type: "prompt", prompt: TRANSITION_NAME_PROVIDED } }],
         start_speaker: "agent",
       },
@@ -1006,31 +1004,31 @@ function buildGenericFlow(businessName: string): any {
         id: "collect-reason",
         type: "conversation",
         name: "Collect Reason",
-        instruction: { type: "prompt", text: FLOW_COLLECT_REASON },
+        instruction: { type: "prompt", text: TASK_REASON },
         edges: [{ id: "edge-2", destination_node_id: "collect-contact", transition_condition: { type: "prompt", prompt: TRANSITION_REASON_CLEAR } }],
       },
       {
         id: "collect-contact",
         type: "conversation",
         name: "Contact Info",
-        instruction: { type: "prompt", text: FLOW_COLLECT_PHONE },
+        instruction: { type: "prompt", text: TASK_PHONE },
         edges: [{ id: "edge-3", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: TRANSITION_PHONE_PROVIDED } }],
       },
       {
         id: "confirm-details",
         type: "conversation",
         name: "Confirm Details",
-        instruction: { type: "prompt", text: FLOW_CONFIRM_ONCE },
-        edges: [{ id: "edge-4", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: FLOW_CONFIRM_EDGE } }],
+        instruction: { type: "prompt", text: TASK_CONFIRM },
+        edges: [{ id: "edge-4", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: TRANSITION_CONFIRM_DONE } }],
       },
       {
         id: "end-call",
         type: "end",
         name: "End Call",
         speak_during_execution: true,
-        instruction: { type: "prompt", text: FLOW_END_POLITE(businessName) },
+        instruction: { type: "prompt", text: TASK_END },
       },
-    ]),
+    ],
   }
 }
 
@@ -1058,12 +1056,12 @@ function buildDemoConversationFlow(): any {
   return {
     start_node_id: "start-node",
     start_speaker: "agent",
-    nodes: withGlobalNodes([
+    nodes: [
       {
         id: "start-node",
         type: "conversation",
         name: "Welcome Node",
-        instruction: { type: "prompt", text: FLOW_DEMO_START },
+        instruction: { type: "prompt", text: TASK_GREET_DEMO },
         edges: [{ id: "edge-1", destination_node_id: "collect-reason", transition_condition: { type: "prompt", prompt: TRANSITION_NAME_PROVIDED } }],
         start_speaker: "agent",
       },
@@ -1071,23 +1069,23 @@ function buildDemoConversationFlow(): any {
         id: "collect-reason",
         type: "conversation",
         name: "Collect Reason",
-        instruction: { type: "prompt", text: DEMO_COLLECT_REASON },
+        instruction: { type: "prompt", text: TASK_REASON_DEMO },
         edges: [{ id: "edge-2", destination_node_id: "collect-phone", transition_condition: { type: "prompt", prompt: TRANSITION_REASON_CLEAR } }],
       },
       {
         id: "collect-phone",
         type: "conversation",
         name: "Collect Phone",
-        instruction: { type: "prompt", text: DEMO_COLLECT_PHONE },
+        instruction: { type: "prompt", text: TASK_PHONE },
         edges: [{ id: "edge-3", destination_node_id: "confirm-details", transition_condition: { type: "prompt", prompt: TRANSITION_PHONE_PROVIDED } }],
       },
       {
         id: "confirm-details",
         type: "conversation",
         name: "Confirm Details",
-        instruction: { type: "prompt", text: DEMO_CONFIRM_INSTRUCTION },
+        instruction: { type: "prompt", text: TASK_CONFIRM_DEMO },
         tools: [DEMO_EXTRACT_LEAD_TOOL],
-        edges: [{ id: "edge-4", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: FLOW_CONFIRM_EDGE } }],
+        edges: [{ id: "edge-4", destination_node_id: "end-call", transition_condition: { type: "prompt", prompt: TRANSITION_CONFIRM_DONE } }],
         else_edge: {
           id: "edge-4-else",
           destination_node_id: "end-call",
@@ -1099,9 +1097,9 @@ function buildDemoConversationFlow(): any {
         type: "end",
         name: "End Call",
         speak_during_execution: true,
-        instruction: { type: "prompt", text: FLOW_DEMO_END },
+        instruction: { type: "prompt", text: TASK_END },
       },
-    ]),
+    ],
   }
 }
 
@@ -1154,7 +1152,7 @@ export async function createTemplateAgentForIndustry(
   const flow = buildTemplateConversationFlow(industry)
   const { conversation_flow_id, version } = await createConversationFlow(apiKey, {
     ...flow,
-    global_prompt: RETELL_GLOBAL_PROMPT_TEMPLATE,
+    global_prompt: buildTemplateGlobalPrompt(industry),
   })
 
   const agentName = options?.agentName ?? `CallGrabbr ${industry}`
@@ -1402,7 +1400,7 @@ export async function updateTemplateAgentForIndustry(
   const flow = buildTemplateConversationFlow(industry)
   const { version } = await updateConversationFlow(apiKey, entry.conversation_flow_id, {
     ...flow,
-    global_prompt: RETELL_GLOBAL_PROMPT_TEMPLATE,
+    global_prompt: buildTemplateGlobalPrompt(industry),
   })
   await updateAgent(apiKey, entry.agent_id, {
     ...receptionistAgentFields(DEFAULT_RETELL_VOICE),
