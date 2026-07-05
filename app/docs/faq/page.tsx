@@ -11,17 +11,26 @@ import { Button } from "@/components/ui/button"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { PRODUCT_FAQ } from "@/lib/faq-data"
 import { faqPageJsonLd } from "@/lib/structured-data"
+import { DEFAULT_OG_IMAGE, SEO_KEYWORDS } from "@/lib/seo"
 
 export const metadata: Metadata = {
   title: "Help & FAQ - CallGrabbr",
   description:
     "Answers about CallGrabbr plus step-by-step call forwarding instructions for AT&T, Verizon, T-Mobile, and other carriers.",
+  keywords: [...SEO_KEYWORDS, "call forwarding setup", "AT&T call forwarding", "Verizon call forwarding"],
   alternates: { canonical: "/docs/faq" },
   openGraph: {
     title: "Help & FAQ - CallGrabbr",
     description:
       "How CallGrabbr works, pricing and trial details, and carrier call forwarding setup guides.",
     type: "website",
+    images: [DEFAULT_OG_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Help & FAQ - CallGrabbr",
+    description: "How CallGrabbr works, pricing, trial details, and carrier call forwarding guides.",
+    images: [DEFAULT_OG_IMAGE.url],
   },
 }
 

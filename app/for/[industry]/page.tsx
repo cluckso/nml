@@ -9,7 +9,10 @@ import { getAllIndustrySlugs, getIndustryLandingBySlug, formatCurrency } from "@
 import { getFunnelConfig } from "@/lib/funnel/industry-configs"
 import { DemoUnlock } from "@/components/marketing/DemoUnlock"
 import { SMSPreview } from "@/components/marketing/SMSPreview"
+import { JsonLd } from "@/components/seo/JsonLd"
 import { funnelTrialFeatureLabel } from "@/lib/trial-marketing"
+import { industryPageMetadata } from "@/lib/seo"
+import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data"
 
 type PageProps = { params: Promise<{ industry: string }> }
 
@@ -21,16 +24,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { industry: slug } = await params
   const data = getIndustryLandingBySlug(slug)
   if (!data) return { title: "CallGrabbr" }
-  return {
-    title: `${data.headline} | CallGrabbr`,
-    description: data.subheadline,
-    alternates: { canonical: `/for/${slug}` },
-    openGraph: {
-      title: data.headline,
-      description: data.subheadline,
-      type: "website",
-    },
-  }
+  return industryPageMetadata({
+    headline: data.headline,
+    subheadline: data.subheadline,
+    slug,
+    industryName: data.name,
+  })
 }
 
 export default async function IndustryLandingPage({ params }: PageProps) {
@@ -39,9 +38,23 @@ export default async function IndustryLandingPage({ params }: PageProps) {
   if (!data) notFound()
 
   const smsPreview = getFunnelConfig(slug)?.smsPreview
+  const pagePath = `/for/${slug}`
 
   return (
     <div className="flex flex-col">
+      <JsonLd
+        data={[
+          webPageJsonLd({
+            name: data.headline,
+            description: data.subheadline,
+            path: pagePath,
+          }),
+          breadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: data.name, path: pagePath },
+          ]),
+        ]}
+      />
       <section className="container mx-auto px-4 py-16 md:py-24">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-sm font-medium text-primary mb-3">Built for {data.name}</p>

@@ -18,6 +18,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: `${config.headline} | CallGrabbr Funnel`,
     description: config.subheadline,
     alternates: { canonical: `/funnel/${slug}` },
+    robots: { index: false, follow: true },
     openGraph: {
       title: config.headline,
       description: config.subheadline,

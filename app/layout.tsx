@@ -29,9 +29,6 @@ export const metadata: Metadata = {
   description: siteMetaDescription(),
   icons: { icon: "/icon.png" },
   verification: { google: googleSiteVerification },
-  alternates: {
-    canonical: "/",
-  },
   openGraph: {
     title: "CallGrabbr - Stop Losing Jobs to Voicemail",
     description: "80% of callers won't leave voicemail. One captured job pays for months. CallGrabbr catches missed calls and texts you the lead in seconds.",

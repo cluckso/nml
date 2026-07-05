@@ -1,5 +1,15 @@
 # Vercel Deployment Configuration
 
+## Vercel project vs local folder
+
+| | Name |
+|---|---|
+| **Vercel project** | `callgrabbr` (dashboard → [vercel.com](https://vercel.com/dashboard)) |
+| **Local git folder** | `nml-main` (directory name only — not the Vercel project name) |
+| **Production URL** | `https://www.callgrabbr.com` |
+
+Env vars live on the **callgrabbr** Vercel project. A missing local `.env` does not affect production if Vercel env is set.
+
 ## Node.js Version
 - **Current:** Node 22.x (Latest LTS)
 - **Minimum:** Node 20.x
@@ -58,8 +68,28 @@ Sentry only sends events when `NODE_ENV=production` and a DSN is set.
 ### Option 2: Vercel CLI
 ```bash
 cd nml-main
+npx vercel link --project callgrabbr   # first time only
 npx vercel --prod
 ```
+
+## Sync database schema (production)
+
+If the dashboard shows "Unable to load dashboard" and Vercel logs contain `P2022` / **column does not exist**, the production DB is behind the Prisma schema. Env vars are fine — apply migrations:
+
+**Option A — Supabase SQL Editor** (fastest):
+
+```sql
+ALTER TABLE "Call" ADD COLUMN IF NOT EXISTS "capacityDeclineSmsSent" BOOLEAN NOT NULL DEFAULT false;
+```
+
+**Option B — Prisma migrate** (from a machine with `DIRECT_URL` set):
+
+```bash
+cd nml-main
+npx prisma migrate deploy
+```
+
+After applying, reload `/dashboard` — no redeploy needed.
 
 ## Troubleshooting
 

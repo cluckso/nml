@@ -1,6 +1,15 @@
 # Database connection (Supabase + Prisma)
 
-## Avoiding "MaxClientsInSessionMode: max clients reached"
+## Local setup
+
+1. Copy `.env.example` to `.env`.
+2. In [Supabase Dashboard](https://supabase.com/dashboard) → **Project Settings** → **Database**, copy:
+   - **Transaction pooler** URI → `DATABASE_URL` (append `?pgbouncer=true` if missing)
+   - **Direct connection** URI → `DIRECT_URL`
+3. Run `npm run check:env` before starting the app.
+4. Health check: `GET /api/health` returns `{ status: "healthy" }` when the DB is reachable.
+
+---
 
 This error happens when the app uses Supabase’s **direct** (Session) connection, which has a low connection limit. Use the **connection pooler** for runtime instead.
 

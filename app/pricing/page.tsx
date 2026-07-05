@@ -18,6 +18,7 @@ import {
 import { PLAN_SOLO_OWNER, PLAN_MID_VOLUME } from "@/lib/plan-labels"
 import { FREE_TRIAL_MINUTES } from "@/lib/plans"
 import { trialSummaryShort, moneyBackGuaranteeLabel, trialConversionLine } from "@/lib/trial-marketing"
+import { DEFAULT_OG_IMAGE, SEO_KEYWORDS } from "@/lib/seo"
 import Link from "next/link"
 import { pricingUrl } from "@/lib/monetization-urls"
 import { PlanType } from "@prisma/client"
@@ -25,7 +26,20 @@ import { PlanType } from "@prisma/client"
 export const metadata: Metadata = {
   title: "Pricing - CallGrabbr",
   description: `${formatPricingSummary()}. ${formatJobRoiLine()} ${trialSummaryShort()}.`,
+  keywords: [...SEO_KEYWORDS, "CallGrabbr pricing", "AI answering service pricing"],
   alternates: { canonical: "/pricing" },
+  openGraph: {
+    title: "Pricing - CallGrabbr",
+    description: `${formatPricingSummary()}. ${formatJobRoiLine()}`,
+    type: "website",
+    images: [DEFAULT_OG_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Pricing - CallGrabbr",
+    description: `${formatPricingSummary()}. ${formatJobRoiLine()}`,
+    images: [DEFAULT_OG_IMAGE.url],
+  },
 }
 
 export default async function PricingPage() {

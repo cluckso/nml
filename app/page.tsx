@@ -31,11 +31,10 @@ import {
 
 import { JsonLd } from "@/components/seo/JsonLd"
 import { softwareApplicationJsonLd } from "@/lib/structured-data"
+import { homePageMetadata } from "@/lib/seo"
 import { trialHeadlineLabel, trialWithNoCardSentence } from "@/lib/trial-marketing"
 
-export const metadata: Metadata = {
-  alternates: { canonical: "/" },
-}
+export const metadata: Metadata = homePageMetadata()
 
 export default function HomePage() {
   return (

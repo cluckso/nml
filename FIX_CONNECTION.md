@@ -1,85 +1,36 @@
 # Fix Database Connection Issue
 
-## Current Situation
-- ✅ Prisma Studio works (can view database)
-- ❌ `prisma db push` fails with "Can't reach database server"
+## Quick start
 
-## Possible Causes
+1. Copy `.env.example` to `.env` in the project root.
+2. Fill in `DATABASE_URL` and `DIRECT_URL` from Supabase (see `DATABASE.md`).
+3. Run `npm run check:env` to validate configuration.
+4. Restart the dev server and hit `/api/health`.
 
-1. **IPv4 Compatibility Issue** (Most Likely)
-   - Your Supabase dashboard showed "Not IPv4 compatible"
-   - CLI tools might need IPv4 while Prisma Studio uses a different method
+## Common causes
 
-2. **Supabase Project Status**
-   - Check if your Supabase project is active (not paused)
-   - Go to Supabase dashboard and verify project status
+### Missing env vars (most common locally)
 
-3. **Network/Firewall**
-   - Your network might be blocking direct database connections
-   - Prisma Studio might use a different connection method
+If the dashboard shows "Unable to load dashboard" and `npm run check:env` reports `DATABASE_URL is not set`, add the Supabase Transaction pooler URI to `.env`.
 
-## Solutions to Try
+### Wrong connection type
 
-### Solution 1: Enable Connection Pooler in Supabase
+- **Runtime (`DATABASE_URL`)**: Transaction pooler, port **6543**, username `postgres.[project-ref]`, append `?pgbouncer=true`.
+- **Migrations (`DIRECT_URL`)**: Direct connection, port **5432**, username `postgres`.
 
-1. Go to Supabase Dashboard
-2. Navigate to **Settings** → **Database**
-3. Look for **Connection Pooling** section
-4. Enable **Session Mode** pooler
-5. Copy the pooler connection string (port 6543)
-6. Update your `.env`:
+Do **not** use the direct URL (port 5432) as `DATABASE_URL` in production or local dev.
 
-```env
-DATABASE_URL="postgresql://postgres:CcF7DGhTFdddMqpB@db.sbfwaopvqpfgjfdzxnaq.supabase.co:6543/postgres?schema=public&pgbouncer=true"
-```
+### IPv4 / network issues
 
-### Solution 2: Use Supabase SQL Editor
+If `prisma db push` fails but Supabase SQL Editor works, use the pooler URI from the dashboard instead of the direct host.
 
-Since Prisma Studio works, you can create tables manually:
-
-1. Go to Supabase Dashboard
-2. Click **SQL Editor**
-3. Run this SQL to create the schema:
-
-```sql
--- Create enums
-CREATE TYPE "UserRole" AS ENUM ('CUSTOMER', 'ADMIN');
-CREATE TYPE "Industry" AS ENUM ('HVAC', 'PLUMBING', 'AUTO_REPAIR', 'CHILDCARE', 'ELECTRICIAN', 'GENERIC');
-CREATE TYPE "PlanType" AS ENUM ('STARTER', 'PRO', 'LOCAL_PLUS');
-CREATE TYPE "SubscriptionStatus" AS ENUM ('ACTIVE', 'PAST_DUE', 'CANCELED', 'PAUSED');
-
--- Then run: npx prisma db pull to sync schema
-```
-
-### Solution 3: Check Supabase Project Status
-
-1. Go to Supabase Dashboard
-2. Check if project shows as "Active"
-3. If paused, click "Resume" or "Restore"
-
-### Solution 4: Use Prisma Migrate with Different Connection
-
-Try using the connection string from Supabase's "Connection Pooling" section instead of "Direct connection".
-
-## Quick Test
-
-Test if you can connect via command line:
+## Verify
 
 ```bash
-# Test connection
-npx prisma db execute --stdin
-# Type: SELECT 1;
-# Press Enter, then Ctrl+D
+npm run check:env
+curl http://localhost:3000/api/health
 ```
 
-If this works but `db push` doesn't, it's likely a Prisma-specific issue.
+## Full reference
 
-## Alternative: Manual Migration
-
-If nothing works, you can:
-
-1. Use Prisma Studio to verify connection
-2. Use Supabase SQL Editor to run migrations manually
-3. Use `prisma db pull` to sync schema after manual changes
-
-Let me know which solution works for you!
+See `DATABASE.md` for pooler vs direct URLs, password URL-encoding, and Vercel deployment notes.

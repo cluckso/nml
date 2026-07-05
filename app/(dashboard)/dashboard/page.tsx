@@ -1,5 +1,7 @@
 import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { formatDatabaseEnvHint } from "@/lib/database-env"
+import { formatPrismaErrorHint } from "@/lib/db-errors"
 import { getTrialStatus, type TrialStatus } from "@/lib/trial"
 import { trialDashboardSubtitle } from "@/lib/trial-marketing"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -98,16 +100,22 @@ export default async function DashboardPage() {
     ])
   } catch (err) {
     console.error("Dashboard page data fetch error:", err)
+    const hint = formatPrismaErrorHint(err) ?? formatDatabaseEnvHint()
+    const isDev = process.env.NODE_ENV === "development"
     return (
       <div className="container mx-auto max-w-7xl py-4 px-4">
         <Card className="border-destructive/50">
           <CardHeader>
             <CardTitle>Unable to load dashboard</CardTitle>
             <CardDescription>
-              There was a problem loading your data. This is often due to a temporary database connection limit — try again in a moment. If it keeps happening, ensure your app uses the Transaction pooler (port 6543) for the database. See DATABASE.md.
+              {hint ??
+                "There was a problem loading your data. Try again in a moment. If it keeps happening, check Vercel runtime logs for the callgrabbr project."}
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-3">
+            {isDev && err instanceof Error && (
+              <p className="text-xs text-muted-foreground font-mono break-all">{err.message}</p>
+            )}
             <Link href="/dashboard">
               <Button variant="outline">Retry</Button>
             </Link>
