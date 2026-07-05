@@ -4,7 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Phone, Zap } from "lucide-react"
 import type { TrialStatus } from "@/lib/trial"
 import { FREE_TRIAL_MINUTES } from "@/lib/plans"
+import { approxCallsPerMonth } from "@/lib/plan-usage"
 import { trialDaysLabel } from "@/lib/trial-marketing"
+import { AVG_JOB_VALUE_LOW } from "@/lib/pricing-catalog"
 
 interface TrialCardProps {
   trial: TrialStatus
@@ -13,6 +15,7 @@ interface TrialCardProps {
 
 export function TrialCard({ trial, hasAgent }: TrialCardProps) {
   const { minutesRemaining, minutesUsed, isExhausted, isExpired, daysRemaining } = trial
+  const approxCalls = approxCallsPerMonth(FREE_TRIAL_MINUTES)
   const percentUsed = FREE_TRIAL_MINUTES > 0 ? (minutesUsed / FREE_TRIAL_MINUTES) * 100 : 0
   const isEnded = isExhausted || isExpired
   const warningLow = minutesRemaining <= 5 && minutesRemaining > 0
@@ -20,11 +23,11 @@ export function TrialCard({ trial, hasAgent }: TrialCardProps) {
 
   const description = () => {
     if (isExpired && !isExhausted)
-      return "Your trial has ended. Upgrade to a plan to reactivate your number and keep capturing leads."
+      return "Your trial window ended. Upgrade to turn your assistant back on — one captured job often covers months of service."
     if (isExhausted)
-      return "You've used your trial minutes. Upgrade to keep receiving calls."
-    if (isEnded) return "Your trial has ended. Upgrade to a plan to continue."
-    return `${trialDaysLabel()} free trial. No charge until you upgrade. One trial per business number.`
+      return "Trial minutes used up. Upgrade to keep answering calls you would have missed."
+    if (isEnded) return "Trial ended. Pick a plan to keep capturing leads."
+    return `${trialDaysLabel()} trial · ~${approxCalls} real calls included · No charge until you upgrade.`
   }
 
   return (
@@ -32,16 +35,16 @@ export function TrialCard({ trial, hasAgent }: TrialCardProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-emerald-800 dark:text-emerald-200">
           <Zap className="h-5 w-5" />
-          Your free trial
+          Free trial — test with real calls
         </CardTitle>
         <CardDescription>{description()}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div>
           <div className="flex justify-between text-sm mb-2">
-            <span className="text-muted-foreground">Minutes used</span>
+            <span className="text-muted-foreground">Trial usage</span>
             <span className="font-semibold">
-              {Math.ceil(minutesUsed)} / {FREE_TRIAL_MINUTES}
+              {Math.ceil(minutesUsed)} / {FREE_TRIAL_MINUTES} min
             </span>
           </div>
           <div className="w-full bg-muted rounded-full h-3">
@@ -52,36 +55,44 @@ export function TrialCard({ trial, hasAgent }: TrialCardProps) {
           </div>
           {!isExhausted && (
             <p className="text-sm text-muted-foreground mt-2">
-              <span className="font-medium text-foreground">{Math.ceil(minutesRemaining)}</span> minutes remaining
+              <span className="font-medium text-foreground">{Math.ceil(minutesRemaining)}</span> min left
               {daysRemaining > 0 && (
                 <> · <span className="font-medium text-foreground">{daysRemaining}</span> days left</>
               )}
             </p>
           )}
           {isExpired && !isExhausted && (
-            <p className="text-sm text-amber-700 dark:text-amber-400 mt-2">Trial ended</p>
+            <p className="text-sm text-amber-700 dark:text-amber-400 mt-2">Trial period ended</p>
           )}
           {warningEighty && (
             <p className="text-sm text-amber-700 dark:text-amber-400 mt-2">
-              About {Math.ceil(minutesRemaining)} minutes left — upgrade to avoid interruption.
+              Running low — upgrade so the next call still gets answered.
             </p>
           )}
           {warningLow && (
             <p className="text-sm text-amber-700 dark:text-amber-400 mt-2">
-              5 minutes left in your trial — upgrade to avoid interruption.
+              Almost out of trial minutes — upgrade before your next missed call goes to voicemail.
             </p>
           )}
         </div>
 
         {!hasAgent && !isEnded && (
           <p className="text-sm">
-            Connect your call assistant below to start using your trial minutes. Forward your business line to your forwarding number and receive real calls.
+            Connect your call assistant below, forward your business line, and make a test call. That&apos;s when the trial really starts.
           </p>
         )}
 
-        {hasAgent && !isEnded && (
+        {hasAgent && !isEnded && !trial.minutesUsed && (
           <p className="text-sm text-muted-foreground">
-            You&apos;re using your trial. Calls appear under <Link href="/calls" className="text-primary underline">Calls</Link>. Upgrade anytime from Billing.
+            Assistant connected — forward your line and place a test call. Captured leads show up under{" "}
+            <Link href="/calls" className="text-primary underline">Calls</Link>.
+          </p>
+        )}
+
+        {hasAgent && !isEnded && trial.minutesUsed > 0 && (
+          <p className="text-sm text-muted-foreground">
+            Calls are coming in. Average jobs run ${AVG_JOB_VALUE_LOW.toLocaleString()}+ —{" "}
+            <Link href="/billing" className="text-primary underline font-medium">upgrade</Link> to keep your line active after the trial.
           </p>
         )}
 
@@ -90,17 +101,17 @@ export function TrialCard({ trial, hasAgent }: TrialCardProps) {
             <a href="#setup" className="inline-flex">
               <Button size="sm" className="gap-2">
                 <Phone className="h-4 w-4" />
-                Connect call assistant
+                Connect assistant
               </Button>
             </a>
           )}
           {isEnded ? (
             <Button size="sm" asChild>
-              <Link href="/billing">Upgrade to keep receiving calls</Link>
+              <Link href="/billing">Choose a plan — from $99/mo</Link>
             </Button>
           ) : (
             <Button variant="outline" size="sm" asChild>
-              <Link href="/billing">View Billing & Upgrade</Link>
+              <Link href="/billing">View plans</Link>
             </Button>
           )}
         </div>

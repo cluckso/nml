@@ -3,8 +3,7 @@
 import Link from "next/link"
 import type { FunnelConfig } from "@/lib/funnel/funnel-config"
 import { getFunnelCtaHref } from "@/lib/funnel/industry-configs"
-import { PRICING_TIERS } from "@/lib/pricing-catalog"
-import { formatCurrency } from "@/lib/industry-data"
+import { PRICING_TIERS, formatJobRoiLine, formatCostPerCapturedCall } from "@/lib/pricing-catalog"
 import { trialDaysLabel, moneyBackGuaranteeLabel } from "@/lib/trial-marketing"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -25,8 +24,9 @@ export function FunnelPricingCta({ config, onCtaClick, className = "" }: FunnelP
     <section className={`container mx-auto px-4 py-12 ${className}`}>
       <div className="max-w-3xl mx-auto text-center">
         <h2 className="text-2xl md:text-3xl font-bold mb-3">Ready to stop losing {config.displayName.toLowerCase()} leads?</h2>
-        <p className="text-muted-foreground mb-8">
-          {moneyBackGuaranteeLabel()} · {trialDaysLabel()} free trial · Plans from {formatCurrency(starter.price)}/mo
+        <p className="text-muted-foreground mb-2">{formatJobRoiLine()}</p>
+        <p className="text-sm text-muted-foreground mb-8">
+          {moneyBackGuaranteeLabel()} · {trialDaysLabel()} free trial · {formatCostPerCapturedCall(starter.price, starter.includedMinutes)} on {starter.name}
         </p>
 
         <Card className="border-border/50 bg-card/60 backdrop-blur text-left mb-8">

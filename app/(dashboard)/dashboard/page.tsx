@@ -1,6 +1,7 @@
 import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { getTrialStatus, type TrialStatus } from "@/lib/trial"
+import { trialDashboardSubtitle } from "@/lib/trial-marketing"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { CallLog } from "@/components/calls/CallLog"
 import { SetupAICard } from "@/components/dashboard/SetupAICard"
@@ -28,7 +29,15 @@ export default async function DashboardPage() {
   const user = await requireAuth()
 
   if (!user.businessId) {
-    return <div>Please complete onboarding</div>
+    return (
+      <div className="container mx-auto max-w-lg py-16 px-4 text-center">
+        <h1 className="text-2xl font-bold mb-2">Almost there</h1>
+        <p className="text-muted-foreground mb-6">Add your business details so your call assistant knows how to answer.</p>
+        <Button asChild>
+          <Link href="/onboarding">Continue setup</Link>
+        </Button>
+      </div>
+    )
   }
 
   const defaultTrial: TrialStatus = {
@@ -155,7 +164,10 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-background via-background to-muted/20">
       <div className="container mx-auto max-w-7xl px-4 py-8">
-        <DashboardPageHeader title={business?.name ?? "Dashboard"} subtitle="Overview of calls, leads, and setup">
+        <DashboardPageHeader
+          title={business?.name ?? "Dashboard"}
+          subtitle={trial.isOnTrial ? trialDashboardSubtitle() : "Calls, leads, and setup at a glance"}
+        >
           <DashboardNav />
         </DashboardPageHeader>
 

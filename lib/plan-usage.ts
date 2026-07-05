@@ -29,13 +29,26 @@ export function approxCallsPerMonth(
 }
 
 export function formatIncludedUsageLabel(includedMinutes: number): string {
+  return formatIncludedUsagePrimary(includedMinutes)
+}
+
+/** Call-first label for marketing — trades owners think in calls, not minutes. */
+export function formatIncludedUsagePrimary(includedMinutes: number): string {
   const calls = approxCallsPerMonth(includedMinutes)
-  return `${includedMinutes.toLocaleString()} min/month · ~${calls} calls (avg. ${TYPICAL_INTAKE_CALL_MINUTES} min)`
+  return `~${calls} captured calls/mo (${includedMinutes.toLocaleString()} min included)`
 }
 
 export function formatIncludedUsageShort(includedMinutes: number): string {
   const calls = approxCallsPerMonth(includedMinutes)
-  return `~${calls} calls/month · avg. ${TYPICAL_INTAKE_CALL_MINUTES} min each`
+  return `~${calls} calls/mo · about $${TYPICAL_INTAKE_CALL_MINUTES} min each`
+}
+
+/** Effective cost per captured call at included volume (for plan cards). */
+export function formatCostPerCapturedCall(monthlyPrice: number, includedMinutes: number): string {
+  const calls = approxCallsPerMonth(includedMinutes)
+  if (calls <= 0) return ""
+  const perCall = monthlyPrice / calls
+  return `~$${perCall.toFixed(2)}/captured call`
 }
 
 export function getUsagePercent(minutesUsed: number, minutesIncluded: number): number {
@@ -102,8 +115,8 @@ export function getPlanUsageNudge(input: {
       severity: atThreshold || inOverage ? "warning" : "info",
       title: inOverage ? "Trial minutes used up" : "Trial minutes running low",
       message: inOverage
-        ? "Choose a plan to keep your call assistant live. Solo Owner covers missed and after-hours calls; Mid Volume is built for 24/7 answering."
-        : `You've used ${Math.ceil(percent)}% of your trial minutes. Pick a plan before you run out so calls keep getting answered.`,
+        ? "Your assistant is paused. Choose Solo Owner ($99/mo) to keep catching missed calls — one job often pays for months."
+        : `You've used ${Math.ceil(percent)}% of your trial. Forward a test call soon so you can see a real lead before minutes run out.`,
       upgradePlan: PlanType.PRO,
       upgradePlanName: getPlanDisplayName(PlanType.PRO),
       ctaLabel: "View plans",

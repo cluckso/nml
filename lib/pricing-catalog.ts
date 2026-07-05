@@ -13,7 +13,12 @@ import {
   PLAN_TYPE_BY_DISPLAY_KEY,
   type PricingTierKey,
 } from "./plan-labels"
-import { formatIncludedUsageShort } from "./plan-usage"
+import {
+  approxCallsPerMonth,
+  formatCostPerCapturedCall,
+  formatIncludedUsagePrimary,
+  formatIncludedUsageShort,
+} from "./plan-usage"
 
 export { OVERAGE_RATE_PER_MIN, getIncludedMinutes, getMonthlyPrice }
 export type { PricingTierKey }
@@ -26,7 +31,7 @@ export interface PricingTier {
   price: number
   includedMinutes: number
   /** Shown on plan card when set */
-  badge?: "Best value" | "Most popular"
+  badge?: "Best to start" | "Most popular" | "For busy shops"
   popular: boolean
   features: string[]
   /** Short subtitle under plan name on landing */
@@ -35,24 +40,29 @@ export interface PricingTier {
   usageNote: string
 }
 
+/** Typical human virtual receptionist entry price — for comparison copy. */
+export const HUMAN_RECEPTIONIST_FROM_MONTHLY = 235
+
 /** Single source for pricing page, landing, and checkout cards. Amounts come from lib/plans.ts. */
 export const PRICING_TIERS: PricingTier[] = [
   {
     key: PLAN_SOLO_OWNER,
     planType: PLAN_TYPE_BY_DISPLAY_KEY[PLAN_SOLO_OWNER],
     name: PLAN_SOLO_OWNER,
-    description: "Missed and after-hours coverage for owner-operators and one-truck shops.",
+    description:
+      "Catch missed and after-hours calls when you're on a job or the shop is closed — without hiring front-desk staff.",
     price: MONTHLY_PRICES[PlanType.STARTER],
     includedMinutes: INCLUDED_MINUTES[PlanType.STARTER],
-    badge: "Best value",
-    popular: false,
-    subtitle: "Solo operator · one truck",
-    usageNote: "Ideal when you're on a job or closed—not every call, all day",
+    badge: "Best to start",
+    popular: true,
+    subtitle: "On the job · evenings · weekends",
+    usageNote: "Most one-truck shops start here — covers the calls you miss, not every ring all day",
     features: [
-      "Missed call capture",
+      "Missed & after-hours call capture",
       "Spam call filtering",
       "Caller name, phone, and reason",
-      "Email and SMS summaries",
+      "Lead summaries by email & SMS",
+      "Industry-tuned intake flows",
       "No setup fee",
     ],
   },
@@ -60,18 +70,19 @@ export const PRICING_TIERS: PricingTier[] = [
     key: PLAN_MID_VOLUME,
     planType: PLAN_TYPE_BY_DISPLAY_KEY[PLAN_MID_VOLUME],
     name: PLAN_MID_VOLUME,
-    description: "Always-on answering for growing teams that can't afford to miss inbound calls.",
+    description:
+      "Your 24/7 front desk — answer most inbound calls so growing crews never lose a lead to voicemail.",
     price: MONTHLY_PRICES[PlanType.PRO],
     includedMinutes: INCLUDED_MINUTES[PlanType.PRO],
     badge: "Most popular",
-    popular: true,
+    popular: false,
     subtitle: "Growing crew · steady inbound volume",
-    usageNote: "Built for shops that answer most incoming calls",
+    usageNote: "When you need every call answered, not just the ones you miss",
     features: [
       "Everything in Solo Owner",
       "24/7 call answering",
       "Industry-specific intake flows",
-      "Appointment and emergency handling",
+      "Appointment & emergency handling",
       "SMS follow-up to callers",
       "CRM email forwarding",
       "Lead tagging and priority rules",
@@ -81,9 +92,11 @@ export const PRICING_TIERS: PricingTier[] = [
     key: PLAN_HIGH_VOLUME,
     planType: PLAN_TYPE_BY_DISPLAY_KEY[PLAN_HIGH_VOLUME],
     name: PLAN_HIGH_VOLUME,
-    description: "Full coverage for busy shops, multiple crews, and high daily call volume.",
+    description:
+      "Full coverage for busy shops, multiple crews, and operations that can't afford a single dropped call.",
     price: MONTHLY_PRICES[PlanType.ELITE],
     includedMinutes: INCLUDED_MINUTES[PlanType.ELITE],
+    badge: "For busy shops",
     popular: false,
     subtitle: "Multi-crew · high call volume",
     usageNote: "For operations answering every line throughout the day",
@@ -106,9 +119,7 @@ export const PRICING_TIERS_BY_KEY: Record<PricingTierKey, PricingTier> = Object.
 /** For meta tags and hero copy */
 export function formatPricingSummary(): string {
   const solo = PRICING_TIERS_BY_KEY[PLAN_SOLO_OWNER]
-  const mid = PRICING_TIERS_BY_KEY[PLAN_MID_VOLUME]
-  const high = PRICING_TIERS_BY_KEY[PLAN_HIGH_VOLUME]
-  return `${PLAN_SOLO_OWNER} from $${solo.price}/mo, ${PLAN_MID_VOLUME} $${mid.price}/mo, ${PLAN_HIGH_VOLUME} $${high.price}/mo`
+  return `${PLAN_SOLO_OWNER} from $${solo.price}/mo · one captured job pays for months`
 }
 
 export function formatOverageRate(): string {
@@ -120,8 +131,21 @@ export const AVG_JOB_VALUE_LOW = 350
 export const AVG_JOB_VALUE_HIGH = 600
 
 export function formatJobRoiLine(): string {
-  return `Average job value: $${AVG_JOB_VALUE_LOW}–$${AVG_JOB_VALUE_HIGH}. One captured lead can cover months of service.`
+  return `Average job: $${AVG_JOB_VALUE_LOW}–$${AVG_JOB_VALUE_HIGH}. One captured lead pays for months of service.`
+}
+
+export function formatRoiHeadline(): string {
+  return "One captured job pays for months of service"
+}
+
+export function formatMissedJobCostLine(): string {
+  return "One missed emergency call often costs $350–$600 — more than months of CallGrabbr"
+}
+
+export function formatVsHumanLine(): string {
+  const solo = PRICING_TIERS_BY_KEY[PLAN_SOLO_OWNER]
+  return `Less than 40% of a human answering service (from $${HUMAN_RECEPTIONIST_FROM_MONTHLY}/mo) · ${PLAN_SOLO_OWNER} from $${solo.price}/mo`
 }
 
 /** Re-export for pricing UI */
-export { formatIncludedUsageShort }
+export { formatIncludedUsageShort, formatIncludedUsagePrimary, formatCostPerCapturedCall, approxCallsPerMonth }

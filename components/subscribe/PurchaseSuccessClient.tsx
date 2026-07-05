@@ -8,7 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { trackPurchaseSuccess } from "@/lib/analytics"
 import { getPlanDisplayName } from "@/lib/plan-labels"
 import { getIncludedMinutes, getMonthlyPrice } from "@/lib/plans"
-import { formatIncludedUsageShort } from "@/lib/plan-usage"
+import { formatIncludedUsageShort, formatCostPerCapturedCall } from "@/lib/plan-usage"
+import { formatJobRoiLine } from "@/lib/pricing-catalog"
+import { onboardingCompleteNextStep } from "@/lib/trial-marketing"
 import { CheckCircle2, AlertCircle, ArrowRight } from "lucide-react"
 
 type PurchaseSuccessClientProps =
@@ -58,7 +60,7 @@ export function PurchaseSuccessClient(props: PurchaseSuccessClientProps) {
   const monthlyPrice = getMonthlyPrice(props.planType)
   const includedMinutes = getIncludedMinutes(props.planType)
   const continueHref = props.onboardingComplete ? "/dashboard" : "/onboarding"
-  const continueLabel = props.onboardingComplete ? "Go to dashboard" : "Finish setup"
+  const continueLabel = props.onboardingComplete ? "Go to dashboard" : "Finish business setup"
 
   return (
     <div className="flex min-h-[70vh] items-center justify-center p-4">
@@ -68,12 +70,12 @@ export function PurchaseSuccessClient(props: PurchaseSuccessClientProps) {
             <CheckCircle2 className="h-7 w-7 text-primary" />
           </div>
           <CardTitle className="text-2xl">
-            {props.isUpgrade ? "Plan updated!" : "You're subscribed!"}
+            {props.isUpgrade ? "Plan updated!" : "You're in — let's go live"}
           </CardTitle>
           <CardDescription className="text-base">
             {props.isUpgrade
-              ? "Your subscription has been updated. Changes may take a moment to appear on your billing page."
-              : "Payment received. Your CallGrabbr plan is active — here's what you have."}
+              ? "Your subscription has been updated. Changes may take a moment on Billing."
+              : `${planName} is active at $${monthlyPrice}/mo. ${formatJobRoiLine()}`}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -89,22 +91,27 @@ export function PurchaseSuccessClient(props: PurchaseSuccessClientProps) {
               </div>
             </div>
             <div className="pt-2 border-t">
-              <p className="text-sm text-muted-foreground">Included usage</p>
-              <p className="font-medium">
-                {includedMinutes.toLocaleString()} minutes/month
-              </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                {formatIncludedUsageShort(includedMinutes)}
+              <p className="text-sm text-muted-foreground">Included</p>
+              <p className="font-medium">{formatIncludedUsageShort(includedMinutes)}</p>
+              <p className="text-sm text-primary mt-1">
+                {formatCostPerCapturedCall(monthlyPrice, includedMinutes)}
               </p>
             </div>
           </div>
 
           {!props.onboardingComplete && !props.isUpgrade && (
             <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
-              <p className="font-medium mb-1">Next step: set up your business</p>
+              <p className="font-medium mb-1">Next: add your business details</p>
               <p className="text-muted-foreground">
-                Add your industry and business details so we can configure your AI call assistant.
+                Industry, name, and hours — about 2 minutes. Then connect your assistant and forward your line.
               </p>
+            </div>
+          )}
+
+          {props.onboardingComplete && !props.isUpgrade && (
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
+              <p className="font-medium mb-1">Next: go live</p>
+              <p className="text-muted-foreground">{onboardingCompleteNextStep()}</p>
             </div>
           )}
 
@@ -116,7 +123,7 @@ export function PurchaseSuccessClient(props: PurchaseSuccessClientProps) {
           </Button>
 
           <p className="text-center text-sm text-muted-foreground">
-            Receipt and billing details are in{" "}
+            Receipt and usage in{" "}
             <Link href="/billing" className="text-primary underline">
               Billing &amp; Usage
             </Link>

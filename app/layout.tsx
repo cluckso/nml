@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "CallGrabbr - Stop Losing Jobs to Voicemail",
-    description: "80% of callers won't leave voicemail. Live answering captures 80-95% of leads vs voicemail's 5-15%. We answer when you can't and text you the lead instantly.",
+    description: "80% of callers won't leave voicemail. One captured job pays for months. CallGrabbr catches missed calls and texts you the lead in seconds.",
     url: SITE_URL,
     siteName: "CallGrabbr",
     type: "website",

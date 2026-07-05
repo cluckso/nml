@@ -2,12 +2,12 @@ import { redirect } from "next/navigation"
 import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { getEffectivePlanType, FREE_TRIAL_MINUTES, MONTHLY_PRICES, INCLUDED_MINUTES, SETUP_FEES, OVERAGE_RATE_PER_MIN } from "@/lib/plans"
-import { getPlanDisplayName, PLAN_SOLO_OWNER, PLAN_MID_VOLUME, PLAN_HIGH_VOLUME } from "@/lib/plan-labels"
+import { getPlanDisplayName, PLAN_SOLO_OWNER } from "@/lib/plan-labels"
 import { getTrialStatus } from "@/lib/trial"
 import { getPlanUsageNudge } from "@/lib/plan-usage"
-import { formatIncludedUsageShort } from "@/lib/pricing-catalog"
+import { formatIncludedUsageShort, formatJobRoiLine } from "@/lib/pricing-catalog"
 import { UsageUpgradeNudge } from "@/components/billing/UsageUpgradeNudge"
-import { getIntakeNumberForIndustry, hasIntakeNumberConfigured } from "@/lib/intake-routing"
+import { getIntakeNumberForIndustry } from "@/lib/intake-routing"
 import { formatPhoneForDisplay } from "@/lib/utils"
 import { PlanType } from "@prisma/client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -83,7 +83,12 @@ export default async function BillingPage() {
 
   return (
     <div className="container mx-auto max-w-6xl py-8">
-      <h1 className="text-3xl font-bold mb-8">Billing & Usage</h1>
+      <h1 className="text-3xl font-bold mb-2">Billing &amp; Usage</h1>
+      {isOnTrial && !trial.isExhausted && !trial.isExpired ? (
+        <p className="text-muted-foreground mb-8 max-w-2xl">{formatJobRoiLine()}</p>
+      ) : (
+        <div className="mb-6" />
+      )}
 
       {showIntakeNumber && (
         <Card className="mb-6 border-primary/20 bg-primary/5">
@@ -127,11 +132,11 @@ export default async function BillingPage() {
               <div className="space-y-2">
                 <p className="text-2xl font-bold">Free trial</p>
                 <p className="text-sm text-muted-foreground">
-                  {trialBillingDescription()} Upgrade to {PLAN_SOLO_OWNER}, {PLAN_MID_VOLUME}, or {PLAN_HIGH_VOLUME} when you&apos;re ready.
+                  {trialBillingDescription()} When you&apos;re ready, Solo Owner ($99/mo) covers missed &amp; after-hours calls for most one-truck shops.
                 </p>
                 {(trial.isExhausted || trial.isExpired) && (
                   <Button asChild className="mt-2">
-                    <Link href="/billing#plans">Upgrade to keep receiving calls</Link>
+                    <Link href="/billing#plans">Choose a plan — from $99/mo</Link>
                   </Button>
                 )}
               </div>
@@ -193,7 +198,9 @@ export default async function BillingPage() {
         <CardHeader>
           <CardTitle>Available Plans</CardTitle>
           <CardDescription>
-            {isOnTrial ? "Upgrade to continue when you're ready" : "Upgrade or change your plan"}
+            {isOnTrial
+              ? "One captured job often pays for months — pick the plan that fits how you handle calls"
+              : "Change plan anytime"}
           </CardDescription>
         </CardHeader>
         <CardContent>

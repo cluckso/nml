@@ -4,7 +4,7 @@ import Link from "next/link"
 import { CheckCircle2, Circle, Phone, PhoneForwarded, Rocket } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { trialDaysLabel } from "@/lib/trial-marketing"
+import { trialActivationGoal } from "@/lib/trial-marketing"
 
 type TrialActivationChecklistProps = {
   onboardingComplete: boolean
@@ -24,27 +24,27 @@ export function TrialActivationChecklist({
   const steps = [
     {
       id: "onboarding",
-      label: "Complete business setup",
+      label: "Add your business details",
       done: onboardingComplete,
-      hint: onboardingComplete ? null : "Finish industry and business details in onboarding.",
+      hint: onboardingComplete ? null : "Industry, name, and hours — takes about 2 minutes.",
     },
     {
       id: "connect",
-      label: "Connect your call assistant",
+      label: "Get your forwarding number",
       done: hasAgent,
-      hint: hasAgent ? null : "Create your AI line from the setup card below.",
+      hint: hasAgent ? null : "Click Connect in the setup card — we'll give you the number to forward to.",
     },
     {
       id: "forward",
       label: "Forward your business line",
       done: hasAgent && hasCalls,
-      hint: hasAgent && !hasCalls ? "Set carrier forwarding to your CallGrabbr number (see setup card)." : null,
+      hint: hasAgent && !hasCalls ? "Set call forwarding at your carrier to the number we gave you. Then call yourself to test." : null,
     },
     {
       id: "first-call",
-      label: "Receive your first real call",
+      label: "Capture your first lead",
       done: hasCalls,
-      hint: hasCalls ? null : `Your ${trialDaysLabel()} trial minutes count when real calls come in.`,
+      hint: hasCalls ? null : "Once a real call completes, you'll get a text or email summary — that's the moment most owners decide to upgrade.",
     },
   ]
 
@@ -58,11 +58,9 @@ export function TrialActivationChecklist({
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center gap-2">
           <Rocket className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-          Get your first call — quick checklist
+          Go live in 4 steps
         </CardTitle>
-        <CardDescription>
-          Most owners convert after one captured lead. Complete these steps to use your trial minutes.
-        </CardDescription>
+        <CardDescription>{trialActivationGoal()}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <ul className="space-y-3">
@@ -88,14 +86,14 @@ export function TrialActivationChecklist({
           <div className="flex flex-wrap gap-2 pt-2">
             {!onboardingComplete && (
               <Button size="sm" asChild>
-                <Link href="/onboarding">Finish setup</Link>
+                <Link href="/onboarding">Add business details</Link>
               </Button>
             )}
             {onboardingComplete && !hasAgent && (
               <Button size="sm" asChild>
                 <a href="#setup">
                   <Phone className="h-4 w-4 mr-2" />
-                  Connect assistant
+                  Get forwarding number
                 </a>
               </Button>
             )}
@@ -103,7 +101,7 @@ export function TrialActivationChecklist({
               <Button size="sm" variant="outline" asChild>
                 <a href="#setup">
                   <PhoneForwarded className="h-4 w-4 mr-2" />
-                  Forwarding steps
+                  See forwarding steps
                 </a>
               </Button>
             )}

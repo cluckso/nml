@@ -16,7 +16,7 @@ import {
 } from "@/lib/funnel/funnel-trial-bridge"
 import { PersistTermsConsent } from "@/components/legal/PersistTermsConsent"
 import { FREE_TRIAL_MINUTES, TRIAL_DAYS } from "@/lib/plans"
-import { trialDaysLabel, trialSummaryWithMinutes, moneyBackGuaranteeLabel } from "@/lib/trial-marketing"
+import { trialConversionLine, trialDaysLabel, moneyBackGuaranteeLabel } from "@/lib/trial-marketing"
 import { pricingUrl } from "@/lib/monetization-urls"
 import { PLAN_SOLO_OWNER, PLAN_MID_VOLUME } from "@/lib/plan-labels"
 import { CreditCard, Shield } from "lucide-react"
@@ -152,7 +152,7 @@ export function TrialStartClient() {
               </>
             ) : (
               <>
-                {trialSummaryWithMinutes()}. Add your business phone to start.
+                {trialConversionLine()} Add your business phone to start.
               </>
             )}
           </CardDescription>
@@ -222,7 +222,7 @@ export function TrialStartClient() {
               </p>
             ) : (
               <p className="text-xs text-muted-foreground text-center">
-                You&apos;ll set up your business next. We&apos;ll ask for payment only when you pick a plan.
+                No payment until you choose a plan. Test with real forwarded calls first.
               </p>
             )}
           </form>
@@ -243,7 +243,7 @@ export function TrialStartClient() {
                 </Button>
                 {(fromFunnel || fromPaidIntent) && (
                   <Button variant="link" asChild>
-                    <Link href={pricingUrl({ intent: "paid", plan: PlanType.PRO, ref: fromFunnel ? "funnel" : undefined })}>
+                    <Link href={pricingUrl({ intent: "paid", plan: PlanType.STARTER, ref: fromFunnel ? "funnel" : undefined })}>
                       Subscribe now — skip trial
                     </Link>
                   </Button>

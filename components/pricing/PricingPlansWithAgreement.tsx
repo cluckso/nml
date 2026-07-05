@@ -14,7 +14,7 @@ import {
 import { isAnnualBillingAvailable, type BillingInterval } from "@/lib/stripe-billing"
 import { getAnnualPrice } from "@/lib/plans"
 import { PRICING_TIERS_BY_KEY, type PricingTierKey } from "@/lib/pricing-catalog"
-import { PLAN_MID_VOLUME } from "@/lib/plan-labels"
+import { PLAN_SOLO_OWNER } from "@/lib/plan-labels"
 
 export type PlanInfo = {
   name: string
@@ -40,7 +40,7 @@ function PricingPlansInner({
     [plans]
   )
 
-  const recommendedPlanType = highlightPlan ?? PlanType.PRO
+  const recommendedPlanType = highlightPlan ?? PlanType.STARTER
 
   return (
     <>
@@ -67,7 +67,7 @@ function PricingPlansInner({
                 billingInterval={billingInterval}
                 annualPrice={showAnnual ? getAnnualPrice(tier.planType) : undefined}
                 annualLabel={showAnnual ? `${annualAvailable ? "2 months free" : ""}` : undefined}
-                recommended={tier.planType === recommendedPlanType || plan.name === PLAN_MID_VOLUME}
+                recommended={tier.planType === recommendedPlanType || (plan.name === PLAN_SOLO_OWNER && !highlightPlan)}
                 showMoneyBack={searchParams.get("intent") === "paid"}
               />
             </div>

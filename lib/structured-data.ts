@@ -28,7 +28,7 @@ export function webSiteJsonLd() {
     name: "CallGrabbr",
     url: SITE_URL,
     description:
-      "Stop losing jobs to voicemail. CallGrabbr answers when you can't and delivers lead details by text or email.",
+      "Stop losing jobs to voicemail. CallGrabbr catches missed calls and delivers lead details by text or email. One captured job pays for months.",
     publisher: {
       "@type": "Organization",
       name: "CallGrabbr",

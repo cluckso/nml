@@ -8,7 +8,6 @@ import Link from "next/link"
 import { Phone, CheckCircle2, Loader2, Smartphone } from "lucide-react"
 import type { TrialStatus } from "@/lib/trial"
 import { formatPhoneForDisplay } from "@/lib/utils"
-import { trialDaysLabel } from "@/lib/trial-marketing"
 
 interface SetupAICardProps {
   hasAgent: boolean
@@ -72,7 +71,7 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
             Your call assistant is connected
           </CardTitle>
           <CardDescription>
-            Finish setup by forwarding your business line to the forwarding number below. Call alerts use the number in this card.
+            Finish forwarding your business line to the number below — then call yourself to confirm it works.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -103,7 +102,7 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            New calls appear under <Link href="/calls" className="text-primary underline">Calls</Link>. Forward your business line to the number above to go live.
+            New calls appear under <Link href="/calls" className="text-primary underline">Calls</Link>. Haven&apos;t forwarded yet? Do that now — your trial only counts when real calls come in.
           </p>
         </CardContent>
       </Card>
@@ -166,13 +165,13 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
       <CardHeader>
         <CardTitle>Connect your call assistant</CardTitle>
         <CardDescription>
-          Connect once to get your forwarding number and set both your business line and alert number in one place.
+          One click gets your forwarding number. Set your carrier to forward missed calls — then test with a real call.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {onTrial && !trialEnded && (
           <p className="text-sm text-muted-foreground rounded-md bg-muted/50 p-3">
-            You&apos;re on the {trialDaysLabel()} free trial{trialStatus?.daysRemaining != null && trialStatus.daysRemaining > 0 ? ` (${trialStatus.daysRemaining} days left)` : ""}{trialStatus?.minutesRemaining != null && trialStatus.minutesRemaining > 0 ? ` · ${Math.ceil(trialStatus.minutesRemaining)} min left` : ""}. Upgrade from <Link href="/billing" className="text-primary underline">Billing</Link> when you&apos;re ready.
+            Trial active{trialStatus?.daysRemaining != null && trialStatus.daysRemaining > 0 ? ` · ${trialStatus.daysRemaining} days left` : ""}{trialStatus?.minutesRemaining != null && trialStatus.minutesRemaining > 0 ? ` · ${Math.ceil(trialStatus.minutesRemaining)} min left` : ""}. Connect below, forward your line, and make a test call — that&apos;s how you know if it&apos;s worth keeping.
           </p>
         )}
         {trialEnded && (
@@ -181,7 +180,7 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
           </p>
         )}
         <p className="text-sm text-muted-foreground">
-          Forward your missed calls to our shared intake number. Click Connect to load the number, then set your phone to forward to it. Call summaries are sent by email.
+          Forward unanswered calls to your CallGrabbr number. You&apos;ll get lead summaries by text and email when callers share their details.
         </p>
         {error && (
           <p className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">{error}</p>
@@ -202,7 +201,7 @@ export function SetupAICard({ hasAgent, phoneNumber, businessName, ownerPhone, t
                 Connecting…
               </>
             ) : (
-              "Connect to my call assistant"
+              "Connect & get my number"
             )}
           </Button>
         )}

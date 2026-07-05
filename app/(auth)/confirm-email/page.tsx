@@ -52,7 +52,7 @@ function ConfirmEmailContent() {
               <li>Open your email inbox{email ? ` for ${email}` : ""}.</li>
               <li>Find the message from CallGrabbr (subject: &quot;Confirm your signup&quot; or similar).</li>
               <li>Click the confirmation link in that email.</li>
-              <li>You&apos;ll be signed in and can start your free trial or set up your business.</li>
+              <li>You&apos;ll be signed in — start your free trial and forward your line to test with real calls.</li>
             </ol>
           </div>
 

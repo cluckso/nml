@@ -2,9 +2,8 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
 import { MARKETING_IMAGES, MARKETING_IMAGE_ALT } from "@/lib/marketing-images"
-import { pricingUrl } from "@/lib/monetization-urls"
-import { PlanType } from "@prisma/client"
-import { trialDaysLabel } from "@/lib/trial-marketing"
+import { formatMissedJobCostLine } from "@/lib/pricing-catalog"
+import { trialDaysLabel, trialConversionLine } from "@/lib/trial-marketing"
 import {
   ArrowRight,
   Clock,
@@ -27,7 +26,7 @@ export function HomeHero() {
     >
       <div className="inline-flex items-center gap-2 rounded-full border border-destructive/30 bg-background/60 backdrop-blur-sm px-4 py-1.5 text-sm font-medium text-destructive mb-4">
         <PhoneOff className="h-4 w-4" aria-hidden />
-        80% of callers won&apos;t leave voicemail — they call the next business
+        80% of callers won&apos;t leave voicemail — they call your competitor
       </div>
       <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 tracking-tight">
         Stop Losing Jobs to{" "}
@@ -37,14 +36,14 @@ export function HomeHero() {
         We answer when you can&apos;t and text you the lead in seconds.
       </p>
       <p className="text-base sm:text-lg text-muted-foreground mb-2 max-w-2xl mx-auto px-1">
-        Voicemail captures 5–15% of callers. Live answering captures 80–95%. From first ring to
-        qualified lead — no hold music, no robot menus. Captured details are sent by text and email when the caller shares them.
+        Voicemail captures 5–15% of callers. Live answering captures 80–95%. Built for HVAC,
+        plumbing, electrical, and auto repair — industry intake, not generic scripts.
       </p>
-      <p className="text-sm text-muted-foreground/90 mb-8 max-w-xl mx-auto">
-        Built for HVAC, plumbing, electrical, and auto repair shops. Plans from $99/mo.
+      <p className="text-sm font-medium text-primary/90 mb-8 max-w-xl mx-auto">
+        {formatMissedJobCostLine()}
       </p>
       <div className="flex flex-wrap gap-4 justify-center mb-6">
-        <Link href="/sign-up" className="min-h-[44px] flex items-center">
+        <Link href="/sign-up?next=%2Ftrial%2Fstart" className="min-h-[44px] flex items-center">
           <Button
             size="lg"
             className="gap-2 text-base px-6 sm:px-8 shadow-lg shadow-primary/30 min-h-[44px]"
@@ -53,13 +52,13 @@ export function HomeHero() {
             <ArrowRight className="h-5 w-5" aria-hidden />
           </Button>
         </Link>
-        <Link href={pricingUrl({ intent: "paid", plan: PlanType.PRO })} className="min-h-[44px] flex items-center">
+        <Link href="/pricing" className="min-h-[44px] flex items-center">
           <Button
             size="lg"
             variant="secondary"
             className="gap-2 text-base px-6 sm:px-8 min-h-[44px]"
           >
-            Subscribe from $99/mo
+            See plans &amp; pricing
           </Button>
         </Link>
         <Link href="#demo" className="min-h-[44px] flex items-center">
@@ -86,12 +85,9 @@ export function HomeHero() {
           Cancel anytime
         </span>
       </div>
-      <div className="mt-8 inline-flex items-center gap-2 rounded-lg border border-primary/25 bg-background/50 backdrop-blur-sm px-4 py-2 text-sm">
-        <TrendingUp className="h-4 w-4 text-primary" aria-hidden />
-        <span className="text-muted-foreground">Study of 130,000+ calls:</span>
-        <span className="font-semibold text-foreground">
-          Live answering captures 80–95% vs voicemail&apos;s 5–15%
-        </span>
+      <div className="mt-8 inline-flex items-center gap-2 rounded-lg border border-primary/25 bg-background/50 backdrop-blur-sm px-4 py-2 text-sm max-w-2xl">
+        <TrendingUp className="h-4 w-4 text-primary shrink-0" aria-hidden />
+        <span className="text-muted-foreground text-left">{trialConversionLine()}</span>
       </div>
     </SectionBackdrop>
   )

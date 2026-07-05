@@ -35,11 +35,16 @@ export const PRODUCT_FAQ: FaqItem[] = [
   {
     question: "How much does CallGrabbr cost after the trial?",
     answer:
-      "Plans start at $99/month (Solo Owner, ~100 calls), $159/month (Mid Volume, ~265 calls), and $279/month (High Volume, ~500 calls). Estimates assume an average of 3 minutes per call. Additional minutes are billed at $0.22/min.",
+      "Solo Owner is $99/month (~100 captured calls) for missed and after-hours coverage. Mid Volume is $159/month (~265 calls) for shops that need most inbound calls answered. High Volume is $279/month (~500 calls) for busy multi-crew operations. Estimates assume ~3 minutes per call. Additional usage is $0.22/min. One captured job ($350–$600 average) often pays for months of service.",
   },
   {
     question: "Which plan should I choose?",
     answer:
-      "Solo Owner fits most one-truck shops using CallGrabbr for missed and after-hours calls. Mid Volume is for growing crews that need most inbound calls answered. High Volume is for busy, multi-crew operations. Upgrade anytime as volume grows.",
+      "Start with Solo Owner if you're a one-truck shop and mainly need missed and after-hours calls covered while you're on a job. Choose Mid Volume when you want the AI to answer most inbound calls like a 24/7 front desk. High Volume fits busy shops with multiple crews or departments. Upgrade anytime as volume grows.",
+  },
+  {
+    question: "Is CallGrabbr worth $99/month?",
+    answer:
+      "For most service businesses, yes — if it captures even one job you'd have lost to voicemail. Average job value is $350–$600. Solo Owner costs $99/month (~$0.99 per captured call at included volume). That's far less than a human answering service ($235+/month) and much cheaper than one missed emergency call.",
   },
 ]

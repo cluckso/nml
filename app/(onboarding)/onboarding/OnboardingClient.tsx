@@ -12,7 +12,7 @@ import { PlanType } from "@prisma/client"
 import { formatPhoneForDisplay } from "@/lib/utils"
 import { Phone } from "lucide-react"
 import Link from "next/link"
-import { trialOnboardingHint } from "@/lib/trial-marketing"
+import { onboardingCompleteNextStep, onboardingWelcomeSubtitle } from "@/lib/trial-marketing"
 
 type OnboardingStep = "industry" | "business-info" | "complete" | "manual-setup"
 
@@ -103,7 +103,7 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
         throw new Error(details ? `${msg}. ${details}` : msg)
       }
       if (result.provisioningFailed) {
-        setProvisioningWarning("Your info was saved. We couldn't set up your call line just yet — click Connect on the dashboard to try again.")
+        setProvisioningWarning("Your info was saved. Connect your call assistant on the dashboard to get your forwarding number.")
       }
       const businessId = result.business?.id
       if (businessId && typeof window !== "undefined") {
@@ -172,7 +172,7 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
     return (
       <div className="container mx-auto max-w-2xl py-12">
         <div className="rounded-lg border border-border bg-card p-8 text-center shadow-sm">
-          <h1 className="text-2xl font-bold mb-4">Setup Complete!</h1>
+          <h1 className="text-2xl font-bold mb-2">You&apos;re set up</h1>
           {provisioningWarning && (
             <div className="rounded-lg border border-amber-500/50 bg-amber-500/10 p-4 mb-6 text-left text-sm text-amber-800 dark:text-amber-200" role="alert">
               {provisioningWarning}
@@ -186,11 +186,12 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
               </p>
               <p className="text-xl font-mono font-semibold">{formatPhoneForDisplay(intakeNumber) || intakeNumber}</p>
               <p className="text-xs text-muted-foreground mt-2">
-                Set call forwarding at your carrier to this number. See <Link href="/docs/faq" className="text-primary underline">Help & FAQ</Link> for steps.
+                Set call forwarding at your carrier. See <Link href="/docs/faq" className="text-primary underline">Help & FAQ</Link> for steps.
               </p>
             </div>
           )}
-          <p className="text-muted-foreground">Redirecting to your dashboard...</p>
+          <p className="text-muted-foreground mb-2">{onboardingCompleteNextStep()}</p>
+          <p className="text-sm text-muted-foreground">Taking you to your dashboard…</p>
         </div>
       </div>
     )
@@ -199,18 +200,18 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
   return (
     <div className="container mx-auto max-w-4xl py-12">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Welcome to CallGrabbr</h1>
+        <h1 className="text-3xl font-bold mb-2">Set up your call assistant</h1>
         <p className="text-muted-foreground">
-          Set up your business in a few minutes. {planType ? "You've already chosen your plan." : trialOnboardingHint()}
+          {onboardingWelcomeSubtitle(!!planType)}
         </p>
       </div>
 
       <div className="rounded-lg border border-border bg-card p-8 shadow-sm">
         {step === "industry" && (
           <div>
-            <h2 className="text-xl font-semibold mb-2">Select Your Industry (required)</h2>
+            <h2 className="text-xl font-semibold mb-2">What type of business is this?</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              Choose the option that best fits your business. This determines which call flow answers your calls. Select &quot;Other&quot; for the default service number if none of the listed industries apply.
+              We&apos;ll tune how your assistant answers — HVAC, plumbing, auto, and more each get industry-specific intake.
             </p>
             {planType && hasIndustryOptimizedAgents(planType) && (
               <p className="text-sm text-muted-foreground mb-4">
@@ -223,7 +224,10 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
 
         {step === "business-info" && (
           <div>
-            <h2 className="text-xl font-semibold mb-4">Business Information</h2>
+            <h2 className="text-xl font-semibold mb-2">Your business details</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              This is what callers hear — business name, hours, and service area. Takes about 2 minutes.
+            </p>
             {submitError && (
               <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-4 mb-4 text-sm text-destructive" role="alert">
                 {submitError}

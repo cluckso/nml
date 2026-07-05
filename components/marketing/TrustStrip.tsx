@@ -1,10 +1,11 @@
-import { BadgeCheck, Headphones, Lock, Star } from "lucide-react"
+import { Clock, DollarSign, Shield, TrendingUp } from "lucide-react"
+import { trialDaysLabel } from "@/lib/trial-marketing"
 
 const TRUST_ITEMS = [
-  { icon: Star, label: "Built for local trades" },
-  { icon: Headphones, label: "24/7 call coverage" },
-  { icon: Lock, label: "Your data stays yours" },
-  { icon: BadgeCheck, label: "Professional voice" },
+  { icon: TrendingUp, label: "One job pays for months" },
+  { icon: Clock, label: `${trialDaysLabel()} free trial · no card` },
+  { icon: DollarSign, label: "From $99/mo · no setup fee" },
+  { icon: Shield, label: "Cancel anytime" },
 ] as const
 
 export function TrustStrip() {

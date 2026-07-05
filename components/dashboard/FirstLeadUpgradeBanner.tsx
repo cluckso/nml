@@ -12,17 +12,20 @@ export function FirstLeadUpgradeBanner({ callCount }: { callCount: number }) {
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-primary" />
-          Your assistant is working — lock it in
+          It&apos;s working — keep it on
         </CardTitle>
         <CardDescription>
-          You&apos;ve received {callCount} call{callCount === 1 ? "" : "s"} on your trial. Average
-          service jobs run ${AVG_JOB_VALUE_LOW.toLocaleString()}–$
-          {AVG_JOB_VALUE_HIGH.toLocaleString()} — one lead can cover months of CallGrabbr.
+          You&apos;ve had {callCount} call{callCount === 1 ? "" : "s"} on your trial. Jobs in your trade often run $
+          {AVG_JOB_VALUE_LOW.toLocaleString()}–${AVG_JOB_VALUE_HIGH.toLocaleString()} — one lead can pay for months of
+          CallGrabbr.
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-wrap gap-2">
         <Button asChild>
-          <Link href="/billing#plans">Upgrade to keep your number active</Link>
+          <Link href="/billing#plans">Choose a plan — from $99/mo</Link>
+        </Button>
+        <Button variant="outline" asChild>
+          <Link href="/calls">Review calls</Link>
         </Button>
       </CardContent>
     </Card>

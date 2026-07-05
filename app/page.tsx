@@ -12,7 +12,7 @@ import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
 import { TrustStrip } from "@/components/marketing/TrustStrip"
 import { MobileAppDownload } from "@/components/marketing/MobileAppDownload"
 import { MARKETING_IMAGES, MARKETING_IMAGE_ALT } from "@/lib/marketing-images"
-import { formatJobRoiLine, formatOverageRate, formatIncludedUsageShort, PRICING_TIERS } from "@/lib/pricing-catalog"
+import { formatJobRoiLine, formatOverageRate, formatIncludedUsageShort, formatCostPerCapturedCall, PRICING_TIERS } from "@/lib/pricing-catalog"
 import {
   ArrowRight,
   CreditCard,
@@ -407,18 +407,18 @@ export default function HomePage() {
         <p className="text-center text-muted-foreground mt-8">If customers call you — this fits.</p>
       </section>
 
-      {/* Pricing (Simple and Predictable) */}
+      {/* Pricing — ROI-first framing */}
       <section className="bg-muted/30 py-16 border-y border-border/50">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold tracking-tight text-center mb-3">
-            Pricing that scales with call volume
+            Missed-call coverage, not another subscription
           </h2>
           <p className="text-center text-muted-foreground mb-4 max-w-xl mx-auto leading-relaxed">
-            No setup fees. No hidden charges. Overage {formatOverageRate()} beyond included minutes.
+            {formatJobRoiLine()} No setup fees. Overage {formatOverageRate()} only if you exceed included calls.
             Cancel anytime.
           </p>
           <p className="text-center text-sm text-muted-foreground mb-10 max-w-lg mx-auto leading-relaxed">
-            {formatJobRoiLine()}
+            Pick the plan that matches how you handle calls — most one-truck shops start on Solo Owner.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {PRICING_TIERS.map((tier) => (
@@ -434,9 +434,11 @@ export default function HomePage() {
                   {tier.badge && (
                     <span
                       className={`mb-1 inline-block w-fit rounded px-2 py-1 text-xs font-semibold uppercase tracking-wide ${
-                        tier.badge === "Best value"
+                        tier.badge === "Best to start"
                           ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
-                          : "bg-primary text-primary-foreground"
+                          : tier.badge === "Most popular"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground"
                       }`}
                     >
                       {tier.badge}
@@ -449,8 +451,11 @@ export default function HomePage() {
                     </span>
                   </CardTitle>
                   <p className="text-sm text-muted-foreground leading-relaxed">{tier.subtitle}</p>
-                  <p className="text-sm text-foreground/90 leading-snug">
+                  <p className="text-sm font-medium text-foreground/90 leading-snug">
                     {formatIncludedUsageShort(tier.includedMinutes)}
+                  </p>
+                  <p className="text-xs text-primary font-medium">
+                    {formatCostPerCapturedCall(tier.price, tier.includedMinutes)}
                   </p>
                   <p className="text-xs text-muted-foreground leading-relaxed">{tier.usageNote}</p>
                 </CardHeader>

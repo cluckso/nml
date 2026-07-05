@@ -130,7 +130,9 @@ function SignUpForm() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Sign Up</CardTitle>
-          <CardDescription>Create your CallGrabbr account</CardDescription>
+          <CardDescription>
+            Create your account — then start a 7-day free trial with real calls. No card required.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignUp} className="space-y-4">

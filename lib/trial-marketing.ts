@@ -28,7 +28,30 @@ export function trialCtaLabel(): string {
 }
 
 export function trialOnboardingHint(): string {
-  return `You're on the ${TRIAL_DAYS}-day free trial. Upgrade anytime from Billing.`
+  return `You're on the ${TRIAL_DAYS}-day free trial — finish setup below, then forward your line to catch your first real call.`
+}
+
+/** Dashboard header when user is on trial. */
+export function trialDashboardSubtitle(): string {
+  return "Forward your line, get your first call, then decide if one captured lead is worth keeping."
+}
+
+/** Goal line for trial activation checklist. */
+export function trialActivationGoal(): string {
+  return "Most owners upgrade after one captured lead. These steps get you there."
+}
+
+/** Onboarding welcome subtitle for trial users. */
+export function onboardingWelcomeSubtitle(hasPlan: boolean): string {
+  if (hasPlan) {
+    return "You're subscribed — add your business details so your call assistant knows how to answer."
+  }
+  return `${TRIAL_DAYS}-day trial · ${FREE_TRIAL_MINUTES} call minutes · About 5 minutes to go live.`
+}
+
+/** Shown after onboarding completes — pushes user to dashboard setup. */
+export function onboardingCompleteNextStep(): string {
+  return "Next: connect your call assistant on the dashboard and forward your business line."
 }
 
 export function trialBillingDescription(): string {
@@ -40,7 +63,7 @@ export function trialBillingCardLabel(): string {
 }
 
 export function siteMetaDescription(): string {
-  return `80% of callers won't leave voicemail — they call the next business. CallGrabbr answers missed calls and texts you the lead in seconds. ${trialSummaryShort()}.`
+  return `80% of callers won't leave voicemail — they call your competitor. CallGrabbr catches missed calls and texts you the lead in seconds. One captured job pays for months. ${trialSummaryShort()}.`
 }
 
 export function authMetaDescription(): string {
@@ -52,7 +75,12 @@ export function trialStartMetaDescription(): string {
 }
 
 export function pricingSchemaTrialDescription(): string {
-  return `Plans from $99/month with a ${TRIAL_DAYS}-day free trial`
+  return `${TRIAL_DAYS}-day free trial · Plans from $99/mo · one captured job pays for months`
+}
+
+/** Short value prop for auth and trial pages. */
+export function trialConversionLine(): string {
+  return `Forward your line for ${TRIAL_DAYS} days with ${FREE_TRIAL_MINUTES} real call minutes. If it doesn't capture a lead you'd have lost, don't pay.`
 }
 
 export function funnelTrialFeatureLabel(): string {

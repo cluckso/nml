@@ -62,7 +62,10 @@ export default async function IndustryLandingPage({ params }: PageProps) {
             </Button>
           </div>
           <p className="text-sm text-muted-foreground mt-4">
-            Average {data.name.toLowerCase()} job: {formatCurrency(data.averageJobValue)} · One captured lead can pay for months of service
+            Average {data.name.toLowerCase()} job: {formatCurrency(data.averageJobValue)} · One captured lead pays for months of service
+          </p>
+          <p className="text-xs text-muted-foreground mt-2 max-w-md mx-auto">
+            7-day free trial · No card required · Forward your line and test with real calls
           </p>
         </div>
       </section>
@@ -146,9 +149,12 @@ export default async function IndustryLandingPage({ params }: PageProps) {
       </section>
 
       <section className="container mx-auto px-4 py-16 text-center">
-        <h2 className="text-2xl font-bold mb-4">Ready to stop losing {data.name.toLowerCase()} jobs?</h2>
+        <h2 className="text-2xl font-bold mb-2">Ready to stop losing {data.name.toLowerCase()} jobs?</h2>
+        <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
+          Forward your line for 7 days free. If CallGrabbr doesn&apos;t capture a lead you&apos;d have lost, don&apos;t pay.
+        </p>
         <Button size="lg" asChild>
-          <Link href="/sign-up">Get started free</Link>
+          <Link href="/trial/start">Start free trial</Link>
         </Button>
       </section>
     </div>

@@ -7,8 +7,8 @@ import { trackSubscribe } from "@/lib/analytics"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, Loader2 } from "lucide-react"
-import { PRICING_TIERS_BY_KEY } from "@/lib/pricing-catalog"
-import { formatIncludedUsageLabel } from "@/lib/plan-usage"
+import { PRICING_TIERS_BY_KEY, formatCostPerCapturedCall } from "@/lib/pricing-catalog"
+import { formatIncludedUsagePrimary } from "@/lib/plan-usage"
 import { LegalConsentCheckbox } from "@/components/legal/LegalConsentCheckbox"
 import { moneyBackGuaranteeLabel } from "@/lib/trial-marketing"
 import type { BillingInterval } from "@/lib/stripe-billing"
@@ -108,7 +108,10 @@ export function PlanCard({
         {includedMinutes != null && (
           <div className="rounded-lg border bg-muted/30 px-3 py-2.5 space-y-1">
             <p className="text-sm font-medium leading-snug text-foreground">
-              {formatIncludedUsageLabel(includedMinutes)}
+              {formatIncludedUsagePrimary(includedMinutes)}
+            </p>
+            <p className="text-xs font-medium text-primary">
+              {formatCostPerCapturedCall(plan.price, includedMinutes)}
             </p>
             {plan.usageNote && (
               <p className="text-xs leading-relaxed text-muted-foreground">{plan.usageNote}</p>

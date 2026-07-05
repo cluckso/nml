@@ -83,7 +83,7 @@ export default function OpenGraphImage() {
         >
           <span>{trialHeadlineLabel()}</span>
           <span>·</span>
-          <span>No card required</span>
+          <span>One job pays for months</span>
         </div>
       </div>
     ),

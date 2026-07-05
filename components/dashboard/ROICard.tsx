@@ -26,7 +26,7 @@ export function ROICard({ leadsThisMonth, industry }: ROICardProps) {
             </p>
             <p className="text-lg sm:text-xl font-bold tracking-tight mt-1">
               {leadsThisMonth === 0 ? (
-                "Your first captured lead will show up here"
+                "Forward your line — your first captured lead shows up here"
               ) : (
                 <>
                   <span className="text-emerald-400">{leadsThisMonth}</span> lead{leadsThisMonth !== 1 ? "s" : ""} captured
@@ -36,7 +36,7 @@ export function ROICard({ leadsThisMonth, industry }: ROICardProps) {
               )}
             </p>
             <p className="text-xs text-muted-foreground mt-1.5">
-              Based on {formatCurrency(avgJob)} average job value for your industry. One booked job often pays for months of service.
+              Based on {formatCurrency(avgJob)} average job value. One booked job often pays for months of CallGrabbr.
             </p>
           </div>
         </div>
