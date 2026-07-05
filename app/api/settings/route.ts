@@ -137,6 +137,16 @@ export async function PATCH(req: NextRequest) {
       data: { settings: updated as any },
     })
 
+    if (sectionKeys.includes("departments")) {
+      const deptNames = updated.departments
+        .map((d) => d.name.trim())
+        .filter(Boolean)
+      await db.business.update({
+        where: { id: user.businessId },
+        data: { departments: deptNames },
+      })
+    }
+
     const verified = await db.business.findUnique({
       where: { id: user.businessId },
       select: { settings: true },

@@ -24,16 +24,24 @@ import type {
   ReputationSettings,
   AvailabilitySettings,
   BookingSettings,
+  CapacitySettings,
   LeadTagSettings,
   CrmSettings,
   VoiceBrandSettings,
   AiBehaviorSettings,
   ReportSettings,
   QuestionDepth,
+  DepartmentConfig,
 } from "@/lib/business-settings"
 import { SECTION_LABELS, SECTION_MIN_TIER, SECTION_UPGRADE_DESCRIPTIONS } from "@/lib/business-settings"
 import { formatRingDelayLabel, formatScheduledRingDelaySummary } from "@/lib/call-routing"
 import { BUSINESS_TIMEZONE_OPTIONS } from "@/lib/business-timezone"
+import {
+  INTAKE_TEMPLATE_OPTIONS,
+  getIntakeFieldsForTemplate,
+  getIntakeTemplateMeta,
+} from "@/lib/intake-presets"
+import type { IntakeTemplate } from "@/lib/business-settings"
 import { getUpgradeTierLabel, PLAN_VOLUME_TAGS } from "@/lib/plan-labels"
 import { hasPremiumElevenLabsVoice } from "@/lib/plans"
 import { PlanType } from "@prisma/client"
@@ -50,7 +58,6 @@ const TABS: { section: SettingsSection; tier: "starter" | "pro" | "local_plus" }
   { section: "missedCallRecovery", tier: "starter" },
   { section: "followUpSms", tier: "pro" },
   { section: "reputation", tier: "pro" },
-  { section: "intakeTemplate", tier: "pro" },
   { section: "questionDepth", tier: "pro" },
   { section: "booking", tier: "pro" },
   { section: "leadTags", tier: "pro" },
@@ -247,7 +254,17 @@ export function SettingsClient() {
                 saving={saving}
               />
             )}
-            {activeTab === "intakeFields" && <IntakeFieldsSection value={settings.intakeFields} onSave={(v) => save("intakeFields", v)} saving={saving} />}
+            {activeTab === "intakeFields" && (
+              <IntakeSection
+                fields={settings.intakeFields}
+                template={settings.intakeTemplate}
+                canPickTemplate={allowed.includes("intakeTemplate")}
+                onSave={(fields, template) =>
+                  save("intakeFields", fields, template != null ? { intakeTemplate: template } : undefined)
+                }
+                saving={saving}
+              />
+            )}
             {activeTab === "availability" && <AvailabilitySection value={settings.availability} onSave={(v) => save("availability", v)} saving={saving} />}
             {activeTab === "notifications" && (
               <NotificationsSection
@@ -263,9 +280,15 @@ export function SettingsClient() {
             {activeTab === "missedCallRecovery" && <MissedCallRecoverySection value={settings.missedCallRecovery} onSave={(v) => save("missedCallRecovery", v)} saving={saving} />}
             {activeTab === "followUpSms" && <FollowUpSmsSection value={settings.followUpSms} onSave={(v) => save("followUpSms", v)} saving={saving} />}
             {activeTab === "reputation" && <ReputationSection value={settings.reputation} onSave={(v) => save("reputation", v)} saving={saving} />}
-            {activeTab === "intakeTemplate" && <IntakeTemplateSection value={settings.intakeTemplate} onSave={(v) => save("intakeTemplate", v)} saving={saving} />}
             {activeTab === "questionDepth" && <QuestionDepthSection value={settings.questionDepth} onSave={(v) => save("questionDepth", v)} saving={saving} />}
-            {activeTab === "booking" && <BookingSection value={settings.booking} onSave={(v) => save("booking", v)} saving={saving} />}
+            {activeTab === "booking" && (
+              <BookingSection
+                value={settings.booking}
+                capacity={settings.capacity}
+                onSave={(booking, capacity) => save("booking", booking, { capacity })}
+                saving={saving}
+              />
+            )}
             {activeTab === "leadTags" && <LeadTagsSection value={settings.leadTags} onSave={(v) => save("leadTags", v)} saving={saving} />}
             {activeTab === "crm" && <CrmSection value={settings.crm} onSave={(v) => save("crm", v)} saving={saving} />}
             {activeTab === "departments" && <DepartmentsSection value={settings.departments} onSave={(v) => save("departments", v)} saving={saving} />}
@@ -306,7 +329,10 @@ function AgentPreviewCard({
       ringBeforeAnswerSeconds?: number
       tone?: string
       questionDepth?: string
+      questionDepthGuidance?: string
+      beginMessage?: string
     }
+    beginMessage?: string
     ringDurationMs?: number
   } | null
   verified: boolean
@@ -367,7 +393,17 @@ function AgentPreviewCard({
               <li className="text-xs">Active now: {summary.ringDelayLabel ?? "—"}</li>
             )}
             <li>Tone: {summary.tone ?? "—"}</li>
-            <li>Question depth: {summary.questionDepth ?? "—"}</li>
+            <li>
+              Question depth: {summary.questionDepth ?? "—"}
+              {summary.questionDepthGuidance ? (
+                <span className="block text-xs mt-0.5">{summary.questionDepthGuidance}</span>
+              ) : null}
+            </li>
+            {(summary.beginMessage ?? agentPreview?.beginMessage) && (
+              <li>
+                Greeting: <span className="text-foreground">&ldquo;{summary.beginMessage ?? agentPreview?.beginMessage}&rdquo;</span>
+              </li>
+            )}
             {agentPreview?.ringDurationMs != null && agentPreview.ringDurationMs > 0 && (
               <li className="text-emerald-600">Ring delay applied: {agentPreview.ringDurationMs}ms</li>
             )}
@@ -415,6 +451,43 @@ function Slider({ label, value, onChange, min = 0, max = 1, step = 0.1 }: { labe
   )
 }
 
+function playBrowserVoicePreview(text: string, rate: number) {
+  if (typeof window === "undefined" || !window.speechSynthesis) return false
+  window.speechSynthesis.cancel()
+  const utterance = new SpeechSynthesisUtterance(text)
+  utterance.rate = Math.min(2, Math.max(0.5, rate))
+  window.speechSynthesis.speak(utterance)
+  return true
+}
+
+function VoicePreviewButton({
+  label,
+  loading,
+  onClick,
+}: {
+  label: string
+  loading?: boolean
+  onClick: () => void
+}) {
+  return (
+    <Button type="button" variant="outline" size="sm" onClick={onClick} disabled={loading} className="gap-2">
+      {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+      {label}
+    </Button>
+  )
+}
+
+async function fetchVoicePreview(body: Record<string, unknown>) {
+  const res = await fetch("/api/settings/voice-preview", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error ?? "Preview failed")
+  return data as { text: string; beginMessage: string; voiceSpeed: number; voiceSummary: string }
+}
+
 function LockedSection({ section }: { section: SettingsSection }) {
   const tier = SECTION_MIN_TIER[section]
   return (
@@ -451,8 +524,24 @@ function GreetingSection({
   saving: boolean
 }) {
   const [d, setD] = useState(value)
+  const [previewLoading, setPreviewLoading] = useState(false)
+  const [previewError, setPreviewError] = useState<string | null>(null)
   const showPremiumToggle = planType === PlanType.PRO
   const premiumIncluded = planType != null && hasPremiumElevenLabsVoice(planType, true)
+
+  const handlePreviewGreeting = async () => {
+    setPreviewLoading(true)
+    setPreviewError(null)
+    try {
+      const data = await fetchVoicePreview({ greeting: d, mode: "greeting" })
+      const played = playBrowserVoicePreview(data.text, data.voiceSpeed)
+      if (!played) setPreviewError("Browser speech preview is not available on this device.")
+    } catch (e) {
+      setPreviewError(e instanceof Error ? e.message : "Preview failed")
+    } finally {
+      setPreviewLoading(false)
+    }
+  }
   return (
     <Card>
       <CardHeader>
@@ -464,6 +553,8 @@ function GreetingSection({
           <Label>Business name pronunciation <span className="text-muted-foreground font-normal">(optional)</span></Label>
           <Input placeholder="e.g. 'Mc-Gee Plumming'" value={d.businessNamePronunciation ?? ""} onChange={(e) => setD({ ...d, businessNamePronunciation: e.target.value || null })} />
           <p className="text-xs text-muted-foreground">Phonetic spelling so your assistant says your name correctly.</p>
+          <VoicePreviewButton label="Preview pronunciation & greeting" loading={previewLoading} onClick={handlePreviewGreeting} />
+          {previewError && <p className="text-xs text-destructive">{previewError}</p>}
         </div>
         <div className="space-y-2">
           <Label>Custom greeting</Label>
@@ -519,10 +610,29 @@ function GreetingSection({
   )
 }
 
-function IntakeFieldsSection({ value, onSave, saving }: { value: IntakeFieldConfig; onSave: (v: IntakeFieldConfig) => void; saving: boolean }) {
-  const [d, setD] = useState(value)
-  const fields = Object.keys(d) as (keyof IntakeFieldConfig)[]
-  const labels: Record<keyof IntakeFieldConfig, string> = {
+function IntakeSection({
+  fields,
+  template,
+  canPickTemplate,
+  onSave,
+  saving,
+}: {
+  fields: IntakeFieldConfig
+  template: string | null
+  canPickTemplate: boolean
+  onSave: (fields: IntakeFieldConfig, template: IntakeTemplate | null) => void
+  saving: boolean
+}) {
+  const [d, setD] = useState(fields)
+  const [selectedTemplate, setSelectedTemplate] = useState<IntakeTemplate>((template as IntakeTemplate) ?? "generic")
+  const templateMeta = getIntakeTemplateMeta(selectedTemplate)
+
+  useEffect(() => {
+    setD(fields)
+    setSelectedTemplate((template as IntakeTemplate) ?? "generic")
+  }, [fields, template])
+
+  const fieldLabels: Record<keyof IntakeFieldConfig, string> = {
     name: "Caller Name",
     phone: "Phone Number",
     address: "Address",
@@ -532,28 +642,98 @@ function IntakeFieldsSection({ value, onSave, saving }: { value: IntakeFieldConf
     budgetRange: "Budget Range",
     appointmentPreference: "Appointment Preference",
   }
+
+  const applyTemplateDefaults = () => {
+    setD(getIntakeFieldsForTemplate(selectedTemplate))
+  }
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Intake Fields</CardTitle>
-        <CardDescription>Choose which fields your assistant collects. Mark as required or optional.</CardDescription>
+        <CardTitle>Intake</CardTitle>
+        <CardDescription>
+          Choose your business type and which fields your assistant collects. Industry types suggest defaults you can override.
+        </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-6">
+        {canPickTemplate ? (
+          <div className="space-y-3">
+            <Label>Business type</Label>
+            <div className="grid gap-2 sm:grid-cols-2">
+              {INTAKE_TEMPLATE_OPTIONS.map((t) => (
+                <label
+                  key={t.id}
+                  className={cn(
+                    "flex items-start gap-2 cursor-pointer rounded-lg border p-3 text-sm",
+                    selectedTemplate === t.id ? "border-primary bg-primary/5" : "border-border"
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="intake-template"
+                    checked={selectedTemplate === t.id}
+                    onChange={() => setSelectedTemplate(t.id)}
+                    className="mt-1"
+                  />
+                  <div>
+                    <span className="font-medium">{t.label}</span>
+                    <p className="text-xs text-muted-foreground mt-0.5">{t.description}</p>
+                  </div>
+                </label>
+              ))}
+            </div>
+            <Button type="button" size="sm" variant="outline" onClick={applyTemplateDefaults}>
+              Apply {templateMeta.label} field defaults
+            </Button>
+          </div>
+        ) : (
+          <div className="rounded-lg border border-dashed border-border bg-muted/20 p-3 text-sm text-muted-foreground">
+            Upgrade to Pro to pick an industry intake type and see recommended field presets.
+          </div>
+        )}
+
+        {templateMeta.industryFields.length > 0 && (
+          <div className="rounded-lg bg-muted/30 border border-border p-3 text-sm">
+            <p className="font-medium text-foreground mb-1">Also collected for {templateMeta.label}</p>
+            <ul className="list-disc list-inside text-muted-foreground text-xs space-y-0.5">
+              {templateMeta.industryFields.map((f) => (
+                <li key={f}>{f}</li>
+              ))}
+            </ul>
+            <p className="text-xs text-muted-foreground mt-2">Typical flow: {templateMeta.sampleSteps.join(" → ")}</p>
+          </div>
+        )}
+
         <div className="space-y-3">
-          {fields.map((f) => (
+          <Label>Field toggles</Label>
+          {(Object.keys(d) as (keyof IntakeFieldConfig)[]).map((f) => (
             <div key={f} className="flex items-center gap-4">
-              <input type="checkbox" checked={d[f].enabled} onChange={(e) => setD({ ...d, [f]: { ...d[f], enabled: e.target.checked } })} className="rounded" />
-              <span className="text-sm w-40">{labels[f]}</span>
+              <input
+                type="checkbox"
+                checked={d[f].enabled}
+                onChange={(e) => setD({ ...d, [f]: { ...d[f], enabled: e.target.checked } })}
+                className="rounded"
+              />
+              <span className="text-sm w-40">{fieldLabels[f]}</span>
               {d[f].enabled && (
                 <label className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <input type="checkbox" checked={d[f].required} onChange={(e) => setD({ ...d, [f]: { ...d[f], required: e.target.checked } })} className="rounded" />
+                  <input
+                    type="checkbox"
+                    checked={d[f].required}
+                    onChange={(e) => setD({ ...d, [f]: { ...d[f], required: e.target.checked } })}
+                    className="rounded"
+                  />
                   Required
                 </label>
               )}
             </div>
           ))}
         </div>
-        <SaveBtn saving={saving} onClick={() => onSave(d)} />
+
+        <SaveBtn
+          saving={saving}
+          onClick={() => onSave(d, canPickTemplate ? selectedTemplate : null)}
+        />
       </CardContent>
     </Card>
   )
@@ -969,15 +1149,20 @@ function MissedCallRecoverySection({ value, onSave, saving }: { value: MissedCal
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Missed Call Recovery</CardTitle>
-        <CardDescription>Auto-text callers when a call ends without full capture. Use [Business] for your business name.</CardDescription>
+        <CardTitle>Incomplete Call Text-Back</CardTitle>
+        <CardDescription>
+          When a call ends before your assistant captures enough info (or ends very quickly), send one SMS asking the caller to reply with missing details. Use [Business] for your business name.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Toggle label="Enable missed call text-back" checked={d.enabled} onChange={(v) => setD({ ...d, enabled: v })} />
+        <Toggle label="Text callers when intake is incomplete" checked={d.enabled} onChange={(v) => setD({ ...d, enabled: v })} />
         {d.enabled && (
           <div className="space-y-2">
-            <Label>SMS text-back message</Label>
+            <Label>SMS message</Label>
             <textarea className="w-full rounded border border-input bg-background px-3 py-2 text-sm min-h-[80px]" value={d.smsAutoReplyText} onChange={(e) => setD({ ...d, smsAutoReplyText: e.target.value })} />
+            <p className="text-xs text-muted-foreground">
+              If the caller replies, their text can be added to the lead record automatically.
+            </p>
           </div>
         )}
         <SaveBtn saving={saving} onClick={() => onSave(d)} />
@@ -1048,49 +1233,39 @@ function ReputationSection({ value, onSave, saving }: { value: ReputationSetting
 
 // ─── PRO SECTIONS ────────────────────────────────────────────────────────
 
-function IntakeTemplateSection({ value, onSave, saving }: { value: string | null; onSave: (v: string | null) => void; saving: boolean }) {
-  const [d, setD] = useState(value ?? "generic")
-  const templates = [
-    { id: "hvac", label: "HVAC" },
-    { id: "plumbing", label: "Plumbing" },
-    { id: "auto_repair", label: "Auto Repair" },
-    { id: "childcare", label: "Childcare" },
-    { id: "electrician", label: "Electrician" },
-    { id: "handyman", label: "Handyman" },
-    { id: "generic", label: "Generic Booking" },
+function QuestionDepthSection({ value, onSave, saving }: { value: QuestionDepth; onSave: (v: QuestionDepth) => void; saving: boolean }) {
+  const [d, setD] = useState(value)
+  const options: { id: QuestionDepth; label: string; description: string }[] = [
+    {
+      id: "fast",
+      label: "Fast capture",
+      description: "Name, callback number, and a clear reason — minimal questions.",
+    },
+    {
+      id: "standard",
+      label: "Standard intake",
+      description: "Standard trade intake: enough detail for a useful callback summary.",
+    },
+    {
+      id: "deep",
+      label: "Deep intake",
+      description: "Extra follow-ups on scope, urgency, and context before wrapping up.",
+    },
   ]
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Intake Templates</CardTitle>
-        <CardDescription>Choose an industry-optimized intake flow.</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {templates.map((t) => (
-          <label key={t.id} className="flex items-center gap-2 text-sm">
-            <input type="radio" name="template" checked={d === t.id} onChange={() => setD(t.id)} className="rounded-full" />
-            {t.label}
-          </label>
-        ))}
-        <SaveBtn saving={saving} onClick={() => onSave(d)} />
-      </CardContent>
-    </Card>
-  )
-}
-
-function QuestionDepthSection({ value, onSave, saving }: { value: QuestionDepth; onSave: (v: QuestionDepth) => void; saving: boolean }) {
-  const [d, setD] = useState(value)
-  return (
-    <Card>
-      <CardHeader>
         <CardTitle>Question Depth</CardTitle>
-        <CardDescription>How thorough your assistant is during intake.</CardDescription>
+        <CardDescription>How thorough your assistant is when collecting caller details.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {(["fast", "standard", "deep"] as QuestionDepth[]).map((q) => (
-          <label key={q} className="flex items-center gap-2 text-sm capitalize">
-            <input type="radio" name="depth" checked={d === q} onChange={() => setD(q)} className="rounded-full" />
-            {q === "fast" ? "Fast capture (3 questions)" : q === "standard" ? "Standard intake" : "Deep intake"}
+      <CardContent className="space-y-4">
+        {options.map((opt) => (
+          <label key={opt.id} className="flex items-start gap-3 cursor-pointer rounded-lg border border-border p-3">
+            <input type="radio" name="depth" checked={d === opt.id} onChange={() => setD(opt.id)} className="mt-1 rounded-full" />
+            <div>
+              <span className="text-sm font-medium">{opt.label}</span>
+              <p className="text-xs text-muted-foreground mt-0.5">{opt.description}</p>
+            </div>
           </label>
         ))}
         <SaveBtn saving={saving} onClick={() => onSave(d)} />
@@ -1099,8 +1274,19 @@ function QuestionDepthSection({ value, onSave, saving }: { value: QuestionDepth;
   )
 }
 
-function BookingSection({ value, onSave, saving }: { value: BookingSettings; onSave: (v: BookingSettings) => void; saving: boolean }) {
+function BookingSection({
+  value,
+  capacity,
+  onSave,
+  saving,
+}: {
+  value: BookingSettings
+  capacity: CapacitySettings
+  onSave: (booking: BookingSettings, capacity: CapacitySettings) => void
+  saving: boolean
+}) {
   const [d, setD] = useState(value)
+  const [cap, setCap] = useState(capacity)
   const [newJobType, setNewJobType] = useState("")
   const [newJobMinutes, setNewJobMinutes] = useState("")
   const rules = d.serviceTimeByJobType ?? []
@@ -1167,7 +1353,96 @@ function BookingSection({ value, onSave, saving }: { value: BookingSettings; onS
             <Toggle label="Emergency override (bypass rules)" checked={d.emergencyOverride} onChange={(v) => setD({ ...d, emergencyOverride: v })} />
           </>
         )}
-        <SaveBtn saving={saving} onClick={() => onSave(d)} />
+
+        <div className="rounded-lg border border-border p-4 space-y-4 mt-6">
+          <div>
+            <h4 className="text-sm font-medium">Capacity limits</h4>
+            <p className="text-xs text-muted-foreground mt-1">
+              Optional daily caps in your business timezone. When exceeded, new inbound calls use your high-volume or decline behavior.
+            </p>
+          </div>
+          <Toggle label="Enable daily capacity limits" checked={cap.enabled} onChange={(v) => setCap({ ...cap, enabled: v })} />
+          {cap.enabled && (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Max new leads per day (optional)</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    placeholder="No limit"
+                    value={cap.maxLeadsPerDay ?? ""}
+                    onChange={(e) =>
+                      setCap({
+                        ...cap,
+                        maxLeadsPerDay: e.target.value ? parseInt(e.target.value, 10) || null : null,
+                      })
+                    }
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Max appointments per day (optional)</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    placeholder="No limit"
+                    value={cap.maxAppointmentsPerDay ?? ""}
+                    onChange={(e) =>
+                      setCap({
+                        ...cap,
+                        maxAppointmentsPerDay: e.target.value ? parseInt(e.target.value, 10) || null : null,
+                      })
+                    }
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>When limit is reached</Label>
+                <select
+                  className="w-full rounded border border-input bg-background px-3 py-2 text-sm"
+                  value={cap.overLimitMode}
+                  onChange={(e) => setCap({ ...cap, overLimitMode: e.target.value as CapacitySettings["overLimitMode"] })}
+                >
+                  <option value="intake_only">High volume — still capture info, no booking promises</option>
+                  <option value="decline">Decline new jobs — brief message and optional SMS</option>
+                </select>
+              </div>
+              {cap.overLimitMode === "intake_only" && (
+                <div className="space-y-2">
+                  <Label>High-volume greeting</Label>
+                  <textarea
+                    className="w-full rounded border border-input bg-background px-3 py-2 text-sm min-h-[60px]"
+                    value={cap.highVolumeGreeting ?? ""}
+                    onChange={(e) => setCap({ ...cap, highVolumeGreeting: e.target.value || null })}
+                  />
+                  <p className="text-xs text-muted-foreground">Use [business] for your business name.</p>
+                </div>
+              )}
+              {cap.overLimitMode === "decline" && (
+                <>
+                  <div className="space-y-2">
+                    <Label>Decline greeting (spoken)</Label>
+                    <textarea
+                      className="w-full rounded border border-input bg-background px-3 py-2 text-sm min-h-[60px]"
+                      value={cap.declineGreeting ?? ""}
+                      onChange={(e) => setCap({ ...cap, declineGreeting: e.target.value || null })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Decline SMS (optional)</Label>
+                    <textarea
+                      className="w-full rounded border border-input bg-background px-3 py-2 text-sm min-h-[60px]"
+                      value={cap.declineSms ?? ""}
+                      onChange={(e) => setCap({ ...cap, declineSms: e.target.value || null })}
+                    />
+                  </div>
+                </>
+              )}
+            </>
+          )}
+        </div>
+
+        <SaveBtn saving={saving} onClick={() => onSave(d, cap)} />
       </CardContent>
     </Card>
   )
@@ -1303,27 +1578,84 @@ function CrmSection({ value, onSave, saving }: { value: CrmSettings; onSave: (v:
 
 // ─── LOCAL PLUS SECTIONS ─────────────────────────────────────────────────
 
-function DepartmentsSection({ value, onSave, saving }: { value: any[]; onSave: (v: any[]) => void; saving: boolean }) {
+function DepartmentsSection({ value, onSave, saving }: { value: DepartmentConfig[]; onSave: (v: DepartmentConfig[]) => void; saving: boolean }) {
   const [d, setD] = useState(value || [])
-  const addDept = () => setD([...d, { name: "", greeting: null, intakeQuestions: [], notificationTargets: [] }])
+  const maxDepartments = 6
+  const addDept = () => {
+    if (d.length >= maxDepartments) return
+    setD([...d, { name: "", greeting: null, intakeQuestions: [], notificationTargets: [] }])
+  }
   return (
     <Card>
       <CardHeader>
         <CardTitle>Departments</CardTitle>
-        <CardDescription>Route callers to specific departments with custom greetings.</CardDescription>
+        <CardDescription>
+          When a caller asks for Sales, Service, or another department by name, your assistant uses the greeting below and tags the lead.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {d.map((dept: any, i: number) => (
-          <div key={i} className="border rounded p-3 space-y-2">
+        <div className="rounded-lg border border-border bg-muted/30 p-4 text-sm text-muted-foreground space-y-2">
+          <p className="font-medium text-foreground">Example</p>
+          <p>
+            Caller: &quot;I need to talk to your service department.&quot;
+            <br />
+            Assistant: uses your Service greeting, captures their details, and notes &quot;Service&quot; on the lead.
+          </p>
+        </div>
+        {d.length === 0 && (
+          <p className="text-sm text-muted-foreground">No departments yet. Add one if callers often ask for a specific team.</p>
+        )}
+        {d.map((dept, i) => (
+          <div key={i} className="border rounded-lg p-4 space-y-3">
             <div className="flex gap-2 items-center">
-              <Input placeholder="Department name" value={dept.name} onChange={(e) => { const n = [...d]; n[i] = { ...dept, name: e.target.value }; setD(n) }} />
-              <Button size="sm" variant="destructive" onClick={() => setD(d.filter((_: any, j: number) => j !== i))}>Remove</Button>
+              <Input
+                placeholder="Department name (e.g. Sales, Service)"
+                value={dept.name}
+                onChange={(e) => {
+                  const n = [...d]
+                  n[i] = { ...dept, name: e.target.value }
+                  setD(n)
+                }}
+              />
+              <Button size="sm" variant="destructive" onClick={() => setD(d.filter((_, j) => j !== i))}>
+                Remove
+              </Button>
             </div>
-            <Input placeholder="Custom greeting (optional)" value={dept.greeting ?? ""} onChange={(e) => { const n = [...d]; n[i] = { ...dept, greeting: e.target.value || null }; setD(n) }} />
-            <Input placeholder="Notification emails/phones (comma-separated)" value={(dept.notificationTargets || []).join(", ")} onChange={(e) => { const n = [...d]; n[i] = { ...dept, notificationTargets: e.target.value.split(",").map((s: string) => s.trim()).filter(Boolean) }; setD(n) }} />
+            <div className="space-y-2">
+              <Label>Greeting when this department is requested (optional)</Label>
+              <Input
+                placeholder={`Thanks for calling — you're reaching ${dept.name || "this department"}. How can I help?`}
+                value={dept.greeting ?? ""}
+                onChange={(e) => {
+                  const n = [...d]
+                  n[i] = { ...dept, greeting: e.target.value || null }
+                  setD(n)
+                }}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Alert these emails or phones when this department gets a lead</Label>
+              <Input
+                placeholder="owner@example.com, +15551234567"
+                value={(dept.notificationTargets || []).join(", ")}
+                onChange={(e) => {
+                  const n = [...d]
+                  n[i] = {
+                    ...dept,
+                    notificationTargets: e.target.value
+                      .split(",")
+                      .map((s) => s.trim())
+                      .filter(Boolean),
+                  }
+                  setD(n)
+                }}
+              />
+            </div>
           </div>
         ))}
-        <Button size="sm" variant="outline" onClick={addDept}>Add department</Button>
+        <Button size="sm" variant="outline" onClick={addDept} disabled={d.length >= maxDepartments}>
+          Add department{d.length >= maxDepartments ? " (limit reached)" : ""}
+        </Button>
         <SaveBtn saving={saving} onClick={() => onSave(d)} />
       </CardContent>
     </Card>
@@ -1332,6 +1664,23 @@ function DepartmentsSection({ value, onSave, saving }: { value: any[]; onSave: (
 
 function VoiceBrandSection({ value, onSave, saving }: { value: VoiceBrandSettings; onSave: (v: VoiceBrandSettings) => void; saving: boolean }) {
   const [d, setD] = useState(value)
+  const [previewLoading, setPreviewLoading] = useState(false)
+  const [previewError, setPreviewError] = useState<string | null>(null)
+
+  const handlePreviewVoice = async () => {
+    setPreviewLoading(true)
+    setPreviewError(null)
+    try {
+      const data = await fetchVoicePreview({ voiceBrand: d, mode: "voice" })
+      const played = playBrowserVoicePreview(data.text, data.voiceSpeed)
+      if (!played) setPreviewError("Browser speech preview is not available on this device.")
+    } catch (e) {
+      setPreviewError(e instanceof Error ? e.message : "Preview failed")
+    } finally {
+      setPreviewLoading(false)
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -1339,6 +1688,10 @@ function VoiceBrandSection({ value, onSave, saving }: { value: VoiceBrandSetting
         <CardDescription>Fine-tune voice and personality.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <VoicePreviewButton label="Preview voice tone" loading={previewLoading} onClick={handlePreviewVoice} />
+          {previewError && <p className="text-xs text-destructive">{previewError}</p>}
+        </div>
         <Slider label="Speed" value={d.speed} onChange={(v) => setD({ ...d, speed: v })} />
         <Slider label="Warmth" value={d.warmth} onChange={(v) => setD({ ...d, warmth: v })} />
         <Slider label="Conciseness" value={d.conciseness} onChange={(v) => setD({ ...d, conciseness: v })} />
@@ -1374,8 +1727,14 @@ function AiBehaviorSection({ value, onSave, saving }: { value: AiBehaviorSetting
         <div className="space-y-2">
           <Label>Question retry count</Label>
           <Input type="number" min={0} max={5} value={d.questionRetryCount} onChange={(e) => setD({ ...d, questionRetryCount: parseInt(e.target.value) || 0 })} />
+          <p className="text-xs text-muted-foreground">How many times the assistant may re-ask if an answer is unclear.</p>
         </div>
-        <Toggle label="Escalate to human after retries" checked={d.escalateToHumanAfterRetries} onChange={(v) => setD({ ...d, escalateToHumanAfterRetries: v })} />
+        <Toggle
+          label="Escalate to human after retries"
+          checked={d.escalateToHumanAfterRetries}
+          onChange={(v) => setD({ ...d, escalateToHumanAfterRetries: v })}
+          description="After retries are used up, the assistant stops probing, summarizes what it captured, tells the caller someone will follow up, and ends the call. It does not live-transfer unless Emergency Forward is enabled in Call Routing."
+        />
         <SaveBtn saving={saving} onClick={() => onSave(d)} />
       </CardContent>
     </Card>

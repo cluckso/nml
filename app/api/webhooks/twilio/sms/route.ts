@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import twilio from "twilio"
+import { mergeIncompleteTextBackReply } from "@/lib/incomplete-text-back-merge"
 
 /**
  * POST /api/webhooks/twilio/sms
@@ -39,7 +40,8 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData()
     const from = formData.get("From")?.toString()?.trim() || ""
-    const body = formData.get("Body")?.toString()?.trim().toUpperCase() || ""
+    const rawBody = formData.get("Body")?.toString()?.trim() || ""
+    const body = rawBody.toUpperCase()
 
     if (!from) {
       return twimlResponse("")
@@ -68,6 +70,15 @@ export async function POST(req: NextRequest) {
       return twimlResponse(
         "CallGrabbr: Call alerts & lead notifications. Reply STOP to opt out. Msg & data rates may apply. For help, visit callgrabbr.com or email support."
       )
+    }
+
+    try {
+      const mergeReply = await mergeIncompleteTextBackReply(from, rawBody)
+      if (mergeReply) {
+        return twimlResponse(mergeReply)
+      }
+    } catch (error) {
+      console.error("Incomplete text-back SMS merge error:", error)
     }
 
     // Unknown keyword — no auto-response (avoid unintended messaging costs)

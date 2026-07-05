@@ -7,6 +7,7 @@ import {
   ringDurationMsForRetellAgent,
 } from "./call-routing"
 import type { BusinessSettings, QuestionDepth } from "./business-settings"
+import { buildIntakeTemplateGuidance } from "./intake-presets"
 
 /** Map strictness slider (0=conversational, 1=strict script) to prompt guidance. */
 export function buildStrictnessGuidance(strictness: number): string {
@@ -51,12 +52,17 @@ export function computeModelTemperature(
   voiceBaseTemperature: number
 ): number {
   if (brandedVoice) {
-    const base = 0.45 + (1 - strictness) * 0.2 + warmth * 0.12
+    const base = 0.48 + (1 - strictness) * 0.2 + warmth * 0.12
     const concisenessAdjust = (conciseness - 0.5) * 0.08
     return Math.round(Math.min(1, Math.max(0.35, base + concisenessAdjust)) * 100) / 100
   }
-  const base = 0.52 + (1 - strictness) * 0.12 + warmth * 0.06
+  const base = 0.55 + (1 - strictness) * 0.12 + warmth * 0.06
   return Math.round(Math.min(1, Math.max(0.4, base)) * 100) / 100
+}
+
+export type BuildAgentOverrideOptions = {
+  capacityMode?: "normal" | "intake_only" | "decline"
+  beginMessageOverride?: string
 }
 
 /**
@@ -68,7 +74,8 @@ export function buildAgentOverride(
   businessName: string,
   serviceAreas: string | string[],
   planType?: PlanType | null,
-  at: Date = new Date()
+  at: Date = new Date(),
+  options?: BuildAgentOverrideOptions
 ): {
   agentOverride: {
     agent?: Record<string, unknown>
@@ -87,9 +94,22 @@ export function buildAgentOverride(
   const warmth = settings.voiceBrand.warmth ?? 0.7
   const conciseness = settings.voiceBrand.conciseness ?? 0.5
 
-  const beginMessage = settings.greeting.customGreeting
-    ? settings.greeting.customGreeting.replace(/\[business\]/gi, businessName)
-    : `Hi, thanks for calling ${businessName}! Who am I speaking with today?`
+  const beginMessage = options?.beginMessageOverride
+    ? options.beginMessageOverride
+    : settings.greeting.customGreeting
+      ? settings.greeting.customGreeting.replace(/\[business\]/gi, businessName)
+      : `Hi, thanks for calling ${businessName}! Who am I speaking with today?`
+
+  const capacityMode = options?.capacityMode ?? "normal"
+  const departmentsJson = JSON.stringify(
+    (settings.departments ?? [])
+      .filter((d) => d.name?.trim())
+      .map((d) => ({
+        name: d.name.trim(),
+        greeting: d.greeting,
+        intakeQuestions: d.intakeQuestions ?? [],
+      }))
+  )
 
   const strictnessGuidance = buildStrictnessGuidance(strictness)
   const warmthGuidance = buildWarmthGuidance(warmth)
@@ -113,6 +133,7 @@ export function buildAgentOverride(
     voice_gender: settings.greeting.voiceGender ?? "",
     intake_fields: JSON.stringify(settings.intakeFields),
     intake_template: settings.intakeTemplate ?? "generic",
+    intake_template_guidance: buildIntakeTemplateGuidance(settings.intakeTemplate),
     booking_ask_appointment: String(settings.booking.askForAppointment),
     booking_only_offer_when_asked: String(settings.booking.onlyOfferWhenAsked ?? true),
     booking_default_minutes: String(settings.booking.defaultAppointmentMinutes ?? 60),
@@ -135,6 +156,8 @@ export function buildAgentOverride(
     emergency_forward: String(settings.callRouting.emergencyForward),
     emergency_forward_number: settings.callRouting.emergencyForwardNumber ?? "",
     spam_handling: settings.callRouting.spamHandling,
+    capacity_mode: capacityMode,
+    departments_json: departmentsJson,
   }
 
   const effectiveRingProfile = resolveEffectiveRingDelayProfile(

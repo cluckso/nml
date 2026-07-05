@@ -9,7 +9,7 @@ import { updateDemoAgentFlow } from "../lib/retell"
 
 async function main() {
   await updateDemoAgentFlow()
-  console.log("Done. Demo agent flow updated (natural name usage, single confirmation, polite end).")
+  console.log("Done. Demo agent flow updated (warm receptionist tone, single confirmation, no name spam).")
 }
 
 main().catch((e) => {

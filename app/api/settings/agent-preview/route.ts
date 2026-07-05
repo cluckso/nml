@@ -51,6 +51,7 @@ export async function GET(req: NextRequest) {
         strictnessGuidance: dynamicVars.strictness_guidance,
         warmthGuidance: dynamicVars.warmth_guidance,
         questionDepthGuidance: dynamicVars.question_depth_guidance,
+        beginMessage,
         modelTemperature: agentOverride.conversation_flow?.model_temperature,
         interruptionSensitivity: agentOverride.agent?.interruption_sensitivity,
       },

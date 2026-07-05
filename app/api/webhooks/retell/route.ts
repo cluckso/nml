@@ -22,6 +22,7 @@ import { getAgentIdForInbound, getAgentIdForIndustry } from "@/lib/intake-routin
 import { ClientStatus } from "@prisma/client"
 import { mergeWithDefaults, DEFAULT_SETTINGS, type BusinessSettings } from "@/lib/business-settings"
 import { buildAgentOverride } from "@/lib/agent-override"
+import { evaluateCapacity, resolveCapacityGreeting } from "@/lib/capacity-limits"
 import { hasActionableInfo, isLikelySpam, isKnownSpamOrTestNumber } from "@/lib/call-filter"
 import { parseAppointmentRequest } from "@/lib/appointments"
 import { isSpamByTwilioLookup } from "@/lib/twilio-lookup"
@@ -121,26 +122,13 @@ export async function POST(req: NextRequest) {
       const demoAgentId = process.env.RETELL_DEMO_AGENT_ID
 
       if (isDemoNumber && demoAgentId) {
+        // No begin_message or Name/name dynamic vars — welcome node prompt varies
+        // naturally, and business-name aliases would collide with the caller's name.
         console.info("Retell inbound: demo call, routing to demo agent", { to_number: toNumber })
-        const demoSettings = mergeWithDefaults({
-          greeting: {
-            ...DEFAULT_SETTINGS.greeting,
-            customGreeting:
-              "Hi, thanks for calling — you've reached the CallGrabbr demo. I'll take your information so our team can follow up, just like a real business would. Who am I speaking with?",
-          },
-        } satisfies Partial<BusinessSettings>)
-        const { agentOverride, dynamicVars } = buildAgentOverride(
-          demoSettings,
-          "CallGrabbr",
-          [],
-          null
-        )
         return NextResponse.json({
           call_inbound: {
             override_agent_id: demoAgentId,
             metadata: { demo_call: true },
-            dynamic_variables: dynamicVars,
-            agent_override: agentOverride,
           },
         })
       }
@@ -223,12 +211,31 @@ export async function POST(req: NextRequest) {
         ? (client as { serviceAreas: string[] }).serviceAreas
         : []
 
+      const capacityEval = await evaluateCapacity(settings, client.id)
+      const capacityMode = capacityEval.overLimit ? capacityEval.mode : "normal"
+      const beginMessageOverride =
+        capacityEval.overLimit && capacityMode !== "normal"
+          ? resolveCapacityGreeting(
+              settings.capacity,
+              businessName,
+              capacityMode as "intake_only" | "decline"
+            )
+          : undefined
+
       const { agentOverride, dynamicVars, ringDurationMs } = buildAgentOverride(
         settings,
         businessName,
         serviceAreas,
-        getEffectivePlanType((client as { planType?: import("@prisma/client").PlanType }).planType)
+        getEffectivePlanType((client as { planType?: import("@prisma/client").PlanType }).planType),
+        new Date(),
+        {
+          capacityMode: capacityMode as "normal" | "intake_only" | "decline",
+          beginMessageOverride,
+        }
       )
+      if (capacityEval.overLimit) {
+        console.info("Retell call_inbound: capacity limit reached", capacityEval.reason, "mode:", capacityMode)
+      }
       if (ringDurationMs > 0) {
         console.info("Retell call_inbound: ring delay", ringDurationMs, "ms from call routing settings")
       } else {
@@ -245,6 +252,8 @@ export async function POST(req: NextRequest) {
             tone: settings.greeting.tone,
             question_depth: settings.questionDepth,
             after_hours_behavior: settings.availability.afterHoursBehavior,
+            capacity_mode: capacityMode,
+            capacity_over_limit: String(capacityEval.overLimit),
           },
           dynamic_variables: dynamicVars,
           agent_override: agentOverride,
@@ -318,7 +327,12 @@ interface RetellCallWebhookEvent {
     start_timestamp?: number
     end_timestamp?: number
     transcript?: string
-    metadata?: { client_id?: string; forwarded_from_number?: string }
+    metadata?: {
+      client_id?: string
+      forwarded_from_number?: string
+      capacity_mode?: string
+      capacity_over_limit?: string
+    }
     call_analysis?: RetellCallAnalysis
   }
   call_analysis?: RetellCallAnalysis
@@ -720,12 +734,39 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
       }
     }
 
+    // Capacity decline SMS: sent when inbound was over limit in decline mode
+    const capacityMode = metadata?.capacity_mode
+    const capacityDeclineSmsSent =
+      (call as { capacityDeclineSmsSent?: boolean }).capacityDeclineSmsSent === true
+    const shouldSendCapacityDeclineSms =
+      !isDemoCall &&
+      callerPhone &&
+      !capacityDeclineSmsSent &&
+      capacityMode === "decline" &&
+      callSettings.capacity?.enabled &&
+      callSettings.capacity.declineSms?.trim()
+
+    if (shouldSendCapacityDeclineSms) {
+      try {
+        const text = callSettings.capacity.declineSms!.replace(/\[business\]/gi, business.name)
+        await sendMissedCallTextBack(business, callerPhone, text)
+        await db.call.update({
+          where: { id: call.id },
+          data: { capacityDeclineSmsSent: true } as any,
+        })
+      } catch (error) {
+        console.error("Capacity decline SMS error:", error)
+      }
+    }
+
     // Missed call text-back: short calls or calls without full analysis
     const textBackSent = (call as { missedCallTextBackSent?: boolean }).missedCallTextBackSent === true
     const shouldTextBack =
       !isDemoCall &&
       callerPhone &&
       !textBackSent &&
+      !capacityDeclineSmsSent &&
+      capacityMode !== "decline" &&
       callSettings.missedCallRecovery.enabled &&
       (missedCallRecovery || (!hasInfo && call.duration < 60))
 

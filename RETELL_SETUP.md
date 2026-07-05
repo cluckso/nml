@@ -137,7 +137,7 @@ You can **create one Retell agent per industry via the API** so that prompts and
 
 **Variable reference**
 
-- Single source of truth: **`lib/retell-agent-template.ts`** (`RETELL_DYNAMIC_VARIABLE_NAMES`, `RETELL_GLOBAL_PROMPT_TEMPLATE`).
+- Single source of truth: **`lib/receptionist-prompt.ts`** (sectional global prompt) and **`lib/retell-agent-template.ts`** (`RETELL_DYNAMIC_VARIABLE_NAMES`, `RECEPTIONIST_HANDBOOK_CONFIG`, voice defaults).
 - The webhook in `app/api/webhooks/retell/route.ts` sends the same variable names in `dynamic_variables` on every `call_inbound`. Use **double curly braces** in Retell prompts: `{{business_name}}`, `{{tone}}`, `{{service_areas}}`, etc.
 
 **How to run**
@@ -182,14 +182,28 @@ So: **Retell does not pull or forward calls by itself.** Either callers dial a n
 
 ---
 
-## 7. Voices
+## 7. Voices and Agent Handbook
 
-The app uses:
+**Voices** (see `lib/retell-agent-template.ts`):
 
-- **11labs-Chloe** (default)
-- **11labs-Adam** (for “Local Plus” / branded voice)
+- **Standard tier (Solo / Pro default):** Cartesia `cartesia-Emily` / `cartesia-Nico` — speed 0.92, temperature 0.90
+- **Premium tier (Elite or Pro + premiumVoice):** ElevenLabs `11labs-Chloe` / `11labs-Ethan` — speed 0.90, temperature 0.92
+- **Interruption sensitivity:** 0.68 (better barge-in on all tiers)
 
-These are Retell voice IDs. They’re usually available by default in Retell. If your account doesn’t have them, check Retell Dashboard → **Voices** (or equivalent) and either enable 11labs voices or change the voice IDs in `lib/retell.ts` to ones your account supports.
+**Agent Handbook** (applied on every create/update via `RECEPTIONIST_HANDBOOK_CONFIG`):
+
+- Enabled: conversational personality, high empathy, speech normalization, echo verification, smart matching, scope boundaries
+- Disabled: natural filler words, AI disclosure, default call-center personality
+
+After changing prompts or flows in code, run:
+
+```bash
+npx tsx scripts/sync-retell-agents.ts
+npx tsx scripts/update-demo-flow.ts
+npx tsx scripts/update-steve-flow.ts
+```
+
+Per-business dedicated agents also sync when the owner saves **Settings** (if `retellAgentId` is set).
 
 ---
 

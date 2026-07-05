@@ -176,6 +176,8 @@ model Call {
   missedCallRecovery    Boolean   @default(false) // True if call ended early but we captured partial info
   notificationSent       Boolean   @default(false) // True after email/SMS summary sent (once per call)
   missedCallTextBackSent Boolean   @default(false) // True after missed-call SMS sent to caller
+  capacityDeclineSmsSent Boolean  @default(false) // True after capacity-decline SMS sent to caller
+  incompleteTextBackReplyAt DateTime? // When caller replied to incomplete-call text-back SMS
   callerConfirmationSentAt DateTime? // When immediate confirmation SMS was sent to caller
   followUpSentAt        DateTime? // When 24hr follow-up SMS was sent to caller
   createdAt             DateTime  @default(now())

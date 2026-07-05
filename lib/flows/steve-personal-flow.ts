@@ -1,10 +1,14 @@
 import { STEVE_PERSONAL_AGENT_CONFIG } from "@/config/steve-personal-agent"
 import {
   FLOW_ACKNOWLEDGE,
+  FLOW_COLLECT_PHONE,
   FLOW_CONFIRM_EDGE,
   FLOW_CONFIRM_ONCE,
+  FLOW_EMPATHY_PRIORITY,
   FLOW_END_POLITE,
-  FLOW_NAME_USAGE,
+  TRANSITION_NAME_PROVIDED,
+  TRANSITION_PHONE_PROVIDED,
+  withGlobalNodes,
 } from "@/lib/conversation-flow-instructions"
 
 export const STEVE_EXTRACT_MESSAGE_TOOL = {
@@ -61,7 +65,7 @@ function followUpNode(id: string, type: keyof typeof TYPE_FOLLOWUP) {
         destination_node_id: needsUrgent ? "check-urgency" : "collect-phone",
         transition_condition: {
           type: "prompt" as const,
-          prompt: needsUrgent ? "User explained reason with enough detail" : "User provided enough detail",
+          prompt: needsUrgent ? "Caller explained reason with enough detail" : "Caller provided enough detail",
         },
       },
     ],
@@ -80,7 +84,7 @@ export function buildStevePersonalConversationFlow(): {
   return {
     start_node_id: "start-node",
     start_speaker: "agent",
-    nodes: [
+    nodes: withGlobalNodes([
       {
         id: "start-node",
         type: "conversation",
@@ -93,7 +97,7 @@ export function buildStevePersonalConversationFlow(): {
           {
             id: "edge-1",
             destination_node_id: "collect-type",
-            transition_condition: { type: "prompt", prompt: "User provided name" },
+            transition_condition: { type: "prompt", prompt: TRANSITION_NAME_PROVIDED },
           },
         ],
         start_speaker: "agent",
@@ -104,7 +108,7 @@ export function buildStevePersonalConversationFlow(): {
         name: "Caller Type",
         instruction: {
           type: "prompt",
-          text: `${FLOW_ACKNOWLEDGE} Are you calling as a store employee, a customer, a vendor or delivery driver, about a job application, from corporate or district, or something else? ${FLOW_NAME_USAGE}`,
+          text: `${FLOW_ACKNOWLEDGE} Ask whether they're calling as a store employee, a customer, a vendor or delivery driver, about a job application, from corporate or district, or something else.`,
         },
         edges: [
           { id: "edge-t-employee", destination_node_id: "followup-employee", transition_condition: { type: "prompt", prompt: "Employee or store staff" } },
@@ -127,7 +131,7 @@ export function buildStevePersonalConversationFlow(): {
         name: "Check Urgency",
         instruction: {
           type: "prompt",
-          text: `${FLOW_ACKNOWLEDGE} Is this urgent — like equipment down, a safety issue, or trouble opening or staffing the store? If yes, I'll flag it as priority for Steve.`,
+          text: `${FLOW_ACKNOWLEDGE} Is this urgent — like equipment down, a safety issue, or trouble opening or staffing the store? If yes, flag it as priority for Steve.`,
         },
         edges: [
           {
@@ -148,7 +152,7 @@ export function buildStevePersonalConversationFlow(): {
         name: "Priority Note",
         instruction: {
           type: "prompt",
-          text: "Acknowledge briefly that this is priority and Steve will be notified as soon as possible. Ask one short question only if you still need a critical detail.",
+          text: FLOW_EMPATHY_PRIORITY.replace("the team", "Steve"),
         },
         edges: [
           {
@@ -164,13 +168,13 @@ export function buildStevePersonalConversationFlow(): {
         name: "Collect Phone",
         instruction: {
           type: "prompt",
-          text: `${FLOW_ACKNOWLEDGE} What's the best number for Steve to call you back? If the number you're calling from works, they can say so.`,
+          text: FLOW_COLLECT_PHONE.replace("the team", "Steve"),
         },
         edges: [
           {
             id: "edge-phone",
             destination_node_id: "save-lead",
-            transition_condition: { type: "prompt", prompt: "User provided phone or confirmed calling number" },
+            transition_condition: { type: "prompt", prompt: TRANSITION_PHONE_PROVIDED },
           },
         ],
       },
@@ -211,6 +215,6 @@ export function buildStevePersonalConversationFlow(): {
           text: FLOW_END_POLITE(endLabel),
         },
       },
-    ],
+    ]),
   }
 }

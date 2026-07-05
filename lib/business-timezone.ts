@@ -74,3 +74,20 @@ export function getZonedWallClock(at: Date, timeZone: string): ZonedWallClock {
     minutesSinceMidnight: hour * 60 + minute,
   }
 }
+
+/** UTC instants for start/end of the business calendar day containing `at`. */
+export function getZonedDayUtcBounds(at: Date, timeZone: string): { start: Date; end: Date } {
+  const tz = normalizeBusinessTimezone(timeZone)
+  const { dateKey } = getZonedWallClock(at, tz)
+  const probe = new Date(`${dateKey}T12:00:00.000Z`)
+  let start = probe
+  for (let i = -36; i <= 36; i++) {
+    const candidate = new Date(probe.getTime() + i * 3_600_000)
+    const wall = getZonedWallClock(candidate, tz)
+    if (wall.dateKey === dateKey && wall.minutesSinceMidnight === 0) {
+      start = candidate
+      break
+    }
+  }
+  return { start, end: new Date(start.getTime() + 86_400_000) }
+}

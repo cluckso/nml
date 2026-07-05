@@ -112,6 +112,17 @@ export interface BookingSettings {
   serviceTimeByJobType: ServiceTimeRule[]
 }
 
+/** Optional daily caps to avoid overbooking / overload — Pro+ */
+export interface CapacitySettings {
+  enabled: boolean
+  maxLeadsPerDay: number | null
+  maxAppointmentsPerDay: number | null
+  overLimitMode: "intake_only" | "decline"
+  highVolumeGreeting: string | null
+  declineGreeting: string | null
+  declineSms: string | null
+}
+
 /** Lead tag config — Pro+ */
 export interface LeadTagSettings {
   customTags: string[] // e.g. ["emergency", "estimate", "follow_up", "warranty", "maintenance", "new_install"]
@@ -178,6 +189,7 @@ export interface BusinessSettings {
   intakeTemplate: IntakeTemplate | null
   questionDepth: QuestionDepth
   booking: BookingSettings
+  capacity: CapacitySettings
   leadTags: LeadTagSettings
   crm: CrmSettings
   // Local Plus
@@ -226,7 +238,8 @@ export const DEFAULT_SETTINGS: BusinessSettings = {
   callRouting: { ...DEFAULT_CALL_ROUTING },
   missedCallRecovery: {
     enabled: true,
-    smsAutoReplyText: "Sorry we missed you! We'll call back shortly. Need urgent help? Reply URGENT.",
+    smsAutoReplyText:
+      "Hi — thanks for calling [Business]. We didn't get all your details on the call. Reply with your name, callback number, and what you need help with. Reply STOP to opt out.",
   },
   followUpSms: {
     enabled: true,
@@ -260,6 +273,18 @@ export const DEFAULT_SETTINGS: BusinessSettings = {
       { jobType: "evaluation", minutes: 30 },
     ],
   },
+  capacity: {
+    enabled: false,
+    maxLeadsPerDay: null,
+    maxAppointmentsPerDay: null,
+    overLimitMode: "intake_only",
+    highVolumeGreeting:
+      "Thanks for calling [business]. We're handling a high volume of calls right now, but I can still take your information and have someone follow up with you.",
+    declineGreeting:
+      "Thanks for calling [business]. We're at capacity for new jobs today. I can take a brief message, or you're welcome to call back tomorrow.",
+    declineSms:
+      "Thanks for calling [business]. We're at capacity for new jobs today. We'll follow up when we can take new work. Reply STOP to opt out.",
+  },
   leadTags: {
     customTags: ["emergency", "estimate", "follow_up", "general"],
     priorityRules: [
@@ -282,7 +307,7 @@ export const DEFAULT_SETTINGS: BusinessSettings = {
   voiceBrand: {
     voicePersona: null,
     speed: 0.5,
-    warmth: 0.7,
+    warmth: 0.75,
     conciseness: 0.5,
     strictness: 0.3,
     alwaysSay: [],
@@ -290,7 +315,7 @@ export const DEFAULT_SETTINGS: BusinessSettings = {
     compliancePhrases: [],
   },
   aiBehavior: {
-    interruptTolerance: 0.6,
+    interruptTolerance: 0.68,
     maxCallLengthMinutes: 7,
     questionRetryCount: 2,
     escalateToHumanAfterRetries: false,
@@ -317,6 +342,7 @@ export type SettingsSection =
   | "intakeTemplate"
   | "questionDepth"
   | "booking"
+  | "capacity"
   | "leadTags"
   | "crm"
   | "departments"
@@ -340,6 +366,7 @@ const PRO_SECTIONS: SettingsSection[] = [
   "intakeTemplate",
   "questionDepth",
   "booking",
+  "capacity",
   "leadTags",
   "crm",
 ]
@@ -372,16 +399,17 @@ export function isSectionAllowed(section: SettingsSection, planType: PlanType | 
 /** Human-readable section labels */
 export const SECTION_LABELS: Record<SettingsSection, string> = {
   greeting: "Greeting & Voice",
-  intakeFields: "Intake Fields",
+  intakeFields: "Intake",
   availability: "Hours & Availability",
   notifications: "Notification Settings",
   callRouting: "Call Routing",
-  missedCallRecovery: "Missed Call Recovery",
+  missedCallRecovery: "Incomplete Call Text-Back",
   followUpSms: "Lead Follow-Up SMS",
   reputation: "Google Reviews",
   intakeTemplate: "Intake Templates",
   questionDepth: "Question Depth",
   booking: "Booking Controls",
+  capacity: "Capacity Limits",
   leadTags: "Lead Tags & Rules",
   crm: "CRM & Integrations",
   departments: "Departments",
@@ -403,6 +431,7 @@ export const SECTION_MIN_TIER: Record<SettingsSection, PlanType> = {
   intakeTemplate: PlanType.PRO,
   questionDepth: PlanType.PRO,
   booking: PlanType.PRO,
+  capacity: PlanType.PRO,
   leadTags: PlanType.PRO,
   crm: PlanType.PRO,
   departments: PlanType.ELITE,
@@ -414,16 +443,17 @@ export const SECTION_MIN_TIER: Record<SettingsSection, PlanType> = {
 /** Short upgrade prompt copy shown when a locked settings section is clicked. */
 export const SECTION_UPGRADE_DESCRIPTIONS: Record<SettingsSection, string> = {
   greeting: "Customize how your call assistant greets callers.",
-  intakeFields: "Choose which lead fields to capture on every call.",
+  intakeFields: "Choose your business type and which lead fields to capture on every call.",
   availability: "Set business hours, holidays, and after-hours behavior.",
   notifications: "Control SMS, email, and emergency alert preferences.",
   callRouting: "Configure ring delay and how calls reach your assistant.",
-  missedCallRecovery: "Send automatic SMS replies when a call is missed.",
+  missedCallRecovery: "Text callers when intake is incomplete so they can reply with missing details.",
   followUpSms: "Send confirmation and follow-up texts to callers after a lead is captured.",
   reputation: "Request Google reviews from satisfied callers via automated SMS.",
   intakeTemplate: "Use industry-specific intake scripts tailored to your trade.",
   questionDepth: "Choose how many questions your assistant asks per call.",
   booking: "Control appointment booking rules and availability windows.",
+  capacity: "Set optional daily lead and appointment caps with high-volume or decline behavior.",
   leadTags: "Auto-tag leads by urgency, service type, and custom rules.",
   crm: "Forward leads to your CRM or webhook integration automatically.",
   departments: "Route calls to different departments with separate intake flows.",
@@ -485,6 +515,7 @@ export function mergeWithDefaults(saved: Partial<BusinessSettings> | null | unde
     intakeTemplate: saved.intakeTemplate ?? DEFAULT_SETTINGS.intakeTemplate,
     questionDepth: saved.questionDepth ?? DEFAULT_SETTINGS.questionDepth,
     booking: { ...DEFAULT_SETTINGS.booking, ...(saved.booking ?? {}) },
+    capacity: { ...DEFAULT_SETTINGS.capacity, ...(saved.capacity ?? {}) },
     leadTags: { ...DEFAULT_SETTINGS.leadTags, ...(saved.leadTags ?? {}) },
     crm: { ...DEFAULT_SETTINGS.crm, ...(saved.crm ?? {}) },
     departments: saved.departments ?? DEFAULT_SETTINGS.departments,

@@ -1,11 +1,30 @@
 import { PlanType } from "@prisma/client"
 import { getEffectivePlanType, hasPremiumElevenLabsVoice } from "./plans"
+import { buildTemplateGlobalPrompt, RETELL_GLOBAL_PROMPT_TEMPLATE } from "./receptionist-prompt"
+
+export { RETELL_GLOBAL_PROMPT_TEMPLATE, buildTemplateGlobalPrompt }
 
 /**
  * Retell agent template: global prompt and variable names.
  * Must match dynamic_variables sent in app/api/webhooks/retell/route.ts (call_inbound).
  * Use {{variable_name}} in prompts — Retell replaces these per call from our webhook response.
  */
+
+/**
+ * Retell Agent Handbook presets — complements custom global prompt (not a replacement).
+ * @see https://docs.retellai.com/build/agent-handbook
+ */
+export const RECEPTIONIST_HANDBOOK_CONFIG = {
+  conversational_personality: true,
+  high_empathy: true,
+  speech_normalization: true,
+  echo_verification: true,
+  smart_matching: true,
+  scope_boundaries: true,
+  natural_filler_words: false,
+  ai_disclosure: false,
+  default_personality: false,
+} as const
 
 /** Cartesia platform voices (~$0.015/min) — standard tier for Solo Owner and Mid Volume default. */
 export const STANDARD_CARTESIA_FEMALE_VOICE_ID = "cartesia-Emily"
@@ -14,20 +33,20 @@ export const STANDARD_CARTESIA_MALE_VOICE_ID = "cartesia-Nico"
 /** Standard-tier voice (Cartesia TTS). Default for Solo Owner and Mid Volume without premium add-on. */
 export const STANDARD_RETELL_VOICE = {
   voice_id: STANDARD_CARTESIA_FEMALE_VOICE_ID,
-  voice_temperature: 0.85,
-  voice_speed: 0.95,
+  voice_temperature: 0.9,
+  voice_speed: 0.92,
   volume: 1.0,
-  interruption_sensitivity: 0.6,
+  interruption_sensitivity: 0.68,
   max_call_duration_ms: 7 * 60 * 1000,
 } as const
 
 /** Premium ElevenLabs voice — Elite always; Mid Volume when premiumVoice enabled. */
 export const DEFAULT_RETELL_VOICE = {
   voice_id: "11labs-Chloe",
-  voice_temperature: 0.88,
-  voice_speed: 0.88,
+  voice_temperature: 0.92,
+  voice_speed: 0.9,
   volume: 1.0,
-  interruption_sensitivity: 0.6,
+  interruption_sensitivity: 0.68,
   max_call_duration_ms: 7 * 60 * 1000,
 } as const
 
@@ -57,6 +76,19 @@ export function getRetellVoiceConfig(
   return { ...DEFAULT_RETELL_VOICE, voice_id }
 }
 
+/** Base fields merged into every create-agent / update-agent payload for receptionist agents. */
+export function receptionistAgentFields(voice: RetellVoiceConfig): Record<string, unknown> {
+  return {
+    voice_id: voice.voice_id,
+    voice_temperature: voice.voice_temperature,
+    voice_speed: voice.voice_speed,
+    volume: voice.volume,
+    max_call_duration_ms: voice.max_call_duration_ms,
+    interruption_sensitivity: voice.interruption_sensitivity,
+    handbook_config: { ...RECEPTIONIST_HANDBOOK_CONFIG },
+  }
+}
+
 /** Variable names we send in call_inbound dynamic_variables. Use these in agent prompts with {{name}}. */
 export const RETELL_DYNAMIC_VARIABLE_NAMES = [
   "business_name",
@@ -71,6 +103,7 @@ export const RETELL_DYNAMIC_VARIABLE_NAMES = [
   "voice_gender",
   "intake_fields",
   "intake_template",
+  "intake_template_guidance",
   "booking_ask_appointment",
   "booking_only_offer_when_asked",
   "booking_default_minutes",
@@ -93,46 +126,6 @@ export const RETELL_DYNAMIC_VARIABLE_NAMES = [
   "emergency_forward",
   "emergency_forward_number",
   "spam_handling",
+  "capacity_mode",
+  "departments_json",
 ] as const
-
-/**
- * Global prompt template for conversation-flow agents.
- * Uses {{business_name}}, {{tone}}, etc. so each inbound call gets values from our webhook.
- */
-export const RETELL_GLOBAL_PROMPT_TEMPLATE = `You are the friendly front-desk receptionist for {{business_name}} — warm, calm, and helpful, like a great customer service rep.
-Callers should hear a smile in your voice. Sound human, not scripted.
-
-Your role is to:
-- Greet callers warmly and make them feel heard
-- Understand why they are calling before asking for details
-- Ask ONE question at a time; acknowledge their answer briefly before the next question (e.g. "Got it", "Thanks", "I understand") — do NOT repeat the caller's name every turn; first name at most once early in the call
-- Collect ONLY the information relevant to this business type (see intake_fields if provided)
-- After all details are captured, confirm once in short form (concise paraphrase, not verbatim), then end politely — never loop through confirmation
-- Explain what happens next in plain language
-
-Tone: Be {{tone}}. {{warmth_guidance}} {{strictness_guidance}}
-Question depth: {{question_depth}} — {{question_depth_guidance}} When outside business hours, behavior: {{after_hours_behavior}}.
-
-Conversation style:
-- Keep responses short — one or two sentences per turn
-- Use natural phrasing; vary your wording so you do not sound repetitive
-- Mirror the caller's energy — match their pace and formality
-- If the caller seems stressed, stay calm and reassuring
-- Never say "virtual assistant", "AI", or "automated system"
-- Avoid obvious filler ("um", "uh") but natural conversational pauses are fine
-
-When collecting the reason for the call:
-- Do NOT accept vague one-word answers (e.g. "a problem", "help", "something's wrong")
-- Ask one short follow-up to get enough detail for a useful callback summary
-- Only move on once you have a clear, actionable description
-
-NEVER:
-- Ask unnecessary questions or rush through a checklist
-- Collect payment information
-- Give pricing or quotes
-- Promise scheduling, availability, or outcomes
-- Overuse filler words like "um", "uh", "well", "so" in every sentence
-
-If a situation requires emergency services, say "Nine-One-One" clearly.
-
-Keep calls under {{max_call_length_minutes}} minutes when possible. If the caller is unclear, you may re-ask up to {{question_retry_count}} times before summarizing what you have.`

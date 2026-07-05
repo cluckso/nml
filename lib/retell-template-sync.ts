@@ -1,4 +1,3 @@
-import "server-only"
 import { readFile } from "fs/promises"
 import { join } from "path"
 import type { Industry } from "@prisma/client"
