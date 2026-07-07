@@ -60,7 +60,7 @@ describe("buildAgentOverride", () => {
 
   it("uses aligned default interruption sensitivity", () => {
     const { agentOverride } = buildAgentOverride(DEFAULT_SETTINGS, "Acme", [], PlanType.STARTER)
-    expect(agentOverride.agent?.interruption_sensitivity).toBe(0.6)
+    expect(agentOverride.agent?.interruption_sensitivity).toBe(0.68)
   })
 
   it("wires question depth to behavior guidance", () => {

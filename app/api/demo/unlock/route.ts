@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ 
       success: true,
-      demoNumber: process.env.NEXT_PUBLIC_DEMO_NUMBER || "+1 (202) 873-8983"
+      demoNumber: process.env.NEXT_PUBLIC_DEMO_NUMBER || "+1 (202) 952-6890"
     })
   } catch (error) {
     console.error("[Demo Unlock] Error:", error)

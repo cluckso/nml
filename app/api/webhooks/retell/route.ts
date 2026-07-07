@@ -34,6 +34,7 @@ import {
 import { auditCallTranscript } from "@/lib/audit-call-transcript"
 import { fireZapierLeadHook } from "@/lib/zapier"
 import { captureRouteError } from "@/lib/capture-error"
+import { canAnswerSignupInbound, isDemoInboundCall, resolveDemoInboundResponse } from "@/lib/inbound-call-routing"
 
 /** Retell expects 204 No Content on success. Use 200 + body only for call_inbound (required) and test/ping. */
 const RETELL_SUCCESS = new NextResponse(null, { status: 204 })
@@ -116,20 +117,17 @@ export async function POST(req: NextRequest) {
 
       // Demo number: route to dedicated demo agent (RETELL_DEMO_AGENT_ID)
       const demoNumberRaw = process.env.NEXT_PUBLIC_DEMO_NUMBER
-      const toNumberNorm = toNumber ? normalizeE164(toNumber) ?? undefined : undefined
-      const demoNumberNorm = demoNumberRaw ? normalizeE164(demoNumberRaw) : null
-      const isDemoNumber = !!(toNumberNorm && demoNumberNorm && toNumberNorm === demoNumberNorm)
       const demoAgentId = process.env.RETELL_DEMO_AGENT_ID
-
-      if (isDemoNumber && demoAgentId) {
-        // No begin_message or Name/name dynamic vars — welcome node prompt varies
-        // naturally, and business-name aliases would collide with the caller's name.
-        console.info("Retell inbound: demo call, routing to demo agent", { to_number: toNumber })
-        return NextResponse.json({
-          call_inbound: {
-            override_agent_id: demoAgentId,
-            metadata: { demo_call: true },
-          },
+      if (isDemoInboundCall(toNumber, demoNumberRaw)) {
+        const demoResponse = resolveDemoInboundResponse({ demoNumberRaw, demoAgentId })
+        if (demoResponse) {
+          // No begin_message or Name/name dynamic vars — welcome node prompt varies
+          // naturally, and business-name aliases would collide with the caller's name.
+          console.info("Retell inbound: demo call, routing to demo agent", { to_number: toNumber })
+          return NextResponse.json(demoResponse)
+        }
+        console.warn("Retell inbound: demo number called but RETELL_DEMO_AGENT_ID not set", {
+          to_number: toNumber,
         })
       }
       
@@ -179,7 +177,7 @@ export async function POST(req: NextRequest) {
         agentIdConfigured: !!process.env.RETELL_AGENT_ID,
       })
       
-      if (!client || !agentId) {
+      if (!canAnswerSignupInbound(client, agentId)) {
         // Block call: no override_agent_id = Retell rejects → caller hears unavailable / disconnect
         const reason = !agentId
           ? "No agent ID (business has no retellAgentId and RETELL_AGENT_ID / RETELL_AGENT_ID_<INDUSTRY> not set)"

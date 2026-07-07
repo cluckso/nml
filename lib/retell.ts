@@ -48,6 +48,15 @@ import {
 
 const RETELL_API_BASE = process.env.RETELL_API_BASE ?? "https://api.retellai.com"
 
+/** Inbound webhook URL for per-call routing (dynamic vars, capacity, demo detection). */
+export function getRetellInboundWebhookUrl(): string | undefined {
+  const explicit = process.env.RETELL_INBOUND_WEBHOOK_URL?.trim()
+  if (explicit) return explicit
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL?.trim()
+  if (!appUrl) return undefined
+  return `${appUrl.replace(/\/$/, "")}/api/webhooks/retell`
+}
+
 /** Standard model for all conversation flows: gemini-3.0-flash (create + update). */
 const RETELL_MODEL_CHOICE = { model: "gemini-3.0-flash" as const, type: "cascading" as const }
 
@@ -364,11 +373,15 @@ async function createPhoneNumber(
   areaCode: number
 ): Promise<string> {
   const agentBinding = [{ agent_id: agentId, weight: 1 }]
-  const body = {
+  const inboundWebhookUrl = getRetellInboundWebhookUrl()
+  const body: Record<string, unknown> = {
     inbound_agents: agentBinding,
     outbound_agents: agentBinding,
     area_code: areaCode,
     country_code: "US",
+  }
+  if (inboundWebhookUrl) {
+    body.inbound_webhook_url = inboundWebhookUrl
   }
 
   console.info("createPhoneNumber: purchasing number for agent", agentId, "area code", areaCode)
@@ -407,9 +420,13 @@ async function updatePhoneNumber(
   agentId: string
 ): Promise<void> {
   const agentBinding = [{ agent_id: agentId, weight: 1 }]
-  const body = {
+  const inboundWebhookUrl = getRetellInboundWebhookUrl()
+  const body: Record<string, unknown> = {
     inbound_agents: agentBinding,
     outbound_agents: agentBinding,
+  }
+  if (inboundWebhookUrl) {
+    body.inbound_webhook_url = inboundWebhookUrl
   }
   const encoded = encodeURIComponent(phoneNumber)
   const url = `${RETELL_API_BASE}/update-phone-number/${encoded}`

@@ -8,7 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Phone, ArrowRight, Check } from "lucide-react"
 
-const DEMO_NUMBER = process.env.NEXT_PUBLIC_DEMO_NUMBER || "+1 (202) 873-8983"
+const DEMO_NUMBER = process.env.NEXT_PUBLIC_DEMO_NUMBER || "+1 (202) 952-6890"
 
 const BUSINESS_TYPES = [
   "HVAC",
