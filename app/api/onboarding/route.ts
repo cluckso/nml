@@ -6,7 +6,7 @@ import { Industry } from "@prisma/client"
 import { ClientStatus } from "@prisma/client"
 import { isComplexSetup } from "@/lib/industries"
 import { getConfiguredIntakeNumbersE164 } from "@/lib/intake-routing"
-import { provisionAgentAndNumberForBusiness } from "@/lib/retell"
+import { provisionAgentAndNumberForBusiness, ensureRetellInboundWebhookForBusiness } from "@/lib/retell"
 import { isMultiTrialPhone, releasePrimaryForwardingNumberFromOtherBusinesses } from "@/lib/trial"
 
 export async function POST(req: NextRequest) {
@@ -181,6 +181,11 @@ export async function POST(req: NextRequest) {
           })
           console.info("Assigned Retell agent and number to business:", retellAgentId, retellPhoneNumber, business.id)
         }
+        try {
+          await ensureRetellInboundWebhookForBusiness(business.id)
+        } catch (err) {
+          console.error("Failed to ensure Retell inbound webhook after provisioning:", business.id, err)
+        }
       } catch (err) {
         console.error("Failed to provision Retell agent/number for business:", business.id, err instanceof Error ? err.message : err)
       }
@@ -192,6 +197,13 @@ export async function POST(req: NextRequest) {
     })
 
     const provisioningFailed = !!(updatedBusiness && !updatedBusiness.retellAgentId && !updatedBusiness.retellPhoneNumber)
+    if (updatedBusiness?.retellAgentId && updatedBusiness?.retellPhoneNumber) {
+      try {
+        await ensureRetellInboundWebhookForBusiness(business.id)
+      } catch (err) {
+        console.error("Onboarding: ensureRetellInboundWebhookForBusiness failed:", business.id, err)
+      }
+    }
     return NextResponse.json({
       success: true,
       business: updatedBusiness,

@@ -97,7 +97,9 @@ function SignInContent() {
           <form onSubmit={handleSignIn} className="space-y-4">
             {message && (
               <div className="bg-primary/10 text-primary text-sm p-3 rounded-md">
-                {message}
+                {message === "account-deleted"
+                  ? "Your account was deleted. You can sign up again anytime."
+                  : message}
               </div>
             )}
             {error && (

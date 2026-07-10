@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getAuthUserFromRequest } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { provisionAgentAndNumberForBusiness } from "@/lib/retell"
+import { provisionAgentAndNumberForBusiness, ensureRetellInboundWebhookForBusiness } from "@/lib/retell"
 
 /**
  * POST /api/agents
@@ -36,6 +36,11 @@ export async function POST(req: NextRequest) {
     }
 
     if (business.retellAgentId && business.retellPhoneNumber) {
+      try {
+        await ensureRetellInboundWebhookForBusiness(business.id)
+      } catch (err) {
+        console.error("POST /api/agents: ensureRetellInboundWebhookForBusiness failed:", business.id, err)
+      }
       return NextResponse.json({
         success: true,
         phoneNumber: business.retellPhoneNumber,
@@ -67,6 +72,12 @@ export async function POST(req: NextRequest) {
       where: { id: user.businessId },
       data: { retellAgentId: provisioned.agent_id, retellPhoneNumber: provisioned.phone_number },
     })
+
+    try {
+      await ensureRetellInboundWebhookForBusiness(business.id)
+    } catch (err) {
+      console.error("POST /api/agents: ensureRetellInboundWebhookForBusiness failed:", business.id, err)
+    }
 
     return NextResponse.json({
       success: true,

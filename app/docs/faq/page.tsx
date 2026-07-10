@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { DeleteAccountControl } from "@/components/help/DeleteAccountControl"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { PRODUCT_FAQ } from "@/lib/faq-data"
 import { faqPageJsonLd } from "@/lib/structured-data"
@@ -346,7 +347,7 @@ export default function DocsFaqPage() {
           <ol className="list-decimal list-inside space-y-2 text-sm">
             <li>Get your <strong>forwarding number</strong> from the dashboard (after you connect your call assistant).</li>
             <li>Use the steps below for <strong>your carrier</strong> to set up <strong>call forwarding</strong> to that forwarding number.</li>
-            <li>Configure when your assistant answers in <strong>Settings → Call Routing</strong>: turn on <strong>Answer all calls immediately</strong>, or choose a delay in seconds or number of rings before it picks up.</li>
+            <li>Configure when your assistant answers in <strong>Settings → Call Routing</strong>: pick a quick-setup preset (e.g. ring 10 seconds during business hours) or customize the delay.</li>
             <li>Save and test by calling your business line from another phone.</li>
           </ol>
           <Link href="/dashboard">
@@ -413,6 +414,8 @@ export default function DocsFaqPage() {
           </CardDescription>
         </CardHeader>
       </Card>
+
+      <DeleteAccountControl />
     </div>
   )
 }

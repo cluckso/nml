@@ -41,6 +41,10 @@ import {
 } from "@/lib/inbound-call-routing"
 import { planInboundRingDelay, sleepMs, computeRingDurationMsForInbound } from "@/lib/call-routing"
 
+/** Retell inbound webhook may sleep up to ~10s for ring delay; allow headroom on Vercel. */
+export const runtime = "nodejs"
+export const maxDuration = 60
+
 /** Retell expects 204 No Content on success. Use 200 + body only for call_inbound (required) and test/ping. */
 const RETELL_SUCCESS = new NextResponse(null, { status: 204 })
 
@@ -220,12 +224,19 @@ export async function POST(req: NextRequest) {
         console.info("Retell call_inbound: ring delay", ringDurationMs, "ms", {
           webhookSleepMs: ringDelayPlan.webhookSleepMs,
           retellRingDurationMs: ringDelayPlan.retellRingDurationMs ?? null,
+          scheduleByBusinessHours: settings.callRouting.scheduleByBusinessHours,
+          answerAllCalls: settings.callRouting.answerAllCalls,
         })
         if (ringDelayPlan.webhookSleepMs > 0) {
           await sleepMs(ringDelayPlan.webhookSleepMs)
         }
       } else {
-        console.info("Retell call_inbound: answer immediately (ring delay 0ms)")
+        console.info("Retell call_inbound: answer immediately (ring delay 0ms)", {
+          scheduleByBusinessHours: settings.callRouting.scheduleByBusinessHours,
+          answerAllCalls: settings.callRouting.answerAllCalls,
+          duringHoursAnswerAll: settings.callRouting.duringHours?.answerAllCalls,
+          afterHoursAnswerAll: settings.callRouting.afterHours?.answerAllCalls,
+        })
       }
 
       const capacityEval = await evaluateCapacity(settings, client.id)

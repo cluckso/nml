@@ -28,7 +28,10 @@ type PurchaseSuccessClientProps =
 export function PurchaseSuccessClient(props: PurchaseSuccessClientProps) {
   useEffect(() => {
     if (props.state === "success") {
-      trackPurchaseSuccess(getPlanDisplayName(props.planType))
+      trackPurchaseSuccess(getPlanDisplayName(props.planType), {
+        value: getMonthlyPrice(props.planType),
+        currency: "USD",
+      })
     }
   }, [props])
 

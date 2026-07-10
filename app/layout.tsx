@@ -23,6 +23,9 @@ const gtmId = process.env.NEXT_PUBLIC_GTM_ID?.trim()
 /** Google Analytics (gtag.js) — measurement ID for all pages. */
 const GA_MEASUREMENT_ID = "G-F7EPPRSNR1"
 
+/** Spotify Ads Manager pixel — PAGE_VIEW on load. */
+const SPOTIFY_PIXEL_KEY = "8b593790e34b49699d8e5caa3c54f20d"
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "CallGrabbr - Stop Losing Jobs to Missed Calls",
@@ -151,6 +154,27 @@ var n=r.getElementsByTagName("script")[0];
 }(window,document);
 rkp("init","PaccPmsytSiq");rkp("event","PAGE_VIEW");
             `,
+          }}
+        />
+        {/* Spotify Ads Manager — view on load; purchase via lib/analytics.ts */}
+        <Script
+          id="spotify-pixel"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+(function(w,d){
+  var id='spdt-capture',n='script';
+  if(!d.getElementById(id)){
+    w.spdt=w.spdt||function(){(w.spdt.q=w.spdt.q||[]).push(arguments);};
+    var e=d.createElement(n);e.id=id;e.async=1;
+    e.src='https://pixel.byspotify.com/ping.min.js';
+    var s=d.getElementsByTagName(n)[0];
+    s.parentNode.insertBefore(e,s);
+  }
+  w.spdt('conf',{key:'${SPOTIFY_PIXEL_KEY}'});
+  w.spdt('view');
+})(window,document);
+            `.trim(),
           }}
         />
         <Providers>

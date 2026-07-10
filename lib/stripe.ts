@@ -391,6 +391,23 @@ function getPriceIdForPlan(planType: PlanType): string {
   return id
 }
 
+/** Cancel Stripe subscription immediately when a customer deletes their account. */
+export async function cancelStripeSubscriptionForBusiness(businessId: string): Promise<boolean> {
+  if (!stripe) return false
+  const business = await db.business.findUnique({
+    where: { id: businessId },
+    select: { stripeSubscriptionId: true },
+  })
+  if (!business?.stripeSubscriptionId) return false
+  try {
+    await stripe.subscriptions.cancel(business.stripeSubscriptionId)
+    return true
+  } catch (err) {
+    console.error("cancelStripeSubscriptionForBusiness failed:", businessId, err)
+    return false
+  }
+}
+
 export async function reportUsageToStripe(businessId: string, minutes: number) {
   if (!stripe) return
   const business = await db.business.findUnique({

@@ -1,5 +1,5 @@
 /**
- * Analytics helpers. Uses Meta Pixel (fbq) and Roku Pixel (rkp) when available.
+ * Analytics helpers. Uses Meta Pixel (fbq), Roku Pixel (rkp), and Spotify Ads (spdt) when available.
  * Call from client components after key actions.
  */
 
@@ -7,6 +7,13 @@ declare global {
   interface Window {
     fbq?: (action: string, event: string, params?: Record<string, unknown>) => void
     rkp?: (...args: unknown[]) => void
+    spdt?: (...args: unknown[]) => void
+  }
+}
+
+function trackSpotifyPurchase(value: number, currency = "USD"): void {
+  if (typeof window !== "undefined" && window.spdt) {
+    window.spdt("purchase", { value, currency })
   }
 }
 
@@ -50,8 +57,14 @@ export function trackSubscribe(planName?: string): void {
 }
 
 /** Fired when Stripe checkout completes and the user lands on the purchase success page. */
-export function trackPurchaseSuccess(planName?: string): void {
+export function trackPurchaseSuccess(
+  planName?: string,
+  options?: { value?: number; currency?: string }
+): void {
   if (typeof window !== "undefined" && window.fbq) {
     window.fbq("track", "Purchase", planName ? { content_name: planName } : undefined)
+  }
+  if (options?.value != null) {
+    trackSpotifyPurchase(options.value, options.currency ?? "USD")
   }
 }
