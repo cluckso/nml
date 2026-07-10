@@ -16,8 +16,6 @@ interface SetupAICardProps {
   phoneNumber: string | null
   /** True when the business still needs its own dedicated line provisioned. */
   needsDedicatedLine?: boolean
-  businessName: string
-  ownerPhone?: string | null
   trialStatus?: TrialStatus
   compact?: boolean
 }
@@ -26,8 +24,6 @@ export function SetupAICard({
   hasAgent,
   phoneNumber,
   needsDedicatedLine = !hasAgent,
-  businessName,
-  ownerPhone,
   trialStatus,
   compact,
 }: SetupAICardProps) {
