@@ -44,9 +44,9 @@ const LANDING_PAGES: IndustryLandingData[] = [
     slug: "hvac",
     industry: Industry.HVAC,
     name: "HVAC",
-    headline: "Stop Losing HVAC Jobs to Voicemail",
+    headline: "Stop Losing HVAC Jobs to Missed Calls",
     subheadline:
-      "When the AC goes out or the furnace dies, homeowners call the next contractor. CallGrabbr answers forwarded calls 24/7 and captures job details when callers share them.",
+      "When the AC goes out or the furnace dies, homeowners call the next contractor. CallGrabbr answers when you can't and texts you the job details in seconds.",
     averageJobValue: 475,
     painPoints: [
       "No-heat and no-AC calls spike after hours and on weekends",
@@ -78,7 +78,7 @@ const LANDING_PAGES: IndustryLandingData[] = [
       "What's the address for service?",
       "Can you describe what's going on?",
     ],
-    statMissedCalls: "80% of callers won't leave voicemail",
+    statMissedCalls: "Most emergency callers hang up — and dial the next plumber",
   },
   {
     slug: "electrical",
@@ -131,7 +131,7 @@ const LANDING_PAGES: IndustryLandingData[] = [
     painPoints: [
       "Solo operators can't answer while on a ladder",
       "Callers describe vague jobs — you need details upfront",
-      "Weekend inquiries often go to voicemail",
+      "Weekend inquiries often go unanswered",
     ],
     exampleQuestions: [
       "What type of repair or project do you need?",
@@ -218,5 +218,4 @@ export const HOMEPAGE_INDUSTRY_LINKS: { name: string; slug: string }[] = [
   { name: "Handyman", slug: "handyman" },
   { name: "Cleaning", slug: "cleaning" },
   { name: "Landscaping", slug: "landscaping" },
-  { name: "Home services", slug: "hvac" },
 ]

@@ -63,7 +63,7 @@ export function trialBillingCardLabel(): string {
 }
 
 export function siteMetaDescription(): string {
-  return `80% of callers won't leave voicemail — they call your competitor. CallGrabbr catches missed calls and texts you the lead in seconds. One captured job pays for months. ${trialSummaryShort()}.`
+  return `When you miss a call, most callers hang up and dial your competitor. CallGrabbr answers and texts you the lead in seconds. One captured job pays for months. ${trialSummaryShort()}.`
 }
 
 export function authMetaDescription(): string {

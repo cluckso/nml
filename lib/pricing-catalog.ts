@@ -31,7 +31,7 @@ export interface PricingTier {
   price: number
   includedMinutes: number
   /** Shown on plan card when set */
-  badge?: "Best to start" | "Most popular" | "For busy shops"
+  badge?: "Best to start" | "Growing shops" | "For busy shops"
   popular: boolean
   features: string[]
   /** Short subtitle under plan name on landing */
@@ -62,7 +62,7 @@ export const PRICING_TIERS: PricingTier[] = [
       "Spam call filtering",
       "Caller name, phone, and reason",
       "Lead summaries by email & SMS",
-      "Industry-tuned intake flows",
+      "Service-business lead capture",
       "No setup fee",
     ],
   },
@@ -71,10 +71,10 @@ export const PRICING_TIERS: PricingTier[] = [
     planType: PLAN_TYPE_BY_DISPLAY_KEY[PLAN_MID_VOLUME],
     name: PLAN_MID_VOLUME,
     description:
-      "Your 24/7 front desk — answer most inbound calls so growing crews never lose a lead to voicemail.",
+      "Your 24/7 front desk — answer most inbound calls so growing crews never lose a lead to a missed ring.",
     price: MONTHLY_PRICES[PlanType.PRO],
     includedMinutes: INCLUDED_MINUTES[PlanType.PRO],
-    badge: "Most popular",
+    badge: "Growing shops",
     popular: false,
     subtitle: "Growing crew · steady inbound volume",
     usageNote: "When you need every call answered, not just the ones you miss",
@@ -139,7 +139,11 @@ export function formatRoiHeadline(): string {
 }
 
 export function formatMissedJobCostLine(): string {
-  return "One missed emergency call often costs $350–$600 — more than months of CallGrabbr"
+  return `One missed emergency call often costs $${AVG_JOB_VALUE_LOW}–$${AVG_JOB_VALUE_HIGH} — more than months of CallGrabbr`
+}
+
+export function formatAvgJobValueRange(): string {
+  return `$${AVG_JOB_VALUE_LOW}–$${AVG_JOB_VALUE_HIGH}`
 }
 
 export function formatVsHumanLine(): string {

@@ -2,7 +2,7 @@ import { ImageResponse } from "next/og"
 import { trialHeadlineLabel } from "@/lib/trial-marketing"
 
 export const runtime = "edge"
-export const alt = "CallGrabbr — Stop losing jobs to voicemail"
+export const alt = "CallGrabbr — Stop losing jobs to missed calls"
 export const size = { width: 1200, height: 630 }
 export const contentType = "image/png"
 
@@ -59,7 +59,7 @@ export default function OpenGraphImage() {
             marginBottom: 28,
           }}
         >
-          Stop Losing Jobs to Voicemail
+          Stop Losing Jobs to Missed Calls
         </div>
         <div
           style={{
@@ -70,7 +70,7 @@ export default function OpenGraphImage() {
             marginBottom: 40,
           }}
         >
-          Answers missed calls and texts you the lead in seconds. Built for local service businesses.
+          We answer when you can{"'"}t and text you the lead in seconds. Built for local service businesses.
         </div>
         <div
           style={{

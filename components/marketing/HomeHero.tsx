@@ -26,18 +26,19 @@ export function HomeHero() {
     >
       <div className="inline-flex items-center gap-2 rounded-full border border-destructive/30 bg-background/60 backdrop-blur-sm px-4 py-1.5 text-sm font-medium text-destructive mb-4">
         <PhoneOff className="h-4 w-4" aria-hidden />
-        80% of callers won&apos;t leave voicemail — they call your competitor
+        When you miss a call, 80% of callers hang up — and dial your competitor
       </div>
       <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 tracking-tight">
         Stop Losing Jobs to{" "}
-        <span className="text-gradient-hero">Voicemail</span>
+        <span className="text-gradient-hero">Missed Calls</span>
       </h1>
       <p className="text-xl sm:text-2xl font-semibold text-foreground/90 mb-4">
         We answer when you can&apos;t and text you the lead in seconds.
       </p>
       <p className="text-base sm:text-lg text-muted-foreground mb-2 max-w-2xl mx-auto px-1">
-        Voicemail captures 5–15% of callers. Live answering captures 80–95%. Built for HVAC,
-        plumbing, electrical, and auto repair — industry intake, not generic scripts.
+        Most callers won&apos;t leave a message. Live answering captures 80–95% of those
+        calls — vs. 5–15% for voicemail. Built for HVAC, plumbing, electrical, and auto
+        repair.
       </p>
       <p className="text-sm font-medium text-primary/90 mb-8 max-w-xl mx-auto">
         {formatMissedJobCostLine()}

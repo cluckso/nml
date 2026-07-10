@@ -19,11 +19,11 @@ export const DEFAULT_OG_IMAGE = {
   url: "/opengraph-image",
   width: 1200,
   height: 630,
-  alt: "CallGrabbr — Stop losing jobs to voicemail",
+  alt: "CallGrabbr — Stop losing jobs to missed calls",
 } as const
 
 export function homePageMetadata(): Metadata {
-  const title = "CallGrabbr - Stop Losing Jobs to Voicemail"
+  const title = "CallGrabbr - Stop Losing Jobs to Missed Calls"
   const description = siteMetaDescription()
 
   return {

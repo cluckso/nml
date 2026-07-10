@@ -72,10 +72,10 @@ export function PricingComparisonTable({ className = "" }: { className?: string 
     <div className={className}>
       <div className="text-center mb-8 max-w-2xl mx-auto">
         <h2 className="text-2xl md:text-3xl font-bold tracking-tight mb-3">
-          Cheaper than losing the job. Smarter than voicemail.
+          Cheaper than losing the job. Smarter than hoping they leave a message.
         </h2>
         <p className="text-muted-foreground leading-relaxed">
-          Most shops compare us to voicemail (free) or a human answering service ($235+/mo).
+          Most shops compare us to voicemail (free, but most callers hang up) or a human answering service ($235+/mo).
           CallGrabbr sits in the sweet spot — {perCall} at {PLAN_SOLO_OWNER} tier.
         </p>
       </div>

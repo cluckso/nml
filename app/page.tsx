@@ -1,6 +1,6 @@
 import Link from "next/link"
 import type { Metadata } from "next"
-import { MID_AND_HIGH_VOLUME_LABEL, PLAN_MID_VOLUME, PLAN_HIGH_VOLUME, PLAN_SOLO_OWNER } from "@/lib/plan-labels"
+import { MID_AND_HIGH_VOLUME_LABEL, PLAN_MID_VOLUME, PLAN_HIGH_VOLUME } from "@/lib/plan-labels"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { AudioExamples } from "@/components/marketing/AudioExamples"
@@ -12,7 +12,7 @@ import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
 import { TrustStrip } from "@/components/marketing/TrustStrip"
 import { MobileAppDownload } from "@/components/marketing/MobileAppDownload"
 import { MARKETING_IMAGES, MARKETING_IMAGE_ALT } from "@/lib/marketing-images"
-import { formatJobRoiLine, formatOverageRate, formatIncludedUsageShort, formatCostPerCapturedCall, PRICING_TIERS } from "@/lib/pricing-catalog"
+import { formatJobRoiLine, formatOverageRate, formatIncludedUsageShort, formatCostPerCapturedCall, formatAvgJobValueRange, PRICING_TIERS } from "@/lib/pricing-catalog"
 import {
   ArrowRight,
   CreditCard,
@@ -53,26 +53,26 @@ export default function HomePage() {
         contentClassName="container mx-auto px-4"
       >
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-3">
-            From first ring to qualified lead.
+            From first ring to qualified lead
           </h2>
           <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-12">
-            CallGrabbr handles the full flow: answer forwarded calls, qualify the lead, and deliver captured details straight to you.
+            CallGrabbr answers the call, qualifies the lead, and delivers the details straight to your phone — so you can stay on the job.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             <div className="text-center">
               <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15 text-primary mb-4">
                 <Zap className="h-6 w-6" aria-hidden />
               </div>
-              <h3 className="font-semibold text-lg mb-2">Built for your industry</h3>
+              <h3 className="font-semibold text-lg mb-2">Built for your trade</h3>
               <p className="text-sm text-muted-foreground">
-                Intake flows tuned for HVAC, plumbing, electrical, auto repair, handyman, and more. No generic scripts.
+                Intake tuned for HVAC, plumbing, electrical, auto repair, handyman, and more — not a generic script.
               </p>
             </div>
             <div className="text-center">
               <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15 text-primary mb-4">
                 <MessageSquare className="h-6 w-6" aria-hidden />
               </div>
-              <h3 className="font-semibold text-lg mb-2">Captures lead details</h3>
+              <h3 className="font-semibold text-lg mb-2">Captures what matters</h3>
               <p className="text-sm text-muted-foreground">
                 Name, phone, service need, urgency, and preferred time when shared. Appointment booking on {MID_AND_HIGH_VOLUME_LABEL}.
               </p>
@@ -81,37 +81,37 @@ export default function HomePage() {
               <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/15 text-primary mb-4">
                 <LayoutDashboard className="h-6 w-6" aria-hidden />
               </div>
-              <h3 className="font-semibold text-lg mb-2">Delivers to your stack</h3>
+              <h3 className="font-semibold text-lg mb-2">Delivers to you instantly</h3>
               <p className="text-sm text-muted-foreground">
-                Summaries by email and SMS. CRM webhook on {MID_AND_HIGH_VOLUME_LABEL}. No data lock-in — you own the leads.
+                Summaries by email and SMS. CRM webhook on {MID_AND_HIGH_VOLUME_LABEL}. You own every lead.
               </p>
             </div>
           </div>
       </SectionBackdrop>
 
-      {/* Stats strip */}
+      {/* Stats strip — one story: miss → hang up → you get the lead */}
       <section className="container mx-auto px-4 py-8">
         <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-4 text-center">
           <div>
             <p className="text-2xl font-bold text-destructive">28%</p>
-            <p className="text-sm text-muted-foreground">Calls go unanswered</p>
+            <p className="text-sm text-muted-foreground">of calls go unanswered</p>
           </div>
           <div>
             <p className="text-2xl font-bold text-destructive">80%</p>
-            <p className="text-sm text-muted-foreground">Won&apos;t leave voicemail</p>
+            <p className="text-sm text-muted-foreground">hang up — no message</p>
           </div>
           <div>
             <p className="text-2xl font-bold text-primary">Seconds</p>
-            <p className="text-sm text-muted-foreground">Lead to your phone</p>
+            <p className="text-sm text-muted-foreground">from call to lead text</p>
           </div>
         </div>
       </section>
 
       {/* Features — Every call picked up */}
       <section className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold text-center mb-3">Forwarded calls answered. Lead details captured.</h2>
+        <h2 className="text-3xl font-bold text-center mb-3">Missed calls answered. Leads captured.</h2>
         <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-          When the line is busy or the office is closed, CallGrabbr takes over — no more voicemail black holes.
+          When you&apos;re on a job or the shop is closed, CallGrabbr takes over — so callers talk to someone instead of hanging up.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
           <Card className="glass-card">
@@ -123,7 +123,7 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Forwarded calls answered in seconds. Spam and robocalls filtered before your call assistant picks up.
+                Forwarded calls answered in seconds. Spam and robocalls filtered before your assistant picks up.
               </p>
             </CardContent>
           </Card>
@@ -132,11 +132,11 @@ export default function HomePage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary mb-2">
                 <Zap className="h-5 w-5" aria-hidden />
               </div>
-              <CardTitle className="text-base">Industry flows</CardTitle>
+              <CardTitle className="text-base">Trade-ready intake</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Questions and intake tailored to your trade. Emergency routing when needed.
+                Questions tailored to your trade. Industry-specific flows on {MID_AND_HIGH_VOLUME_LABEL}. Emergency routing when needed.
               </p>
             </CardContent>
           </Card>
@@ -145,11 +145,11 @@ export default function HomePage() {
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary mb-2">
                 <Calendar className="h-5 w-5" aria-hidden />
               </div>
-              <CardTitle className="text-base">Booking & leads</CardTitle>
+              <CardTitle className="text-base">Booking &amp; leads</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Appointment booking on {MID_AND_HIGH_VOLUME_LABEL}. Qualified leads with name, phone, and details.
+                Qualified leads with name, phone, and details. Appointment booking on {MID_AND_HIGH_VOLUME_LABEL}.
               </p>
             </CardContent>
           </Card>
@@ -162,7 +162,7 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Email and SMS summaries. CRM webhook on {MID_AND_HIGH_VOLUME_LABEL}. Works with your existing phone number.
+                Email and SMS summaries. CRM webhook on {MID_AND_HIGH_VOLUME_LABEL}. Works with your existing number.
               </p>
             </CardContent>
           </Card>
@@ -178,20 +178,20 @@ export default function HomePage() {
         className="py-16 border-y border-border/50"
         contentClassName="container mx-auto px-4"
       >
-          <h2 className="text-3xl font-bold text-center mb-4">Why This Matters</h2>
+          <h2 className="text-3xl font-bold text-center mb-4">Why this matters</h2>
           <ul className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto list-none text-center">
             <li className="text-muted-foreground">
               Most local service businesses miss <strong className="text-foreground">20–40% of inbound calls</strong>
             </li>
             <li className="text-muted-foreground">
-              One missed call often = <strong className="text-foreground">$150–$600 lost job</strong>
+              One missed call often means a <strong className="text-foreground">{formatAvgJobValueRange()} lost job</strong>
             </li>
             <li className="text-muted-foreground">
-              After-hours calls are usually <strong className="text-foreground">high intent</strong>
+              After-hours callers are usually <strong className="text-foreground">ready to book</strong>
             </li>
           </ul>
           <p className="text-center font-medium mt-8 text-primary">
-            Recover just 2 jobs per month → service pays for itself
+            Capture one job you would have lost — and the service pays for itself for months
           </p>
       </SectionBackdrop>
 
@@ -199,41 +199,41 @@ export default function HomePage() {
       <section className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center mb-3">How it works</h2>
         <p className="text-center text-muted-foreground mb-10 max-w-xl mx-auto">
-          Get from first ring to qualified lead in four steps.
+          Live in about five minutes. Four steps from signup to your first captured lead.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
           <div className="flex flex-col items-center text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary mb-4">
               <PhoneForwarded className="h-7 w-7" />
             </div>
-            <h3 className="font-semibold text-lg mb-2">Step 1 — Connect Your Number</h3>
+            <h3 className="font-semibold text-lg mb-2">1. Connect your number</h3>
             <p className="text-muted-foreground text-sm">
-              Forward your business line or use a new one.
+              Forward your business line — or use a new one. Keep the number customers already know.
             </p>
           </div>
           <div className="flex flex-col items-center text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary mb-4">
               <Zap className="h-7 w-7" />
             </div>
-            <h3 className="font-semibold text-lg mb-2">Step 2 — Pick Your Industry Flow</h3>
+            <h3 className="font-semibold text-lg mb-2">2. Pick your trade</h3>
             <p className="text-muted-foreground text-sm">
-              HVAC, plumbing, electrical, handyman, auto, and more.
+              HVAC, plumbing, electrical, handyman, auto, and more — so intake asks the right questions.
             </p>
           </div>
           <div className="flex flex-col items-center text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary mb-4">
               <MessageSquare className="h-7 w-7" />
             </div>
-            <h3 className="font-semibold text-lg mb-2">Step 3 — Calls get answered</h3>
+            <h3 className="font-semibold text-lg mb-2">3. Calls get answered</h3>
             <p className="text-muted-foreground text-sm">
-              Intake and scheduling handled automatically when enabled on your plan.
+              We pick up when you can&apos;t, qualify the caller, and capture the details you need.
             </p>
           </div>
           <div className="flex flex-col items-center text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary mb-4">
               <LayoutDashboard className="h-7 w-7" />
             </div>
-            <h3 className="font-semibold text-lg mb-2">Step 4 — You get the lead</h3>
+            <h3 className="font-semibold text-lg mb-2">4. You get the lead</h3>
             <p className="text-muted-foreground text-sm">
               SMS and email summary with captured details. CRM webhook on {MID_AND_HIGH_VOLUME_LABEL}.
             </p>
@@ -294,7 +294,7 @@ export default function HomePage() {
         <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-bold text-center mb-3">What your callers experience</h2>
           <p className="text-center text-muted-foreground mb-12 max-w-xl mx-auto">
-            Professional, friendly, and fast. No robot menus. No hold music.
+            Professional, friendly, and fast — so they stay on the line instead of calling the next shop.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <Card className="glass-card">
@@ -305,8 +305,8 @@ export default function HomePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm text-muted-foreground">
-                <p>Callers hear a friendly, professional voice — not a robot menu.</p>
-                <p>Your call assistant asks relevant questions based on your industry (plumbing, HVAC, electrical, etc.) and captures the details you need.</p>
+                <p>Callers hear a clear, professional voice — not a robot menu or hold music.</p>
+                <p>Your assistant asks relevant questions for your trade and captures the details you need to follow up.</p>
               </CardContent>
             </Card>
             <Card className="glass-card">
@@ -317,8 +317,8 @@ export default function HomePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm text-muted-foreground">
-                <p>No &quot;press 1 for sales&quot; — callers explain their problem and get acknowledged.</p>
-                <p>Average call time: under 2 minutes. Fast for them, detailed for you.</p>
+                <p>No &quot;press 1 for sales.&quot; Callers explain their problem and get acknowledged.</p>
+                <p>Most calls finish in under two minutes — fast for them, detailed for you.</p>
               </CardContent>
             </Card>
             <Card className="glass-card">
@@ -330,19 +330,19 @@ export default function HomePage() {
               </CardHeader>
               <CardContent className="space-y-3 text-sm text-muted-foreground">
                 <p>Urgent calls can be flagged or routed based on your settings.</p>
-                <p>You set the rules: what counts as emergency, who gets notified, when to escalate.</p>
+                <p>You decide what counts as an emergency, who gets notified, and when to escalate.</p>
               </CardContent>
             </Card>
             <Card className="glass-card">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Shield className="h-5 w-5 text-primary" />
-                  Transparency
+                  Honest when asked
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm text-muted-foreground">
-                <p>Identifies as an automated assistant if asked directly — no pretending to be you.</p>
-                <p>Calls may be recorded for quality and training. You control the settings.</p>
+                <p>Sounds natural in conversation — and identifies as an automated assistant if asked directly.</p>
+                <p>Calls may be recorded for quality. You control the settings.</p>
               </CardContent>
             </Card>
           </div>
@@ -360,7 +360,7 @@ export default function HomePage() {
       >
           <h2 className="text-3xl font-bold text-center mb-3">What happens after a completed call?</h2>
           <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-            You get all captured lead info in a neat, easy-to-read text or email—or sent directly to your CRM.
+            You get a clean lead summary by text or email — or sent straight to your CRM — usually within seconds.
           </p>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-5xl mx-auto items-center">
             {/* SMS Preview */}
@@ -368,7 +368,7 @@ export default function HomePage() {
             
             {/* Feature list */}
             <div>
-              <h3 className="text-xl font-semibold mb-6">Your call assistant collects as much pertinent lead information as possible, including:</h3>
+              <h3 className="text-xl font-semibold mb-6">Every completed call can include:</h3>
               <ul className="space-y-3 list-none">
                 {[
                   "Caller name + phone number",
@@ -390,7 +390,7 @@ export default function HomePage() {
                 CRM delivery available on {MID_AND_HIGH_VOLUME_LABEL} plans.
               </p>
               <p className="text-sm text-muted-foreground mt-2">
-                Spam and robocalls filtered when possible — alerts focus on actionable leads.
+                Spam and robocalls filtered when possible — so alerts focus on real leads.
               </p>
             </div>
           </div>
@@ -400,24 +400,25 @@ export default function HomePage() {
 
       {/* Built for Local Service Businesses */}
       <section className="container mx-auto px-4 py-16">
-        <h2 className="text-3xl font-bold text-center mb-4">Built for Local Service Businesses</h2>
-        <p className="text-center text-muted-foreground mb-10">Ideal for:</p>
+        <h2 className="text-3xl font-bold text-center mb-4">Built for local service businesses</h2>
+        <p className="text-center text-muted-foreground mb-10">
+          If customers call you when they need help — this fits.
+        </p>
         <IndustryPhotoCards />
-        <p className="text-center text-muted-foreground mt-8">If customers call you — this fits.</p>
       </section>
 
       {/* Pricing — ROI-first framing */}
       <section className="bg-muted/30 py-16 border-y border-border/50">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold tracking-tight text-center mb-3">
-            Missed-call coverage, not another subscription
+            Coverage for the calls you&apos;d otherwise lose
           </h2>
           <p className="text-center text-muted-foreground mb-4 max-w-xl mx-auto leading-relaxed">
             {formatJobRoiLine()} No setup fees. Overage {formatOverageRate()} only if you exceed included calls.
             Cancel anytime.
           </p>
           <p className="text-center text-sm text-muted-foreground mb-10 max-w-lg mx-auto leading-relaxed">
-            Pick the plan that matches how you handle calls — most one-truck shops start on Solo Owner.
+            Most one-truck shops start on Solo Owner. Upgrade when you need every inbound call answered.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {PRICING_TIERS.map((tier) => (
@@ -435,8 +436,8 @@ export default function HomePage() {
                       className={`mb-1 inline-block w-fit rounded px-2 py-1 text-xs font-semibold uppercase tracking-wide ${
                         tier.badge === "Best to start"
                           ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
-                          : tier.badge === "Most popular"
-                            ? "bg-primary text-primary-foreground"
+                          : tier.badge === "Growing shops"
+                            ? "bg-primary/15 text-primary"
                             : "bg-muted text-muted-foreground"
                       }`}
                     >
@@ -475,7 +476,7 @@ export default function HomePage() {
             </p>
             <Link href="/pricing">
               <Button size="lg" className="gap-2">
-                See full pricing & start free trial
+                See full pricing &amp; start free trial
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Button>
             </Link>
@@ -487,22 +488,22 @@ export default function HomePage() {
       <section className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center mb-4">Frequently asked questions</h2>
         <p className="text-center text-muted-foreground mb-12 max-w-xl mx-auto">
-          Quick answers so you can get started with confidence.
+          Straight answers so you can decide with confidence.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
           <Card className="glass-card">
             <CardHeader>
-              <CardTitle className="text-base">“Does it sound like a real person?”</CardTitle>
+              <CardTitle className="text-base">“Does it sound natural?”</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Yes. Natural conversation, no robot menus. Callers get answers faster than voicemail.
+                Yes — clear conversation, no robot menus. Callers get help faster than leaving a message. If asked, it identifies as an automated assistant.
               </p>
             </CardContent>
           </Card>
           <Card className="glass-card">
             <CardHeader>
-              <CardTitle className="text-base">“What if the caller wants a human?”</CardTitle>
+              <CardTitle className="text-base">“What if they want a person?”</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-2">You can set:</p>
@@ -519,7 +520,7 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                No. Use your existing business phone and forward calls. Summaries go to email, SMS, and optional CRM.
+                No. Keep your business phone and forward calls. Summaries go to email, SMS, and optional CRM.
               </p>
             </CardContent>
           </Card>
@@ -529,7 +530,7 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                About 5 minutes. Sign up, add your business phone, and set call forwarding. See our Help guide for carrier steps.
+                About five minutes. Sign up, add your business phone, and set call forwarding. Carrier steps are in Help.
               </p>
             </CardContent>
           </Card>
@@ -541,23 +542,23 @@ export default function HomePage() {
         </p>
       </section>
 
-      {/* Mistakes to Avoid */}
+      {/* Cost of inaction */}
       <section className="bg-muted/30 py-16 border-y border-border/50">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-2xl font-bold mb-4">Mistakes to Avoid (Most Shops Do This)</h2>
+          <h2 className="text-2xl font-bold mb-4">What quietly costs shops the most</h2>
           <ul className="inline-block text-left list-none space-y-2 text-muted-foreground">
             {[
-              "Letting calls go to voicemail",
-              "Relying only on daytime staff",
-              "Missing after-hours emergencies",
-              "Losing weekend leads",
+              "Letting busy and after-hours calls go unanswered",
+              "Hoping callers will leave a message (most won't)",
+              "Missing weekend and emergency leads",
+              "Finding out a competitor booked the job first",
             ].map((item, i) => (
               <li key={i} className="flex items-center gap-2">
                 <span className="text-destructive font-medium">×</span> {item}
               </li>
             ))}
           </ul>
-          <p className="font-medium mt-6 text-foreground">Each one costs real money.</p>
+          <p className="font-medium mt-6 text-foreground">Each one is a job that walked away.</p>
         </div>
       </section>
 
@@ -589,7 +590,7 @@ export default function HomePage() {
             </div>
           </div>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Average job value for contractors: <strong className="text-foreground">$350–$600</strong>. 
+            Average job value for contractors: <strong className="text-foreground">{formatAvgJobValueRange()}</strong>.
             Capture just one job from a missed call, and the service pays for itself for months.
           </p>
         </div>
@@ -605,9 +606,9 @@ export default function HomePage() {
         contentClassName="container mx-auto px-4 text-center"
       >
         <div className="max-w-3xl mx-auto rounded-2xl border border-white/10 bg-primary/90 backdrop-blur-md px-6 py-12 sm:px-10 text-primary-foreground shadow-2xl shadow-primary/20">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Turn your phone into a 24/7 lead machine</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Turn missed calls into paying jobs</h2>
           <p className="text-lg opacity-90 max-w-2xl mx-auto mb-8">
-            Stop losing jobs to voicemail. Forward your line, capture lead details, and get summaries by text or email — usually within seconds.
+            We answer when you can&apos;t, capture the lead, and text you the details — usually within seconds.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
             <span className="opacity-90">{trialHeadlineLabel()}</span>
@@ -616,14 +617,14 @@ export default function HomePage() {
             <span className="opacity-60">·</span>
             <span className="opacity-90">Cancel anytime</span>
           </div>
-          <Link href="/sign-up">
+          <Link href="/sign-up?next=%2Ftrial%2Fstart">
             <Button size="lg" variant="secondary" className="gap-2 bg-white text-primary hover:bg-white/90 shadow-lg min-h-[48px] px-8">
               Start your free trial
               <ArrowRight className="h-5 w-5" aria-hidden />
             </Button>
           </Link>
           <p className="text-sm opacity-80 mt-6">
-            Setup in 5 minutes. Use your existing business number.
+            Setup in about five minutes. Use your existing business number.
           </p>
         </div>
       </SectionBackdrop>

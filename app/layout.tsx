@@ -8,7 +8,7 @@ import { Nav } from "@/components/nav"
 import { SUPPORT_EMAIL } from "@/lib/site-contact"
 import { GOOGLE_PLAY_STORE_URL } from "@/lib/mobile-app"
 import { SITE_URL } from "@/lib/site-url"
-import { siteMetaDescription, trialSummaryShort } from "@/lib/trial-marketing"
+import { siteMetaDescription } from "@/lib/trial-marketing"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { organizationJsonLd, webSiteJsonLd } from "@/lib/structured-data"
 
@@ -25,13 +25,13 @@ const GA_MEASUREMENT_ID = "G-F7EPPRSNR1"
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "CallGrabbr - Stop Losing Jobs to Voicemail",
+  title: "CallGrabbr - Stop Losing Jobs to Missed Calls",
   description: siteMetaDescription(),
   icons: { icon: "/icon.png" },
   verification: { google: googleSiteVerification },
   openGraph: {
-    title: "CallGrabbr - Stop Losing Jobs to Voicemail",
-    description: "80% of callers won't leave voicemail. One captured job pays for months. CallGrabbr catches missed calls and texts you the lead in seconds.",
+    title: "CallGrabbr - Stop Losing Jobs to Missed Calls",
+    description: siteMetaDescription(),
     url: SITE_URL,
     siteName: "CallGrabbr",
     type: "website",
@@ -41,14 +41,14 @@ export const metadata: Metadata = {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: "CallGrabbr — Stop losing jobs to voicemail",
+        alt: "CallGrabbr — Stop losing jobs to missed calls",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "CallGrabbr - Stop Losing Jobs to Voicemail",
-    description: `80% of callers won't leave voicemail. CallGrabbr answers missed calls and texts you the lead in seconds. ${trialSummaryShort()}.`,
+    title: "CallGrabbr - Stop Losing Jobs to Missed Calls",
+    description: siteMetaDescription(),
     images: ["/opengraph-image"],
   },
 }

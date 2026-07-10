@@ -87,9 +87,15 @@ export function PlanCard({
       className={`flex flex-col h-full ${isPopular ? "border-primary border-2 shadow-lg ring-2 ring-primary/20" : ""}`}
     >
       <CardHeader className="space-y-3 pb-4">
-        {isPopular && (
-          <span className="inline-block w-fit rounded bg-primary/15 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-            {plan.badge ?? "Recommended"}
+        {plan.badge && (
+          <span
+            className={`inline-block w-fit rounded px-2.5 py-1 text-xs font-semibold uppercase tracking-wide ${
+              isPopular
+                ? "bg-primary/15 text-primary"
+                : "bg-muted text-muted-foreground"
+            }`}
+          >
+            {plan.badge}
           </span>
         )}
         <div>
