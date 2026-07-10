@@ -68,4 +68,18 @@ describe("buildAgentOverride", () => {
     const { dynamicVars } = buildAgentOverride(settings, "Acme", [], PlanType.PRO)
     expect(dynamicVars.question_depth_guidance).toMatch(/only essential/i)
   })
+
+  it("includes ring_duration_ms when ring delay is enabled", () => {
+    const settings = {
+      ...DEFAULT_SETTINGS,
+      callRouting: {
+        ...DEFAULT_SETTINGS.callRouting,
+        answerAllCalls: false,
+        ringBeforeAnswerSeconds: 10 as const,
+      },
+    }
+    const { agentOverride, ringDurationMs } = buildAgentOverride(settings, "Acme", [], PlanType.STARTER)
+    expect(ringDurationMs).toBe(10_000)
+    expect(agentOverride.agent?.ring_duration_ms).toBe(10_000)
+  })
 })

@@ -298,6 +298,30 @@ export async function provisionAgentAndNumberForBusiness(
   return { agent_id, phone_number }
 }
 
+/** Re-attach inbound webhook URL on a business number (idempotent). Call after call-routing changes. */
+export async function ensureRetellInboundWebhookForBusiness(businessId: string): Promise<void> {
+  const apiKey = process.env.RETELL_API_KEY
+  const inboundWebhookUrl = getRetellInboundWebhookUrl()
+  if (!apiKey || !inboundWebhookUrl) return
+
+  const business = await db.business.findUnique({
+    where: { id: businessId },
+    select: { retellPhoneNumber: true, retellAgentId: true, name: true },
+  })
+  if (!business?.retellPhoneNumber || !business.retellAgentId) return
+
+  try {
+    await updatePhoneNumber(apiKey, business.retellPhoneNumber, business.retellAgentId)
+    console.info(
+      "ensureRetellInboundWebhookForBusiness: confirmed inbound webhook on",
+      business.retellPhoneNumber,
+      business.name
+    )
+  } catch (err) {
+    console.error("ensureRetellInboundWebhookForBusiness failed:", business.retellPhoneNumber, err)
+  }
+}
+
 /**
  * Release a business's Retell number into the recycle pool so it can be reused.
  * Call when a business churns (trial end) or cancels subscription.

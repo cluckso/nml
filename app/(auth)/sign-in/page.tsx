@@ -13,6 +13,7 @@ import { Loader2 } from "lucide-react"
 import { validateEmail, validatePasswordSignIn } from "@/lib/utils"
 import { loadFunnelTrialContext } from "@/lib/funnel/funnel-trial-bridge"
 import { signInPageDescription, trialNavCtaLabel } from "@/lib/trial-marketing"
+import { getSafeRedirectPath } from "@/lib/safe-redirect"
 
 const AUTH_NEXT_KEY = "callgrabbr_auth_next"
 

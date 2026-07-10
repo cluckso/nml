@@ -12,7 +12,7 @@ import {
   type SettingsSection,
 } from "@/lib/business-settings"
 import { getEffectivePlanType } from "@/lib/plans"
-import { syncRetellAgentFromBusiness } from "@/lib/retell"
+import { syncRetellAgentFromBusiness, ensureRetellInboundWebhookForBusiness } from "@/lib/retell"
 
 /** GET /api/settings — return current business settings (merged with defaults) and owner notification phone. */
 export async function GET(req: NextRequest) {
@@ -176,6 +176,14 @@ export async function PATCH(req: NextRequest) {
       } catch (err) {
         console.error("Settings PATCH: syncRetellAgentFromBusiness failed:", err)
         // Still return 200; settings were saved
+      }
+    }
+
+    if (sectionKeys.includes("callRouting") && user.businessId) {
+      try {
+        await ensureRetellInboundWebhookForBusiness(user.businessId)
+      } catch (err) {
+        console.error("Settings PATCH: ensureRetellInboundWebhookForBusiness failed:", err)
       }
     }
 

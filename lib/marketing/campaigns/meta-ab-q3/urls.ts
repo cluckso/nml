@@ -1,6 +1,7 @@
 import { buildCampaignUrl } from "@/lib/marketing/campaign-urls"
 import { META_AB_CAMPAIGN_ID } from "./config"
-import { getMetaAbVariant, type MetaAbAdVariant } from "./posts"
+import { getMetaAbVariant } from "./posts"
+import type { MetaAbAdVariant } from "./types"
 
 /** Tracked sign-up URL for a Meta ad variant (static creative). */
 export function buildMetaAbSignUpUrl(variant: MetaAbAdVariant): string {

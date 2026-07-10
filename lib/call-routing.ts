@@ -7,6 +7,10 @@ export const SECONDS_PER_RING = 5
 export const RETELL_MIN_RING_MS = 5000
 export const RETELL_MAX_RING_MS = 90000
 
+/** Retell inbound webhook times out after 10s; leave headroom for auth, DB, and JSON. */
+export const RETELL_INBOUND_WEBHOOK_TIMEOUT_MS = 10_000
+export const INBOUND_WEBHOOK_RING_SLEEP_HEADROOM_MS = 800
+
 export type RingDelayMode = "seconds" | "rings"
 
 export type RingBeforeAnswerSeconds = 5 | 10 | 15 | 20 | 25 | 30
@@ -185,4 +189,43 @@ export function formatScheduledRingDelaySummary(routing: CallRoutingSettings): s
 export function ringDurationMsForRetellAgent(ms: number): number | undefined {
   if (ms >= RETELL_MIN_RING_MS && ms <= RETELL_MAX_RING_MS) return Math.round(ms)
   return undefined
+}
+
+export type InboundRingDelayPlan = {
+  /** Caller hears ringing while the webhook handler waits (reliable for delays within Retell's timeout). */
+  webhookSleepMs: number
+  /** Remaining delay passed to Retell via agent_override.agent.ring_duration_ms (for longer delays). */
+  retellRingDurationMs: number | undefined
+}
+
+/**
+ * Split ring delay between webhook sleep (while the call is still ringing) and Retell's
+ * ring_duration_ms override. Retell documents both; conversation-flow agents often need
+ * the webhook sleep for short delays (e.g. 10s) to take effect.
+ */
+export function planInboundRingDelay(ringDurationMs: number): InboundRingDelayPlan {
+  if (ringDurationMs <= 0) {
+    return { webhookSleepMs: 0, retellRingDurationMs: undefined }
+  }
+
+  const maxWebhookSleepMs = Math.max(
+    0,
+    RETELL_INBOUND_WEBHOOK_TIMEOUT_MS - INBOUND_WEBHOOK_RING_SLEEP_HEADROOM_MS
+  )
+
+  if (ringDurationMs <= maxWebhookSleepMs) {
+    return { webhookSleepMs: ringDurationMs, retellRingDurationMs: undefined }
+  }
+
+  const webhookSleepMs = maxWebhookSleepMs
+  const remainder = ringDurationMs - webhookSleepMs
+  return {
+    webhookSleepMs,
+    retellRingDurationMs: ringDurationMsForRetellAgent(remainder),
+  }
+}
+
+export function sleepMs(ms: number): Promise<void> {
+  if (ms <= 0) return Promise.resolve()
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }

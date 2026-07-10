@@ -34,7 +34,12 @@ import {
 import { auditCallTranscript } from "@/lib/audit-call-transcript"
 import { fireZapierLeadHook } from "@/lib/zapier"
 import { captureRouteError } from "@/lib/capture-error"
-import { canAnswerSignupInbound, isDemoInboundCall, resolveDemoInboundResponse } from "@/lib/inbound-call-routing"
+import {
+  canAnswerSignupInbound,
+  isDemoInboundCall,
+  resolveDemoInboundResponse,
+} from "@/lib/inbound-call-routing"
+import { planInboundRingDelay, sleepMs, computeRingDurationMsForInbound } from "@/lib/call-routing"
 
 /** Retell expects 204 No Content on success. Use 200 + body only for call_inbound (required) and test/ping. */
 const RETELL_SUCCESS = new NextResponse(null, { status: 204 })
@@ -209,6 +214,20 @@ export async function POST(req: NextRequest) {
         ? (client as { serviceAreas: string[] }).serviceAreas
         : []
 
+      const ringDurationMs = computeRingDurationMsForInbound(settings.callRouting, settings.availability)
+      const ringDelayPlan = planInboundRingDelay(ringDurationMs)
+      if (ringDurationMs > 0) {
+        console.info("Retell call_inbound: ring delay", ringDurationMs, "ms", {
+          webhookSleepMs: ringDelayPlan.webhookSleepMs,
+          retellRingDurationMs: ringDelayPlan.retellRingDurationMs ?? null,
+        })
+        if (ringDelayPlan.webhookSleepMs > 0) {
+          await sleepMs(ringDelayPlan.webhookSleepMs)
+        }
+      } else {
+        console.info("Retell call_inbound: answer immediately (ring delay 0ms)")
+      }
+
       const capacityEval = await evaluateCapacity(settings, client.id)
       const capacityMode = capacityEval.overLimit ? capacityEval.mode : "normal"
       const beginMessageOverride =
@@ -220,7 +239,7 @@ export async function POST(req: NextRequest) {
             )
           : undefined
 
-      const { agentOverride, dynamicVars, ringDurationMs } = buildAgentOverride(
+      const { agentOverride, dynamicVars, ringDurationMs: ringDurationMsFromOverride } = buildAgentOverride(
         settings,
         businessName,
         serviceAreas,
@@ -231,13 +250,20 @@ export async function POST(req: NextRequest) {
           beginMessageOverride,
         }
       )
+
+      const agentOverrideForCall = { ...agentOverride, agent: { ...agentOverride.agent } }
+      if (ringDelayPlan.retellRingDurationMs != null) {
+        agentOverrideForCall.agent = {
+          ...agentOverrideForCall.agent,
+          ring_duration_ms: ringDelayPlan.retellRingDurationMs,
+        }
+      } else if (agentOverrideForCall.agent?.ring_duration_ms != null) {
+        const { ring_duration_ms: _omit, ...agentWithoutRing } = agentOverrideForCall.agent
+        agentOverrideForCall.agent = agentWithoutRing
+      }
+
       if (capacityEval.overLimit) {
         console.info("Retell call_inbound: capacity limit reached", capacityEval.reason, "mode:", capacityMode)
-      }
-      if (ringDurationMs > 0) {
-        console.info("Retell call_inbound: ring delay", ringDurationMs, "ms from call routing settings")
-      } else {
-        console.info("Retell call_inbound: answer immediately (ring delay 0ms)")
       }
 
       const response = {
@@ -252,9 +278,11 @@ export async function POST(req: NextRequest) {
             after_hours_behavior: settings.availability.afterHoursBehavior,
             capacity_mode: capacityMode,
             capacity_over_limit: String(capacityEval.overLimit),
+            ring_delay_ms: String(ringDurationMsFromOverride),
+            ring_delay_webhook_sleep_ms: String(ringDelayPlan.webhookSleepMs),
           },
           dynamic_variables: dynamicVars,
-          agent_override: agentOverride,
+          agent_override: agentOverrideForCall,
         },
       }
       

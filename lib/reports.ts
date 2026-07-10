@@ -4,6 +4,7 @@ import { hasWeeklyReports, getEffectivePlanType } from "./plans"
 import { mergeWithDefaults, type BusinessSettings } from "./business-settings"
 import { subDays } from "date-fns"
 import { AVG_JOB_VALUE_LOW } from "./pricing-catalog"
+import { Resend } from "resend"
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 

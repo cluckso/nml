@@ -12,6 +12,7 @@ import { loadFunnelTrialContext } from "@/lib/funnel/funnel-trial-bridge"
 import { getSafeRedirectPath } from "@/lib/safe-redirect"
 import { TERMS_ACCEPTED_STORAGE_KEY } from "@/lib/user-legal"
 import { trialCtaLabel, signupPageTitle, signupPageDescription } from "@/lib/trial-marketing"
+import { LegalConsentCheckbox } from "@/components/legal/LegalConsentCheckbox"
 
 const AUTH_NEXT_KEY = "callgrabbr_auth_next"
 

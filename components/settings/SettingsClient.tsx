@@ -405,7 +405,14 @@ function AgentPreviewCard({
               </li>
             )}
             {agentPreview?.ringDurationMs != null && agentPreview.ringDurationMs > 0 && (
-              <li className="text-emerald-600">Ring delay applied: {agentPreview.ringDurationMs}ms</li>
+              <li className="text-emerald-600">
+                Ring delay active: {Math.round(agentPreview.ringDurationMs / 1000)}s before assistant answers
+              </li>
+            )}
+            {summary?.answerAllCalls && !summary?.scheduleByBusinessHours && (
+              <li className="text-amber-700 dark:text-amber-500">
+                Assistant answers immediately — turn on &quot;Let me answer first&quot; to add a ring delay.
+              </li>
             )}
           </ul>
         ) : (
@@ -952,21 +959,28 @@ function RingDelayProfileControls({
   onChange: (profile: RingDelayProfile) => void
   namePrefix: string
 }) {
-  const handleAnswerAllChange = (answerAll: boolean) => {
+  const handleLetMeAnswerFirstChange = (enabled: boolean) => {
     onChange({
       ...profile,
-      answerAllCalls: answerAll,
-      ringBeforeAnswerSeconds: answerAll ? profile.ringBeforeAnswerSeconds : profile.ringBeforeAnswerSeconds || 10,
+      answerAllCalls: !enabled,
+      ringBeforeAnswerSeconds: enabled
+        ? profile.ringBeforeAnswerSeconds || 10
+        : profile.ringBeforeAnswerSeconds,
     })
   }
+
+  const withRingDelay = (next: RingDelayProfile): RingDelayProfile => ({
+    ...next,
+    answerAllCalls: false,
+  })
 
   return (
     <div className="space-y-4">
       <Toggle
-        label="Answer immediately"
-        checked={profile.answerAllCalls}
-        onChange={handleAnswerAllChange}
-        description="When on, your call assistant picks up right away for this schedule window."
+        label="Let me answer first"
+        checked={!profile.answerAllCalls}
+        onChange={handleLetMeAnswerFirstChange}
+        description="When on, callers hear ringing for your chosen delay before the assistant picks up."
       />
       {!profile.answerAllCalls && (
         <div className="space-y-4 rounded-lg border border-border bg-muted/20 p-4">
@@ -978,7 +992,7 @@ function RingDelayProfileControls({
                   type="radio"
                   name={`${namePrefix}-ringDelayMode`}
                   checked={profile.ringDelayMode === "seconds"}
-                  onChange={() => onChange({ ...profile, ringDelayMode: "seconds" as RingDelayMode })}
+                  onChange={() => onChange(withRingDelay({ ...profile, ringDelayMode: "seconds" as RingDelayMode }))}
                 />
                 Seconds
               </label>
@@ -987,7 +1001,7 @@ function RingDelayProfileControls({
                   type="radio"
                   name={`${namePrefix}-ringDelayMode`}
                   checked={profile.ringDelayMode === "rings"}
-                  onChange={() => onChange({ ...profile, ringDelayMode: "rings" as RingDelayMode })}
+                  onChange={() => onChange(withRingDelay({ ...profile, ringDelayMode: "rings" as RingDelayMode }))}
                 />
                 Number of rings
               </label>
@@ -1000,10 +1014,12 @@ function RingDelayProfileControls({
                 className="w-full rounded border border-input bg-background px-3 py-2 text-sm"
                 value={profile.ringBeforeAnswerSeconds}
                 onChange={(e) =>
-                  onChange({
-                    ...profile,
-                    ringBeforeAnswerSeconds: Number(e.target.value) as RingBeforeAnswerSeconds,
-                  })
+                  onChange(
+                    withRingDelay({
+                      ...profile,
+                      ringBeforeAnswerSeconds: Number(e.target.value) as RingBeforeAnswerSeconds,
+                    })
+                  )
                 }
               >
                 {RING_SECOND_OPTIONS.map((opt) => (
@@ -1020,10 +1036,12 @@ function RingDelayProfileControls({
                 className="w-full rounded border border-input bg-background px-3 py-2 text-sm"
                 value={profile.ringBeforeAnswerRings}
                 onChange={(e) =>
-                  onChange({
-                    ...profile,
-                    ringBeforeAnswerRings: Number(e.target.value) as RingBeforeAnswerRings,
-                  })
+                  onChange(
+                    withRingDelay({
+                      ...profile,
+                      ringBeforeAnswerRings: Number(e.target.value) as RingBeforeAnswerRings,
+                    })
+                  )
                 }
               >
                 {RING_COUNT_OPTIONS.map((opt) => (

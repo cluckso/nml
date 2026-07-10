@@ -3,6 +3,7 @@ import {
   computeRingDurationMs,
   computeRingDurationMsForInbound,
   normalizeCallRouting,
+  planInboundRingDelay,
   resolveEffectiveRingDelayProfile,
   DEFAULT_CALL_ROUTING,
   DEFAULT_DURING_HOURS_PROFILE,
@@ -113,5 +114,31 @@ describe("computeRingDurationMsForInbound", () => {
     })
     const at = new Date("2026-06-29T02:00:00.000Z")
     expect(computeRingDurationMsForInbound(routing, availability, at)).toBe(0)
+  })
+})
+
+describe("planInboundRingDelay", () => {
+  it("uses webhook sleep only for delays that fit within the Retell webhook timeout", () => {
+    expect(planInboundRingDelay(5_000)).toEqual({
+      webhookSleepMs: 5_000,
+      retellRingDurationMs: undefined,
+    })
+    expect(planInboundRingDelay(10_000)).toEqual({
+      webhookSleepMs: 9_200,
+      retellRingDurationMs: undefined,
+    })
+  })
+
+  it("returns no delay when answer immediately", () => {
+    expect(planInboundRingDelay(0)).toEqual({
+      webhookSleepMs: 0,
+      retellRingDurationMs: undefined,
+    })
+  })
+
+  it("splits long delays between webhook sleep and Retell ring_duration_ms", () => {
+    const plan = planInboundRingDelay(30_000)
+    expect(plan.webhookSleepMs).toBe(9200)
+    expect(plan.retellRingDurationMs).toBe(20_800)
   })
 })

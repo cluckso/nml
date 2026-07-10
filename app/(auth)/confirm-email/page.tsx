@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { confirmEmailValueLine } from "@/lib/trial-marketing"
+import { CheckCircle2, Loader2, Mail } from "lucide-react"
 
 function ConfirmEmailContent() {
   const searchParams = useSearchParams()
