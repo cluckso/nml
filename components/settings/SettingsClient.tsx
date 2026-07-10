@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Lock, Save, Loader2, Check } from "lucide-react"
+import { Lock, Save, Loader2, Check, Clock, PhoneForwarded, Zap, ChevronDown, Settings2 } from "lucide-react"
 import Link from "next/link"
 import type {
   BusinessSettings,
@@ -35,6 +35,14 @@ import type {
 } from "@/lib/business-settings"
 import { SECTION_LABELS, SECTION_MIN_TIER, SECTION_UPGRADE_DESCRIPTIONS } from "@/lib/business-settings"
 import { formatRingDelayLabel, formatScheduledRingDelaySummary } from "@/lib/call-routing"
+import {
+  CALL_ROUTING_PRESETS,
+  applyCallRoutingPreset,
+  detectCallRoutingPreset,
+  describeCallRoutingBehavior,
+  describeCallRoutingBehaviorDetail,
+  type CallRoutingPresetId,
+} from "@/lib/call-routing-presets"
 import { BUSINESS_TIMEZONE_OPTIONS } from "@/lib/business-timezone"
 import {
   INTAKE_TEMPLATE_OPTIONS,
@@ -69,6 +77,15 @@ const TABS: { section: SettingsSection; tier: "starter" | "pro" | "local_plus" }
 ]
 
 const TIER_GROUP_LABELS = PLAN_VOLUME_TAGS
+
+const SECTION_INTROS: Partial<Record<SettingsSection, string>> = {
+  greeting: "How your assistant sounds when it picks up — greeting, tone, and voice.",
+  intakeFields: "What information to collect from callers on every job lead.",
+  availability: "Your timezone and business hours — used for after-hours behavior and call routing schedules.",
+  notifications: "Where we send call summaries and alerts when a lead comes in.",
+  callRouting: "When your assistant answers forwarded calls — quick presets below, or customize the timing.",
+  missedCallRecovery: "Follow up automatically when someone hangs up before your assistant finishes intake.",
+}
 
 export function SettingsClient() {
   const [settings, setSettings] = useState<BusinessSettings | null>(null)
@@ -234,6 +251,9 @@ export function SettingsClient() {
       <div className="flex-1 min-w-0">
         {error && <p className="text-sm text-destructive mb-4">{error}</p>}
         {saved && <p className="text-sm text-emerald-600 mb-4">Settings saved and verified.</p>}
+        {!isLocked(activeTab) && SECTION_INTROS[activeTab] && (
+          <p className="text-sm text-muted-foreground mb-5 -mt-1">{SECTION_INTROS[activeTab]}</p>
+        )}
         <AgentPreviewCard
           agentPreview={agentPreview}
           verified={agentPreviewVerified}
@@ -376,47 +396,52 @@ function AgentPreviewCard({
           )}
         </CardTitle>
         <CardDescription>
-          Shows what will be sent to your call assistant on each call. Use &quot;Verify&quot; to confirm your settings are applied.
+          A snapshot of what your assistant will use on the next call. Click Verify after saving changes.
         </CardDescription>
       </CardHeader>
       <CardContent className="text-sm">
         {summary ? (
-          <ul className="space-y-1 text-muted-foreground">
-            <li>
-              {summary.scheduleByBusinessHours
-                ? summary.scheduledRingDelayLabel ?? "Scheduled by business hours"
-                : summary.answerAllCalls
-                  ? "Answer all calls immediately"
-                  : `Ring delay: ${summary.ringDelayLabel ?? `${summary.ringBeforeAnswerSeconds ?? 0} sec`}`}
-            </li>
-            {summary.scheduleByBusinessHours && (
-              <li className="text-xs">Active now: {summary.ringDelayLabel ?? "—"}</li>
-            )}
-            <li>Tone: {summary.tone ?? "—"}</li>
-            <li>
-              Question depth: {summary.questionDepth ?? "—"}
-              {summary.questionDepthGuidance ? (
-                <span className="block text-xs mt-0.5">{summary.questionDepthGuidance}</span>
-              ) : null}
-            </li>
+          <dl className="grid gap-3 sm:grid-cols-2">
+            <div className="rounded-lg border border-border/60 bg-muted/20 px-3 py-2.5 sm:col-span-2">
+              <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Call pickup</dt>
+              <dd className="mt-1 text-foreground font-medium">
+                {summary.scheduleByBusinessHours
+                  ? summary.scheduledRingDelayLabel ?? "Scheduled by business hours"
+                  : summary.answerAllCalls
+                    ? "Answers immediately on every call"
+                    : `Rings ${summary.ringDelayLabel?.toLowerCase() ?? `${summary.ringBeforeAnswerSeconds ?? 0} seconds`} before answering`}
+              </dd>
+              {summary.scheduleByBusinessHours && (
+                <p className="mt-1 text-xs text-muted-foreground">Right now: {summary.ringDelayLabel ?? "—"}</p>
+              )}
+              {agentPreview?.ringDurationMs != null && agentPreview.ringDurationMs > 0 && (
+                <p className="mt-1 text-xs text-emerald-600">
+                  Active delay: ~{Math.round(agentPreview.ringDurationMs / 1000)}s before assistant speaks
+                </p>
+              )}
+              {summary?.answerAllCalls && !summary?.scheduleByBusinessHours && (
+                <p className="mt-1 text-xs text-amber-700 dark:text-amber-500">
+                  No ring delay — assistant picks up as soon as the call forwards through.
+                </p>
+              )}
+            </div>
+            <div className="rounded-lg border border-border/60 px-3 py-2.5">
+              <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Tone</dt>
+              <dd className="mt-1 capitalize text-foreground">{summary.tone ?? "—"}</dd>
+            </div>
+            <div className="rounded-lg border border-border/60 px-3 py-2.5">
+              <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Question depth</dt>
+              <dd className="mt-1 capitalize text-foreground">{summary.questionDepth ?? "—"}</dd>
+            </div>
             {(summary.beginMessage ?? agentPreview?.beginMessage) && (
-              <li>
-                Greeting: <span className="text-foreground">&ldquo;{summary.beginMessage ?? agentPreview?.beginMessage}&rdquo;</span>
-              </li>
+              <div className="rounded-lg border border-border/60 px-3 py-2.5 sm:col-span-2">
+                <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Opening greeting</dt>
+                <dd className="mt-1 text-foreground">&ldquo;{summary.beginMessage ?? agentPreview?.beginMessage}&rdquo;</dd>
+              </div>
             )}
-            {agentPreview?.ringDurationMs != null && agentPreview.ringDurationMs > 0 && (
-              <li className="text-emerald-600">
-                Ring delay active: {Math.round(agentPreview.ringDurationMs / 1000)}s before assistant answers
-              </li>
-            )}
-            {summary?.answerAllCalls && !summary?.scheduleByBusinessHours && (
-              <li className="text-amber-700 dark:text-amber-500">
-                Assistant answers immediately — turn on &quot;Let me answer first&quot; to add a ring delay.
-              </li>
-            )}
-          </ul>
+          </dl>
         ) : (
-          <p className="text-muted-foreground">Click &quot;Verify&quot; to see what the agent will use.</p>
+          <p className="text-muted-foreground">Click Verify to preview your assistant configuration.</p>
         )}
       </CardContent>
     </Card>
@@ -1059,12 +1084,27 @@ function RingDelayProfileControls({
   )
 }
 
+const PRESET_ICONS = {
+  "daytime-delay": Clock,
+  "always-delay": PhoneForwarded,
+  "always-answer": Zap,
+} as const
+
 function CallRoutingSection({ value, onSave, saving }: { value: CallRoutingSettings; onSave: (v: CallRoutingSettings) => void; saving: boolean }) {
   const [d, setD] = useState(value)
+  const [showCustom, setShowCustom] = useState(() => detectCallRoutingPreset(value) === "custom")
 
   useEffect(() => {
     setD(value)
+    setShowCustom(detectCallRoutingPreset(value) === "custom")
   }, [value])
+
+  const activePreset = detectCallRoutingPreset(d)
+
+  const applyPreset = (presetId: Exclude<CallRoutingPresetId, "custom">) => {
+    setD(applyCallRoutingPreset(presetId, d))
+    setShowCustom(false)
+  }
 
   const handleScheduleToggle = (enabled: boolean) => {
     if (enabled) {
@@ -1079,86 +1119,207 @@ function CallRoutingSection({ value, onSave, saving }: { value: CallRoutingSetti
         },
         afterHours: d.afterHours?.answerAllCalls != null
           ? d.afterHours
-          : { ...d.afterHours, answerAllCalls: true, ringDelayMode: d.ringDelayMode, ringBeforeAnswerSeconds: d.ringBeforeAnswerSeconds, ringBeforeAnswerRings: d.ringBeforeAnswerRings },
+          : {
+              ...d.afterHours,
+              answerAllCalls: true,
+              ringDelayMode: d.ringDelayMode,
+              ringBeforeAnswerSeconds: d.ringBeforeAnswerSeconds,
+              ringBeforeAnswerRings: d.ringBeforeAnswerRings,
+            },
       })
-      return
+    } else {
+      setD({ ...d, scheduleByBusinessHours: false })
     }
-    setD({ ...d, scheduleByBusinessHours: false })
+    setShowCustom(true)
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Call Routing</CardTitle>
-        <CardDescription>
-          Control when your call assistant picks up forwarded calls. Forward your business line to your CallGrabbr number at your carrier, then choose whether it answers right away or after a delay.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <Toggle
-          label="Different behavior during vs after business hours"
-          checked={d.scheduleByBusinessHours}
-          onChange={handleScheduleToggle}
-          description="Example: ring 10 seconds during the day so you can answer first, then answer immediately after hours. Uses your Hours & Availability settings."
-        />
-
-        {d.scheduleByBusinessHours ? (
-          <div className="space-y-6">
-            <div className="rounded-lg border border-border p-4 space-y-3">
-              <h4 className="text-sm font-medium">During business hours</h4>
-              <RingDelayProfileControls
-                profile={d.duringHours}
-                onChange={(duringHours) => setD({ ...d, duringHours })}
-                namePrefix="during"
-              />
-            </div>
-            <div className="rounded-lg border border-border p-4 space-y-3">
-              <h4 className="text-sm font-medium">After hours & closed days</h4>
-              <RingDelayProfileControls
-                profile={d.afterHours}
-                onChange={(afterHours) => setD({ ...d, afterHours })}
-                namePrefix="after"
-              />
-            </div>
-            <p className="text-xs text-muted-foreground">{formatScheduledRingDelaySummary(d)}</p>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>When your assistant picks up</CardTitle>
+          <CardDescription>
+            Forward your business line to your CallGrabbr number. These settings control how long the phone rings on
+            your end before the assistant answers.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
+            <p className="text-sm font-medium text-foreground">Current behavior</p>
+            <p className="mt-1 text-sm text-muted-foreground">{describeCallRoutingBehavior(d)}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{describeCallRoutingBehaviorDetail(d)}</p>
           </div>
-        ) : (
-          <RingDelayProfileControls
-            profile={d}
-            onChange={(profile) => setD({ ...d, ...profile })}
-            namePrefix="default"
+
+          <div className="space-y-3">
+            <div>
+              <h3 className="text-sm font-semibold">Quick setup</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Pick a standard pattern. You can fine-tune timing below if needed.
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-1 lg:grid-cols-3">
+              {CALL_ROUTING_PRESETS.map((preset) => {
+                const Icon = PRESET_ICONS[preset.id]
+                const selected = activePreset === preset.id
+                return (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => applyPreset(preset.id)}
+                    className={cn(
+                      "relative rounded-xl border p-4 text-left transition-colors",
+                      "hover:border-primary/40 hover:bg-muted/30",
+                      selected ? "border-primary bg-primary/5 ring-1 ring-primary/30" : "border-border bg-card"
+                    )}
+                  >
+                    {preset.recommended && (
+                      <Badge className="absolute top-3 right-3 text-[10px]" variant="secondary">
+                        Recommended
+                      </Badge>
+                    )}
+                    <div className="flex items-start gap-3 pr-16">
+                      <div
+                        className={cn(
+                          "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+                          selected ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
+                        )}
+                      >
+                        <Icon className="h-4 w-4" aria-hidden />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium leading-snug">{preset.title}</p>
+                        <p className="mt-1 text-xs text-muted-foreground leading-relaxed">{preset.summary}</p>
+                      </div>
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+            {activePreset === "custom" && (
+              <p className="text-xs text-muted-foreground">
+                You&apos;re using custom timing — not an exact quick-setup match. Save to keep it, or pick a preset above.
+              </p>
+            )}
+          </div>
+
+          <div className="rounded-xl border border-border">
+            <button
+              type="button"
+              onClick={() => setShowCustom((open) => !open)}
+              className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-muted/30 transition-colors rounded-xl"
+            >
+              <span className="flex items-center gap-2 text-sm font-medium">
+                <Settings2 className="h-4 w-4 text-muted-foreground" aria-hidden />
+                Customize timing
+              </span>
+              <ChevronDown
+                className={cn("h-4 w-4 text-muted-foreground transition-transform", showCustom && "rotate-180")}
+                aria-hidden
+              />
+            </button>
+            {showCustom && (
+              <div className="space-y-4 border-t border-border px-4 py-4">
+                <Toggle
+                  label="Different timing during vs after business hours"
+                  checked={d.scheduleByBusinessHours}
+                  onChange={handleScheduleToggle}
+                  description="Uses your Hours & Availability schedule. Example: ring 10 seconds on weekdays, answer immediately on nights and weekends."
+                />
+
+                {d.scheduleByBusinessHours ? (
+                  <div className="space-y-4">
+                    <div className="rounded-lg border border-border bg-muted/10 p-4 space-y-3">
+                      <h4 className="text-sm font-medium">During business hours</h4>
+                      <RingDelayProfileControls
+                        profile={d.duringHours}
+                        onChange={(duringHours) => setD({ ...d, duringHours })}
+                        namePrefix="during"
+                      />
+                    </div>
+                    <div className="rounded-lg border border-border bg-muted/10 p-4 space-y-3">
+                      <h4 className="text-sm font-medium">After hours &amp; closed days</h4>
+                      <RingDelayProfileControls
+                        profile={d.afterHours}
+                        onChange={(afterHours) => setD({ ...d, afterHours })}
+                        namePrefix="after"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">{formatScheduledRingDelaySummary(d)}</p>
+                  </div>
+                ) : (
+                  <div className="rounded-lg border border-border bg-muted/10 p-4">
+                    <RingDelayProfileControls
+                      profile={d}
+                      onChange={(profile) => setD({ ...d, ...profile })}
+                      namePrefix="default"
+                    />
+                  </div>
+                )}
+
+                {!d.scheduleByBusinessHours && !d.answerAllCalls && (
+                  <p className="text-xs text-muted-foreground">
+                    Callers hear ringing for {formatRingDelayLabel(d).toLowerCase()} on your forwarded line before the
+                    assistant picks up.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          <SaveBtn saving={saving} onClick={() => onSave(d)} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base">Advanced routing</CardTitle>
+          <CardDescription>Emergency forwarding, spam handling, and caller priority.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <Toggle
+            label="Forward emergencies"
+            checked={d.emergencyForward}
+            onChange={(v) => setD({ ...d, emergencyForward: v })}
+            description="Bypass the ring delay and connect urgent calls to a phone number you choose."
           />
-        )}
-
-        {!d.scheduleByBusinessHours && !d.answerAllCalls && (
-          <p className="text-xs text-muted-foreground">
-            Current setting: {formatRingDelayLabel(d)}. Use unconditional forwarding at your carrier so calls reach your CallGrabbr number; this delay controls how long your assistant waits before answering.
-          </p>
-        )}
-        <Toggle label="Forward emergencies" checked={d.emergencyForward} onChange={(v) => setD({ ...d, emergencyForward: v })} description="Immediately forward emergency calls to a phone number." />
-        {d.emergencyForward && (
-          <div className="space-y-2 pl-6">
-            <div className="flex items-center gap-2">
-              <Label>Forward to number</Label>
-              <Link href="/docs/faq" className="text-sm text-primary hover:underline" target="_blank" rel="noopener noreferrer">
-                Help
-              </Link>
+          {d.emergencyForward && (
+            <div className="space-y-2 pl-6">
+              <div className="flex items-center gap-2">
+                <Label>Forward to number</Label>
+                <Link href="/docs/faq" className="text-sm text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+                  Help
+                </Link>
+              </div>
+              <Input
+                type="tel"
+                placeholder="+1 (555) 123-4567"
+                value={d.emergencyForwardNumber ?? ""}
+                onChange={(e) => setD({ ...d, emergencyForwardNumber: e.target.value || null })}
+              />
             </div>
-            <Input type="tel" placeholder="+1 (555) 123-4567" value={d.emergencyForwardNumber ?? ""} onChange={(e) => setD({ ...d, emergencyForwardNumber: e.target.value || null })} />
+          )}
+          <Toggle
+            label="Tag repeat callers as priority"
+            checked={d.repeatCallerPriorityTag}
+            onChange={(v) => setD({ ...d, repeatCallerPriorityTag: v })}
+            description="Recognize returning callers in lead summaries."
+          />
+          <div className="space-y-2">
+            <Label>Spam and sales calls</Label>
+            <select
+              className="w-full rounded border border-input bg-background px-3 py-2 text-sm"
+              value={d.spamHandling}
+              onChange={(e) => setD({ ...d, spamHandling: e.target.value as CallRoutingSettings["spamHandling"] })}
+            >
+              <option value="block">Block — disconnect without answering</option>
+              <option value="short_response">Short response, then hang up</option>
+              <option value="voicemail">Send to voicemail</option>
+            </select>
           </div>
-        )}
-        <Toggle label="Tag repeat callers as priority" checked={d.repeatCallerPriorityTag} onChange={(v) => setD({ ...d, repeatCallerPriorityTag: v })} />
-        <div className="space-y-2">
-          <Label>Spam / sales call handling</Label>
-          <select className="w-full rounded border border-input bg-background px-3 py-2 text-sm" value={d.spamHandling} onChange={(e) => setD({ ...d, spamHandling: e.target.value as CallRoutingSettings["spamHandling"] })}>
-            <option value="block">Block</option>
-            <option value="short_response">Short response + hang up</option>
-            <option value="voicemail">Transfer to voicemail</option>
-          </select>
-        </div>
-        <SaveBtn saving={saving} onClick={() => onSave(d)} />
-      </CardContent>
-    </Card>
+          <SaveBtn saving={saving} onClick={() => onSave(d)} />
+        </CardContent>
+      </Card>
+    </div>
   )
 }
 

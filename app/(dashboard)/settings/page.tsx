@@ -47,21 +47,22 @@ export default async function SettingsPage() {
         </DashboardPageHeader>
 
         {/* Forwarding number card */}
-        <Card className="glass-card mb-8">
+        <Card className="glass-card mb-8 border-primary/15">
         <CardHeader className="pb-2">
           <CardTitle className="text-base flex items-center gap-2">
-            <Phone className="h-4 w-4" />
-            CallGrabbr number (forward to)
+            <Phone className="h-4 w-4 text-primary" />
+            Your CallGrabbr number
           </CardTitle>
           <CardDescription>
-            Forward your business line to this number so your call assistant answers.
+            Forward your business line to this number (unconditional forwarding at your carrier). Then use Call Routing
+            below to choose when your assistant picks up.
           </CardDescription>
         </CardHeader>
         <CardContent>
           {intakeNumber ? (
-            <p className="text-xl font-mono font-semibold">{formatPhoneForDisplay(intakeNumber) || intakeNumber}</p>
+            <p className="text-2xl font-mono font-semibold tracking-tight">{formatPhoneForDisplay(intakeNumber) || intakeNumber}</p>
           ) : (
-            <p className="text-muted-foreground text-sm">Not configured yet.</p>
+            <p className="text-muted-foreground text-sm">Complete onboarding to get your dedicated number.</p>
           )}
         </CardContent>
       </Card>
