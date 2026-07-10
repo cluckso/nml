@@ -5,8 +5,7 @@ import { Phone, Zap } from "lucide-react"
 import type { TrialStatus } from "@/lib/trial"
 import { FREE_TRIAL_MINUTES } from "@/lib/plans"
 import { approxCallsPerMonth } from "@/lib/plan-usage"
-import { trialDaysLabel } from "@/lib/trial-marketing"
-import { AVG_JOB_VALUE_LOW } from "@/lib/pricing-catalog"
+import { trialDaysLabel, upgradeKeepAnsweringLabel, upgradeTrialEndedLabel } from "@/lib/trial-marketing"
 
 interface TrialCardProps {
   trial: TrialStatus
@@ -71,7 +70,7 @@ export function TrialCard({ trial, hasAgent }: TrialCardProps) {
           )}
           {warningLow && (
             <p className="text-sm text-amber-700 dark:text-amber-400 mt-2">
-              Almost out of trial minutes — upgrade before your next missed call goes to voicemail.
+              Almost out of trial minutes — don&apos;t let the next missed call go unanswered.
             </p>
           )}
         </div>
@@ -91,8 +90,11 @@ export function TrialCard({ trial, hasAgent }: TrialCardProps) {
 
         {hasAgent && !isEnded && trial.minutesUsed > 0 && (
           <p className="text-sm text-muted-foreground">
-            Calls are coming in. Average jobs run ${AVG_JOB_VALUE_LOW.toLocaleString()}+ —{" "}
-            <Link href="/billing" className="text-primary underline font-medium">upgrade</Link> to keep your line active after the trial.
+            Calls are coming in —{" "}
+            <Link href="/billing" className="text-primary underline font-medium">
+              keep your assistant on
+            </Link>{" "}
+            after the trial so you don&apos;t miss the next one.
           </p>
         )}
 
@@ -107,12 +109,14 @@ export function TrialCard({ trial, hasAgent }: TrialCardProps) {
           )}
           {isEnded ? (
             <Button size="sm" asChild>
-              <Link href="/billing">Choose a plan — from $99/mo</Link>
+              <Link href="/billing">{upgradeTrialEndedLabel()}</Link>
             </Button>
           ) : (
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/billing">View plans</Link>
-            </Button>
+            hasAgent && trial.minutesUsed > 0 && (
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/billing">{upgradeKeepAnsweringLabel()}</Link>
+              </Button>
+            )
           )}
         </div>
       </CardContent>

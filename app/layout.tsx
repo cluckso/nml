@@ -174,7 +174,7 @@ rkp("init","PaccPmsytSiq");rkp("event","PAGE_VIEW");
                   Android app
                 </a>
                 <Link href="/funnel/hvac" className="hover:text-foreground text-xs opacity-70">
-                  Funnel demo
+                  See how it works
                 </Link>
                 <Link href="/privacy" className="hover:text-foreground">
                   Privacy Policy

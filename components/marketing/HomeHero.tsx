@@ -2,8 +2,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
 import { MARKETING_IMAGES, MARKETING_IMAGE_ALT } from "@/lib/marketing-images"
-import { formatMissedJobCostLine } from "@/lib/pricing-catalog"
-import { trialDaysLabel, trialConversionLine } from "@/lib/trial-marketing"
+import { trialDaysLabel, trialConversionLine, trialNavCtaLabel } from "@/lib/trial-marketing"
 import {
   ArrowRight,
   Clock,
@@ -35,31 +34,19 @@ export function HomeHero() {
       <p className="text-xl sm:text-2xl font-semibold text-foreground/90 mb-4">
         We answer when you can&apos;t and text you the lead in seconds.
       </p>
-      <p className="text-base sm:text-lg text-muted-foreground mb-2 max-w-2xl mx-auto px-1">
+      <p className="text-base sm:text-lg text-muted-foreground mb-8 max-w-2xl mx-auto px-1">
         Most callers won&apos;t leave a message. Live answering captures 80–95% of those
         calls — vs. 5–15% for voicemail. Built for HVAC, plumbing, electrical, and auto
         repair.
       </p>
-      <p className="text-sm font-medium text-primary/90 mb-8 max-w-xl mx-auto">
-        {formatMissedJobCostLine()}
-      </p>
-      <div className="flex flex-wrap gap-4 justify-center mb-6">
+      <div className="flex flex-wrap gap-4 justify-center mb-4">
         <Link href="/sign-up?next=%2Ftrial%2Fstart" className="min-h-[44px] flex items-center">
           <Button
             size="lg"
             className="gap-2 text-base px-6 sm:px-8 shadow-lg shadow-primary/30 min-h-[44px]"
           >
-            Start free trial
+            {trialNavCtaLabel()}
             <ArrowRight className="h-5 w-5" aria-hidden />
-          </Button>
-        </Link>
-        <Link href="/pricing" className="min-h-[44px] flex items-center">
-          <Button
-            size="lg"
-            variant="secondary"
-            className="gap-2 text-base px-6 sm:px-8 min-h-[44px]"
-          >
-            See plans &amp; pricing
           </Button>
         </Link>
         <Link href="#demo" className="min-h-[44px] flex items-center">
@@ -72,6 +59,11 @@ export function HomeHero() {
           </Button>
         </Link>
       </div>
+      <p className="text-sm text-muted-foreground mb-6">
+        <Link href="/pricing" className="text-primary/90 hover:text-primary hover:underline">
+          See plans &amp; pricing
+        </Link>
+      </p>
       <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-sm text-muted-foreground">
         <span className="inline-flex items-center gap-2">
           <Clock className="h-4 w-4 text-primary/80" aria-hidden />

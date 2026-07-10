@@ -115,11 +115,11 @@ export function getPlanUsageNudge(input: {
       severity: atThreshold || inOverage ? "warning" : "info",
       title: inOverage ? "Trial minutes used up" : "Trial minutes running low",
       message: inOverage
-        ? "Your assistant is paused. Choose Solo Owner ($99/mo) to keep catching missed calls — one job often pays for months."
-        : `You've used ${Math.ceil(percent)}% of your trial. Forward a test call soon so you can see a real lead before minutes run out.`,
-      upgradePlan: PlanType.PRO,
-      upgradePlanName: getPlanDisplayName(PlanType.PRO),
-      ctaLabel: "View plans",
+        ? "Your assistant is paused. Turn it back on so the next call doesn't go unanswered."
+        : `You've used ${Math.ceil(percent)}% of your trial. Forward a test call soon — see a real lead before minutes run out.`,
+      upgradePlan: PlanType.STARTER,
+      upgradePlanName: getPlanDisplayName(PlanType.STARTER),
+      ctaLabel: "Keep answering calls",
       ctaHref,
     }
   }

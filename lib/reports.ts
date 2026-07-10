@@ -3,7 +3,7 @@ import { PlanType } from "@prisma/client"
 import { hasWeeklyReports, getEffectivePlanType } from "./plans"
 import { mergeWithDefaults, type BusinessSettings } from "./business-settings"
 import { subDays } from "date-fns"
-import { Resend } from "resend"
+import { AVG_JOB_VALUE_LOW } from "./pricing-catalog"
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
@@ -105,7 +105,7 @@ export async function sendWeeklyReportForBusiness(
     <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0;">
       <h2 style="margin-top: 0;">Revenue estimate</h2>
       <p>Leads captured: <strong>${calls.length}</strong></p>
-      <p>Potential value: <strong>$${(calls.length * 150).toLocaleString()}</strong> (est. $150/lead avg)</p>
+      <p>Potential value: <strong>$${(calls.length * AVG_JOB_VALUE_LOW).toLocaleString()}</strong> (est. $${AVG_JOB_VALUE_LOW.toLocaleString()}/lead avg)</p>
     </div>
   ` : ""
 

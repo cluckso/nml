@@ -12,7 +12,7 @@ import { PlanType } from "@prisma/client"
 import { formatPhoneForDisplay } from "@/lib/utils"
 import { Phone } from "lucide-react"
 import Link from "next/link"
-import { onboardingCompleteNextStep, onboardingWelcomeSubtitle } from "@/lib/trial-marketing"
+import { onboardingCompleteCelebration, onboardingCompleteNextStep, onboardingWelcomeSubtitle } from "@/lib/trial-marketing"
 import type { OnboardingIntakeNumbers } from "@/lib/intake-routing"
 import { resolveIntakeForIndustry } from "@/lib/intake-routing"
 
@@ -179,6 +179,7 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
       <div className="container mx-auto max-w-2xl py-12">
         <div className="rounded-lg border border-border bg-card p-8 text-center shadow-sm">
           <h1 className="text-2xl font-bold mb-2">You&apos;re set up</h1>
+          <p className="text-primary font-medium mb-4">{onboardingCompleteCelebration()}</p>
           {provisioningWarning && (
             <div className="rounded-lg border border-amber-500/50 bg-amber-500/10 p-4 mb-6 text-left text-sm text-amber-800 dark:text-amber-200" role="alert">
               {provisioningWarning}

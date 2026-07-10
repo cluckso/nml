@@ -16,7 +16,7 @@ import {
 } from "@/lib/funnel/funnel-trial-bridge"
 import { PersistTermsConsent } from "@/components/legal/PersistTermsConsent"
 import { FREE_TRIAL_MINUTES, TRIAL_DAYS } from "@/lib/plans"
-import { trialConversionLine, trialDaysLabel, moneyBackGuaranteeLabel } from "@/lib/trial-marketing"
+import { trialDaysLabel, trialConversionLine, trialLimitsLine, moneyBackGuaranteeLabel } from "@/lib/trial-marketing"
 import { pricingUrl } from "@/lib/monetization-urls"
 import { PLAN_SOLO_OWNER, PLAN_MID_VOLUME } from "@/lib/plan-labels"
 import { CreditCard, Shield } from "lucide-react"
@@ -152,7 +152,7 @@ export function TrialStartClient() {
               </>
             ) : (
               <>
-                {trialConversionLine()} Add your business phone to start.
+                {trialConversionLine()} Add your business phone to start. Trial ends after {trialLimitsLine()}.
               </>
             )}
           </CardDescription>
@@ -197,8 +197,8 @@ export function TrialStartClient() {
               />
               <p className="text-xs text-muted-foreground">
                 {fromFunnel
-                  ? "This is the number callers use — we pre-filled from your funnel if you entered a mobile number."
-                  : "We'll use it to verify one trial per business."}
+                  ? "The number your customers call — we pre-filled it if you entered one in the form."
+                  : "One trial per business line — helps us keep the free trial fair for real shops."}
               </p>
             </div>
             <p className="text-xs text-muted-foreground">

@@ -12,7 +12,7 @@ import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
 import { TrustStrip } from "@/components/marketing/TrustStrip"
 import { MobileAppDownload } from "@/components/marketing/MobileAppDownload"
 import { MARKETING_IMAGES, MARKETING_IMAGE_ALT } from "@/lib/marketing-images"
-import { formatJobRoiLine, formatOverageRate, formatIncludedUsageShort, formatCostPerCapturedCall, formatAvgJobValueRange, PRICING_TIERS } from "@/lib/pricing-catalog"
+import { formatAvgJobValueRange, PRICING_TIERS } from "@/lib/pricing-catalog"
 import {
   ArrowRight,
   CreditCard,
@@ -32,7 +32,7 @@ import {
 import { JsonLd } from "@/components/seo/JsonLd"
 import { softwareApplicationJsonLd } from "@/lib/structured-data"
 import { homePageMetadata } from "@/lib/seo"
-import { trialHeadlineLabel, trialWithNoCardSentence } from "@/lib/trial-marketing"
+import { trialHeadlineLabel, trialWithNoCardSentence, trialNavCtaLabel } from "@/lib/trial-marketing"
 
 export const metadata: Metadata = homePageMetadata()
 
@@ -407,29 +407,18 @@ export default function HomePage() {
         <IndustryPhotoCards />
       </section>
 
-      {/* Pricing — ROI-first framing */}
+      {/* Plans teaser — outcomes first; pricing on /pricing */}
       <section className="bg-muted/30 py-16 border-y border-border/50">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold tracking-tight text-center mb-3">
-            Coverage for the calls you&apos;d otherwise lose
+            Pick coverage for how you run your shop
           </h2>
-          <p className="text-center text-muted-foreground mb-4 max-w-xl mx-auto leading-relaxed">
-            {formatJobRoiLine()} No setup fees. Overage {formatOverageRate()} only if you exceed included calls.
-            Cancel anytime.
+          <p className="text-center text-muted-foreground mb-10 max-w-xl mx-auto leading-relaxed">
+            Most owners start by catching the calls they miss. Upgrade when you need every inbound call answered.
           </p>
-          <p className="text-center text-sm text-muted-foreground mb-10 max-w-lg mx-auto leading-relaxed">
-            Most one-truck shops start on Solo Owner. Upgrade when you need every inbound call answered.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {PRICING_TIERS.map((tier) => (
-              <Card
-                key={tier.key}
-                className={
-                  tier.popular
-                    ? "border-primary/50 bg-primary/5 border-2"
-                    : "glass-card"
-                }
-              >
+              <Card key={tier.key} className={tier.popular ? "border-primary/50 bg-primary/5 border-2" : "glass-card"}>
                 <CardHeader className="space-y-2">
                   {tier.badge && (
                     <span
@@ -444,23 +433,12 @@ export default function HomePage() {
                       {tier.badge}
                     </span>
                   )}
-                  <CardTitle className="text-xl tracking-tight">
-                    {tier.name}
-                    <span className="block text-base font-semibold text-muted-foreground mt-1">
-                      ${tier.price}/month
-                    </span>
-                  </CardTitle>
+                  <CardTitle className="text-xl tracking-tight">{tier.name}</CardTitle>
                   <p className="text-sm text-muted-foreground leading-relaxed">{tier.subtitle}</p>
-                  <p className="text-sm font-medium text-foreground/90 leading-snug">
-                    {formatIncludedUsageShort(tier.includedMinutes)}
-                  </p>
-                  <p className="text-xs text-primary font-medium">
-                    {formatCostPerCapturedCall(tier.price, tier.includedMinutes)}
-                  </p>
-                  <p className="text-xs text-muted-foreground leading-relaxed">{tier.usageNote}</p>
+                  <p className="text-sm text-foreground/90 leading-snug">{tier.usageNote}</p>
                 </CardHeader>
                 <CardContent className="space-y-2 pt-0">
-                  {tier.features.map((f) => (
+                  {tier.features.slice(0, 4).map((f) => (
                     <p key={f} className="text-sm text-muted-foreground flex items-start gap-2 leading-snug">
                       <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" aria-hidden />
                       {f}
@@ -476,10 +454,15 @@ export default function HomePage() {
             </p>
             <Link href="/pricing">
               <Button size="lg" className="gap-2">
-                See full pricing &amp; start free trial
+                {trialNavCtaLabel()}
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Button>
             </Link>
+            <p className="text-sm text-muted-foreground mt-4">
+              <Link href="/pricing" className="text-primary hover:underline">
+                Compare plans &amp; pricing →
+              </Link>
+            </p>
           </div>
         </div>
       </section>

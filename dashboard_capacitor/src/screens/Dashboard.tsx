@@ -97,8 +97,11 @@ export default function Dashboard({ onSignOut }: DashboardProps) {
               <div className="card" style={{ background: 'rgba(16, 185, 129, 0.1)', borderColor: 'var(--success)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                   <span style={{ fontSize: 20 }}>⚡</span>
-                  <h2 className="section-title" style={{ margin: 0 }}>Free Trial Active</h2>
+                  <h2 className="section-title" style={{ margin: 0 }}>Free trial — forward your line</h2>
                 </div>
+                <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>
+                  Test with real calls. Leads show up here and on the web dashboard.
+                </p>
                 <div style={{ display: 'flex', gap: 16 }}>
                   <div>
                     <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--success)' }}>
@@ -132,7 +135,7 @@ export default function Dashboard({ onSignOut }: DashboardProps) {
                   </span>
                 ) : (
                   <p style={{ marginTop: 12, fontSize: 14, color: 'var(--text-muted)' }}>
-                    Complete setup on the web app to connect your call assistant.
+                    Finish setup on the web app — forward your line to connect your call assistant.
                   </p>
                 )}
               </div>
@@ -193,6 +196,9 @@ export default function Dashboard({ onSignOut }: DashboardProps) {
                 <div className="empty-state">
                   <div className="empty-state-icon">📞</div>
                   <p>No calls yet</p>
+                  <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 8 }}>
+                    Forward your line on the web app — captured leads show up here.
+                  </p>
                 </div>
               )}
               {data.recentCalls?.slice(0, 5).map((c, i) => (

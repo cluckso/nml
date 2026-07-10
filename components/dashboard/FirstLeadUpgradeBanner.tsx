@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { AVG_JOB_VALUE_LOW, AVG_JOB_VALUE_HIGH } from "@/lib/pricing-catalog"
+import { upgradeKeepAnsweringLabel } from "@/lib/trial-marketing"
 import { Sparkles } from "lucide-react"
 
 export function FirstLeadUpgradeBanner({ callCount }: { callCount: number }) {
@@ -12,17 +12,16 @@ export function FirstLeadUpgradeBanner({ callCount }: { callCount: number }) {
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center gap-2">
           <Sparkles className="h-5 w-5 text-primary" />
-          It&apos;s working — keep it on
+          It&apos;s working — don&apos;t turn it off
         </CardTitle>
         <CardDescription>
-          You&apos;ve had {callCount} call{callCount === 1 ? "" : "s"} on your trial. Jobs in your trade often run $
-          {AVG_JOB_VALUE_LOW.toLocaleString()}–${AVG_JOB_VALUE_HIGH.toLocaleString()} — one lead can pay for months of
-          CallGrabbr.
+          You&apos;ve had {callCount} call{callCount === 1 ? "" : "s"} on your trial. That&apos;s exactly what you&apos;d
+          lose if the line goes unanswered again — keep your assistant live after the trial.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-wrap gap-2">
         <Button asChild>
-          <Link href="/billing#plans">Choose a plan — from $99/mo</Link>
+          <Link href="/billing#plans">{upgradeKeepAnsweringLabel()}</Link>
         </Button>
         <Button variant="outline" asChild>
           <Link href="/calls">Review calls</Link>

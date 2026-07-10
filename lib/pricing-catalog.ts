@@ -139,7 +139,7 @@ export function formatRoiHeadline(): string {
 }
 
 export function formatMissedJobCostLine(): string {
-  return `One missed emergency call often costs $${AVG_JOB_VALUE_LOW}–$${AVG_JOB_VALUE_HIGH} — more than months of CallGrabbr`
+  return `One missed emergency job often runs $${AVG_JOB_VALUE_LOW}–$${AVG_JOB_VALUE_HIGH} — enough to cover months of CallGrabbr`
 }
 
 export function formatAvgJobValueRange(): string {

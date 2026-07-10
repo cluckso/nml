@@ -46,7 +46,7 @@ export function onboardingWelcomeSubtitle(hasPlan: boolean): string {
   if (hasPlan) {
     return "You're subscribed — add your business details so your call assistant knows how to answer."
   }
-  return `${TRIAL_DAYS}-day trial · ${FREE_TRIAL_MINUTES} call minutes · About 5 minutes to go live.`
+  return `${TRIAL_DAYS}-day trial · ${FREE_TRIAL_MINUTES} call minutes (${trialLimitsLine()}) · About 5 minutes to go live.`
 }
 
 /** Shown after onboarding completes — pushes user to dashboard setup. */
@@ -81,6 +81,56 @@ export function pricingSchemaTrialDescription(): string {
 /** Short value prop for auth and trial pages. */
 export function trialConversionLine(): string {
   return `Forward your line for ${TRIAL_DAYS} days with ${FREE_TRIAL_MINUTES} real call minutes. If it doesn't capture a lead you'd have lost, don't pay.`
+}
+
+/** Clarifies trial ends when either limit hits — use on trial start and onboarding. */
+export function trialLimitsLine(): string {
+  return `${TRIAL_DAYS} days or ${FREE_TRIAL_MINUTES} call minutes — whichever comes first`
+}
+
+/** Hero / trust strip — outcome only, no pricing. */
+export function trialTrustLine(): string {
+  return `${trialDaysLabel()} free trial · No card required · Cancel anytime`
+}
+
+/** Primary nav and signup CTA — consistent highest-intent language. */
+export function trialNavCtaLabel(): string {
+  return "Start free trial"
+}
+
+/** Loss-framed upgrade CTA — use instead of leading with price. */
+export function upgradeKeepAnsweringLabel(): string {
+  return "Keep answering calls"
+}
+
+/** After trial ends or minutes exhausted. */
+export function upgradeTrialEndedLabel(): string {
+  return "Turn your assistant back on"
+}
+
+/** Sign-up page headline — trial-first, not account-first. */
+export function signupPageTitle(): string {
+  return "Start your free trial"
+}
+
+/** Sign-up page subtitle. */
+export function signupPageDescription(): string {
+  return `Create your account in under a minute. ${trialLimitsLine()}. No credit card required.`
+}
+
+/** Sign-in page for returning users who may not have finished setup. */
+export function signInPageDescription(): string {
+  return "Sign in to finish setup, view captured leads, and manage your call assistant."
+}
+
+/** Onboarding completion — urgency without pricing. */
+export function onboardingCompleteCelebration(): string {
+  return "You're one forwarded call away from your first captured lead."
+}
+
+/** Email confirmation — restate value while they wait. */
+export function confirmEmailValueLine(): string {
+  return `After you confirm, you'll get ${FREE_TRIAL_MINUTES} minutes of real call coverage to test with your own line — no card required.`
 }
 
 export function funnelTrialFeatureLabel(): string {

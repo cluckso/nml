@@ -5,12 +5,12 @@ import { MID_AND_HIGH_VOLUME_LABEL, PLAN_MID_VOLUME, PLAN_HIGH_VOLUME } from "@/
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, Phone, ArrowRight } from "lucide-react"
-import { getAllIndustrySlugs, getIndustryLandingBySlug, formatCurrency } from "@/lib/industry-data"
+import { getAllIndustrySlugs, getIndustryLandingBySlug } from "@/lib/industry-data"
 import { getFunnelConfig } from "@/lib/funnel/industry-configs"
 import { DemoUnlock } from "@/components/marketing/DemoUnlock"
 import { SMSPreview } from "@/components/marketing/SMSPreview"
 import { JsonLd } from "@/components/seo/JsonLd"
-import { funnelTrialFeatureLabel } from "@/lib/trial-marketing"
+import { funnelTrialFeatureLabel, trialSummaryShort, trialNavCtaLabel } from "@/lib/trial-marketing"
 import { industryPageMetadata } from "@/lib/seo"
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data"
 
@@ -63,22 +63,16 @@ export default async function IndustryLandingPage({ params }: PageProps) {
           <div className="flex flex-wrap justify-center gap-3">
             <Button size="lg" asChild>
               <Link href="/trial/start">
-                Start free trial
+                {trialNavCtaLabel()}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <Link href="/pricing">View pricing</Link>
-            </Button>
-            <Button size="lg" variant="ghost" asChild>
-              <Link href={`/funnel/${slug}`}>See funnel</Link>
+              <Link href="#demo">Try a demo call</Link>
             </Button>
           </div>
           <p className="text-sm text-muted-foreground mt-4">
-            Average {data.name.toLowerCase()} job: {formatCurrency(data.averageJobValue)} · One captured lead pays for months of service
-          </p>
-          <p className="text-xs text-muted-foreground mt-2 max-w-md mx-auto">
-            7-day free trial · No card required · Forward your line and test with real calls
+            {trialSummaryShort()} · Forward your line and test with real calls
           </p>
         </div>
       </section>
@@ -154,7 +148,7 @@ export default async function IndustryLandingPage({ params }: PageProps) {
         </div>
       </section>
 
-      <section className="bg-muted/30 border-y border-border/50 py-16">
+      <section id="demo" className="bg-muted/30 border-y border-border/50 py-16">
         <div className="container mx-auto px-4 max-w-xl">
           <h2 className="text-2xl font-bold text-center mb-6">Try a demo call</h2>
           <DemoUnlock />

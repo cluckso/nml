@@ -6,7 +6,7 @@ import Link from "next/link"
 import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Mail, Loader2, CheckCircle2 } from "lucide-react"
+import { confirmEmailValueLine } from "@/lib/trial-marketing"
 
 function ConfirmEmailContent() {
   const searchParams = useSearchParams()
@@ -42,7 +42,7 @@ function ConfirmEmailContent() {
           </div>
           <CardTitle className="text-2xl">Check your email</CardTitle>
           <CardDescription className="text-base">
-            We need to verify your email address before you can sign in.
+            One quick step — then you can forward your line and test with real calls.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -52,7 +52,7 @@ function ConfirmEmailContent() {
               <li>Open your email inbox{email ? ` for ${email}` : ""}.</li>
               <li>Find the message from CallGrabbr (subject: &quot;Confirm your signup&quot; or similar).</li>
               <li>Click the confirmation link in that email.</li>
-              <li>You&apos;ll be signed in — start your free trial and forward your line to test with real calls.</li>
+              <li>You&apos;ll be signed in — {confirmEmailValueLine()}</li>
             </ol>
           </div>
 

@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2 } from "lucide-react"
 import { validateEmail, validatePasswordSignIn } from "@/lib/utils"
 import { loadFunnelTrialContext } from "@/lib/funnel/funnel-trial-bridge"
-import { getSafeRedirectPath } from "@/lib/safe-redirect"
+import { signInPageDescription, trialNavCtaLabel } from "@/lib/trial-marketing"
 
 const AUTH_NEXT_KEY = "callgrabbr_auth_next"
 
@@ -90,7 +90,7 @@ function SignInContent() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Sign In</CardTitle>
-          <CardDescription>Sign in to your CallGrabbr account</CardDescription>
+          <CardDescription>{signInPageDescription()}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignIn} className="space-y-4">
@@ -141,7 +141,7 @@ function SignInContent() {
           <p className="mt-4 text-center text-sm text-muted-foreground">
             Don't have an account?{" "}
             <a href={`/sign-up?next=${encodeURIComponent("/trial/start")}`} className="text-primary hover:underline">
-              Sign up
+              {trialNavCtaLabel()}
             </a>
           </p>
         </CardContent>

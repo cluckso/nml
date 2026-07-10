@@ -1,10 +1,10 @@
-import { Clock, DollarSign, Shield, TrendingUp } from "lucide-react"
+import { Clock, Phone, Shield, Zap } from "lucide-react"
 import { trialDaysLabel } from "@/lib/trial-marketing"
 
 const TRUST_ITEMS = [
-  { icon: TrendingUp, label: "One job pays for months" },
+  { icon: Zap, label: "Leads texted in seconds" },
   { icon: Clock, label: `${trialDaysLabel()} free trial · no card` },
-  { icon: DollarSign, label: "From $99/mo · no setup fee" },
+  { icon: Phone, label: "Keep your existing number" },
   { icon: Shield, label: "Cancel anytime" },
 ] as const
 

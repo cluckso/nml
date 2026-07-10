@@ -1,7 +1,8 @@
 import { Call } from "@prisma/client"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
 import { ChevronRight, Phone } from "lucide-react"
 
@@ -28,9 +29,17 @@ export function CallLog({ calls }: CallLogProps) {
         <CardContent className="py-12 text-center">
           <Phone className="h-10 w-10 text-muted-foreground/50 mx-auto mb-3" />
           <p className="text-muted-foreground font-medium">No calls yet</p>
-          <p className="text-sm text-muted-foreground mt-1">
-            Calls will appear here once your call assistant is answering
+          <p className="text-sm text-muted-foreground mt-1 max-w-sm mx-auto">
+            Forward your business line to your CallGrabbr number — your first captured lead shows up here.
           </p>
+          <div className="flex flex-wrap justify-center gap-2 mt-6">
+            <Button size="sm" asChild>
+              <Link href="/dashboard#setup">Finish setup</Link>
+            </Button>
+            <Button size="sm" variant="outline" asChild>
+              <Link href="/docs/faq">Forwarding guide</Link>
+            </Button>
+          </div>
         </CardContent>
       </Card>
     )

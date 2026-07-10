@@ -11,7 +11,7 @@ import { validateEmail, validatePasswordSignUp } from "@/lib/utils"
 import { loadFunnelTrialContext } from "@/lib/funnel/funnel-trial-bridge"
 import { getSafeRedirectPath } from "@/lib/safe-redirect"
 import { TERMS_ACCEPTED_STORAGE_KEY } from "@/lib/user-legal"
-import { LegalConsentCheckbox } from "@/components/legal/LegalConsentCheckbox"
+import { trialCtaLabel, signupPageTitle, signupPageDescription } from "@/lib/trial-marketing"
 
 const AUTH_NEXT_KEY = "callgrabbr_auth_next"
 
@@ -129,9 +129,9 @@ function SignUpForm() {
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Sign Up</CardTitle>
+          <CardTitle>{signupPageTitle()}</CardTitle>
           <CardDescription>
-            Create your account — then start a 7-day free trial with real calls. No card required.
+            {signupPageDescription()}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -178,7 +178,7 @@ function SignUpForm() {
               variant="compact"
             />
             <Button type="submit" className="w-full" disabled={loading || !agreedToLegal}>
-              {loading ? "Creating account..." : "Sign Up"}
+              {loading ? "Creating account..." : trialCtaLabel()}
             </Button>
           </form>
           <p className="mt-4 text-center text-sm text-muted-foreground">

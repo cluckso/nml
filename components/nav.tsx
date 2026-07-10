@@ -7,10 +7,27 @@ import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import type { User } from "@supabase/supabase-js"
+import { trialNavCtaLabel } from "@/lib/trial-marketing"
+import { getTrialNavBadge, type TrialNavBadge as TrialNavBadgeData } from "@/lib/trial-nav-badge"
+import { TrialNavBadge } from "@/components/nav/TrialNavBadge"
+
+type DashboardNavPayload = {
+  business?: { name?: string } | null
+  hasAgent?: boolean
+  trial?: {
+    isOnTrial: boolean
+    minutesRemaining: number
+    daysRemaining: number
+    isExhausted: boolean
+    isExpired: boolean
+    minutesUsed: number
+  } | null
+}
 
 export function Nav() {
   const [user, setUser] = useState<User | null>(null)
   const [businessName, setBusinessName] = useState<string | null>(null)
+  const [trialBadge, setTrialBadge] = useState<TrialNavBadgeData | null>(null)
   const router = useRouter()
 
   useEffect(() => {
@@ -36,17 +53,37 @@ export function Nav() {
   useEffect(() => {
     if (!user) {
       setBusinessName(null)
+      setTrialBadge(null)
       return
     }
     let cancelled = false
     fetch("/api/dashboard")
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (!cancelled && data?.business?.name) setBusinessName(data.business.name)
-        else if (!cancelled) setBusinessName(null)
+      .then((data: DashboardNavPayload | null) => {
+        if (cancelled) return
+        setBusinessName(data?.business?.name ?? null)
+        const trial = data?.trial
+        if (trial?.isOnTrial) {
+          setTrialBadge(
+            getTrialNavBadge({
+              isOnTrial: trial.isOnTrial,
+              hasAgent: !!data?.hasAgent,
+              minutesRemaining: trial.minutesRemaining,
+              daysRemaining: trial.daysRemaining,
+              isExhausted: trial.isExhausted,
+              isExpired: trial.isExpired,
+              minutesUsed: trial.minutesUsed,
+            })
+          )
+        } else {
+          setTrialBadge(null)
+        }
       })
       .catch(() => {
-        if (!cancelled) setBusinessName(null)
+        if (!cancelled) {
+          setBusinessName(null)
+          setTrialBadge(null)
+        }
       })
     return () => {
       cancelled = true
@@ -62,9 +99,9 @@ export function Nav() {
 
   return (
     <nav className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2 text-foreground" aria-label="CallGrabbr home">
+      <div className="container mx-auto px-4 py-4 flex justify-between items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <Link href="/" className="flex items-center gap-2 text-foreground shrink-0" aria-label="CallGrabbr home">
             <Image
               src="/icon.png"
               alt=""
@@ -75,12 +112,16 @@ export function Nav() {
             />
           </Link>
           {businessName && (
-            <span className="text-sm text-muted-foreground border-l border-border/60 pl-3 font-medium truncate max-w-[200px] sm:max-w-[280px]" title={businessName}>
+            <span
+              className="text-sm text-muted-foreground border-l border-border/60 pl-3 font-medium truncate max-w-[120px] sm:max-w-[200px] md:max-w-[280px]"
+              title={businessName}
+            >
               {businessName}
             </span>
           )}
+          {trialBadge && <TrialNavBadge badge={trialBadge} />}
         </div>
-        <div className="flex gap-4 items-center">
+        <div className="flex gap-4 items-center shrink-0">
           <Link href="/pricing">
             <Button variant="ghost">Pricing</Button>
           </Link>
@@ -113,8 +154,8 @@ export function Nav() {
               <Link href="/sign-in">
                 <Button variant="outline">Sign In</Button>
               </Link>
-              <Link href="/sign-up">
-                <Button>Sign Up</Button>
+              <Link href="/sign-up?next=%2Ftrial%2Fstart">
+                <Button>{trialNavCtaLabel()}</Button>
               </Link>
             </>
           )}

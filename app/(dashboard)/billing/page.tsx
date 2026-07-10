@@ -15,7 +15,7 @@ import { BillingPlansWithAgreement } from "@/components/billing/BillingPlansWith
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Phone } from "lucide-react"
-import { trialBillingCardLabel, trialBillingDescription } from "@/lib/trial-marketing"
+import { trialBillingCardLabel, trialBillingDescription, upgradeTrialEndedLabel } from "@/lib/trial-marketing"
 
 const PLAN_DETAILS = {
   [PlanType.STARTER]: {
@@ -132,11 +132,11 @@ export default async function BillingPage() {
               <div className="space-y-2">
                 <p className="text-2xl font-bold">Free trial</p>
                 <p className="text-sm text-muted-foreground">
-                  {trialBillingDescription()} When you&apos;re ready, Solo Owner ($99/mo) covers missed &amp; after-hours calls for most one-truck shops.
+                  {trialBillingDescription()} When you&apos;re ready, Solo Owner covers missed &amp; after-hours calls for most one-truck shops.
                 </p>
                 {(trial.isExhausted || trial.isExpired) && (
                   <Button asChild className="mt-2">
-                    <Link href="/billing#plans">Choose a plan — from $99/mo</Link>
+                    <Link href="/billing#plans">{upgradeTrialEndedLabel()}</Link>
                   </Button>
                 )}
               </div>

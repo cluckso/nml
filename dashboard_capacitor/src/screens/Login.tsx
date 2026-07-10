@@ -32,7 +32,12 @@ export default function Login({ supabase }: LoginProps) {
   return (
     <div className="page" style={{ paddingTop: 48, maxWidth: 400, margin: '0 auto' }}>
       <h1 style={{ textAlign: 'center', marginBottom: 4 }}>CallGrabbr</h1>
-      <p style={{ textAlign: 'center', color: 'var(--text-muted)', marginBottom: 24 }}>Dashboard</p>
+      <p style={{ textAlign: 'center', color: 'var(--text-muted)', marginBottom: 8 }}>
+        Missed calls answered. Leads texted to you.
+      </p>
+      <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 13, marginBottom: 24 }}>
+        Sign in to view calls, alerts, and your dashboard.
+      </p>
       <form onSubmit={handleSubmit}>
         <label style={{ display: 'block', marginBottom: 16 }}>
           <span style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Email</span>

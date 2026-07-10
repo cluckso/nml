@@ -1,7 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import type { FunnelConfig } from "@/lib/funnel/funnel-config"
+import type { MetaLeadPrefill } from "@/lib/meta-lead-routing"
+import {
+  buildMetaPrefillValues,
+  getMetaSkippedStepIds,
+} from "@/lib/meta-lead-routing"
 import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
 import { getIndustryImageAlt } from "@/lib/marketing-images"
 import { calculateLeadScore } from "@/lib/funnel/lead-scoring"
@@ -23,15 +28,37 @@ import { funnelSubscribeUrl } from "@/lib/monetization-urls"
 
 interface FunnelExperienceProps {
   config: FunnelConfig
+  metaPrefill?: MetaLeadPrefill | null
 }
 
-export function FunnelExperience({ config }: FunnelExperienceProps) {
-  const [values, setValues] = useState<Record<string, string>>({})
+export function FunnelExperience({ config, metaPrefill }: FunnelExperienceProps) {
+  const initialValues = useMemo(
+    () => (metaPrefill ? buildMetaPrefillValues(metaPrefill, config.displayName) : {}),
+    [metaPrefill, config.displayName]
+  )
+  const activeSteps = useMemo(() => {
+    if (!metaPrefill) return config.steps
+    const skipIds = new Set(getMetaSkippedStepIds(metaPrefill))
+    return config.steps.filter((step) => !skipIds.has(step.id))
+  }, [config.steps, metaPrefill])
+
+  const [values, setValues] = useState<Record<string, string>>(initialValues)
   const { submitting, submitted, error, submitLead } = useFunnelLead()
 
   useEffect(() => {
-    trackFunnelView(config.slug)
-  }, [config.slug])
+    trackFunnelView(config.slug, metaPrefill ? "meta" : undefined)
+  }, [config.slug, metaPrefill])
+
+  useEffect(() => {
+    if (!metaPrefill) return
+    saveFunnelTrialContext({
+      industry: config.slug,
+      displayName: config.displayName,
+      contactName: metaPrefill.contactName,
+      contactEmail: metaPrefill.contactEmail,
+      contactPhone: metaPrefill.contactPhone,
+    })
+  }, [config.slug, config.displayName, metaPrefill])
 
   const handleChange = (fieldId: string, value: string) => {
     setValues((prev) => ({ ...prev, [fieldId]: value }))
@@ -102,6 +129,7 @@ export function FunnelExperience({ config }: FunnelExperienceProps) {
           {!submitted ? (
             <FunnelStepForm
               config={config}
+              steps={activeSteps}
               values={values}
               onChange={handleChange}
               onComplete={handleComplete}
@@ -113,18 +141,17 @@ export function FunnelExperience({ config }: FunnelExperienceProps) {
                 <CheckCircle2 className="h-12 w-12 text-primary mx-auto mb-4" />
                 <h3 className="text-xl font-bold mb-2">You&apos;re all set!</h3>
                 <p className="text-muted-foreground mb-6">
-                  Your personalized ROI snapshot is ready. Subscribe to go live today, or start a
-                  free trial with no card.
+                  Your personalized ROI snapshot is ready. Start your free trial with no card — or subscribe when you&apos;re ready to go live.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <Button size="lg" asChild onClick={() => trackFunnelConversion(config.slug, "subscribe")}>
-                    <Link href={subscribeHref}>
-                      Subscribe — 30-day guarantee
+                  <Button size="lg" asChild onClick={() => trackFunnelConversion(config.slug, "trial")}>
+                    <Link href={trialHref}>
+                      Start free trial — no card
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
-                  <Button size="lg" variant="outline" asChild onClick={() => trackFunnelConversion(config.slug, "trial")}>
-                    <Link href={trialHref}>Free trial (no card)</Link>
+                  <Button size="lg" variant="outline" asChild onClick={() => trackFunnelConversion(config.slug, "subscribe")}>
+                    <Link href={subscribeHref}>Subscribe — 30-day guarantee</Link>
                   </Button>
                 </div>
               </CardContent>
