@@ -37,7 +37,7 @@ If sign-up returns **500**, Supabase may be failing while sending the confirmati
 
 ## App behavior
 
-- **Sign-up**: User is sent to `/confirm-email?email=...` and told to check their email. No sign-in until email is confirmed (if you have **Confirm email** on).
+- **Sign-up**: User is sent to `/confirm-email?email=...` and told to check their email. The confirmation link redirects to `/sign-in?message=email-confirmed` so they sign in manually (not to trial signup).
 - **429**: The app shows: *"Too many sign-up attempts. Please wait a few minutes and try again."*
 - **500**: The app shows a message suggesting checking Supabase Auth settings (email/SMTP) or trying again later.
 

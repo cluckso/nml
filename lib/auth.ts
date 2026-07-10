@@ -31,6 +31,7 @@ async function getDbUserFromSupabaseUser(supabaseUserId: string, email: string |
           supabaseUserId,
           email: email || "",
           role: UserRole.CUSTOMER,
+          termsAcceptedAt: new Date(),
         },
         include: { business: true },
       })

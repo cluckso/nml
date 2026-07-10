@@ -1,19 +1,32 @@
 import { createBrowserClient } from "@supabase/ssr"
+import { getRememberMePreference, PERSISTENT_SESSION_MAX_AGE } from "@/lib/auth-session"
 
 let browserClient: ReturnType<typeof createBrowserClient> | null = null
+let clientRememberMe: boolean | null = null
 
-export function createClient() {
+type CreateClientOptions = {
+  rememberMe?: boolean
+  forceNew?: boolean
+}
+
+export function createClient(options?: CreateClientOptions) {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
   if (typeof window === "undefined") {
-    return createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
+    return createBrowserClient(url, key)
   }
-  if (!browserClient) {
-    browserClient = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
+
+  const rememberMe = options?.rememberMe ?? getRememberMePreference()
+  if (!browserClient || clientRememberMe !== rememberMe || options?.forceNew) {
+    browserClient = createBrowserClient(url, key, {
+      isSingleton: false,
+      cookieOptions: rememberMe
+        ? { path: "/", maxAge: PERSISTENT_SESSION_MAX_AGE }
+        : { path: "/" },
+    })
+    clientRememberMe = rememberMe
   }
+
   return browserClient
 }

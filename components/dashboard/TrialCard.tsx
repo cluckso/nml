@@ -10,13 +10,15 @@ import { trialDaysLabel, upgradeKeepAnsweringLabel, upgradeTrialEndedLabel } fro
 interface TrialCardProps {
   trial: TrialStatus
   hasAgent: boolean
+  hasForwardingNumber: boolean
 }
 
-export function TrialCard({ trial, hasAgent }: TrialCardProps) {
+export function TrialCard({ trial, hasAgent, hasForwardingNumber }: TrialCardProps) {
   const { minutesRemaining, minutesUsed, isExhausted, isExpired, daysRemaining } = trial
   const approxCalls = approxCallsPerMonth(FREE_TRIAL_MINUTES)
   const percentUsed = FREE_TRIAL_MINUTES > 0 ? (minutesUsed / FREE_TRIAL_MINUTES) * 100 : 0
   const isEnded = isExhausted || isExpired
+  const isLive = hasAgent || hasForwardingNumber
   const warningLow = minutesRemaining <= 5 && minutesRemaining > 0
   const warningEighty = percentUsed >= 80 && !isExhausted
 
@@ -75,20 +77,21 @@ export function TrialCard({ trial, hasAgent }: TrialCardProps) {
           )}
         </div>
 
-        {!hasAgent && !isEnded && (
+        {!isLive && !isEnded && (
           <p className="text-sm">
-            Connect your call assistant below, forward your business line, and make a test call. That&apos;s when the trial really starts.
+            Get your forwarding number on the dashboard, forward your business line, and make a test call. That&apos;s
+            when the trial really starts.
           </p>
         )}
 
-        {hasAgent && !isEnded && !trial.minutesUsed && (
+        {isLive && !isEnded && !trial.minutesUsed && (
           <p className="text-sm text-muted-foreground">
-            Assistant connected — forward your line and place a test call. Captured leads show up under{" "}
-            <Link href="/calls" className="text-primary underline">Calls</Link>.
+            Your forwarding number is on the dashboard — forward your line and place a test call. Captured leads show
+            up under <Link href="/calls" className="text-primary underline">Calls</Link>.
           </p>
         )}
 
-        {hasAgent && !isEnded && trial.minutesUsed > 0 && (
+        {isLive && !isEnded && trial.minutesUsed > 0 && (
           <p className="text-sm text-muted-foreground">
             Calls are coming in —{" "}
             <Link href="/billing" className="text-primary underline font-medium">
@@ -99,11 +102,11 @@ export function TrialCard({ trial, hasAgent }: TrialCardProps) {
         )}
 
         <div className="flex flex-wrap gap-2">
-          {!hasAgent && !isEnded && (
+          {!isLive && !isEnded && (
             <a href="#setup" className="inline-flex">
               <Button size="sm" className="gap-2">
                 <Phone className="h-4 w-4" />
-                Connect assistant
+                Get forwarding number
               </Button>
             </a>
           )}
@@ -112,7 +115,7 @@ export function TrialCard({ trial, hasAgent }: TrialCardProps) {
               <Link href="/billing">{upgradeTrialEndedLabel()}</Link>
             </Button>
           ) : (
-            hasAgent && trial.minutesUsed > 0 && (
+            isLive && trial.minutesUsed > 0 && (
               <Button variant="outline" size="sm" asChild>
                 <Link href="/billing">{upgradeKeepAnsweringLabel()}</Link>
               </Button>

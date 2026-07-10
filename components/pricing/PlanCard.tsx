@@ -9,7 +9,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Check, Loader2 } from "lucide-react"
 import { PRICING_TIERS_BY_KEY, formatCostPerCapturedCall } from "@/lib/pricing-catalog"
 import { formatIncludedUsagePrimary } from "@/lib/plan-usage"
-import { LegalConsentCheckbox } from "@/components/legal/LegalConsentCheckbox"
 import { moneyBackGuaranteeLabel } from "@/lib/trial-marketing"
 import type { BillingInterval } from "@/lib/stripe-billing"
 
@@ -39,11 +38,9 @@ export function PlanCard({
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
-  const [agreedToLegal, setAgreedToLegal] = useState(false)
   const plan = PRICING_TIERS_BY_KEY[name as keyof typeof PRICING_TIERS_BY_KEY]
   if (!plan) return null
 
-  const legalFieldId = `legal-${plan.planType}`
   const isPopular = plan.popular || recommended
   const displayPrice =
     billingInterval === "annual" && annualPrice != null
@@ -58,7 +55,6 @@ export function PlanCard({
       router.push(`/sign-up?next=${encodeURIComponent(next)}`)
       return
     }
-    if (!agreedToLegal) return
     setLoading(true)
     setCheckoutError(null)
     try {
@@ -145,16 +141,11 @@ export function PlanCard({
                 {checkoutError}
               </p>
             )}
-            <LegalConsentCheckbox
-              id={legalFieldId}
-              checked={agreedToLegal}
-              onChange={setAgreedToLegal}
-            />
             <Button
               className="w-full mt-auto"
               variant={isPopular ? "default" : "outline"}
               onClick={handleGetStarted}
-              disabled={loading || !agreedToLegal}
+              disabled={loading}
             >
               {loading ? (
                 <>

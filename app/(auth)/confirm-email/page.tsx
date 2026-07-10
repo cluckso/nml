@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { confirmEmailValueLine } from "@/lib/trial-marketing"
+import { getEmailConfirmRedirectUrl } from "@/lib/auth-redirect"
 import { CheckCircle2, Loader2, Mail } from "lucide-react"
 
 function ConfirmEmailContent() {
@@ -25,6 +26,9 @@ function ConfirmEmailContent() {
     const { error } = await supabase.auth.resend({
       type: "signup",
       email: email.trim(),
+      options: {
+        emailRedirectTo: getEmailConfirmRedirectUrl(),
+      },
     })
     setResending(false)
     if (error) {
@@ -53,7 +57,7 @@ function ConfirmEmailContent() {
               <li>Open your email inbox{email ? ` for ${email}` : ""}.</li>
               <li>Find the message from CallGrabbr (subject: &quot;Confirm your signup&quot; or similar).</li>
               <li>Click the confirmation link in that email.</li>
-              <li>You&apos;ll be signed in — {confirmEmailValueLine()}</li>
+              <li>Sign in with your password — {confirmEmailValueLine()}</li>
             </ol>
           </div>
 
@@ -97,16 +101,11 @@ function ConfirmEmailContent() {
 
           <div className="pt-4 border-t space-y-2">
             <p className="text-sm text-muted-foreground text-center">
-              Already confirmed? Sign in or start your free trial.
+              Already confirmed? Sign in to continue.
             </p>
-            <div className="flex flex-col sm:flex-row gap-2">
-              <Button asChild className="flex-1" variant="secondary">
-                <Link href="/sign-in">Sign in</Link>
-              </Button>
-              <Button asChild className="flex-1">
-                <Link href="/trial/start">Start free trial</Link>
-              </Button>
-            </div>
+            <Button asChild className="w-full">
+              <Link href="/sign-in">Sign in</Link>
+            </Button>
           </div>
         </CardContent>
       </Card>

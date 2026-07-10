@@ -130,7 +130,7 @@ export function onboardingCompleteCelebration(): string {
 
 /** Email confirmation — restate value while they wait. */
 export function confirmEmailValueLine(): string {
-  return `After you confirm, you'll get ${FREE_TRIAL_MINUTES} minutes of real call coverage to test with your own line — no card required.`
+  return `After you sign in, you'll get ${FREE_TRIAL_MINUTES} minutes of real call coverage to test with your own line — no card required.`
 }
 
 export function funnelTrialFeatureLabel(): string {

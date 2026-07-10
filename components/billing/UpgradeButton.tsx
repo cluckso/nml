@@ -7,15 +7,13 @@ import { PlanType } from "@prisma/client"
 interface UpgradeButtonProps {
   planType: PlanType
   currentPlan?: PlanType | null
-  agreedToLegal?: boolean
 }
 
-export function UpgradeButton({ planType, currentPlan, agreedToLegal = true }: UpgradeButtonProps) {
+export function UpgradeButton({ planType, currentPlan }: UpgradeButtonProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleUpgrade = async () => {
-    if (!agreedToLegal) return
     setError(null)
     setLoading(true)
     try {
@@ -52,7 +50,7 @@ export function UpgradeButton({ planType, currentPlan, agreedToLegal = true }: U
       <Button
         onClick={handleUpgrade}
         className="w-full"
-        disabled={!agreedToLegal || loading}
+        disabled={loading}
       >
         {loading ? "Redirecting…" : currentPlan ? "Switch Plan" : "Subscribe"}
       </Button>

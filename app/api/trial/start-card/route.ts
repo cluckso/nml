@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { getAuthUserFromRequest } from "@/lib/auth"
 import { createSubscriptionTrialCheckoutSession, stripe } from "@/lib/stripe"
 import { PlanType } from "@prisma/client"
-import { hasAcceptedTerms } from "@/lib/user-legal"
 import { prepareBusinessForTrial } from "@/lib/trial-start-business"
 import { db } from "@/lib/db"
 
@@ -31,20 +30,6 @@ export async function POST(req: NextRequest) {
 
     if (typeof businessPhone !== "string" || !businessPhone.trim()) {
       return NextResponse.json({ error: "Missing businessPhone" }, { status: 400 })
-    }
-
-    const dbUser = await db.user.findUnique({
-      where: { id: user.id },
-      select: { termsAcceptedAt: true },
-    })
-    if (!hasAcceptedTerms(dbUser)) {
-      return NextResponse.json(
-        {
-          error:
-            "Please agree to the Terms of Service and Privacy Policy when creating your account before starting a trial.",
-        },
-        { status: 403 }
-      )
     }
 
     const existing = user.businessId

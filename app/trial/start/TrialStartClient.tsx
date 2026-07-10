@@ -14,7 +14,6 @@ import {
   loadFunnelTrialContext,
   type FunnelTrialContext,
 } from "@/lib/funnel/funnel-trial-bridge"
-import { PersistTermsConsent } from "@/components/legal/PersistTermsConsent"
 import { FREE_TRIAL_MINUTES, TRIAL_DAYS } from "@/lib/plans"
 import { trialDaysLabel, trialConversionLine, trialLimitsLine, moneyBackGuaranteeLabel } from "@/lib/trial-marketing"
 import { pricingUrl } from "@/lib/monetization-urls"
@@ -130,7 +129,6 @@ export function TrialStartClient() {
 
   return (
     <div className="container mx-auto max-w-md py-12">
-      <PersistTermsConsent />
       <Card>
         <CardHeader>
           <CardTitle>

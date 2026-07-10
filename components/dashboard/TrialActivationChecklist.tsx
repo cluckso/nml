@@ -9,6 +9,7 @@ import { trialActivationGoal } from "@/lib/trial-marketing"
 type TrialActivationChecklistProps = {
   onboardingComplete: boolean
   hasAgent: boolean
+  hasForwardingNumber: boolean
   hasCalls: boolean
   isEnded: boolean
 }
@@ -16,6 +17,7 @@ type TrialActivationChecklistProps = {
 export function TrialActivationChecklist({
   onboardingComplete,
   hasAgent,
+  hasForwardingNumber,
   hasCalls,
   isEnded,
 }: TrialActivationChecklistProps) {
@@ -31,14 +33,20 @@ export function TrialActivationChecklist({
     {
       id: "connect",
       label: "Get your forwarding number",
-      done: hasAgent,
-      hint: hasAgent ? null : "Click Connect in the setup card — we'll give you the number to forward to.",
+      done: hasForwardingNumber || hasAgent,
+      hint:
+        hasForwardingNumber || hasAgent
+          ? null
+          : "Your forwarding number appears on the dashboard after onboarding — or click Get number in the setup card.",
     },
     {
       id: "forward",
       label: "Forward your business line",
-      done: hasAgent && hasCalls,
-      hint: hasAgent && !hasCalls ? "Set call forwarding at your carrier to the number we gave you. Then call yourself to test." : null,
+      done: (hasForwardingNumber || hasAgent) && hasCalls,
+      hint:
+        (hasForwardingNumber || hasAgent) && !hasCalls
+          ? "Set call forwarding at your carrier to the number on your dashboard. Then call yourself to test."
+          : null,
     },
     {
       id: "first-call",
@@ -89,7 +97,7 @@ export function TrialActivationChecklist({
                 <Link href="/onboarding">Add business details</Link>
               </Button>
             )}
-            {onboardingComplete && !hasAgent && (
+            {onboardingComplete && !hasForwardingNumber && !hasAgent && (
               <Button size="sm" asChild>
                 <a href="#setup">
                   <Phone className="h-4 w-4 mr-2" />
@@ -97,7 +105,7 @@ export function TrialActivationChecklist({
                 </a>
               </Button>
             )}
-            {hasAgent && !hasCalls && (
+            {(hasForwardingNumber || hasAgent) && !hasCalls && (
               <Button size="sm" variant="outline" asChild>
                 <a href="#setup">
                   <PhoneForwarded className="h-4 w-4 mr-2" />

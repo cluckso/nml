@@ -9,14 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2, Mail } from "lucide-react"
 import { validateEmail } from "@/lib/utils"
-
-function getAppOrigin(): string {
-  if (typeof process.env.NEXT_PUBLIC_APP_URL === "string" && process.env.NEXT_PUBLIC_APP_URL.trim()) {
-    return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, "")
-  }
-  if (typeof window !== "undefined") return window.location.origin
-  return ""
-}
+import { getAppOrigin } from "@/lib/auth-redirect"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")

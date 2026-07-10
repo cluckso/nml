@@ -14,18 +14,25 @@ import { validateEmail, validatePasswordSignIn } from "@/lib/utils"
 import { loadFunnelTrialContext } from "@/lib/funnel/funnel-trial-bridge"
 import { signInPageDescription, trialNavCtaLabel } from "@/lib/trial-marketing"
 import { getSafeRedirectPath } from "@/lib/safe-redirect"
+import { getRememberMePreference, setRememberMePreference } from "@/lib/auth-session"
+import { Checkbox } from "@/components/ui/checkbox"
 
 const AUTH_NEXT_KEY = "callgrabbr_auth_next"
 
 function SignInContent() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [staySignedIn, setStaySignedIn] = useState(true)
   const [loading, setLoading] = useState(false)
+  const [checkingEmailConfirm, setCheckingEmailConfirm] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
   const message = searchParams.get("message")
-  const supabase = createClient()
+
+  useEffect(() => {
+    setStaySignedIn(getRememberMePreference())
+  }, [])
 
   useEffect(() => {
     const next = getSafeRedirectPath(searchParams.get("next"))
@@ -39,6 +46,39 @@ function SignInContent() {
     const ctx = loadFunnelTrialContext()
     if (ctx?.contactEmail) setEmail(ctx.contactEmail)
   }, [searchParams])
+
+  useEffect(() => {
+    const code = searchParams.get("code")
+    if (!code) return
+
+    let cancelled = false
+    setCheckingEmailConfirm(true)
+
+    async function handleEmailConfirm() {
+      const authClient = createClient()
+      const { error: exchangeError } = await authClient.auth.exchangeCodeForSession(code!)
+      if (cancelled) return
+
+      if (exchangeError) {
+        setError("This confirmation link is invalid or has expired. Sign in below or request a new confirmation email.")
+        setCheckingEmailConfirm(false)
+        return
+      }
+
+      await authClient.auth.signOut()
+      if (cancelled) return
+
+      router.replace("/sign-in?message=email-confirmed")
+      router.refresh()
+      setCheckingEmailConfirm(false)
+    }
+
+    void handleEmailConfirm()
+
+    return () => {
+      cancelled = true
+    }
+  }, [searchParams, router])
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -56,7 +96,9 @@ function SignInContent() {
     }
 
     setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({
+    setRememberMePreference(staySignedIn)
+    const authClient = createClient({ rememberMe: staySignedIn, forceNew: true })
+    const { error } = await authClient.auth.signInWithPassword({
       email: emailResult.email,
       password: password.trim(),
     })
@@ -86,6 +128,19 @@ function SignInContent() {
     }
   }
 
+  if (checkingEmailConfirm) {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardContent className="flex flex-col items-center gap-4 pt-6">
+            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">Confirming your email…</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -99,7 +154,9 @@ function SignInContent() {
               <div className="bg-primary/10 text-primary text-sm p-3 rounded-md">
                 {message === "account-deleted"
                   ? "Your account was deleted. You can sign up again anytime."
-                  : message}
+                  : message === "email-confirmed"
+                    ? "Your email is confirmed. Sign in with your password to continue."
+                    : message}
               </div>
             )}
             {error && (
@@ -137,6 +194,14 @@ function SignInContent() {
                 autoComplete="current-password"
               />
             </div>
+            <label htmlFor="stay-signed-in" className="flex items-center gap-2 cursor-pointer">
+              <Checkbox
+                id="stay-signed-in"
+                checked={staySignedIn}
+                onCheckedChange={(checked) => setStaySignedIn(checked === true)}
+              />
+              <span className="text-sm text-muted-foreground">Stay signed in</span>
+            </label>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Signing in..." : "Sign In"}
             </Button>

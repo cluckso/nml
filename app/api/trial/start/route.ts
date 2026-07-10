@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getAuthUserFromRequest } from "@/lib/auth"
 import { prepareBusinessForTrial } from "@/lib/trial-start-business"
-import { hasAcceptedTerms } from "@/lib/user-legal"
-import { db } from "@/lib/db"
 
 /**
  * POST /api/trial/start
@@ -27,20 +25,6 @@ export async function POST(req: NextRequest) {
 
     if (typeof businessPhone !== "string" || !businessPhone.trim()) {
       return NextResponse.json({ error: "Missing businessPhone" }, { status: 400 })
-    }
-
-    const dbUser = await db.user.findUnique({
-      where: { id: user.id },
-      select: { termsAcceptedAt: true },
-    })
-    if (!hasAcceptedTerms(dbUser)) {
-      return NextResponse.json(
-        {
-          error:
-            "Please agree to the Terms of Service and Privacy Policy when creating your account before starting a trial.",
-        },
-        { status: 403 }
-      )
     }
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"

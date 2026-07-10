@@ -20,6 +20,11 @@ import { subDays } from "date-fns"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Phone, Clock, AlertTriangle, ChevronRight } from "lucide-react"
+import {
+  getBusinessForwardingNumber,
+  hasDedicatedCallAssistant,
+  hasForwardingNumberToShow,
+} from "@/lib/business-forwarding"
 import { DashboardNav } from "@/components/dashboard/DashboardNav"
 import {
   DashboardPageHeader,
@@ -150,10 +155,9 @@ export default async function DashboardPage() {
 
   const emergencyCalls = recentCalls.filter((c) => c.emergencyFlag).length
   const totalMinutes = stats._sum.minutes || 0
-  // Only "connected" when this business has its own dedicated agent + number
-  const hasAgent = !!(business?.retellAgentId && business?.retellPhoneNumber)
-  const phoneNumber = business?.retellPhoneNumber ?? null
-  const ownerPhone = user.phoneNumber ?? null
+  const hasAgent = hasDedicatedCallAssistant(business)
+  const hasForwardingNumber = hasForwardingNumberToShow(business)
+  const phoneNumber = getBusinessForwardingNumber(business)
 
   const effectivePlan = business?.planType ? getEffectivePlanType(business.planType) : null
   const minutesIncluded = trial.isOnTrial
@@ -191,6 +195,7 @@ export default async function DashboardPage() {
             <TrialActivationChecklist
               onboardingComplete={!!business?.onboardingComplete}
               hasAgent={hasAgent}
+              hasForwardingNumber={hasForwardingNumber}
               hasCalls={stats._count > 0}
               isEnded={trial.isExhausted || trial.isExpired}
             />
@@ -201,15 +206,14 @@ export default async function DashboardPage() {
         <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2" id="trial">
           {trial.isOnTrial && (
             <div id="trial-card">
-              <TrialCard trial={trial} hasAgent={hasAgent} />
+              <TrialCard trial={trial} hasAgent={hasAgent} hasForwardingNumber={hasForwardingNumber} />
             </div>
           )}
           <div className={trial.isOnTrial ? "" : "md:col-span-2"} id="setup">
             <SetupAICard
               hasAgent={hasAgent}
               phoneNumber={phoneNumber}
-              businessName={business?.name ?? "your business"}
-              ownerPhone={ownerPhone}
+              needsDedicatedLine={!hasAgent}
               trialStatus={trial}
               compact
             />

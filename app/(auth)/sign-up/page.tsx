@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { validateEmail, validatePasswordSignUp } from "@/lib/utils"
 import { loadFunnelTrialContext } from "@/lib/funnel/funnel-trial-bridge"
 import { getSafeRedirectPath } from "@/lib/safe-redirect"
+import { getEmailConfirmRedirectUrl } from "@/lib/auth-redirect"
 import { TERMS_ACCEPTED_STORAGE_KEY } from "@/lib/user-legal"
 import { trialCtaLabel, signupPageTitle, signupPageDescription } from "@/lib/trial-marketing"
 import { LegalConsentCheckbox } from "@/components/legal/LegalConsentCheckbox"
@@ -83,22 +84,15 @@ function SignUpForm() {
     }
 
     setLoading(true)
-    const baseUrl =
-      (typeof process.env.NEXT_PUBLIC_APP_URL === "string" && process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "")) ||
-      (typeof window !== "undefined" ? window.location.origin : "")
-    let redirectPath = "/dashboard"
-    try {
-      const stored = getSafeRedirectPath(sessionStorage.getItem(AUTH_NEXT_KEY))
-      if (stored) redirectPath = stored
-    } catch {
-      // ignore
-    }
-    const emailRedirectTo = baseUrl ? `${baseUrl}${redirectPath}` : undefined
+    const emailRedirectTo = getEmailConfirmRedirectUrl()
 
     const { error } = await supabase.auth.signUp({
       email: emailResult.email,
       password: password.trim(),
-      options: emailRedirectTo ? { emailRedirectTo } : {},
+      options: {
+        ...(emailRedirectTo ? { emailRedirectTo } : {}),
+        data: { terms_accepted_at: new Date().toISOString() },
+      },
     })
 
     if (error) {
