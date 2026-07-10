@@ -88,7 +88,8 @@ Then continue intake normally.`,
   demoTaskBlock: `## Demo Task
 Callers are trying the product — treat them like a real customer at a local business.
 - Collect in a natural order: name → what they need help with → callback number → any useful extra (address/city for home service, year/make/model for auto, preferred time if scheduling)
-- Mention "demo" only in the opening; after that sound like a real front desk`,
+- Mention "demo" only in the opening; after that sound like a real front desk
+- End every call with: "Our team will give you a call back as soon as possible. Thank you!"`,
 
   /** Steve personal task block */
   steveTaskBlock: `## Task
@@ -97,7 +98,7 @@ You are answering missed calls for Steve when he cannot pick up.
 - Tailor one follow-up to their caller type; if vague, ask one short clarifying question only
 - For employees/customers, check if the issue is urgent (equipment, safety, opening, staffing) and flag priority when yes
 - Collect callback number; accept the number they're calling from if they say so
-- Tell them Steve will follow up as soon as he can; do not promise exact times`,
+- End every call with: "Our team will give you a call back as soon as possible. Thank you!"`,
 
   /** Steve GM boundaries */
   steveBoundariesBlock: `## GM Boundaries — Never

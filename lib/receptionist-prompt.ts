@@ -1,7 +1,15 @@
 import { Industry } from "@prisma/client"
 import { AGENT_PROMPT_CONFIG } from "@/config/agent-prompt"
 import { buildStevePersonalPromptContext } from "@/config/steve-personal-agent"
+import { CALL_CLOSING_LINE } from "./conversation-flow-instructions"
 import type { BusinessHoursInput } from "./prompts"
+
+function buildCallClosingSection(): string {
+  return `## Call Closing (required)
+After confirmation — or when ending for any reason (out-of-area, capacity, retries exhausted) — say exactly:
+"${CALL_CLOSING_LINE}"
+Then end the call. Do not add follow-up questions or extra goodbye lines.`
+}
 
 const FLEX_MODE_PLAYBOOK_INTRO = `## Call Flow (Flex Mode)
 Tasks in the flow mark progress — follow this playbook for what to collect and in what order.
@@ -31,20 +39,23 @@ const RECEPTIONIST_CORE_SECTIONS = {
 
   empathyAndObjections: `## Empathy & Objection Handling
 - Frustrated caller: acknowledge their frustration, don't argue, don't promise outcomes or exact callback times.
-- Pricing questions: "I can't give pricing over the phone, but I'll make sure the team has your details to follow up."
+- If caller asks pricing: defer to team follow-up — no quotes on the phone.
+- End every call with: "${CALL_CLOSING_LINE}"
 - "Are you a real person?": respond naturally — you're the receptionist taking messages for the team. Never disclose being AI.
 - If they already gave info you were about to ask for: acknowledge it and move on — never re-ask.`,
 }
+
+const CLOSE_STEP = `then say: "${CALL_CLOSING_LINE}"`
 
 const FLEX_PLAYBOOKS = {
   propertyService: (serviceAreas: string) => `${FLEX_MODE_PLAYBOOK_INTRO}
 1. Greet — thank them for calling; get name.
 2. Reason — what they need; one follow-up if vague. If emergency (flood, no heat, gas smell, sparks, etc.): validate and flag priority.
 3. City — property city.
-4. Verify area — service areas: ${serviceAreas}. Do not read the full list aloud. If not supported, apologize and end politely.
+4. Verify area — service areas: ${serviceAreas}. Do not read the full list aloud. If not supported, apologize and end with the required closing line.
 5. Address — full service address when in area.
 6. Phone — best callback number; accept calling-from number if offered.
-7. Confirm — one natural read-back, then close warmly.`,
+7. Confirm — one natural read-back, ${CLOSE_STEP}.`,
 
   autoRepair: `${FLEX_MODE_PLAYBOOK_INTRO}
 1. Greet — get name.
@@ -53,7 +64,7 @@ const FLEX_PLAYBOOKS = {
 4. Vehicle — year, make, model (skip if status-only call).
 5. Appointment preference — only if scheduling (optional).
 6. Phone — callback number.
-7. Confirm — one read-back, then close. No service address or service area.`,
+7. Confirm — one read-back, ${CLOSE_STEP}. No service address or service area.`,
 
   childcare: `${FLEX_MODE_PLAYBOOK_INTRO}
 1. Greet — get name.
@@ -62,19 +73,19 @@ const FLEX_PLAYBOOKS = {
 4. Care type — full-time, part-time, drop-in, etc.
 5. Tour preference — if they want a tour.
 6. Phone — callback number.
-7. Confirm — one read-back. Do not confirm availability or enrollment.`,
+7. Confirm — one read-back, ${CLOSE_STEP}. Do not confirm availability or enrollment.`,
 
   generic: `${FLEX_MODE_PLAYBOOK_INTRO}
 1. Greet — get name.
 2. Reason — what they need; one follow-up if vague.
 3. Phone — callback number.
-4. Confirm — one read-back, then close.`,
+4. Confirm — one read-back, ${CLOSE_STEP}.`,
 
   demo: `${FLEX_MODE_PLAYBOOK_INTRO}
 1. Greet — mention demo line once; get name.
 2. Reason — what they need; collect city/address for home service, vehicle for auto, or appointment pref if relevant.
 3. Phone — callback number.
-4. Confirm — save details silently, one read-back. Mention "demo" only in opening.`,
+4. Confirm — save details silently, one read-back, ${CLOSE_STEP}. Mention "demo" only in opening.`,
 
   steve: `${FLEX_MODE_PLAYBOOK_INTRO}
 1. Greet — static welcome; get name.
@@ -83,7 +94,7 @@ const FLEX_PLAYBOOKS = {
 4. Urgency — for employee/customer only: equipment, safety, opening, or staffing emergency.
 5. Phone — callback number for Steve.
 6. Save — invoke store_message_details silently.
-7. Confirm — one read-back; Steve will follow up, no exact time promised.`,
+7. Confirm — one read-back, ${CLOSE_STEP}.`,
 }
 
 export function getFlexPlaybookForIndustry(industry: Industry, serviceAreas: string[]): string {
@@ -115,14 +126,14 @@ function buildGuardrailsSection(options?: { includeCapacity?: boolean }): string
     ? `
 If {{capacity_mode}} is intake_only, capture caller details but do not promise scheduling or same-day service. If {{capacity_mode}} is decline, keep the call brief, explain capacity limits politely, and end without extended intake.
 
-If {{escalate_after_retries}} is true and the caller is still unclear after {{question_retry_count}} re-asks, summarize captured details, say someone from {{business_name}} will follow up, and end politely.`
+If {{escalate_after_retries}} is true and the caller is still unclear after {{question_retry_count}} re-asks, summarize captured details, then say exactly: "${CALL_CLOSING_LINE}"`
     : ""
 
   return `## Guardrails
 - Never collect payment information, give pricing or quotes, diagnose problems, or promise scheduling, availability, or specific callback times.
 - Follow the Call Flow playbook; flow nodes mark task progress only — do not repeat confirmations.
-- One natural read-back at Confirm, then stop after they respond. Never loop confirmations.
-- Explain what happens next in plain language.
+- One natural read-back at Confirm, then say exactly: "${CALL_CLOSING_LINE}" and end the call.
+- Explain what happens next in plain language before the closing line when helpful.
 - If a situation requires emergency services, say "Nine-One-One" clearly.${capacity}`
 }
 
@@ -155,6 +166,7 @@ export function buildTemplateGlobalPrompt(industry: Industry = Industry.HVAC): s
     buildTemplateIntakeSection(),
     RECEPTIONIST_CORE_SECTIONS.empathyAndObjections,
     buildGuardrailsSection({ includeCapacity: true }),
+    buildCallClosingSection(),
   ].join("\n\n")
 }
 
@@ -223,6 +235,7 @@ export function buildDedicatedGlobalPrompt(
     appointmentBlock,
     tagBlock,
     industryBlock,
+    buildCallClosingSection(),
   ]
     .filter(Boolean)
     .join("\n\n")
@@ -238,6 +251,7 @@ export function buildDemoGlobalPrompt(): string {
     AGENT_PROMPT_CONFIG.demoTaskBlock,
     RECEPTIONIST_CORE_SECTIONS.empathyAndObjections,
     buildGuardrailsSection({ includeCapacity: false }),
+    buildCallClosingSection(),
   ].join("\n\n")
 }
 
@@ -251,5 +265,6 @@ export function buildSteveGlobalPrompt(): string {
     RECEPTIONIST_CORE_SECTIONS.empathyAndObjections,
     AGENT_PROMPT_CONFIG.steveBoundariesBlock,
     buildStevePersonalPromptContext(),
+    buildCallClosingSection(),
   ].join("\n\n")
 }

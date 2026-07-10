@@ -3,6 +3,12 @@
  * All tone, empathy, phrasing, and skip-if-already-said rules live in the global prompt playbook.
  */
 
+/** Required spoken closing line for every agent (demo, template, dedicated, Steve). */
+export const CALL_CLOSING_LINE =
+  "Our team will give you a call back as soon as possible. Thank you!"
+
+export const CALL_CLOSING_INSTRUCTION = `Say exactly: "${CALL_CLOSING_LINE}" Then end the call immediately. Do not add anything after.`
+
 export const TRANSITION_NAME_PROVIDED =
   "Caller gave their name or how they'd like to be addressed"
 
@@ -50,9 +56,9 @@ export const TASK_CHILD_TOUR = "Task Tour: Capture preferred tour times."
 
 export const TASK_CONFIRM = "Task Confirm: One read-back. Done when caller responds."
 
-export const TASK_NOT_SUPPORTED = "Task NotSupported: Decline out-of-area service."
+export const TASK_NOT_SUPPORTED = `Task NotSupported: Apologize that service is not available in their area, then ${CALL_CLOSING_INSTRUCTION}`
 
-export const TASK_END = "Task End: Close call."
+export const TASK_END = `Task End: ${CALL_CLOSING_INSTRUCTION}`
 
 // ─── Demo tasks ────────────────────────────────────────────────────────────
 
