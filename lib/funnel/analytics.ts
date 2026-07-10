@@ -17,11 +17,14 @@ function pushDataLayer(event: string, params?: Record<string, unknown>): void {
   window.dataLayer.push({ event, ...params })
 }
 
-export function trackFunnelView(industry: string): void {
+export function trackFunnelView(industry: string, source?: string): void {
   if (typeof window !== "undefined" && window.fbq) {
-    window.fbq("trackCustom", "FunnelView", { industry })
+    window.fbq("trackCustom", "FunnelView", { industry, source: source ?? "direct" })
   }
-  pushDataLayer("funnel_view", { funnel_industry: industry })
+  pushDataLayer("funnel_view", {
+    funnel_industry: industry,
+    funnel_source: source ?? "direct",
+  })
 }
 
 export function trackFunnelStepComplete(

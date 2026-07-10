@@ -13,6 +13,12 @@ export function formatPrismaErrorHint(err: unknown): string | null {
   }
 
   if (err instanceof Prisma.PrismaClientInitializationError) {
+    if (err.message.includes("credentials for `postgres` are not valid")) {
+      return "DATABASE_URL uses username postgres on the Supabase pooler. Use postgres.[project-ref] from Supabase → Database → Connection pooling → Transaction URI."
+    }
+    if (err.message.includes("Authentication failed")) {
+      return "Database authentication failed. Verify DATABASE_URL password and pooler username (postgres.[project-ref]) in Vercel env for the callgrabbr project."
+    }
     return formatDatabaseEnvHint()
   }
 

@@ -23,6 +23,7 @@
     "check:env": "npx tsx scripts/check-env.ts",
     "db:add-recycled-numbers": "npx tsx scripts/add-recycled-numbers.ts",
     "campaign:export": "npx tsx scripts/export-phone-slave-campaign.ts",
+    "campaign:export-meta": "npx tsx scripts/export-meta-ab-campaign.ts",
     "campaign:schedule": "npx tsx scripts/schedule-buffer-posts.ts",
     "campaign:buffer-profiles": "npx tsx scripts/schedule-buffer-posts.ts --profiles"
   },

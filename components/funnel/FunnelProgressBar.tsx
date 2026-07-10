@@ -1,15 +1,22 @@
 "use client"
 
-import type { FunnelConfig } from "@/lib/funnel/funnel-config"
+import type { FunnelConfig, FunnelStep } from "@/lib/funnel/funnel-config"
 
 interface FunnelProgressBarProps {
   config: FunnelConfig
+  steps?: FunnelStep[]
   currentStep: number
   className?: string
 }
 
-export function FunnelProgressBar({ config, currentStep, className = "" }: FunnelProgressBarProps) {
-  const total = config.steps.length
+export function FunnelProgressBar({
+  config,
+  steps,
+  currentStep,
+  className = "",
+}: FunnelProgressBarProps) {
+  const activeSteps = steps ?? config.steps
+  const total = activeSteps.length
 
   return (
     <div className={`w-full ${className}`} aria-label={`Step ${currentStep + 1} of ${total}`}>
@@ -26,7 +33,7 @@ export function FunnelProgressBar({ config, currentStep, className = "" }: Funne
         />
       </div>
       <div className="mt-3 hidden sm:flex gap-2">
-        {config.steps.map((step, i) => (
+        {activeSteps.map((step, i) => (
           <div
             key={step.id}
             className={`flex-1 text-center text-xs truncate ${

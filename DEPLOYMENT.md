@@ -78,8 +78,16 @@ If the dashboard shows "Unable to load dashboard" and Vercel logs contain `P2022
 
 **Option A — Supabase SQL Editor** (fastest):
 
+Run `scripts/sync-production-call-columns.sql`, or paste:
+
 ```sql
 ALTER TABLE "Call" ADD COLUMN IF NOT EXISTS "capacityDeclineSmsSent" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "Call" ADD COLUMN IF NOT EXISTS "incompleteTextBackReplyAt" TIMESTAMP(3);
+ALTER TABLE "Call" ADD COLUMN IF NOT EXISTS "callerConfirmationSentAt" TIMESTAMP(3);
+ALTER TABLE "Call" ADD COLUMN IF NOT EXISTS "followUpSentAt" TIMESTAMP(3);
+ALTER TABLE "Call" ADD COLUMN IF NOT EXISTS "missedCallTextBackSent" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "Call" ADD COLUMN IF NOT EXISTS "notificationSent" BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE "Call" ADD COLUMN IF NOT EXISTS "missedCallRecovery" BOOLEAN NOT NULL DEFAULT false;
 ```
 
 **Option B — Prisma migrate** (from a machine with `DIRECT_URL` set):
@@ -90,6 +98,22 @@ npx prisma migrate deploy
 ```
 
 After applying, reload `/dashboard` — no redeploy needed.
+
+## Fix "credentials for postgres are not valid" (pooler auth)
+
+Vercel logs like `Authentication failed... credentials for postgres are not valid` on `pooler.supabase.com` mean **`DATABASE_URL` has the wrong username**.
+
+| Variable | Username | Host | Port |
+|---|---|---|---|
+| `DATABASE_URL` | `postgres.sbfwaopvqpfgjfdzxnaq` | `aws-1-us-east-1.pooler.supabase.com` | **6543** |
+| `DIRECT_URL` | `postgres` | `db.sbfwaopvqpfgjfdzxnaq.supabase.co` | **5432** |
+
+Do **not** copy the direct-connection URI into `DATABASE_URL`. In Vercel → **callgrabbr** → Settings → Environment Variables:
+
+1. Open Supabase → **Database** → **Connection pooling** → **Transaction** mode → copy URI.
+2. Replace `DATABASE_URL` with that URI (must include `postgres.sbfwaopvqpfgjfdzxnaq`, port 6543, and `?pgbouncer=true`).
+3. **Redeploy** production (env changes require redeploy).
+4. Confirm `/api/health` returns healthy, then run schema SQL above if dashboard still errors on missing columns.
 
 ## Troubleshooting
 

@@ -39,18 +39,34 @@
 
 ---
 
-## Ad image generation prompt
+## Visual brand (ad creatives)
 
-Use this (or a shortened version) in an image generator (DALL·E, Midjourney, Ideogram, etc.) to create a clean, professional ad image. Omit or shorten if the tool has token limits.
+Match the approved CallGrabbr poster style — **not** photorealistic contractor job-site photos.
 
-**Full prompt:**
-> Professional advertisement concept for a B2B SaaS product: a modern local service business (e.g. HVAC or plumbing truck, or a small office with a phone and laptop). The scene suggests “always on” and “never miss a call”: soft glow on a phone or headset, clean desk or dashboard with a subtle “incoming call” or “new lead” vibe. Style: bright, trustworthy, slightly tech-forward but not cold — warm neutrals, one accent color (e.g. blue or green). No text or logos in the image. High quality, suitable for Facebook/Instagram/LinkedIn ad creative, 16:9 or 1:1 aspect ratio.
+| Element | Spec |
+|---------|------|
+| **Background** | Deep navy-to-midnight blue gradient (`#0f172a` → `#1e3a8a`), subtle dot grid or circuit pattern |
+| **Accent** | Electric / neon blue glow (`#2563eb`, `#3b82f6`), soft lens flare bottom-right |
+| **Typography** | Bold modern sans-serif; white headlines with key words in bright blue gradient |
+| **Hero graphic** | Glossy 3D blue headset with phone icon, OR smartphone mockup showing a “New Lead” card |
+| **Supporting** | Neon blue soundwave across mid-frame; circular glowing blue icon badges (headset, clipboard, chat, calendar) |
+| **Mood** | High-tech B2B SaaS, trustworthy, 24/7 AI call assistant — not stock photo tradespeople |
+| **Text in image** | Add headlines/CTA in **Canva** after generation; keep AI output mostly visual (or use very short placeholder text only) |
 
-**Short prompt (for strict token limits):**
-> Professional ad image: local service business desk with phone and laptop, soft glow suggesting 24/7 availability, warm neutrals and one blue accent, no text, high quality B2B ad style, 16:9.
+**Prodia:** FLUX.2 Dev + `photographic` or `cinematic` (if too warm, stick to default) · guidance **4–5** · 1024×1024 or 1024×1280 · polish winners on FLUX.2 Pro.
 
-**Alternate (more “customer calling in”):**
-> Advertisement concept: person on phone in a repair truck or workshop, relaxed and confident, with a subtle “call answered” or “lead captured” mood. Clean, professional, warm lighting. No text or logos. Suitable for social ad, 1:1.
+**Negative prompt (SDXL):** `photorealistic contractor, job site, ladder, workshop, warm orange lighting, cartoon, anime, cluttered text, watermark, logo, low quality`
+
+---
+
+## Ad image generation prompt (base style)
+
+Append this block to every variant prompt below:
+
+> CallGrabbr brand style: professional B2B SaaS marketing poster, dark navy blue gradient background with subtle dot grid, neon electric blue glow accents and soundwave graphic, glossy 3D blue headset or smartphone hero, circular glowing blue feature icons, modern clean layout, high contrast white and blue typography area left empty for overlay, lens flare, futuristic trustworthy tech aesthetic, square 1:1 composition, no watermarks
+
+**Short base (token limits):**
+> Dark navy SaaS ad poster, neon blue glow, 3D headset or phone mockup, soundwave, glowing blue icons, no watermarks, 1:1
 
 ---
 
@@ -58,7 +74,7 @@ Use this (or a shortened version) in an image generator (DALL·E, Midjourney, Id
 - **Meta (Facebook/Instagram):** Use headline + short body + CTA; image 1:1 or 4:5.
 - **Google Search:** Headlines ≤ 30 chars where possible; descriptions ≤ 90 chars.
 - **LinkedIn:** More B2B tone; stress “local service businesses” and “lead capture.”
-- **Image:** Keep key message in copy; use image for mood and category (service biz, phone, reliability).
+- **Image:** On-brand poster art; **copy lives in Meta fields** — overlay only a short hook in Canva if needed.
 
 ---
 
@@ -123,16 +139,183 @@ Use this (or a shortened version) in an image generator (DALL·E, Midjourney, Id
 
 ---
 
-## Static ad image prompts
+## Static ad image prompts (A/B test variants)
 
-### Image 1: Ladder/Money (9:16 vertical)
-Contractor on ladder installing siding, phone ringing in pocket, cash bills floating away like birds, dramatic lighting, photorealistic, no text
+Pair each image with the ad copy from the Meta A/B kit. Add headline + CTA in Canva using brand fonts/colors.
 
-### Image 2: Voicemail Graveyard (1:1 square)
-Phone screen showing Voicemail (23) with cobwebs, dark moody lighting, shallow depth of field, no text
+### Image 1 — Problem / loss (pairs with Ad A, H1–H3)
 
-### Image 3: Before/After Split (16:9)
-Split design: LEFT stressed contractor with missed calls, RIGHT same contractor relaxed with New Lead notification
+**Concept:** “Every call is an opportunity” — opportunity slipping away, 24/7 answer.
 
-### Image 4: SMS Lead Notification (4:5 vertical)
-Contractor hand holding phone on job site, screen shows lead text (name, address, urgent), blurred background
+**Full prompt:**
+> Professional CallGrabbr B2B SaaS marketing poster, dark navy blue gradient background with subtle dot grid and neon electric blue soundwave across center, large glossy 3D blue wireless headset with glowing phone icon inside a circular blue ring on the right, soft blue lens flare lower right, left side reserved for bold headline typography (leave text area clean), four small circular glowing blue icon badges stacked vertically suggesting never miss a call and instant notifications, futuristic trustworthy tech aesthetic, high contrast white and electric blue color scheme, square 1:1, no watermarks, no readable body copy baked in
+
+**Canva overlay:** `Stop losing $500 jobs to voicemail` · CTA `Start Your Free Trial Today!`
+
+---
+
+### Image 2 — Benefit / ROI (pairs with Ad B)
+
+**Concept:** “Never miss another lead” — phone mockup with captured lead details.
+
+**Full prompt:**
+> Professional CallGrabbr B2B SaaS marketing poster, dark navy gradient background with digital network grid and neon blue soundwave, centered modern smartphone mockup showing a clean “New Lead” notification card UI with fields for name phone address service needed and urgency high, glowing electric blue accent on key UI elements, four circular glowing blue icon badges in a row below phone (headset AI answers, clipboard captures details, chat bubble instant text, calendar follow up on your schedule), bold headline area at top left empty for overlay, neon blue glow and lens flare, square 1:1, no watermarks, no tiny illegible text
+
+**Canva overlay:** `One captured job pays for months` · subline `24/7 AI Call Assistant`
+
+---
+
+### Image 3 — Competitor steal (pairs with H2: “Your missed call = their next job”)
+
+**Concept:** Split-panel — missed call vs lead captured.
+
+**Full prompt:**
+> CallGrabbr branded split-panel SaaS ad poster, dark navy blue background, LEFT panel dimmer with red-tinted missed call notification on smartphone and fading opportunity metaphor, RIGHT panel bright with electric blue glow showing smartphone “New Lead” success state and glowing checkmark, neon blue soundwave connecting both panels, glossy 3D blue headset icon centered between panels, circular glowing blue icons, modern B2B tech marketing style, square 1:1, high contrast, no watermarks, headline area blank for Canva text
+
+**Canva overlay:** `Your missed call = their next job`
+
+---
+
+### Image 4 — Voicemail graveyard / scroll-stopper (pairs with Ad A short, Reels thumbnail)
+
+**Concept:** Voicemail failure vs AI answer — still on-brand, not photorealistic.
+
+**Full prompt:**
+> CallGrabbr branded dark SaaS ad poster, navy blue gradient background, stylized smartphone showing voicemail inbox filling with cobweb and dust metaphor on left half in muted gray, right half bright electric blue glow with AI headset icon and incoming call answered state, neon blue soundwave divider, circular glowing blue feature icons, dramatic contrast between dead voicemail and active AI assistant, futuristic marketing graphic not photorealistic, square 1:1, no watermarks
+
+**Canva overlay:** `80% won't leave voicemail` · `We answer when you can't`
+
+---
+
+### Image 5 — Feature grid / trust (pairs with Advantage+ headline tests H4–H6)
+
+**Concept:** Matches second reference creative — icon row + 24/7 banner.
+
+**Full prompt:**
+> CallGrabbr B2B SaaS marketing poster, dark navy background with subtle grid, large bold headline zone at top (empty for overlay), row of four circular glowing electric blue icons with soft 3D depth (headset, clipboard, chat bubble, calendar), neon blue soundwave behind icons, smartphone mockup on right showing lead summary notification, bottom banner area with rounded blue border glow reserved for CTA button overlay, lens flare, square 1:1, no watermarks
+
+**Canva overlay:** `Built for HVAC & plumbing shops` · `7-day free trial — no card`
+
+---
+
+### Image 6 — Vertical Reels end card (9:16)
+
+**Full prompt:**
+> Vertical 9:16 CallGrabbr branded end card, dark navy gradient, large glowing 3D blue headset with phone icon center frame, neon blue soundwave, electric blue lens flare, minimal clean space at bottom third for CTA text overlay, futuristic B2B SaaS style, no watermarks
+
+**Canva overlay:** `7-day free trial · No card · callgrabbr.com`
+
+---
+
+## Meta A/B Reels — 15s video prompts (3 angles)
+
+Pairs with the three static creatives: **Voicemail loss**, **Competitor steal**, **Family time**.
+
+**Shared specs**
+
+| Setting | Value |
+|---------|--------|
+| Format | Vertical **9:16** (1080×1920) |
+| Duration | **15 seconds** |
+| Pace | Fast cuts **0.7–1.0s** per scene |
+| Captions | Bold white text, **red accent** on hook line only; mobile-readable, centered lower third |
+| Brand | Dark navy UI (`#0f172a`), electric blue glow (`#3b82f6`) on CallGrabbr moments |
+| Style | Stylized / motion-graphic — **not** photorealistic job-site footage |
+| Audio | Phone ring → cash flutter (loss scenes) → notification ding → subtle upbeat outro |
+| End card | CallGrabbr logo + `7-day free trial · No card` |
+
+**Shared negative prompt (video gen):**
+`photorealistic contractor, job site, ladder, workshop, warm orange lighting, cartoon anime, shaky handheld, cluttered tiny text, watermark, logo distortion, low quality, stock footage people`
+
+**Base style suffix (append to every scene prompt):**
+`Vertical 9:16, dark navy CallGrabbr B2B SaaS aesthetic, electric blue neon accents, stylized motion graphics not photorealistic, bold caption-safe lower third, no watermarks`
+
+---
+
+### Reels 1 — Voicemail loss (pairs with static Creative 1)
+
+**Hook:** Stop losing leads to voicemail  
+**Meta headline:** Stop Losing Leads to Voicemail  
+**UTM content:** `h1-reels`
+
+| Time | Visual | On-screen caption |
+|------|--------|-------------------|
+| 0–2s | Phone ringing, red screen flash | **YOUR PHONE IS LOSING YOU JOBS** |
+| 2–5s | Stylized silhouette on ladder, phone vibrating in pocket | You can't answer every call. |
+| 5–7s | Voicemail inbox filling with cobweb/dust metaphor; dollar bills drift away | 80% won't leave voicemail. |
+| 7–10s | Split: dead voicemail (gray) vs CallGrabbr answering (blue glow) | AI: Thanks for calling! What's the address? |
+| 10–12s | Smartphone: clean New Lead card (name, phone, urgency) | Lead texted in seconds. |
+| 12–15s | Logo end card on navy | Stop Losing Leads to Voicemail |
+
+**Full generative prompt (Runway / Kling / Pika — paste as one block or per scene):**
+```
+Vertical 9:16, 15 seconds total, fast cuts 0.7s each, CallGrabbr ad. Scene 1: smartphone ringing alarm red pulse, bold caption zone YOUR PHONE IS LOSING YOU JOBS. Scene 2: stylized trade worker silhouette on ladder phone vibrating pocket not photorealistic. Scene 3: voicemail inbox UI with cobweb dust metaphor muted gray-red dollar bills floating away. Scene 4: split screen left gray dead voicemail right bright electric blue glow glossy headset AI answering speech bubble Thanks for calling whats the address. Scene 5: smartphone New Lead notification card name phone urgency high. Scene 6: dark navy end card CallGrabbr logo glow 7-day free trial no card. Dark navy and electric blue brand, bold white captions red hook accent, motion graphic SaaS style not photorealistic job site, no watermarks.
+```
+
+---
+
+### Reels 2 — Competitor steal (pairs with static Creative 2)
+
+**Hook:** Your missed call = their next job  
+**Meta headline:** They Called. You Didn't Answer.  
+**UTM content:** `h4-reels`
+
+| Time | Visual | On-screen caption |
+|------|--------|-------------------|
+| 0–2s | Split screen: you on job (left) vs competitor van/logo (right) | When you miss a call... |
+| 2–5s | Your phone → voicemail; stylized money/opportunity birds fly out | ...they don't leave a message. |
+| 5–8s | Birds fly to competitor's phone; Google search "HVAC near me" scroll | They call the next listing. |
+| 8–11s | Competitor phone: blue AI glow, lead captured checkmark | **Your missed call is their next job.** |
+| 11–13s | Side-by-side: your phone missed call / their phone New Lead | Stop losing jobs to voicemail. |
+| 13–15s | Logo end card | 7-day free trial · callgrabbr.com |
+
+**Full generative prompt:**
+```
+Vertical 9:16, 15 second Meta ad, split-screen competitor narrative. Scene 1: split panel stylized worker on job left competitor shop right phone ringing. Scene 2: missed call notification red tint money birds flying away from smartphone. Scene 3: birds fly toward second phone Google listing scroll stylized. Scene 4: competitor smartphone electric blue glow AI headset New Lead success checkmark captured lead card. Scene 5: side by side your phone missed call their phone new lead green check. Scene 6: CallGrabbr logo end card navy background 7-day free trial no card. Bold captions each beat, dark navy electric blue CallGrabbr brand, motion graphic not photorealistic, no watermarks.
+```
+
+---
+
+### Reels 3 — Family time (pairs with static Creative 3)
+
+**Hook:** Get your family time back  
+**Meta headline:** Get Your Family Time Back  
+**UTM content:** `h2-reels`
+
+| Time | Visual | On-screen caption |
+|------|--------|-------------------|
+| 0–3s | Family dinner table, phone buzzing on counter (stylized, warm but not stock photo) | **YOU'RE AT DINNER. YOUR BUSINESS LINE ISN'T.** |
+| 3–6s | Owner glances at phone — conflicted; notification badges pile up | Miss it = lost job. Answer it = never off. |
+| 6–10s | Phone forwards to CallGrabbr — blue glow, AI answers calmly | CallGrabbr answers. Captures the lead. |
+| 10–13s | Single clean lead text; owner smiles, puts phone face-down | Lead texted in seconds. You stay present. |
+| 13–15s | Logo end card | Get Your Family Time Back · Free trial |
+
+**Full generative prompt:**
+```
+Vertical 9:16, 15 second emotional relief ad for local service business owners. Scene 1: stylized family dinner table warm tones phone buzzing on counter many notification badges not photorealistic. Scene 2: conflicted glance at phone stress captions Miss it lost job Answer it never off. Scene 3: transition to dark navy CallGrabbr UI electric blue glow headset AI answering call smoothly. Scene 4: calm single New Lead notification owner smiles puts phone face down relief. Scene 5: CallGrabbr logo end card Get Your Family Time Back 7-day free trial no card. Bold mobile captions, trustworthy not corporate, stylized motion graphic not stock photo tradespeople, no watermarks.
+```
+
+---
+
+### Reels production checklist
+
+1. Generate clips **per scene** (6 scenes × ~2.5s) if your tool caps at 5s — stitch in CapCut/DaVinci.
+2. Burn in captions in CapCut (white bold, black stroke, red on hook only).
+3. Add SFX: ring (0s), voicemail tone (5s), cash flutter (5–7s), notification ding (10–12s).
+4. Optional voiceover on 7–10s only — keep music low under VO.
+5. Export **H.264**, 1080×1920, under 4GB for Meta.
+6. Use same primary text + CTA as static ads; only swap creative + `utm_content` to `h1-reels` / `h4-reels` / `h2-reels`.
+
+**Defer Reels in Ads Manager until a static winner emerges** (Week 3+ per lean $15/day plan) — produce these now so they're ready to drop in.
+
+---
+
+## A/B pairing guide
+
+| Ad | Headline | Static image | Reels | Canva overlay focus |
+|----|----------|--------------|-------|---------------------|
+| A (voicemail) | Stop Losing Leads to Voicemail | Creative 1 / Image 4 | Reels 1 | Loss + trial CTA |
+| D (competition) | They Called. You Didn't Answer. | Creative 2 / Image 3 | Reels 2 | Competitor steal |
+| B (family) | Get Your Family Time Back | Creative 3 | Reels 3 | We answer. You live. |
+| C (short/Reels) | Never miss another lead | Image 6 + video script | — | Minimal end card |
+| Headline test | H1–H6 | Image 1, 3, or 5 | — | Swap headline only |

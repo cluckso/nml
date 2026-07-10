@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getAuthUserFromRequest } from "@/lib/auth"
 import { db } from "@/lib/db"
+import { formatPrismaErrorHint } from "@/lib/db-errors"
 import { getTrialStatus } from "@/lib/trial"
 
 /** Dashboard summary for Flutter (and other API clients). Requires Bearer token or cookie. */
@@ -82,10 +83,12 @@ export async function GET(req: NextRequest) {
     })
   } catch (error) {
     console.error("Dashboard API error:", error)
+    const hint = formatPrismaErrorHint(error)
     const message = error instanceof Error ? error.message : "Failed to load dashboard"
     return NextResponse.json(
       {
         error: "Failed to load dashboard",
+        ...(hint && { hint }),
         ...(process.env.NODE_ENV === "development" && { detail: message }),
       },
       { status: 500 }

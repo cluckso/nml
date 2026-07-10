@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import type { FunnelConfig, FunnelStepField } from "@/lib/funnel/funnel-config"
+import type { FunnelConfig, FunnelStep, FunnelStepField } from "@/lib/funnel/funnel-config"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,6 +12,7 @@ import { trackFunnelStepComplete } from "@/lib/funnel/analytics"
 
 interface FunnelStepFormProps {
   config: FunnelConfig
+  steps?: FunnelStep[]
   values: Record<string, string>
   onChange: (fieldId: string, value: string) => void
   onComplete: () => void | Promise<void>
@@ -45,16 +46,18 @@ function validateStep(fields: FunnelStepField[], values: Record<string, string>)
 
 export function FunnelStepForm({
   config,
+  steps,
   values,
   onChange,
   onComplete,
   submitting = false,
 }: FunnelStepFormProps) {
+  const activeSteps = steps ?? config.steps
   const [stepIndex, setStepIndex] = useState(0)
   const [errors, setErrors] = useState<Record<string, string>>({})
 
-  const step = config.steps[stepIndex]
-  const isLast = stepIndex === config.steps.length - 1
+  const step = activeSteps[stepIndex]
+  const isLast = stepIndex === activeSteps.length - 1
 
   const callsPerWeek = useMemo(() => {
     const vol = values.callVolume
@@ -89,7 +92,7 @@ export function FunnelStepForm({
   return (
     <Card className="border-border/50 bg-card/60 backdrop-blur max-w-xl mx-auto">
       <CardHeader>
-        <FunnelProgressBar config={config} currentStep={stepIndex} className="mb-4" />
+        <FunnelProgressBar config={config} steps={activeSteps} currentStep={stepIndex} className="mb-4" />
         <CardTitle>{step.title}</CardTitle>
         {step.subtitle && <CardDescription>{step.subtitle}</CardDescription>}
       </CardHeader>
