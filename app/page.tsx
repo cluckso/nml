@@ -1,6 +1,6 @@
 import Link from "next/link"
 import type { Metadata } from "next"
-import { MID_AND_HIGH_VOLUME_LABEL, PLAN_MID_VOLUME, PLAN_HIGH_VOLUME } from "@/lib/plan-labels"
+import { GROWTH_AND_PLATINUM_LABEL, PLAN_GROWTH, PLAN_PLATINUM } from "@/lib/plan-labels"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { AudioExamples } from "@/components/marketing/AudioExamples"
@@ -74,7 +74,7 @@ export default function HomePage() {
               </div>
               <h3 className="font-semibold text-lg mb-2">Captures what matters</h3>
               <p className="text-sm text-muted-foreground">
-                Name, phone, service need, urgency, and preferred time when shared. Appointment booking on {MID_AND_HIGH_VOLUME_LABEL}.
+                Name, phone, service need, urgency, and preferred time when shared. Appointment booking on {GROWTH_AND_PLATINUM_LABEL}.
               </p>
             </div>
             <div className="text-center">
@@ -83,7 +83,7 @@ export default function HomePage() {
               </div>
               <h3 className="font-semibold text-lg mb-2">Delivers to you instantly</h3>
               <p className="text-sm text-muted-foreground">
-                Summaries by email and SMS. CRM webhook on {MID_AND_HIGH_VOLUME_LABEL}. You own every lead.
+                Summaries by email and SMS. CRM webhook on {GROWTH_AND_PLATINUM_LABEL}. You own every lead.
               </p>
             </div>
           </div>
@@ -136,7 +136,7 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Questions tailored to your trade. Industry-specific flows on {MID_AND_HIGH_VOLUME_LABEL}. Emergency routing when needed.
+                Questions tailored to your trade. Industry-specific flows on {GROWTH_AND_PLATINUM_LABEL}. Emergency routing when needed.
               </p>
             </CardContent>
           </Card>
@@ -149,7 +149,7 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Qualified leads with name, phone, and details. Appointment booking on {MID_AND_HIGH_VOLUME_LABEL}.
+                Qualified leads with name, phone, and details. Appointment booking on {GROWTH_AND_PLATINUM_LABEL}.
               </p>
             </CardContent>
           </Card>
@@ -162,7 +162,7 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Email and SMS summaries. CRM webhook on {MID_AND_HIGH_VOLUME_LABEL}. Works with your existing number.
+                Email and SMS summaries. CRM webhook on {GROWTH_AND_PLATINUM_LABEL}. Works with your existing number.
               </p>
             </CardContent>
           </Card>
@@ -235,7 +235,7 @@ export default function HomePage() {
             </div>
             <h3 className="font-semibold text-lg mb-2">4. You get the lead</h3>
             <p className="text-muted-foreground text-sm">
-              SMS and email summary with captured details. CRM webhook on {MID_AND_HIGH_VOLUME_LABEL}.
+              SMS and email summary with captured details. CRM webhook on {GROWTH_AND_PLATINUM_LABEL}.
             </p>
           </div>
         </div>
@@ -277,7 +277,7 @@ export default function HomePage() {
             </div>
             <div className="flex items-center gap-3 rounded-lg border border-border/50 bg-card/50 px-5 py-3">
               <Calendar className="h-6 w-6 text-primary" aria-hidden />
-              <span className="font-medium">Appointments ({PLAN_MID_VOLUME} & {PLAN_HIGH_VOLUME})</span>
+              <span className="font-medium">Appointments ({PLAN_GROWTH} & {PLAN_PLATINUM})</span>
             </div>
             <div className="flex items-center gap-3 rounded-lg border border-border/50 bg-card/50 px-5 py-3">
               <Phone className="h-6 w-6 text-primary" aria-hidden />
@@ -387,7 +387,7 @@ export default function HomePage() {
                 ))}
               </ul>
               <p className="text-sm text-muted-foreground mt-6">
-                CRM delivery available on {MID_AND_HIGH_VOLUME_LABEL} plans.
+                CRM delivery available on {GROWTH_AND_PLATINUM_LABEL} plans.
               </p>
               <p className="text-sm text-muted-foreground mt-2">
                 Spam and robocalls filtered when possible — so alerts focus on real leads.

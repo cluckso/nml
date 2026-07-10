@@ -2,7 +2,7 @@ import { redirect } from "next/navigation"
 import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { getEffectivePlanType, FREE_TRIAL_MINUTES, MONTHLY_PRICES, INCLUDED_MINUTES, SETUP_FEES, OVERAGE_RATE_PER_MIN } from "@/lib/plans"
-import { getPlanDisplayName, PLAN_SOLO_OWNER } from "@/lib/plan-labels"
+import { getPlanDisplayName, PLAN_BASIC } from "@/lib/plan-labels"
 import { getTrialStatus } from "@/lib/trial"
 import { getPlanUsageNudge } from "@/lib/plan-usage"
 import { formatIncludedUsageShort, formatJobRoiLine } from "@/lib/pricing-catalog"
@@ -132,7 +132,7 @@ export default async function BillingPage() {
               <div className="space-y-2">
                 <p className="text-2xl font-bold">Free trial</p>
                 <p className="text-sm text-muted-foreground">
-                  {trialBillingDescription()} When you&apos;re ready, Solo Owner covers missed &amp; after-hours calls for most one-truck shops.
+                  {trialBillingDescription()} When you&apos;re ready, {PLAN_BASIC} covers missed &amp; after-hours calls for most one-truck shops.
                 </p>
                 {(trial.isExhausted || trial.isExpired) && (
                   <Button asChild className="mt-2">

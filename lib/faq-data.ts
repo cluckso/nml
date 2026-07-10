@@ -1,4 +1,13 @@
 import type { FaqItem } from "@/lib/structured-data"
+import { PLAN_BASIC, PLAN_GROWTH, PLAN_PLATINUM } from "@/lib/plan-labels"
+import { MONTHLY_PRICES, getIncludedMinutes } from "@/lib/plans"
+import { approxCallsPerMonth } from "@/lib/plan-usage"
+import { PlanType } from "@prisma/client"
+import { AVG_JOB_VALUE_LOW, AVG_JOB_VALUE_HIGH, HUMAN_RECEPTIONIST_FROM_MONTHLY } from "@/lib/pricing-catalog"
+
+const basicCalls = approxCallsPerMonth(getIncludedMinutes(PlanType.STARTER))
+const growthCalls = approxCallsPerMonth(getIncludedMinutes(PlanType.PRO))
+const platinumCalls = approxCallsPerMonth(getIncludedMinutes(PlanType.ELITE))
 
 /** General product FAQ — used on Help page and FAQPage JSON-LD. */
 export const PRODUCT_FAQ: FaqItem[] = [
@@ -35,16 +44,16 @@ export const PRODUCT_FAQ: FaqItem[] = [
   {
     question: "How much does CallGrabbr cost after the trial?",
     answer:
-      "Solo Owner is $99/month (~100 captured calls) for missed and after-hours coverage. Mid Volume is $159/month (~265 calls) for shops that need most inbound calls answered. High Volume is $279/month (~500 calls) for busy multi-crew operations. Estimates assume ~3 minutes per call. Additional usage is $0.22/min. One captured job ($350–$600 average) often pays for months of service.",
+      `${PLAN_BASIC} is $${MONTHLY_PRICES[PlanType.STARTER]}/month (~${basicCalls} captured calls) for missed and after-hours coverage. ${PLAN_GROWTH} is $${MONTHLY_PRICES[PlanType.PRO]}/month (~${growthCalls} calls) for shops that need most inbound calls answered. ${PLAN_PLATINUM} is $${MONTHLY_PRICES[PlanType.ELITE]}/month (~${platinumCalls} calls) for busy multi-crew operations. Estimates assume ~3 minutes per call. Additional usage is $0.22/min. One captured job ($${AVG_JOB_VALUE_LOW}–$${AVG_JOB_VALUE_HIGH} average) often pays for months of service.`,
   },
   {
     question: "Which plan should I choose?",
     answer:
-      "Start with Solo Owner if you're a one-truck shop and mainly need missed and after-hours calls covered while you're on a job. Choose Mid Volume when you want the AI to answer most inbound calls like a 24/7 front desk. High Volume fits busy shops with multiple crews or departments. Upgrade anytime as volume grows.",
+      `Start with ${PLAN_BASIC} if you're a one-truck shop and mainly need missed and after-hours calls covered while you're on a job. Choose ${PLAN_GROWTH} when you want the AI to answer most inbound calls like a 24/7 front desk. ${PLAN_PLATINUM} fits busy shops with multiple crews or departments. Upgrade anytime as volume grows.`,
   },
   {
     question: "Is CallGrabbr worth $99/month?",
     answer:
-      "For most service businesses, yes — if it captures even one job you'd have lost to voicemail. Average job value is $350–$600. Solo Owner costs $99/month (~$0.99 per captured call at included volume). That's far less than a human answering service ($235+/month) and much cheaper than one missed emergency call.",
+      `For most service businesses, yes — if it captures even one job you'd have lost to voicemail. Average job value is $${AVG_JOB_VALUE_LOW}–$${AVG_JOB_VALUE_HIGH}. ${PLAN_BASIC} costs $${MONTHLY_PRICES[PlanType.STARTER]}/month (~$0.99 per captured call at included volume). That's far less than a human answering service ($${HUMAN_RECEPTIONIST_FROM_MONTHLY}+/month) and much cheaper than one missed emergency call.`,
   },
 ]

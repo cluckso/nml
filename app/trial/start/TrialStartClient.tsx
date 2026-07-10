@@ -17,16 +17,16 @@ import {
 import { FREE_TRIAL_MINUTES, TRIAL_DAYS } from "@/lib/plans"
 import { trialDaysLabel, trialConversionLine, trialLimitsLine, moneyBackGuaranteeLabel } from "@/lib/trial-marketing"
 import { pricingUrl } from "@/lib/monetization-urls"
-import { PLAN_SOLO_OWNER, PLAN_MID_VOLUME } from "@/lib/plan-labels"
+import { PLAN_BASIC, PLAN_GROWTH } from "@/lib/plan-labels"
 import { CreditCard, Shield } from "lucide-react"
 
 const PLAN_OPTIONS = [
-  { type: PlanType.STARTER, label: PLAN_SOLO_OWNER },
-  { type: PlanType.PRO, label: PLAN_MID_VOLUME },
+  { type: PlanType.STARTER, label: PLAN_BASIC },
+  { type: PlanType.PRO, label: PLAN_GROWTH },
 ] as const
 
 function planLabelFor(planType: PlanType): string {
-  return planType === PlanType.PRO ? PLAN_MID_VOLUME : PLAN_SOLO_OWNER
+  return planType === PlanType.PRO ? PLAN_GROWTH : PLAN_BASIC
 }
 
 export function TrialStartClient() {

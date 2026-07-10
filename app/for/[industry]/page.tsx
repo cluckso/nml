@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { MID_AND_HIGH_VOLUME_LABEL, PLAN_MID_VOLUME, PLAN_HIGH_VOLUME } from "@/lib/plan-labels"
+import { GROWTH_AND_PLATINUM_LABEL, PLAN_GROWTH, PLAN_PLATINUM } from "@/lib/plan-labels"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, Phone, ArrowRight } from "lucide-react"
@@ -118,7 +118,7 @@ export default async function IndustryLandingPage({ params }: PageProps) {
           <div>
             <h2 className="text-2xl font-bold mb-4">What happens after a completed call?</h2>
             <p className="text-muted-foreground mb-6">
-              You get captured lead info in a neat, easy-to-read text or email—or sent directly to your CRM on {MID_AND_HIGH_VOLUME_LABEL}.
+              You get captured lead info in a neat, easy-to-read text or email—or sent directly to your CRM on {GROWTH_AND_PLATINUM_LABEL}.
             </p>
             <h3 className="text-lg font-semibold mb-4">Your call assistant collects as much pertinent lead information as possible, including:</h3>
             <ul className="space-y-2 text-sm text-muted-foreground mb-6 list-none">
@@ -137,7 +137,7 @@ export default async function IndustryLandingPage({ params }: PageProps) {
               ))}
             </ul>
             <ul className="space-y-2 text-sm">
-              {["24/7 call answering (when forwarded)", `Industry-specific intake on ${PLAN_MID_VOLUME} & ${PLAN_HIGH_VOLUME}`, `Emergency flagging on ${PLAN_MID_VOLUME} & ${PLAN_HIGH_VOLUME}`, funnelTrialFeatureLabel()].map((f) => (
+              {["24/7 call answering (when forwarded)", `Industry-specific intake on ${PLAN_GROWTH} & ${PLAN_PLATINUM}`, `Emergency flagging on ${PLAN_GROWTH} & ${PLAN_PLATINUM}`, funnelTrialFeatureLabel()].map((f) => (
                 <li key={f} className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-primary" />
                   {f}

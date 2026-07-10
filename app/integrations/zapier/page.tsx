@@ -3,7 +3,7 @@ import Link from "next/link"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Zap, Webhook, Key, ArrowRight } from "lucide-react"
-import { MID_AND_HIGH_VOLUME_LABEL } from "@/lib/plan-labels"
+import { GROWTH_AND_PLATINUM_LABEL } from "@/lib/plan-labels"
 
 export const metadata: Metadata = {
   title: "Zapier Integration - CallGrabbr",
@@ -144,7 +144,7 @@ export default function ZapierIntegrationPage() {
       </div>
 
       <p className="text-center text-sm text-muted-foreground mt-8">
-        Available on {MID_AND_HIGH_VOLUME_LABEL} plans. Also works with the Zapier webhook URL in Settings → CRM.
+        Available on {GROWTH_AND_PLATINUM_LABEL} plans. Also works with the Zapier webhook URL in Settings → CRM.
       </p>
     </div>
   )

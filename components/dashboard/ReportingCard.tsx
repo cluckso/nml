@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { BarChart3, Mail } from "lucide-react"
-import { PLAN_HIGH_VOLUME } from "@/lib/plan-labels"
+import { PLAN_PLATINUM } from "@/lib/plan-labels"
 
 type TagCount = { tag: string; count: number }
 
@@ -18,7 +18,7 @@ export function ReportingCard({ weekCalls, weekMinutes, leadsByTag }: ReportingC
           <BarChart3 className="h-5 w-5 text-primary" />
           Reporting dashboard
         </CardTitle>
-        <CardDescription>Last 7 days · {PLAN_HIGH_VOLUME} plan</CardDescription>
+        <CardDescription>Last 7 days · {PLAN_PLATINUM} plan</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-2 gap-3">

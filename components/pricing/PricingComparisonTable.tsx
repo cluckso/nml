@@ -1,10 +1,10 @@
 import { Check, X } from "lucide-react"
 import { PRICING_TIERS_BY_KEY, HUMAN_RECEPTIONIST_FROM_MONTHLY } from "@/lib/pricing-catalog"
-import { PLAN_SOLO_OWNER } from "@/lib/plan-labels"
+import { PLAN_BASIC } from "@/lib/plan-labels"
 import { formatCostPerCapturedCall, approxCallsPerMonth } from "@/lib/plan-usage"
 
-const solo = PRICING_TIERS_BY_KEY[PLAN_SOLO_OWNER]
-const soloCalls = approxCallsPerMonth(solo.includedMinutes)
+const basic = PRICING_TIERS_BY_KEY[PLAN_BASIC]
+const basicCalls = approxCallsPerMonth(basic.includedMinutes)
 
 type CellValue = boolean | string
 
@@ -16,7 +16,7 @@ interface ComparisonRow {
 }
 
 const ROWS: ComparisonRow[] = [
-  { label: "Monthly cost", voicemail: "$0", callgrabbr: `$${solo.price}/mo`, human: `From $${HUMAN_RECEPTIONIST_FROM_MONTHLY}/mo` },
+  { label: "Monthly cost", voicemail: "$0", callgrabbr: `$${basic.price}/mo`, human: `From $${HUMAN_RECEPTIONIST_FROM_MONTHLY}/mo` },
   {
     label: "Captures lead details",
     voicemail: false,
@@ -50,7 +50,7 @@ const ROWS: ComparisonRow[] = [
   {
     label: `Included volume`,
     voicemail: "Unlimited rings to nowhere",
-    callgrabbr: `~${soloCalls} calls/mo`,
+    callgrabbr: `~${basicCalls} calls/mo`,
     human: "~50–75 min/mo",
   },
 ]
@@ -66,7 +66,7 @@ function CellContent({ value }: { value: CellValue }) {
 }
 
 export function PricingComparisonTable({ className = "" }: { className?: string }) {
-  const perCall = formatCostPerCapturedCall(solo.price, solo.includedMinutes)
+  const perCall = formatCostPerCapturedCall(basic.price, basic.includedMinutes)
 
   return (
     <div className={className}>
@@ -76,7 +76,7 @@ export function PricingComparisonTable({ className = "" }: { className?: string 
         </h2>
         <p className="text-muted-foreground leading-relaxed">
           Most shops compare us to voicemail (free, but most callers hang up) or a human answering service ($235+/mo).
-          CallGrabbr sits in the sweet spot — {perCall} at {PLAN_SOLO_OWNER} tier.
+          CallGrabbr sits in the sweet spot — {perCall} at {PLAN_BASIC} tier.
         </p>
       </div>
 

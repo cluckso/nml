@@ -7,9 +7,9 @@ import {
   getMonthlyPrice,
 } from "./plans"
 import {
-  PLAN_HIGH_VOLUME,
-  PLAN_MID_VOLUME,
-  PLAN_SOLO_OWNER,
+  PLAN_BASIC,
+  PLAN_GROWTH,
+  PLAN_PLATINUM,
   PLAN_TYPE_BY_DISPLAY_KEY,
   type PricingTierKey,
 } from "./plan-labels"
@@ -46,9 +46,9 @@ export const HUMAN_RECEPTIONIST_FROM_MONTHLY = 235
 /** Single source for pricing page, landing, and checkout cards. Amounts come from lib/plans.ts. */
 export const PRICING_TIERS: PricingTier[] = [
   {
-    key: PLAN_SOLO_OWNER,
-    planType: PLAN_TYPE_BY_DISPLAY_KEY[PLAN_SOLO_OWNER],
-    name: PLAN_SOLO_OWNER,
+    key: PLAN_BASIC,
+    planType: PLAN_TYPE_BY_DISPLAY_KEY[PLAN_BASIC],
+    name: PLAN_BASIC,
     description:
       "Catch missed and after-hours calls when you're on a job or the shop is closed — without hiring front-desk staff.",
     price: MONTHLY_PRICES[PlanType.STARTER],
@@ -67,9 +67,9 @@ export const PRICING_TIERS: PricingTier[] = [
     ],
   },
   {
-    key: PLAN_MID_VOLUME,
-    planType: PLAN_TYPE_BY_DISPLAY_KEY[PLAN_MID_VOLUME],
-    name: PLAN_MID_VOLUME,
+    key: PLAN_GROWTH,
+    planType: PLAN_TYPE_BY_DISPLAY_KEY[PLAN_GROWTH],
+    name: PLAN_GROWTH,
     description:
       "Your 24/7 front desk — answer most inbound calls so growing crews never lose a lead to a missed ring.",
     price: MONTHLY_PRICES[PlanType.PRO],
@@ -79,7 +79,7 @@ export const PRICING_TIERS: PricingTier[] = [
     subtitle: "Growing crew · steady inbound volume",
     usageNote: "When you need every call answered, not just the ones you miss",
     features: [
-      "Everything in Solo Owner",
+      "Everything in Basic",
       "24/7 call answering",
       "Industry-specific intake flows",
       "Appointment & emergency handling",
@@ -89,9 +89,9 @@ export const PRICING_TIERS: PricingTier[] = [
     ],
   },
   {
-    key: PLAN_HIGH_VOLUME,
-    planType: PLAN_TYPE_BY_DISPLAY_KEY[PLAN_HIGH_VOLUME],
-    name: PLAN_HIGH_VOLUME,
+    key: PLAN_PLATINUM,
+    planType: PLAN_TYPE_BY_DISPLAY_KEY[PLAN_PLATINUM],
+    name: PLAN_PLATINUM,
     description:
       "Full coverage for busy shops, multiple crews, and operations that can't afford a single dropped call.",
     price: MONTHLY_PRICES[PlanType.ELITE],
@@ -101,7 +101,7 @@ export const PRICING_TIERS: PricingTier[] = [
     subtitle: "Multi-crew · high call volume",
     usageNote: "For operations answering every line throughout the day",
     features: [
-      "Everything in Mid Volume",
+      "Everything in Growth",
       "Branded voice and scripting",
       "Multi-department routing",
       "After-hours emergency routing",
@@ -118,8 +118,8 @@ export const PRICING_TIERS_BY_KEY: Record<PricingTierKey, PricingTier> = Object.
 
 /** For meta tags and hero copy */
 export function formatPricingSummary(): string {
-  const solo = PRICING_TIERS_BY_KEY[PLAN_SOLO_OWNER]
-  return `${PLAN_SOLO_OWNER} from $${solo.price}/mo · one captured job pays for months`
+  const basic = PRICING_TIERS_BY_KEY[PLAN_BASIC]
+  return `${PLAN_BASIC} from $${basic.price}/mo · one captured job pays for months`
 }
 
 export function formatOverageRate(): string {
@@ -147,8 +147,8 @@ export function formatAvgJobValueRange(): string {
 }
 
 export function formatVsHumanLine(): string {
-  const solo = PRICING_TIERS_BY_KEY[PLAN_SOLO_OWNER]
-  return `Less than 40% of a human answering service (from $${HUMAN_RECEPTIONIST_FROM_MONTHLY}/mo) · ${PLAN_SOLO_OWNER} from $${solo.price}/mo`
+  const basic = PRICING_TIERS_BY_KEY[PLAN_BASIC]
+  return `Less than 40% of a human answering service (from $${HUMAN_RECEPTIONIST_FROM_MONTHLY}/mo) · ${PLAN_BASIC} from $${basic.price}/mo`
 }
 
 /** Re-export for pricing UI */

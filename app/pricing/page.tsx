@@ -15,7 +15,7 @@ import {
   formatVsHumanLine,
   PRICING_TIERS,
 } from "@/lib/pricing-catalog"
-import { PLAN_SOLO_OWNER, PLAN_MID_VOLUME } from "@/lib/plan-labels"
+import { PLAN_BASIC, PLAN_GROWTH } from "@/lib/plan-labels"
 import { FREE_TRIAL_MINUTES } from "@/lib/plans"
 import { trialSummaryShort, moneyBackGuaranteeLabel, trialConversionLine } from "@/lib/trial-marketing"
 import { DEFAULT_OG_IMAGE, SEO_KEYWORDS } from "@/lib/seo"
@@ -110,8 +110,8 @@ export default async function PricingPage() {
             <Link href={pricingUrl({ intent: "paid", plan: PlanType.STARTER })} className="text-primary underline">
               Subscribe with {moneyBackGuaranteeLabel()}
             </Link>
-            . Most owners start on <strong>{PLAN_SOLO_OWNER}</strong> for missed &amp; after-hours coverage, then move to{" "}
-            <strong>{PLAN_MID_VOLUME}</strong> when they want every call answered.
+            . Most owners start on <strong>{PLAN_BASIC}</strong> for missed &amp; after-hours coverage, then move to{" "}
+            <strong>{PLAN_GROWTH}</strong> when they want every call answered.
           </p>
           <PricingTrialCta isLoggedIn={isLoggedIn} />
         </div>

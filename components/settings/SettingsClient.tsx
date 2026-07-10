@@ -50,7 +50,7 @@ import {
   getIntakeTemplateMeta,
 } from "@/lib/intake-presets"
 import type { IntakeTemplate } from "@/lib/business-settings"
-import { getUpgradeTierLabel, PLAN_VOLUME_TAGS } from "@/lib/plan-labels"
+import { getUpgradeTierLabel, PLAN_PLATINUM, PLAN_VOLUME_TAGS } from "@/lib/plan-labels"
 import { hasPremiumElevenLabsVoice } from "@/lib/plans"
 import { PlanType } from "@prisma/client"
 import { PhoneInputWithCountry } from "@/components/ui/phone-input-with-country"
@@ -628,7 +628,7 @@ function GreetingSection({
             label="Premium ElevenLabs voice"
             checked={!!d.premiumVoice}
             onChange={(v) => setD({ ...d, premiumVoice: v })}
-            description="Upgrade to natural ElevenLabs TTS. Included on High Volume plans."
+            description={`Upgrade to natural ElevenLabs TTS. Included on ${PLAN_PLATINUM} plans.`}
           />
         )}
         {premiumIncluded && planType !== PlanType.PRO && (
