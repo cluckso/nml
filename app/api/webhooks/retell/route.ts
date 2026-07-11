@@ -24,6 +24,7 @@ import { mergeWithDefaults, DEFAULT_SETTINGS, type BusinessSettings } from "@/li
 import { buildAgentOverride } from "@/lib/agent-override"
 import { evaluateCapacity, resolveCapacityGreeting } from "@/lib/capacity-limits"
 import { hasActionableInfo, isLikelySpam, isKnownSpamOrTestNumber } from "@/lib/call-filter"
+import { shouldSendMissedCallTextBack } from "@/lib/missed-call-text-back"
 import { parseAppointmentRequest } from "@/lib/appointments"
 import { isSpamByTwilioLookup } from "@/lib/twilio-lookup"
 import {
@@ -796,16 +797,21 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
       }
     }
 
-    // Missed call text-back: short calls or calls without full analysis
+    // Missed call text-back: only after call_analyzed when intake is still incomplete.
+    // Retell sends call_ended first (no analysis); texting on that event caused duplicate asks
+    // even when the caller had already provided full details on the call.
     const textBackSent = (call as { missedCallTextBackSent?: boolean }).missedCallTextBackSent === true
-    const shouldTextBack =
-      !isDemoCall &&
-      callerPhone &&
-      !textBackSent &&
-      !capacityDeclineSmsSent &&
-      capacityMode !== "decline" &&
-      callSettings.missedCallRecovery.enabled &&
-      (missedCallRecovery || (!hasInfo && call.duration < 60))
+    const shouldTextBack = shouldSendMissedCallTextBack({
+      isDemoCall,
+      callerPhone,
+      textBackSent,
+      notificationSent: alreadySent,
+      capacityDeclineSmsSent,
+      capacityMode,
+      missedCallRecoveryEnabled: callSettings.missedCallRecovery.enabled,
+      hasAnalysis,
+      hasInfo,
+    })
 
     if (shouldTextBack) {
       try {
