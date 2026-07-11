@@ -78,9 +78,9 @@ export function pricingSchemaTrialDescription(): string {
   return `${TRIAL_DAYS}-day free trial · Plans from $99/mo · one captured job pays for months`
 }
 
-/** Short value prop for auth and trial pages. */
+/** Short value prop for auth, trial, pricing, and hero. */
 export function trialConversionLine(): string {
-  return `Forward your line for ${TRIAL_DAYS} days with ${FREE_TRIAL_MINUTES} real call minutes. If it doesn't capture a lead you'd have lost, don't pay.`
+  return `Forward your line for ${TRIAL_DAYS} days with ${FREE_TRIAL_MINUTES} real call minutes. Your phone rings first — set a delay so we only pick up when you can't answer, or have us answer every call if you prefer. If it doesn't capture a lead you'd have lost, don't pay.`
 }
 
 /** Clarifies trial ends when either limit hits — use on trial start and onboarding. */
