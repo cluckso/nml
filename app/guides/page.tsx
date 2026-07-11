@@ -11,20 +11,20 @@ import { trialNavCtaLabel, trialSummaryShort } from "@/lib/trial-marketing"
 export const metadata: Metadata = {
   title: "Guides for Contractors | CallGrabbr",
   description:
-    "Comparisons and buyer guides for HVAC and plumbing shops: CallGrabbr vs Ruby, vs Smith.ai, AI answering for HVAC, and after-hours answering costs.",
+    "Comparisons and buyer guides for HVAC and plumbing shops: vs Ruby, Smith.ai, Rosie, OnCrew, AI vs live, and after-hours cost.",
   keywords: [...SEO_KEYWORDS, "CallGrabbr guides", "contractor answering service comparison"],
   alternates: { canonical: "/guides" },
   openGraph: {
     title: "Guides for Contractors | CallGrabbr",
     description:
-      "Comparisons and buyer guides for HVAC and plumbing: vs Ruby, vs Smith.ai, HVAC AI answering, and after-hours cost.",
+      "Contractor guides: AI vs live, plumbing and HVAC buyers, and comparisons vs Ruby, Smith.ai, Rosie, and OnCrew.",
     type: "website",
     images: [DEFAULT_OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
     title: "Guides for Contractors | CallGrabbr",
-    description: "Contractor guides: comparisons, HVAC AI answering, and after-hours cost.",
+    description: "Eight contractor guides: comparisons, buyer guides, and after-hours cost.",
     images: [DEFAULT_OG_IMAGE.url],
   },
 }

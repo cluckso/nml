@@ -32,8 +32,8 @@ export const META_AB_CONFIG: MetaAbCampaignConfig = {
     minCtrPercent: 0.6,
   },
   objective: "Sales or Leads → Website conversions",
-  conversionEvent: "Complete registration on /sign-up (trial start)",
-  landingPath: "/sign-up?next=/trial/start",
+  conversionEvent: "Complete registration / trial start (via /start → funnel → sign-up)",
+  landingPath: "/start",
 }
 
 export const META_AB_ROUNDS: MetaAbRound[] = [

@@ -28,13 +28,12 @@ describe("meta-ab-q3 campaign", () => {
     expect(r1?.variantIds).toEqual(["a-voicemail", "d-competition"])
   })
 
-  it("builds tracked landing URLs with trial next path", () => {
+  it("builds tracked landing URLs to /start with UTMs", () => {
     const v = getMetaAbVariant("a-voicemail")
     const url = buildMetaAbLandingUrl(v)
     expect(url).toContain("utm_campaign=meta-ab-voicemail")
     expect(url).toContain("utm_content=h1-static")
-    expect(url).toContain("sign-up")
-    expect(url).toContain("next=")
+    expect(url).toContain("/start")
   })
 
   it("includes deferred reels storyboards on all variants", () => {

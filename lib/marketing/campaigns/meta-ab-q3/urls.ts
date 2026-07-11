@@ -13,14 +13,17 @@ export function buildMetaAbSignUpUrl(variant: MetaAbAdVariant): string {
   })
 }
 
-/** Full URL including trial next path. */
+/**
+ * Week 3 primary landing: industry picker → HVAC/Plumbing funnel.
+ * Instant-form thank-you URLs may still deep-link with ?industry=.
+ */
 export function buildMetaAbLandingUrl(variant: MetaAbAdVariant): string {
-  const base = buildMetaAbSignUpUrl(variant)
-  const url = new URL(base)
-  if (!url.searchParams.has("next")) {
-    url.searchParams.set("next", "/trial/start")
-  }
-  return url.toString()
+  return buildCampaignUrl({
+    platform: "facebook",
+    campaign: variant.utmCampaign,
+    content: variant.utmContentStatic,
+    path: "/start",
+  })
 }
 
 export { getMetaAbVariant, META_AB_CAMPAIGN_ID }

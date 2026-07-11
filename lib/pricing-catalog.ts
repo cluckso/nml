@@ -31,7 +31,7 @@ export interface PricingTier {
   price: number
   includedMinutes: number
   /** Shown on plan card when set */
-  badge?: "Best to start" | "Growing shops" | "For busy shops"
+  badge?: "Best to start" | "Most popular" | "Growing shops" | "For busy shops"
   popular: boolean
   features: string[]
   /** Short subtitle under plan name on landing */
@@ -54,7 +54,7 @@ export const PRICING_TIERS: PricingTier[] = [
     price: MONTHLY_PRICES[PlanType.STARTER],
     includedMinutes: INCLUDED_MINUTES[PlanType.STARTER],
     badge: "Best to start",
-    popular: true,
+    popular: false,
     subtitle: "On the job · evenings · weekends",
     usageNote: "Most one-truck shops start here — covers the calls you miss, not every ring all day",
     features: [
@@ -74,8 +74,8 @@ export const PRICING_TIERS: PricingTier[] = [
       "Your 24/7 front desk — answer most inbound calls so growing crews never lose a lead to a missed ring.",
     price: MONTHLY_PRICES[PlanType.PRO],
     includedMinutes: INCLUDED_MINUTES[PlanType.PRO],
-    badge: "Growing shops",
-    popular: false,
+    badge: "Most popular",
+    popular: true,
     subtitle: "Growing crew · steady inbound volume",
     usageNote: "When you need every call answered, not just the ones you miss",
     features: [
