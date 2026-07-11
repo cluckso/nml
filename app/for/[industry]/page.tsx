@@ -155,6 +155,23 @@ export default async function IndustryLandingPage({ params }: PageProps) {
         </div>
       </section>
 
+      {data.relatedGuides && data.relatedGuides.length > 0 && (
+        <section className="container mx-auto px-4 py-12">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-xl font-bold mb-4 text-center">Guides for {data.name} shops</h2>
+            <ul className="space-y-2 text-sm text-center sm:text-left sm:columns-1">
+              {data.relatedGuides.map((g) => (
+                <li key={g.href}>
+                  <Link href={g.href} className="text-primary underline underline-offset-2">
+                    {g.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
       <section className="container mx-auto px-4 py-16 text-center">
         <h2 className="text-2xl font-bold mb-2">Ready to stop losing {data.name.toLowerCase()} jobs?</h2>
         <p className="text-muted-foreground mb-6 max-w-lg mx-auto">

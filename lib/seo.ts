@@ -80,3 +80,33 @@ export function industryPageMetadata(input: {
     },
   }
 }
+
+export function guidePageMetadata(input: {
+  title: string
+  description: string
+  slug: string
+  keywords?: string[]
+}): Metadata {
+  const title = input.title.includes("CallGrabbr") ? input.title : `${input.title} | CallGrabbr`
+  const description = input.description
+  const keywords = [...SEO_KEYWORDS, ...(input.keywords ?? [])]
+
+  return {
+    title,
+    description,
+    keywords,
+    alternates: { canonical: `/guides/${input.slug}` },
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      images: [DEFAULT_OG_IMAGE],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [DEFAULT_OG_IMAGE.url],
+    },
+  }
+}

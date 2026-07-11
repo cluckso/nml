@@ -249,7 +249,9 @@ export default async function DashboardPage() {
               leadsByTag={weekReporting.leadsByTag}
             />
           )}
-          <ReferralCard />
+          <div id="referral">
+            <ReferralCard />
+          </div>
         </div>
 
         <DashboardSection

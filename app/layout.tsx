@@ -186,6 +186,9 @@ rkp("init","PaccPmsytSiq");rkp("event","PAGE_VIEW");
                 <Link href="/pricing" className="hover:text-foreground font-medium">
                   Pricing
                 </Link>
+                <Link href="/guides" className="hover:text-foreground font-medium">
+                  Guides
+                </Link>
                 <Link href="/docs/faq" className="hover:text-foreground font-medium">
                   Help &amp; FAQ
                 </Link>

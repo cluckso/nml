@@ -10,6 +10,8 @@ export interface IndustryLandingData {
   painPoints: string[]
   exampleQuestions: string[]
   statMissedCalls: string
+  /** Internal SEO links to /guides/* pages */
+  relatedGuides?: { label: string; href: string }[]
 }
 
 /** Average job value (USD) used for ROI estimates on the dashboard */
@@ -59,6 +61,12 @@ const LANDING_PAGES: IndustryLandingData[] = [
       "Is anyone in the home without heat or AC right now?",
     ],
     statMissedCalls: "28% of HVAC calls go unanswered during peak season",
+    relatedGuides: [
+      { label: "Best AI answering for HVAC (2026)", href: "/guides/best-ai-answering-for-hvac-2026" },
+      { label: "After-hours answering cost for contractors", href: "/guides/after-hours-answering-cost-for-contractors" },
+      { label: "CallGrabbr vs Ruby", href: "/guides/callgrabbr-vs-ruby" },
+      { label: "CallGrabbr vs Smith.ai", href: "/guides/callgrabbr-vs-smith-ai" },
+    ],
   },
   {
     slug: "plumbing",
@@ -79,6 +87,12 @@ const LANDING_PAGES: IndustryLandingData[] = [
       "Can you describe what's going on?",
     ],
     statMissedCalls: "Most emergency callers hang up — and dial the next plumber",
+    relatedGuides: [
+      { label: "After-hours answering cost for contractors", href: "/guides/after-hours-answering-cost-for-contractors" },
+      { label: "CallGrabbr vs Ruby", href: "/guides/callgrabbr-vs-ruby" },
+      { label: "CallGrabbr vs Smith.ai", href: "/guides/callgrabbr-vs-smith-ai" },
+      { label: "Best AI answering for HVAC (2026)", href: "/guides/best-ai-answering-for-hvac-2026" },
+    ],
   },
   {
     slug: "electrical",

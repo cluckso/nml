@@ -122,6 +122,9 @@ export function Nav() {
           {trialBadge && <TrialNavBadge badge={trialBadge} />}
         </div>
         <div className="flex gap-4 items-center shrink-0">
+          <Link href="/guides">
+            <Button variant="ghost">Guides</Button>
+          </Link>
           <Link href="/pricing">
             <Button variant="ghost">Pricing</Button>
           </Link>
