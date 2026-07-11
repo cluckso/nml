@@ -1,6 +1,5 @@
 import {
-  AVG_JOB_VALUE_HIGH,
-  AVG_JOB_VALUE_LOW,
+  formatJobValuePromptLine,
   HUMAN_RECEPTIONIST_FROM_MONTHLY,
   PRICING_TIERS_BY_KEY,
 } from "@/lib/pricing-catalog"
@@ -37,7 +36,7 @@ const GUIDES: Guide[] = [
         heading: "Pricing snapshot",
         paragraphs: [
           `Ruby-style live answering typically starts near $${HUMAN_RECEPTIONIST_FROM_MONTHLY}/month and rises with minutes and features.`,
-          `CallGrabbr: ${PLAN_BASIC} $${basic.price}/mo · ${PLAN_GROWTH} $${growth.price}/mo · ${PLAN_PLATINUM} $${platinum.price}/mo. ${trialSummaryShort()}. One captured job ($${AVG_JOB_VALUE_LOW}–$${AVG_JOB_VALUE_HIGH} average) often pays for months of service.`,
+          `CallGrabbr: ${PLAN_BASIC} $${basic.price}/mo · ${PLAN_GROWTH} $${growth.price}/mo · ${PLAN_PLATINUM} $${platinum.price}/mo. ${trialSummaryShort()}. ${formatJobValuePromptLine()} Capture one you'd have lost and the plan often pays for itself for months.`,
         ],
       },
       {
@@ -203,7 +202,7 @@ const GUIDES: Guide[] = [
         heading: "How CallGrabbr fits HVAC",
         paragraphs: [
           `CallGrabbr answers when you forward the line, collects HVAC-relevant details, and alerts you immediately. ${PLAN_BASIC} ($${basic.price}/mo) covers missed and after-hours. ${PLAN_GROWTH} ($${growth.price}/mo) is for shops that want most inbound answered like a 24/7 desk. ${PLAN_PLATINUM} ($${platinum.price}/mo) fits multi-crew volume.`,
-          `Average HVAC-related job values in our planning range often land around $${AVG_JOB_VALUE_LOW}–$${AVG_JOB_VALUE_HIGH}. One recovered emergency often covers months of answering.`,
+          `${formatJobValuePromptLine()} One recovered HVAC emergency often covers months of answering.`,
         ],
       },
       {
@@ -270,7 +269,7 @@ const GUIDES: Guide[] = [
       {
         heading: "The real cost: missed emergencies",
         paragraphs: [
-          `A single after-hours emergency often runs $${AVG_JOB_VALUE_LOW}–$${AVG_JOB_VALUE_HIGH} for HVAC, plumbing, and similar trades. That one job can cover months of CallGrabbr.`,
+          `${formatJobValuePromptLine()} For HVAC, plumbing, and similar trades, that one after-hours job can cover months of CallGrabbr.`,
           "Voicemail is free until it isn’t — most emergency callers hang up and dial the next number on the list.",
         ],
       },
@@ -304,7 +303,7 @@ const GUIDES: Guide[] = [
       },
       {
         question: "Is after-hours answering worth it?",
-        answer: `Usually yes if you take emergency work. One missed job at $${AVG_JOB_VALUE_LOW}–$${AVG_JOB_VALUE_HIGH} often exceeds several months of AI answering.`,
+        answer: `Usually yes if you take emergency work. ${formatJobValuePromptLine()} One missed job often exceeds several months of AI answering.`,
       },
       {
         question: "Can I only forward after hours?",

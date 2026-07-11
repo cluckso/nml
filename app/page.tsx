@@ -8,11 +8,12 @@ import { SMSPreview } from "@/components/marketing/SMSPreview"
 import { DemoUnlock } from "@/components/marketing/DemoUnlock"
 import { HomeHero } from "@/components/marketing/HomeHero"
 import { IndustryPhotoCards } from "@/components/marketing/IndustryPhotoCards"
+import { PeerProof } from "@/components/marketing/PeerProof"
 import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
 import { TrustStrip } from "@/components/marketing/TrustStrip"
 import { MobileAppDownload } from "@/components/marketing/MobileAppDownload"
 import { MARKETING_IMAGES, MARKETING_IMAGE_ALT } from "@/lib/marketing-images"
-import { formatAvgJobValueRange, PRICING_TIERS } from "@/lib/pricing-catalog"
+import { formatJobValuePromptLine, PRICING_TIERS } from "@/lib/pricing-catalog"
 import {
   ArrowRight,
   CreditCard,
@@ -89,23 +90,7 @@ export default function HomePage() {
           </div>
       </SectionBackdrop>
 
-      {/* Stats strip — one story: miss → hang up → you get the lead */}
-      <section className="container mx-auto px-4 py-8">
-        <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-4 text-center">
-          <div>
-            <p className="text-2xl font-bold text-destructive">28%</p>
-            <p className="text-sm text-muted-foreground">of calls go unanswered</p>
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-destructive">80%</p>
-            <p className="text-sm text-muted-foreground">hang up — no message</p>
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-primary">Seconds</p>
-            <p className="text-sm text-muted-foreground">from call to lead text</p>
-          </div>
-        </div>
-      </section>
+      <PeerProof />
 
       {/* Features — Every call picked up */}
       <section className="container mx-auto px-4 py-16">
@@ -178,13 +163,18 @@ export default function HomePage() {
         className="py-16 border-y border-border/50"
         contentClassName="container mx-auto px-4"
       >
-          <h2 className="text-3xl font-bold text-center mb-4">Why this matters</h2>
+          <h2 className="text-3xl font-bold text-center mb-4">The jobs you never knew you lost</h2>
+          <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-8">
+            You finish the install. Check your phone. Three missed calls — and no voicemails.
+            Those homeowners already booked someone who answered.
+          </p>
           <ul className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto list-none text-center">
             <li className="text-muted-foreground">
-              Most local service businesses miss <strong className="text-foreground">20–40% of inbound calls</strong>
+              Callers in a bind <strong className="text-foreground">won&apos;t wait on voicemail</strong>
             </li>
             <li className="text-muted-foreground">
-              One missed call often means a <strong className="text-foreground">{formatAvgJobValueRange()} lost job</strong>
+              <strong className="text-foreground">{formatJobValuePromptLine()}</strong>
+              {" "}That&apos;s what walked away.
             </li>
             <li className="text-muted-foreground">
               After-hours callers are usually <strong className="text-foreground">ready to book</strong>
@@ -573,8 +563,8 @@ export default function HomePage() {
             </div>
           </div>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Average job value for contractors: <strong className="text-foreground">{formatAvgJobValueRange()}</strong>.
-            Capture just one job from a missed call, and the service pays for itself for months.
+            {formatJobValuePromptLine()} Capture just one from a missed call, and the
+            service pays for itself for months.
           </p>
         </div>
       </section>

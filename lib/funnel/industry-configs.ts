@@ -209,7 +209,7 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     headline: "Never Miss an Electrical Service Call Again",
     subheadline:
       "Power outages, panel upgrades, and sparking outlets need fast response. Capture every detail for faster quoting.",
-    painPoint: "One missed emergency electrical call can cost $400+ in lost revenue.",
+    painPoint: "Emergency callers hang up fast — and dial the next electrician who answers.",
     averageSale: 420,
     missedCallRate: 0.3,
     exampleTranscript:

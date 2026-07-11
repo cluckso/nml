@@ -1,5 +1,4 @@
 import { FREE_TRIAL_MINUTES, TRIAL_DAYS, ANNUAL_FREE_MONTHS } from "./plans"
-import { AVG_JOB_VALUE_LOW, AVG_JOB_VALUE_HIGH } from "./pricing-catalog"
 
 /** Paid subscribers: full refund within this window (marketing / support policy). */
 export const MONEY_BACK_GUARANTEE_DAYS = 30
@@ -111,7 +110,7 @@ export function upgradeTrialEndedLabel(): string {
 
 /** Mid-trial save — show around day 5 or when ~70% of minutes are used. */
 export function midTrialUpgradeNudgeLine(): string {
-  return `One captured job (often $${AVG_JOB_VALUE_LOW}–$${AVG_JOB_VALUE_HIGH}) covers months of coverage. Upgrade before the trial ends so the next after-hours call still gets answered.`
+  return `How much is one more captured job worth — $300? $500? $600+? Upgrade before the trial ends so the next after-hours call still gets answered.`
 }
 
 /** Sign-up page headline — trial-first, not account-first. */

@@ -126,12 +126,21 @@ export function formatOverageRate(): string {
   return `$${OVERAGE_RATE_PER_MIN.toFixed(2)}/min`
 }
 
-/** Average captured job value for ROI marketing (USD). */
+/**
+ * Soft dollar anchors for ROI math (dashboard reports, internal estimates).
+ * Prefer rhetorical prompts on marketing surfaces — owners supply their own number.
+ */
 export const AVG_JOB_VALUE_LOW = 350
 export const AVG_JOB_VALUE_HIGH = 600
 
+/** Emotional / homepage: invite the owner to name their own job value. */
+export function formatJobValuePromptLine(): string {
+  return `How much is a job worth to your business — $300? $500? $600+?`
+}
+
+/** Pricing / ROI close: rhetorical prompt + payback. */
 export function formatJobRoiLine(): string {
-  return `Average job: $${AVG_JOB_VALUE_LOW}–$${AVG_JOB_VALUE_HIGH}. One captured lead pays for months of service.`
+  return `${formatJobValuePromptLine()} Capture one you'd have lost and CallGrabbr pays for itself for months.`
 }
 
 export function formatRoiHeadline(): string {
@@ -139,9 +148,10 @@ export function formatRoiHeadline(): string {
 }
 
 export function formatMissedJobCostLine(): string {
-  return `One missed emergency job often runs $${AVG_JOB_VALUE_LOW}–$${AVG_JOB_VALUE_HIGH} — enough to cover months of CallGrabbr`
+  return `What does a missed emergency cost you — a few hundred? A half-day of work? Often enough to cover months of CallGrabbr.`
 }
 
+/** @deprecated Prefer formatJobValuePromptLine on marketing pages. Kept for dashboard estimates. */
 export function formatAvgJobValueRange(): string {
   return `$${AVG_JOB_VALUE_LOW}–$${AVG_JOB_VALUE_HIGH}`
 }

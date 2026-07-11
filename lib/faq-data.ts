@@ -3,7 +3,7 @@ import { PLAN_BASIC, PLAN_GROWTH, PLAN_PLATINUM } from "@/lib/plan-labels"
 import { MONTHLY_PRICES, getIncludedMinutes, TRIAL_DAYS, FREE_TRIAL_MINUTES } from "@/lib/plans"
 import { approxCallsPerMonth } from "@/lib/plan-usage"
 import { PlanType } from "@prisma/client"
-import { AVG_JOB_VALUE_LOW, AVG_JOB_VALUE_HIGH, HUMAN_RECEPTIONIST_FROM_MONTHLY } from "@/lib/pricing-catalog"
+import { formatJobValuePromptLine, HUMAN_RECEPTIONIST_FROM_MONTHLY } from "@/lib/pricing-catalog"
 
 const basicCalls = approxCallsPerMonth(getIncludedMinutes(PlanType.STARTER))
 const growthCalls = approxCallsPerMonth(getIncludedMinutes(PlanType.PRO))
@@ -47,7 +47,7 @@ export const PRODUCT_FAQ: FaqItem[] = [
   },
   {
     question: "How much does CallGrabbr cost after the trial?",
-    answer: `${PLAN_BASIC} is $${MONTHLY_PRICES[PlanType.STARTER]}/month (~${basicCalls} captured calls) for missed and after-hours coverage. ${PLAN_GROWTH} is $${MONTHLY_PRICES[PlanType.PRO]}/month (~${growthCalls} calls) for shops that need most inbound calls answered. ${PLAN_PLATINUM} is $${MONTHLY_PRICES[PlanType.ELITE]}/month (~${platinumCalls} calls) for busy multi-crew operations. Estimates assume ~3 minutes per call. Additional usage is $0.22/min. One captured job ($${AVG_JOB_VALUE_LOW}–$${AVG_JOB_VALUE_HIGH} average) often pays for months of service.`,
+    answer: `${PLAN_BASIC} is $${MONTHLY_PRICES[PlanType.STARTER]}/month (~${basicCalls} captured calls) for missed and after-hours coverage. ${PLAN_GROWTH} is $${MONTHLY_PRICES[PlanType.PRO]}/month (~${growthCalls} calls) for shops that need most inbound calls answered. ${PLAN_PLATINUM} is $${MONTHLY_PRICES[PlanType.ELITE]}/month (~${platinumCalls} calls) for busy multi-crew operations. Estimates assume ~3 minutes per call. Additional usage is $0.22/min. ${formatJobValuePromptLine()} Capture one you'd have lost and the plan often pays for itself for months.`,
   },
   {
     question: "Which plan should I choose?",
@@ -55,6 +55,6 @@ export const PRODUCT_FAQ: FaqItem[] = [
   },
   {
     question: "Is CallGrabbr worth $99/month?",
-    answer: `For most service businesses, yes — if it captures even one job you'd have lost to voicemail. Average job value is $${AVG_JOB_VALUE_LOW}–$${AVG_JOB_VALUE_HIGH}. ${PLAN_BASIC} costs $${MONTHLY_PRICES[PlanType.STARTER]}/month (~$0.99 per captured call at included volume). That's far less than a human answering service ($${HUMAN_RECEPTIONIST_FROM_MONTHLY}+/month) and much cheaper than one missed emergency call.`,
+    answer: `For most service businesses, yes — if it captures even one job you'd have lost to voicemail. ${formatJobValuePromptLine()} ${PLAN_BASIC} costs $${MONTHLY_PRICES[PlanType.STARTER]}/month (~$0.99 per captured call at included volume). That's far less than a human answering service ($${HUMAN_RECEPTIONIST_FROM_MONTHLY}+/month) and usually cheaper than one missed emergency call.`,
   },
 ]

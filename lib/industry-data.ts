@@ -6,6 +6,8 @@ export interface IndustryLandingData {
   name: string
   headline: string
   subheadline: string
+  /** Scene-first hook shown above the fold on /for/[industry] */
+  sceneHook: string
   averageJobValue: number
   painPoints: string[]
   exampleQuestions: string[]
@@ -49,6 +51,8 @@ const LANDING_PAGES: IndustryLandingData[] = [
     headline: "Stop Losing HVAC Jobs to Missed Calls",
     subheadline:
       "When the AC goes out or the furnace dies, homeowners call the next contractor. CallGrabbr answers when you can't and texts you the job details in seconds.",
+    sceneHook:
+      "It's 97° and you're under a house finishing a changeout. Your phone buzzes in the truck. By the time you call back, they already booked the next HVAC company on the list.",
     averageJobValue: 475,
     painPoints: [
       "No-heat and no-AC calls spike after hours and on weekends",
@@ -75,6 +79,8 @@ const LANDING_PAGES: IndustryLandingData[] = [
     headline: "Capture More Plumbing Leads — Even at 2 AM",
     subheadline:
       "Burst pipes and clogged drains can't wait. Your call assistant answers instantly, flags emergencies, and texts you the lead before the caller dials your competitor.",
+    sceneHook:
+      "It's 2 AM. A homeowner has water running under the sink. They call you, hang up when you don't answer, and dial the next plumber — while you're asleep.",
     averageJobValue: 380,
     painPoints: [
       "Emergency leaks need immediate callback info",
@@ -101,6 +107,8 @@ const LANDING_PAGES: IndustryLandingData[] = [
     headline: "Never Miss an Electrical Service Call Again",
     subheadline:
       "Power outages, panel upgrades, and sparking outlets need fast response. CallGrabbr captures every detail so you can quote and schedule faster.",
+    sceneHook:
+      "You're in an attic pulling wire. A panicked homeowner calls about sparks. They don't leave a message — they call the next electrician who picks up.",
     averageJobValue: 420,
     painPoints: [
       "Safety issues need urgent flagging",
@@ -112,7 +120,7 @@ const LANDING_PAGES: IndustryLandingData[] = [
       "Residential or commercial property?",
       "What's the best callback number?",
     ],
-    statMissedCalls: "One missed emergency call can cost $400+",
+    statMissedCalls: "One missed emergency walks — callers dial the next electrician",
   },
   {
     slug: "auto-repair",
@@ -121,6 +129,8 @@ const LANDING_PAGES: IndustryLandingData[] = [
     headline: "Book More Auto Repair Jobs From Missed Calls",
     subheadline:
       "Capture year, make, model, and symptoms when callers share them. CallGrabbr handles intake while your techs are under the hood.",
+    sceneHook:
+      "Your techs are under the hood and the shop phone won't stop. Every unanswered ring is an RO that went to the shop down the street.",
     averageJobValue: 550,
     painPoints: [
       "Shop phones ring nonstop during business hours",
@@ -141,6 +151,8 @@ const LANDING_PAGES: IndustryLandingData[] = [
     headline: "Turn Handyman Calls Into Booked Jobs",
     subheadline:
       "From drywall to deck repairs, callers want fast answers. Your call assistant captures the scope, address, and urgency so you can follow up with a quote.",
+    sceneHook:
+      "You're on a ladder with both hands full. The phone rings in your pocket. By lunch you've missed three quotes you never knew about.",
     averageJobValue: 320,
     painPoints: [
       "Solo operators can't answer while on a ladder",
@@ -161,6 +173,8 @@ const LANDING_PAGES: IndustryLandingData[] = [
     headline: "Answer Parent Inquiries — Even During Drop-Off",
     subheadline:
       "Tour requests and enrollment calls need a warm, professional first impression. CallGrabbr captures parent info and schedules tours while you focus on the kids.",
+    sceneHook:
+      "Drop-off is chaos. A parent calling about a tour gets voicemail — and tries the next center on their list before you can call back.",
     averageJobValue: 280,
     painPoints: [
       "Staff are with children and can't answer phones",
@@ -180,6 +194,8 @@ const LANDING_PAGES: IndustryLandingData[] = [
     headline: "Book More Cleaning Clients From Missed Calls",
     subheadline:
       "Residential and commercial cleaning leads need fast follow-up. Capture square footage, frequency, and address when callers provide them.",
+    sceneHook:
+      "Your crew is mid-clean. A commercial lead calls for a quote. Speed-to-lead wins the recurring contract — voicemail usually loses it.",
     averageJobValue: 250,
     painPoints: [
       "Crews are on-site and can't answer",
@@ -199,6 +215,8 @@ const LANDING_PAGES: IndustryLandingData[] = [
     headline: "Grow Your Landscaping Business — Capture More Leads",
     subheadline:
       "Seasonal demand spikes mean missed calls = missed revenue. CallGrabbr answers while your crew is on a job site.",
+    sceneHook:
+      "Spring rush. Your crew is on a mow route. Estimate calls stack up — and the shops that answer first book the season.",
     averageJobValue: 350,
     painPoints: [
       "Peak season call volume overwhelms small teams",

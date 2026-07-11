@@ -74,6 +74,9 @@ export default async function PricingPage() {
       <h1 className="text-4xl font-bold tracking-tight mb-4 max-w-3xl mx-auto">
         One captured job pays for months
       </h1>
+      <p className="text-lg text-foreground/90 max-w-2xl mx-auto leading-relaxed mb-2">
+        You&apos;re not buying software — you&apos;re buying back the jobs that walk while you&apos;re on a call.
+      </p>
       <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
         {formatJobRoiLine()}
       </p>

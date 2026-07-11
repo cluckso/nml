@@ -11,6 +11,7 @@ import { DemoUnlock } from "@/components/marketing/DemoUnlock"
 import { SMSPreview } from "@/components/marketing/SMSPreview"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { funnelTrialFeatureLabel, trialSummaryShort, trialNavCtaLabel, trialConversionLine } from "@/lib/trial-marketing"
+import { formatJobValuePromptLine } from "@/lib/pricing-catalog"
 import { industryPageMetadata } from "@/lib/seo"
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data"
 
@@ -59,7 +60,11 @@ export default async function IndustryLandingPage({ params }: PageProps) {
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-sm font-medium text-primary mb-3">Built for {data.name}</p>
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">{data.headline}</h1>
-          <p className="text-lg text-muted-foreground mb-8">{data.subheadline}</p>
+          <p className="text-lg text-foreground/90 mb-4 leading-relaxed">{data.sceneHook}</p>
+          <p className="text-lg text-muted-foreground mb-6">{data.subheadline}</p>
+          <p className="text-base text-muted-foreground mb-8">
+            {formatJobValuePromptLine()} Capture one you&apos;d have lost and CallGrabbr pays for itself for months.
+          </p>
           <div className="flex flex-wrap justify-center gap-3">
             <Button size="lg" asChild>
               <Link href="/sign-up?next=%2Ftrial%2Fstart">
@@ -72,7 +77,7 @@ export default async function IndustryLandingPage({ params }: PageProps) {
             </Button>
           </div>
           <p className="text-sm text-muted-foreground mt-4">
-            {trialSummaryShort()} · Forward your line and test with real calls
+            If it doesn&apos;t capture a lead you&apos;d have lost, don&apos;t pay. {trialSummaryShort()}.
           </p>
         </div>
       </section>
