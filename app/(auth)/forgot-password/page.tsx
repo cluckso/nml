@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2, Mail } from "lucide-react"
 import { validateEmail } from "@/lib/utils"
 import { getAppOrigin } from "@/lib/auth-redirect"
+import { BrandMark } from "@/components/brand/BrandMark"
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("")
@@ -57,6 +58,7 @@ export default function ForgotPasswordPage() {
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
+          <BrandMark className="mb-4" />
           <CardTitle>Reset your password</CardTitle>
           <CardDescription>
             {sent

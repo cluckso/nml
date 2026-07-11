@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
@@ -10,6 +9,7 @@ import type { User } from "@supabase/supabase-js"
 import { trialNavCtaLabel } from "@/lib/trial-marketing"
 import { getTrialNavBadge, type TrialNavBadge as TrialNavBadgeData } from "@/lib/trial-nav-badge"
 import { TrialNavBadge } from "@/components/nav/TrialNavBadge"
+import { BrandMark } from "@/components/brand/BrandMark"
 
 type DashboardNavPayload = {
   business?: { name?: string } | null
@@ -101,16 +101,7 @@ export function Nav() {
     <nav className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center gap-3">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          <Link href="/" className="flex items-center gap-2 text-foreground shrink-0" aria-label="CallGrabbr home">
-            <Image
-              src="/icon.png"
-              alt=""
-              width={40}
-              height={40}
-              className="h-9 w-9 rounded-lg"
-              priority
-            />
-          </Link>
+          <BrandMark size="sm" />
           {businessName && (
             <span
               className="text-sm text-muted-foreground border-l border-border/60 pl-3 font-medium truncate max-w-[120px] sm:max-w-[200px] md:max-w-[280px]"

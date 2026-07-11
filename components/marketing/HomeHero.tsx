@@ -11,6 +11,7 @@ import {
   Shield,
   TrendingUp,
 } from "lucide-react"
+import { BrandMark } from "@/components/brand/BrandMark"
 
 export function HomeHero() {
   return (
@@ -23,6 +24,7 @@ export function HomeHero() {
       className="min-h-[88vh] flex flex-col items-center justify-center px-4 py-24"
       contentClassName="container mx-auto text-center max-w-4xl"
     >
+      <BrandMark size="lg" className="mb-6 justify-center drop-shadow-sm" />
       <div className="inline-flex items-center gap-2 rounded-full border border-destructive/30 bg-background/60 backdrop-blur-sm px-4 py-1.5 text-sm font-medium text-destructive mb-4">
         <PhoneOff className="h-4 w-4" aria-hidden />
         When you miss a call, 80% of callers hang up — and dial your competitor

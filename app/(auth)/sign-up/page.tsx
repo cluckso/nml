@@ -14,6 +14,7 @@ import { getEmailConfirmRedirectUrl } from "@/lib/auth-redirect"
 import { TERMS_ACCEPTED_STORAGE_KEY } from "@/lib/user-legal"
 import { trialCtaLabel, signupPageTitle, signupPageDescription } from "@/lib/trial-marketing"
 import { LegalConsentCheckbox } from "@/components/legal/LegalConsentCheckbox"
+import { BrandMark } from "@/components/brand/BrandMark"
 
 const AUTH_NEXT_KEY = "callgrabbr_auth_next"
 
@@ -124,6 +125,7 @@ function SignUpForm() {
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
+          <BrandMark className="mb-4" />
           <CardTitle>{signupPageTitle()}</CardTitle>
           <CardDescription>
             {signupPageDescription()}

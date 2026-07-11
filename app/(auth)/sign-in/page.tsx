@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, Suspense, useEffect } from "react"
+import { useState, Suspense, useEffect, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { useSearchParams } from "next/navigation"
@@ -16,6 +16,7 @@ import { signInPageDescription, trialNavCtaLabel } from "@/lib/trial-marketing"
 import { getSafeRedirectPath } from "@/lib/safe-redirect"
 import { getRememberMePreference, setRememberMePreference } from "@/lib/auth-session"
 import { Checkbox } from "@/components/ui/checkbox"
+import { BrandMark } from "@/components/brand/BrandMark"
 
 const AUTH_NEXT_KEY = "callgrabbr_auth_next"
 
@@ -26,9 +27,11 @@ function SignInContent() {
   const [loading, setLoading] = useState(false)
   const [checkingEmailConfirm, setCheckingEmailConfirm] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const confirmAttempted = useRef(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const message = searchParams.get("message")
+  const emailConfirmed = message === "email-confirmed"
 
   useEffect(() => {
     setStaySignedIn(getRememberMePreference())
@@ -47,12 +50,19 @@ function SignInContent() {
     if (ctx?.contactEmail) setEmail(ctx.contactEmail)
   }, [searchParams])
 
+  // After a successful confirm redirect, drop any stale error from a double-exchange race.
+  useEffect(() => {
+    if (emailConfirmed) setError(null)
+  }, [emailConfirmed])
+
   useEffect(() => {
     const code = searchParams.get("code")
-    if (!code) return
+    if (!code || emailConfirmed || confirmAttempted.current) return
 
+    confirmAttempted.current = true
     let cancelled = false
     setCheckingEmailConfirm(true)
+    setError(null)
 
     async function handleEmailConfirm() {
       const authClient = createClient()
@@ -60,14 +70,30 @@ function SignInContent() {
       if (cancelled) return
 
       if (exchangeError) {
-        setError("This confirmation link is invalid or has expired. Sign in below or request a new confirmation email.")
+        // Code may already be consumed by a prior attempt in the same navigation (Strict Mode).
+        // If we already have a session briefly, still treat as confirmed.
+        const { data } = await authClient.auth.getSession()
+        if (data.session) {
+          await authClient.auth.signOut()
+          if (cancelled) return
+          router.replace("/sign-in?message=email-confirmed")
+          router.refresh()
+          setCheckingEmailConfirm(false)
+          return
+        }
+        setError(
+          "This confirmation link is invalid or has expired. Sign in below or request a new confirmation email."
+        )
         setCheckingEmailConfirm(false)
+        // Strip used/invalid code so refresh doesn't re-trigger.
+        router.replace("/sign-in")
         return
       }
 
       await authClient.auth.signOut()
       if (cancelled) return
 
+      setError(null)
       router.replace("/sign-in?message=email-confirmed")
       router.refresh()
       setCheckingEmailConfirm(false)
@@ -78,7 +104,7 @@ function SignInContent() {
     return () => {
       cancelled = true
     }
-  }, [searchParams, router])
+  }, [searchParams, router, emailConfirmed])
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -132,7 +158,10 @@ function SignInContent() {
     return (
       <div className="flex min-h-screen items-center justify-center p-4">
         <Card className="w-full max-w-md">
-          <CardContent className="flex flex-col items-center gap-4 pt-6">
+          <CardHeader className="pb-2">
+            <BrandMark className="mb-2" />
+          </CardHeader>
+          <CardContent className="flex flex-col items-center gap-4 pt-2">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             <p className="text-sm text-muted-foreground">Confirming your email…</p>
           </CardContent>
@@ -141,25 +170,32 @@ function SignInContent() {
     )
   }
 
+  // Prefer success copy; never show confirm-link error alongside email-confirmed.
+  const showConfirmError = !!error && !emailConfirmed
+
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
+          <BrandMark className="mb-4" />
           <CardTitle>Sign In</CardTitle>
           <CardDescription>{signInPageDescription()}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignIn} className="space-y-4">
-            {message && (
+            {emailConfirmed && (
+              <div className="bg-primary/10 text-primary text-sm p-3 rounded-md">
+                Your email is confirmed. Sign in with your password to continue.
+              </div>
+            )}
+            {message && message !== "email-confirmed" && (
               <div className="bg-primary/10 text-primary text-sm p-3 rounded-md">
                 {message === "account-deleted"
                   ? "Your account was deleted. You can sign up again anytime."
-                  : message === "email-confirmed"
-                    ? "Your email is confirmed. Sign in with your password to continue."
-                    : message}
+                  : message}
               </div>
             )}
-            {error && (
+            {showConfirmError && (
               <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md">
                 {error}
               </div>
@@ -207,7 +243,7 @@ function SignInContent() {
             </Button>
           </form>
           <p className="mt-4 text-center text-sm text-muted-foreground">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <a href={`/sign-up?next=${encodeURIComponent("/trial/start")}`} className="text-primary hover:underline">
               {trialNavCtaLabel()}
             </a>

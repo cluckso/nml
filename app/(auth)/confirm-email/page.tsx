@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { confirmEmailValueLine } from "@/lib/trial-marketing"
 import { getEmailConfirmRedirectUrl } from "@/lib/auth-redirect"
 import { CheckCircle2, Loader2, Mail } from "lucide-react"
+import { BrandMark } from "@/components/brand/BrandMark"
 
 function ConfirmEmailContent() {
   const searchParams = useSearchParams()
@@ -42,6 +43,7 @@ function ConfirmEmailContent() {
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+          <BrandMark className="mb-4 justify-center" />
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
             <Mail className="h-7 w-7 text-primary" />
           </div>
