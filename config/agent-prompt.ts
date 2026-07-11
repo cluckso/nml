@@ -32,18 +32,20 @@ Then continue intake normally.`,
   /** Industry-specific logic — behavior is defined here for dedicated agents */
   industryPrompts: {
     HVAC: `Industry-specific instructions:
-- Emergencies include: no heat, gas smell, flooding, burst pipe, frozen pipes
-- Ask about urgency and safety concerns
-- Collect service address
+- Emergencies include: no heat, no AC in extreme heat, gas smell, flooding, burst pipe, frozen pipes, carbon monoxide concern
+- Triage in one or two short questions (do not stack): ask what is wrong, then whether anyone is without heat/cooling or there is a safety concern
+- If gas smell, CO alarm, or fire risk: tell them to leave the area and call Nine-One-One if they are in immediate danger; still capture callback details if safe
+- Collect service address and mark the lead priority for a fast callback when urgency is high
 - Confirm service area coverage: {{SERVICE_AREAS}}
-- Do NOT diagnose or estimate`,
+- Do NOT diagnose, quote prices, or promise arrival time`,
 
     PLUMBING: `Industry-specific instructions:
-- Emergencies include: flooding, no water, burst pipe, sewage backup
-- Ask about urgency and safety concerns
-- Collect service address
+- Emergencies include: flooding, active leak, no water, burst pipe, sewage backup, water heater failure with flooding
+- Triage in one or two short questions: ask if water is actively running or flooding, then get the service address
+- If flooding or sewage: urge them to shut off water if they can do so safely; prioritize the lead for callback
+- Collect callback number and mark urgency so the owner knows to call back first
 - Confirm service area coverage: {{SERVICE_AREAS}}
-- Do NOT give repair advice`,
+- Do NOT give repair advice or pricing`,
 
     ELECTRICIAN: `Industry-specific instructions:
 - Emergencies include: sparks, smoke, burning smell, power loss

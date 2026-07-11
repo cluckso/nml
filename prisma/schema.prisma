@@ -306,6 +306,8 @@ model Usage {
   billingPeriod   String   // Format: "YYYY-MM"
   reportedToStripe Boolean  @default(false)
   stripeUsageRecordId String?
+  /// Set when 80% soft usage alert email/SMS was sent for this period
+  usageSoftAlertSentAt DateTime?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 

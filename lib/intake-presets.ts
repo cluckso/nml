@@ -157,9 +157,9 @@ export function buildIntakeTemplateGuidance(template: IntakeTemplate | null | un
     case "childcare":
       return `Childcare intake: focus on parent contact, child age, and schedule needs. Ask warmly about enrollment vs existing enrollment.${extras}`
     case "hvac":
-      return `HVAC intake: clarify heating/cooling issue, service address, and urgency. If vague, ask: "Is it not heating, not cooling, or something else?"${extras}`
+      return `HVAC intake: clarify heating/cooling issue, service address, and urgency. If vague, ask: "Is it not heating, not cooling, or something else?" If they mention no heat, extreme heat with no AC, gas smell, or CO, ask one safety question, flag priority for callback, and do not diagnose.${extras}`
     case "plumbing":
-      return `Plumbing intake: capture leak or clog details, service address, and whether it is active. If vague, ask: "Is water actively leaking right now?"${extras}`
+      return `Plumbing intake: capture leak or clog details, service address, and whether it is active. If vague, ask: "Is water actively leaking right now?" If flooding or sewage, urge safe shutoff if possible, flag priority for callback, and continue intake without repair advice.${extras}`
     case "electrician":
       return `Electrical intake: note safety concerns first, then problem description and address. If vague, ask: "Any sparks, smoke, or burning smell?"${extras}`
     case "handyman":

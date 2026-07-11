@@ -4,6 +4,7 @@ import { PlanType, SubscriptionStatus } from "@prisma/client"
 import { getIncludedMinutes, getOverageMinutes, TRIAL_DAYS } from "./plans"
 import { convertReferralOnSubscription } from "@/lib/referrals"
 import { processAgencyCommissionOnSubscription } from "@/lib/agency"
+import { maybeSendUsageSoftAlert } from "@/lib/usage-soft-alert"
 import {
   getAnnualStripePriceId,
   type BillingInterval,
@@ -484,6 +485,17 @@ export async function reportUsageToStripe(businessId: string, minutes: number) {
       },
     },
   })
+
+  try {
+    await maybeSendUsageSoftAlert({
+      business,
+      billingPeriod,
+      previousMinutes: previousTotal,
+      newMinutes: previousTotal + minutes,
+    })
+  } catch (alertErr) {
+    console.error("[UsageSoftAlert] Failed:", alertErr)
+  }
 
   // Report only overage minutes to Stripe via Billing Meter events (live overage price uses meters, not legacy usage records)
   if (incrementalOverage > 0) {

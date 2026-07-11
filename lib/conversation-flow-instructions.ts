@@ -29,7 +29,8 @@ export const TASK_REASON = "Task Reason: Capture reason for call."
 
 export const TASK_REASON_AUTO = "Task Reason: Capture call type — new issue, maintenance, status check, or scheduling."
 
-export const TASK_URGENCY = "Task Urgency: Mark priority if emergency; continue intake."
+export const TASK_URGENCY =
+  "Task Urgency: If emergency (flood, no heat, gas smell, sparks, sewage), mark priority for fast callback; ask at most one safety question; continue intake."
 
 export const TASK_CITY = "Task City: Capture property city."
 
