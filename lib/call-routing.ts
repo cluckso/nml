@@ -53,12 +53,13 @@ export const DEFAULT_AFTER_HOURS_PROFILE: RingDelayProfile = {
   ringBeforeAnswerRings: 4,
 }
 
+/** Default for new businesses: ring first during hours (matches marketing + recommended preset). */
 export const DEFAULT_CALL_ROUTING: CallRoutingSettings = {
-  answerAllCalls: true,
+  answerAllCalls: false,
   ringDelayMode: "seconds",
   ringBeforeAnswerSeconds: 10,
   ringBeforeAnswerRings: 4,
-  scheduleByBusinessHours: false,
+  scheduleByBusinessHours: true,
   duringHours: { ...DEFAULT_DURING_HOURS_PROFILE },
   afterHours: { ...DEFAULT_AFTER_HOURS_PROFILE },
   emergencyForward: false,

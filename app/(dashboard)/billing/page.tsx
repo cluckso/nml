@@ -16,6 +16,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Phone } from "lucide-react"
 import { trialBillingCardLabel, trialBillingDescription, upgradeTrialEndedLabel } from "@/lib/trial-marketing"
+import { ManageBillingButton } from "@/components/billing/ManageBillingButton"
 
 const PLAN_DETAILS = {
   [PlanType.STARTER]: {
@@ -152,8 +153,23 @@ export default async function BillingPage() {
                       Next billing: {new Date(business.currentPeriodEnd).toLocaleDateString()}
                     </p>
                   )}
+                  {business?.cancelAtPeriodEnd && (
+                    <p className="text-sm text-amber-700 dark:text-amber-400">
+                      Cancels at end of current period
+                    </p>
+                  )}
+                  <ManageBillingButton
+                    hasStripeCustomer={!!business?.stripeCustomerId}
+                    className="pt-2"
+                  />
                 </div>
               )
+            )}
+            {isOnTrial && business?.stripeCustomerId && (
+              <ManageBillingButton hasStripeCustomer className="mt-3" />
+            )}
+            {!isOnTrial && !planDetails && business?.stripeCustomerId && (
+              <ManageBillingButton hasStripeCustomer className="mt-2" />
             )}
           </CardContent>
         </Card>

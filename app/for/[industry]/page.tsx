@@ -10,7 +10,7 @@ import { getFunnelConfig } from "@/lib/funnel/industry-configs"
 import { DemoUnlock } from "@/components/marketing/DemoUnlock"
 import { SMSPreview } from "@/components/marketing/SMSPreview"
 import { JsonLd } from "@/components/seo/JsonLd"
-import { funnelTrialFeatureLabel, trialSummaryShort, trialNavCtaLabel } from "@/lib/trial-marketing"
+import { funnelTrialFeatureLabel, trialSummaryShort, trialNavCtaLabel, trialConversionLine } from "@/lib/trial-marketing"
 import { industryPageMetadata } from "@/lib/seo"
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data"
 
@@ -62,7 +62,7 @@ export default async function IndustryLandingPage({ params }: PageProps) {
           <p className="text-lg text-muted-foreground mb-8">{data.subheadline}</p>
           <div className="flex flex-wrap justify-center gap-3">
             <Button size="lg" asChild>
-              <Link href="/trial/start">
+              <Link href="/sign-up?next=%2Ftrial%2Fstart">
                 {trialNavCtaLabel()}
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
@@ -158,10 +158,10 @@ export default async function IndustryLandingPage({ params }: PageProps) {
       <section className="container mx-auto px-4 py-16 text-center">
         <h2 className="text-2xl font-bold mb-2">Ready to stop losing {data.name.toLowerCase()} jobs?</h2>
         <p className="text-muted-foreground mb-6 max-w-lg mx-auto">
-          Forward your line for 7 days free. If CallGrabbr doesn&apos;t capture a lead you&apos;d have lost, don&apos;t pay.
+          {trialConversionLine()}
         </p>
         <Button size="lg" asChild>
-          <Link href="/trial/start">Start free trial</Link>
+          <Link href="/sign-up?next=%2Ftrial%2Fstart">{trialNavCtaLabel()}</Link>
         </Button>
       </section>
     </div>

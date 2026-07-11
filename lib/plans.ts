@@ -30,7 +30,7 @@ export const SETUP_FEES: Record<PlanType, number> = {
 export const FREE_TRIAL_MINUTES = 40
 
 /** Free trial: validity window in days (trial ends at TRIAL_DAYS or trial minute cap, whichever comes first) */
-export const TRIAL_DAYS = 7
+export const TRIAL_DAYS = 14
 
 /** Monthly price per plan (USD) — Basic $99, Growth $159, Platinum $279 */
 export const MONTHLY_PRICES: Record<PlanType, number> = {

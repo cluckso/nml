@@ -183,6 +183,8 @@ export interface BusinessSettings {
   notifications: NotificationSettings
   callRouting: CallRoutingSettings
   missedCallRecovery: MissedCallRecoverySettings
+  /** Owner confirmed carrier forwarding is configured (trial checklist). */
+  forwardingSetupComplete: boolean
   // Pro+
   followUpSms: FollowUpSmsSettings
   reputation: ReputationSettings
@@ -241,6 +243,7 @@ export const DEFAULT_SETTINGS: BusinessSettings = {
     smsAutoReplyText:
       "Hi — thanks for calling [Business]. We didn't get all your details on the call. Reply with your name, callback number, and what you need help with. Reply STOP to opt out.",
   },
+  forwardingSetupComplete: false,
   followUpSms: {
     enabled: true,
     confirmationMessage: null,
@@ -510,6 +513,7 @@ export function mergeWithDefaults(saved: Partial<BusinessSettings> | null | unde
     notifications: { ...DEFAULT_SETTINGS.notifications, ...(saved.notifications ?? {}) },
     callRouting: normalizeCallRouting(saved.callRouting, DEFAULT_CALL_ROUTING),
     missedCallRecovery: { ...DEFAULT_SETTINGS.missedCallRecovery, ...(saved.missedCallRecovery ?? {}) },
+    forwardingSetupComplete: !!(saved as Partial<BusinessSettings>).forwardingSetupComplete,
     followUpSms: { ...DEFAULT_SETTINGS.followUpSms, ...(saved.followUpSms ?? {}) },
     reputation: { ...DEFAULT_SETTINGS.reputation, ...(saved.reputation ?? {}) },
     intakeTemplate: saved.intakeTemplate ?? DEFAULT_SETTINGS.intakeTemplate,

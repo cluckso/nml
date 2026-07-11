@@ -8,6 +8,7 @@ import Link from "next/link"
 import { Phone, CheckCircle2, Loader2, Smartphone } from "lucide-react"
 import type { TrialStatus } from "@/lib/trial"
 import { formatPhoneForDisplay } from "@/lib/utils"
+import { RingBehaviorChoice } from "@/components/dashboard/RingBehaviorChoice"
 
 interface SetupAICardProps {
   /** Dedicated Retell agent + number assigned to this business. */
@@ -99,6 +100,7 @@ export function SetupAICard({
               </p>
             </div>
           </div>
+          <RingBehaviorChoice className="mt-3" />
           {error && <p className="text-xs text-destructive mt-2">{error}</p>}
           {warning && (
             <p className="text-xs text-amber-700 dark:text-amber-300 mt-2">{warning}</p>
@@ -140,15 +142,9 @@ export function SetupAICard({
                   In your phone provider&apos;s settings (or carrier app), set call forwarding to this number. Incoming
                   calls will be answered by your call assistant; you&apos;ll get a summary by email.
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Set <strong>unconditional</strong> forwarding to this number, then use{" "}
-                  <Link href="/settings" className="text-primary underline">
-                    Settings → Call Routing
-                  </Link>{" "}
-                  to choose whether your assistant answers immediately or after a ring delay.
-                </p>
               </div>
             </div>
+            <RingBehaviorChoice />
             <div className="flex items-center gap-3 rounded-lg border border-border bg-background p-4">
               <Smartphone className="h-5 w-5 text-muted-foreground shrink-0" />
               <div>

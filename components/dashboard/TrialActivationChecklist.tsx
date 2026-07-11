@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { CheckCircle2, Circle, Phone, PhoneForwarded, Rocket } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,6 +11,8 @@ type TrialActivationChecklistProps = {
   onboardingComplete: boolean
   hasAgent: boolean
   hasForwardingNumber: boolean
+  /** True when a completed call or test verification landed (or owner acknowledged forwarding). */
+  forwardingReady: boolean
   hasCalls: boolean
   isEnded: boolean
 }
@@ -18,10 +21,17 @@ export function TrialActivationChecklist({
   onboardingComplete,
   hasAgent,
   hasForwardingNumber,
+  forwardingReady,
   hasCalls,
   isEnded,
 }: TrialActivationChecklistProps) {
+  const [acknowledged, setAcknowledged] = useState(false)
+  const [acking, setAcking] = useState(false)
+
   if (isEnded) return null
+
+  const hasNumber = hasForwardingNumber || hasAgent
+  const forwardDone = forwardingReady || acknowledged || hasCalls
 
   const steps = [
     {
@@ -33,26 +43,27 @@ export function TrialActivationChecklist({
     {
       id: "connect",
       label: "Get your forwarding number",
-      done: hasForwardingNumber || hasAgent,
-      hint:
-        hasForwardingNumber || hasAgent
-          ? null
-          : "Your forwarding number appears on the dashboard after onboarding — or click Get number in the setup card.",
+      done: hasNumber,
+      hint: hasNumber
+        ? null
+        : "Your forwarding number appears on the dashboard after onboarding — or click Get number in the setup card.",
     },
     {
       id: "forward",
       label: "Forward your business line",
-      done: (hasForwardingNumber || hasAgent) && hasCalls,
+      done: hasNumber && forwardDone,
       hint:
-        (hasForwardingNumber || hasAgent) && !hasCalls
-          ? "Set call forwarding at your carrier to the number on your dashboard. Then call yourself to test."
+        hasNumber && !forwardDone
+          ? "Set call forwarding at your carrier to the number on your dashboard, then confirm below or place a test call."
           : null,
     },
     {
       id: "first-call",
       label: "Capture your first lead",
       done: hasCalls,
-      hint: hasCalls ? null : "Once a real call completes, you'll get a text or email summary — that's the moment most owners decide to upgrade.",
+      hint: hasCalls
+        ? null
+        : "Once a real call completes, you'll get a text or email summary — that's the moment most owners decide to upgrade.",
     },
   ]
 
@@ -60,6 +71,18 @@ export function TrialActivationChecklist({
   if (allDone) return null
 
   const nextStep = steps.find((s) => !s.done)
+
+  async function acknowledgeForwarding() {
+    setAcking(true)
+    try {
+      const res = await fetch("/api/business/acknowledge-forwarding", { method: "POST" })
+      if (res.ok) {
+        setAcknowledged(true)
+      }
+    } finally {
+      setAcking(false)
+    }
+  }
 
   return (
     <Card className="mb-8 border-amber-500/25 bg-amber-500/5">
@@ -97,7 +120,7 @@ export function TrialActivationChecklist({
                 <Link href="/onboarding">Add business details</Link>
               </Button>
             )}
-            {onboardingComplete && !hasForwardingNumber && !hasAgent && (
+            {onboardingComplete && !hasNumber && (
               <Button size="sm" asChild>
                 <a href="#setup">
                   <Phone className="h-4 w-4 mr-2" />
@@ -105,13 +128,18 @@ export function TrialActivationChecklist({
                 </a>
               </Button>
             )}
-            {(hasForwardingNumber || hasAgent) && !hasCalls && (
-              <Button size="sm" variant="outline" asChild>
-                <a href="#setup">
-                  <PhoneForwarded className="h-4 w-4 mr-2" />
-                  See forwarding steps
-                </a>
-              </Button>
+            {hasNumber && !forwardDone && (
+              <>
+                <Button size="sm" onClick={acknowledgeForwarding} disabled={acking}>
+                  {acking ? "Saving…" : "I've set up forwarding"}
+                </Button>
+                <Button size="sm" variant="outline" asChild>
+                  <a href="#setup">
+                    <PhoneForwarded className="h-4 w-4 mr-2" />
+                    See forwarding steps
+                  </a>
+                </Button>
+              </>
             )}
           </div>
         )}

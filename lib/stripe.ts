@@ -408,6 +408,31 @@ export async function cancelStripeSubscriptionForBusiness(businessId: string): P
   }
 }
 
+/** Stripe Customer Portal — manage payment method, invoices, and cancel. */
+export async function createBillingPortalSession(
+  businessId: string,
+  returnUrl: string
+): Promise<string> {
+  if (!stripe) {
+    throw new Error("Billing is not configured. Set STRIPE_SECRET_KEY in your environment.")
+  }
+  const business = await db.business.findUnique({
+    where: { id: businessId },
+    select: { stripeCustomerId: true },
+  })
+  if (!business?.stripeCustomerId) {
+    throw new Error("No Stripe customer on this account. Subscribe to a plan first.")
+  }
+  const session = await stripe.billingPortal.sessions.create({
+    customer: business.stripeCustomerId,
+    return_url: returnUrl,
+  })
+  if (!session.url) {
+    throw new Error("Stripe did not return a billing portal URL")
+  }
+  return session.url
+}
+
 export async function reportUsageToStripe(businessId: string, minutes: number) {
   if (!stripe) return
   const business = await db.business.findUnique({

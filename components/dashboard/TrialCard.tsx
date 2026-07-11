@@ -3,9 +3,14 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Phone, Zap } from "lucide-react"
 import type { TrialStatus } from "@/lib/trial"
-import { FREE_TRIAL_MINUTES } from "@/lib/plans"
+import { FREE_TRIAL_MINUTES, TRIAL_DAYS } from "@/lib/plans"
 import { approxCallsPerMonth } from "@/lib/plan-usage"
-import { trialDaysLabel, upgradeKeepAnsweringLabel, upgradeTrialEndedLabel } from "@/lib/trial-marketing"
+import {
+  trialDaysLabel,
+  upgradeKeepAnsweringLabel,
+  upgradeTrialEndedLabel,
+  midTrialUpgradeNudgeLine,
+} from "@/lib/trial-marketing"
 
 interface TrialCardProps {
   trial: TrialStatus
@@ -20,7 +25,10 @@ export function TrialCard({ trial, hasAgent, hasForwardingNumber }: TrialCardPro
   const isEnded = isExhausted || isExpired
   const isLive = hasAgent || hasForwardingNumber
   const warningLow = minutesRemaining <= 5 && minutesRemaining > 0
-  const warningEighty = percentUsed >= 80 && !isExhausted
+  const warningEighty = percentUsed >= 70 && !isExhausted
+  /** ~day 5 of a TRIAL_DAYS window */
+  const midTrialWindow =
+    !isEnded && daysRemaining > 0 && daysRemaining <= Math.max(1, TRIAL_DAYS - 5)
 
   const description = () => {
     if (isExpired && !isExhausted)
@@ -67,7 +75,12 @@ export function TrialCard({ trial, hasAgent, hasForwardingNumber }: TrialCardPro
           )}
           {warningEighty && (
             <p className="text-sm text-amber-700 dark:text-amber-400 mt-2">
-              Running low — upgrade so the next call still gets answered.
+              Running low on minutes — {midTrialUpgradeNudgeLine()}
+            </p>
+          )}
+          {midTrialWindow && !warningEighty && (
+            <p className="text-sm text-amber-700 dark:text-amber-400 mt-2">
+              {midTrialUpgradeNudgeLine()}
             </p>
           )}
           {warningLow && (
@@ -115,7 +128,7 @@ export function TrialCard({ trial, hasAgent, hasForwardingNumber }: TrialCardPro
               <Link href="/billing">{upgradeTrialEndedLabel()}</Link>
             </Button>
           ) : (
-            isLive && trial.minutesUsed > 0 && (
+            isLive && (trial.minutesUsed > 0 || midTrialWindow || warningEighty) && (
               <Button variant="outline" size="sm" asChild>
                 <Link href="/billing">{upgradeKeepAnsweringLabel()}</Link>
               </Button>

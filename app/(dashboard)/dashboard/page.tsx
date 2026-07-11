@@ -26,6 +26,7 @@ import {
   hasForwardingNumberToShow,
 } from "@/lib/business-forwarding"
 import { DashboardNav } from "@/components/dashboard/DashboardNav"
+import { mergeWithDefaults, type BusinessSettings } from "@/lib/business-settings"
 import {
   DashboardPageHeader,
   DashboardSection,
@@ -196,6 +197,13 @@ export default async function DashboardPage() {
               onboardingComplete={!!business?.onboardingComplete}
               hasAgent={hasAgent}
               hasForwardingNumber={hasForwardingNumber}
+              forwardingReady={
+                !!business?.testCallVerifiedAt ||
+                !!(
+                  business?.settings &&
+                  mergeWithDefaults(business.settings as Partial<BusinessSettings>).forwardingSetupComplete
+                )
+              }
               hasCalls={stats._count > 0}
               isEnded={trial.isExhausted || trial.isExpired}
             />
