@@ -9,7 +9,6 @@ import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
 import { MARKETING_IMAGES, MARKETING_IMAGE_ALT } from "@/lib/marketing-images"
 import {
   formatJobRoiLine,
-  formatMissedJobCostLine,
   formatOverageRate,
   formatPricingSummary,
   formatVsHumanLine,
@@ -79,9 +78,6 @@ export default async function PricingPage() {
       </p>
       <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
         {formatJobRoiLine()}
-      </p>
-      <p className="mt-3 text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
-        {formatMissedJobCostLine()}
       </p>
       <p className="mt-4 text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
         {formatVsHumanLine()} · Overage {formatOverageRate()} beyond included calls · ~3 min avg per call

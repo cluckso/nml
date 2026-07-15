@@ -40,7 +40,7 @@ export function formatIncludedUsagePrimary(includedMinutes: number): string {
 
 export function formatIncludedUsageShort(includedMinutes: number): string {
   const calls = approxCallsPerMonth(includedMinutes)
-  return `~${calls} calls/mo · about $${TYPICAL_INTAKE_CALL_MINUTES} min each`
+  return `~${calls} calls/mo · about ${TYPICAL_INTAKE_CALL_MINUTES} min each`
 }
 
 /** Effective cost per captured call at included volume (for plan cards). */

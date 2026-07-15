@@ -27,6 +27,16 @@ export function normalizePhoneToE164(raw: string | null | undefined): string | n
   return null
 }
 
+/** Build a `tel:` href for click-to-call. Returns null when no usable number. */
+export function toTelHref(raw: string | null | undefined): string | null {
+  if (raw == null || !raw.trim()) return null
+  const e164 = normalizePhoneToE164(raw)
+  if (e164) return `tel:${e164}`
+  const cleaned = raw.replace(/[^\d+]/g, "")
+  if (cleaned.replace(/\D/g, "").length < 7) return null
+  return `tel:${cleaned}`
+}
+
 // --- Auth validation (sign-up / sign-in) ---
 
 const EMAIL_MAX_LENGTH = 255

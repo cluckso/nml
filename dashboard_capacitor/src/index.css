@@ -212,6 +212,56 @@ body {
   margin-top: 4px;
 }
 
+.call-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.call-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary);
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--primary) 40%, transparent);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+.call-back-link:active {
+  opacity: 0.85;
+}
+
+.recording-control {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.recording-player {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.recording-hide {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 .loading-spinner {
   display: inline-block;
   width: 20px;

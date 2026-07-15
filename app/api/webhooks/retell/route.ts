@@ -372,6 +372,8 @@ interface RetellCallWebhookEvent {
       capacity_over_limit?: string
     }
     call_analysis?: RetellCallAnalysis
+    recording_url?: string
+    recording_multi_channel_url?: string
   }
   call_analysis?: RetellCallAnalysis
 }
@@ -610,6 +612,10 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
   const fromNumber = event.call?.from_number ? normalizeE164(event.call.from_number) ?? event.call.from_number : undefined
   const aiNumberAnswered = event.call?.to_number ? normalizeE164(event.call.to_number) ?? event.call.to_number : undefined
   const callerPhone: string | undefined = (fromNumber || (typeof structuredIntake.phone === "string" ? structuredIntake.phone : undefined)) ?? undefined
+  const recordingUrl =
+    (typeof event.call?.recording_url === "string" && event.call.recording_url.trim()) ||
+    existingCall?.recordingUrl ||
+    undefined
 
   const callData = {
     duration,
@@ -618,6 +624,7 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
     aiNumberAnswered,
     transcript: analysis.transcript || event.call?.transcript || undefined,
     summary: summary || undefined,
+    recordingUrl,
     structuredIntake: structuredIntake as any,
     emergencyFlag: emergency,
     leadTag: hasLeadTagging(planType) ? leadTag : undefined,

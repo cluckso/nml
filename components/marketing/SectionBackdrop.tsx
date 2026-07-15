@@ -4,10 +4,10 @@ import { cn } from "@/lib/utils"
 type OverlayStrength = "light" | "medium" | "heavy" | "hero"
 
 const overlayStyles: Record<OverlayStrength, string> = {
-  light: "bg-gradient-to-b from-background/75 via-background/88 to-background/95",
-  medium: "bg-gradient-to-b from-background/82 via-background/92 to-background/98",
-  heavy: "bg-gradient-to-b from-background/88 via-background/94 to-background",
-  hero: "bg-gradient-to-b from-background/55 via-background/82 to-background",
+  light: "bg-gradient-to-b from-black/45 via-background/88 to-background/95",
+  medium: "bg-gradient-to-b from-black/60 via-background/92 to-background/98",
+  heavy: "bg-gradient-to-b from-black/75 via-black/65 to-background",
+  hero: "bg-gradient-to-b from-black/50 via-background/82 to-background",
 }
 
 type SectionBackdropProps = {

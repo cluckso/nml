@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCalls, ApiError } from '../lib/api'
+import { formatPhoneForDisplay, toTelHref } from '../lib/phone'
+import { CallRecordingButton } from '../components/CallRecordingButton'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
 
 export default function Calls() {
@@ -10,6 +12,7 @@ export default function Calls() {
     callerPhone?: string
     issueDescription?: string
     summary?: string
+    recordingUrl?: string | null
     emergencyFlag?: boolean
     createdAt?: string
     duration?: number
@@ -136,12 +139,20 @@ export default function Calls() {
             )}
             {calls.length > 0 && (
               <div className="card">
-                {calls.map((c, i) => (
+                {calls.map((c, i) => {
+                  const telHref = toTelHref(c.callerPhone)
+                  const phoneLabel = formatPhoneForDisplay(c.callerPhone) || c.callerPhone
+                  return (
                   <div key={c.id ?? i} className="call-item">
                     <div className="call-header">
-                      <div className="call-name">{c.callerName ?? c.callerPhone ?? 'Unknown'}</div>
+                      <div className="call-name">{c.callerName ?? phoneLabel ?? 'Unknown'}</div>
                       <div className="call-time">{formatTime(c.createdAt)}</div>
                     </div>
+                    {phoneLabel && c.callerName && (
+                      <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
+                        {phoneLabel}
+                      </div>
+                    )}
                     {c.duration !== undefined && c.duration > 0 && (
                       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
                         Duration: {formatDuration(c.duration)}
@@ -153,13 +164,20 @@ export default function Calls() {
                         {(c.issueDescription || c.summary || '').length > 150 && '...'}
                       </div>
                     )}
-                    {c.emergencyFlag && (
-                      <span className="badge error" style={{ marginTop: 6 }}>
-                        🚨 Emergency
-                      </span>
-                    )}
+                    <div className="call-actions">
+                      {c.emergencyFlag && (
+                        <span className="badge error">🚨 Emergency</span>
+                      )}
+                      {telHref && (
+                        <a href={telHref} className="call-back-link">
+                          📞 Call back
+                        </a>
+                      )}
+                      {c.recordingUrl && <CallRecordingButton url={c.recordingUrl} />}
+                    </div>
                   </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </>

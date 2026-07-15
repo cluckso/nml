@@ -58,4 +58,7 @@ DROP INDEX IF EXISTS "Call_forwardedFromNumber_idx";
 ALTER TABLE "Call" DROP COLUMN IF EXISTS "callerNumber";
 ALTER TABLE "Call" DROP COLUMN IF EXISTS "forwardedFromNumber";
 
+-- ─── 9. Call: Retell recording URL for dashboard/app playback ─────────────────
+ALTER TABLE "Call" ADD COLUMN IF NOT EXISTS "recordingUrl" TEXT;
+
 -- Done. Re-run onboarding; the "RecycledRetellNumber does not exist" error should be gone.

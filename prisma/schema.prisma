@@ -166,6 +166,7 @@ model Call {
   minutes               Float     // Duration in minutes (for billing)
   transcript            String?
   summary               String?   // Short summary (Pro+)
+  recordingUrl          String?   // Retell call recording URL (WAV)
   structuredIntake      Json?     // { name, phone, address, issue_description, emergency, appointmentRequest, etc. }
   emergencyFlag         Boolean   @default(false)
   leadTag               LeadTag?  // Pro+: EMERGENCY | ESTIMATE | FOLLOW_UP | GENERAL

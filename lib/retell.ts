@@ -565,6 +565,24 @@ async function getAgent(
   return response.json()
 }
 
+/** Fetch a call's recording URL from Retell (for backfill when webhook missed it). */
+export async function getRetellCallRecordingUrl(retellCallId: string): Promise<string | null> {
+  const apiKey = process.env.RETELL_API_KEY
+  if (!apiKey || !retellCallId.trim()) return null
+  try {
+    const response = await fetch(`${RETELL_API_BASE}/v2/get-call/${encodeURIComponent(retellCallId)}`, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${apiKey}` },
+    })
+    if (!response.ok) return null
+    const data = (await response.json()) as { recording_url?: string }
+    const url = typeof data.recording_url === "string" ? data.recording_url.trim() : ""
+    return url || null
+  } catch {
+    return null
+  }
+}
+
 /** PATCH agent (agent_name, voice_*, handbook_config, max_call_duration_ms, ring_duration_ms, response_engine). */
 async function updateAgent(
   apiKey: string,

@@ -89,6 +89,7 @@ CREATE TABLE "Call" (
     "minutes" DOUBLE PRECISION NOT NULL,
     "transcript" TEXT,
     "summary" TEXT,
+    "recordingUrl" TEXT,
     "structuredIntake" JSONB,
     "emergencyFlag" BOOLEAN NOT NULL DEFAULT false,
     "leadTag" "LeadTag",

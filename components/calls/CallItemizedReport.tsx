@@ -2,7 +2,10 @@
  * Itemized call/lead report as a polished two-column table.
  * Shows time, contact info, vehicle (if present), reason, appointment preference, and address fields.
  */
+import type { ReactNode } from "react"
+import { Phone } from "lucide-react"
 import { sanitizeIssueDescription } from "@/lib/parse-lead-from-transcript"
+import { formatPhoneForDisplay, toTelHref } from "@/lib/utils"
 
 export type StructuredIntake = {
   name?: string | null
@@ -54,20 +57,16 @@ function formatTime(d: Date): string {
   })
 }
 
-function formatPhone(phone: string | null): string {
-  if (!phone || !phone.trim()) return "—"
-  const digits = phone.replace(/\D/g, "")
-  if (digits.length === 10) {
-    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`
-  }
-  if (digits.length === 11 && digits.startsWith("1")) {
-    return `(${digits.slice(1, 4)}) ${digits.slice(4, 7)}-${digits.slice(7)}`
-  }
-  return phone
-}
-
-function Row({ label, value }: { label: string; value: string | null | undefined }) {
-  const display = value?.trim() || "—"
+function Row({
+  label,
+  value,
+  children,
+}: {
+  label: string
+  value?: string | null
+  children?: ReactNode
+}) {
+  const display = children ?? (value?.trim() || "—")
   return (
     <tr className="border-b border-border/80 last:border-b-0">
       <td className="py-3 pr-6 align-top text-sm font-medium text-muted-foreground whitespace-nowrap w-[36%]">
@@ -105,6 +104,9 @@ export function CallItemizedReport({
 }: CallItemizedReportProps) {
   const hasVehicle = [vehicleYear, vehicleMake, vehicleModel].some((v) => v?.trim())
   const hasAddress = address?.trim() || city?.trim()
+  const contactTel = toTelHref(contactNumber)
+  const contactLabel =
+    formatPhoneForDisplay(contactNumber) || contactNumber?.trim() || null
 
   return (
     <div className="rounded-lg border border-border bg-muted/20 overflow-hidden">
@@ -112,7 +114,19 @@ export function CallItemizedReport({
         <tbody>
           <Row label="Time" value={formatTime(time)} />
           <Row label="Name" value={name} />
-          <Row label="Contact" value={formatPhone(contactNumber)} />
+          <Row label="Contact">
+            {contactTel && contactLabel ? (
+              <a
+                href={contactTel}
+                className="inline-flex items-center gap-1.5 font-medium text-primary hover:underline"
+              >
+                <Phone className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                {contactLabel}
+              </a>
+            ) : (
+              "—"
+            )}
+          </Row>
 
           {hasVehicle && (
             <>

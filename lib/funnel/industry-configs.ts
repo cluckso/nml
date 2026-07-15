@@ -144,7 +144,6 @@ function fromLanding(
     exampleTranscript: overrides.exampleTranscript,
     callSummary: overrides.callSummary,
     smsPreview: overrides.smsPreview,
-    testimonial: overrides.testimonial,
     steps: overrides.steps ?? buildStandardSteps(displayName),
     leadScoring: overrides.leadScoring ?? LEAD_SCORING_WEIGHTS,
     cta: overrides.cta ?? defaultFunnelTrialCta(),
@@ -172,11 +171,6 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
       job: "AC outage - no cooling",
       urgency: "High",
     },
-    testimonial: {
-      quote: "We captured 12 after-hours leads in the first month. One emergency install paid for a year of CallGrabbr.",
-      author: "Mike R.",
-      role: "HVAC owner, Texas",
-    },
   }),
   fromLanding("plumbing", {
     displayName: "Plumbing",
@@ -196,11 +190,6 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
       address: "42 Maple St",
       job: "Kitchen sink leak",
       urgency: "High",
-    },
-    testimonial: {
-      quote: "Our after-hours capture rate went from near zero to most calls answered. Game changer for emergency work.",
-      author: "Sarah T.",
-      role: "Plumbing contractor",
     },
   }),
   fromLanding("electrical", {
@@ -285,11 +274,6 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     steps: buildStandardSteps("Roofing"),
     leadScoring: LEAD_SCORING_WEIGHTS,
     cta: defaultFunnelTrialCta(),
-    testimonial: {
-      quote: "After the last storm we booked 8 inspections from calls we would have missed on the roof.",
-      author: "Dan K.",
-      role: "Roofing contractor",
-    },
   },
   {
     slug: "lawyers",

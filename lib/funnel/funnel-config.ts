@@ -25,12 +25,6 @@ export interface FunnelStep {
   fields: FunnelStepField[]
 }
 
-export interface FunnelTestimonial {
-  quote: string
-  author: string
-  role?: string
-}
-
 /** Sample lead fields shown in the funnel SMS phone mockup — must match exampleTranscript / callSummary. */
 export interface FunnelSmsPreview {
   name: string
@@ -62,7 +56,6 @@ export interface FunnelConfig {
   callSummary?: string
   /** SMS mockup on the demo section; should align with exampleTranscript and callSummary. */
   smsPreview?: FunnelSmsPreview
-  testimonial?: FunnelTestimonial
   steps: FunnelStep[]
   /** fieldId → optionValue → score */
   leadScoring?: Record<string, Record<string, number>>

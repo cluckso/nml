@@ -4,13 +4,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { notFound } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Phone } from "lucide-react"
 import {
   CallItemizedReport,
   buildCallItemizedProps,
 } from "@/components/calls/CallItemizedReport"
+import { CallRecordingPlayer } from "@/components/calls/CallRecordingPlayer"
 import { TranscriptCollapsible } from "@/components/calls/TranscriptCollapsible"
 import { Button } from "@/components/ui/button"
+import { toTelHref } from "@/lib/utils"
+import { getRetellCallRecordingUrl } from "@/lib/retell"
 
 export default async function CallDetailPage({
   params,
@@ -35,6 +38,18 @@ export default async function CallDetailPage({
     notFound()
   }
 
+  let recordingUrl = call.recordingUrl
+  if (!recordingUrl && call.retellCallId) {
+    const fetched = await getRetellCallRecordingUrl(call.retellCallId)
+    if (fetched) {
+      recordingUrl = fetched
+      await db.call.update({
+        where: { id: call.id },
+        data: { recordingUrl: fetched },
+      })
+    }
+  }
+
   const intake = call.structuredIntake as import("@/components/calls/CallItemizedReport").StructuredIntake | null
   const appointmentRequest = call.appointmentRequest as
     | { notes?: string; preferredDays?: string; preferredTime?: string }
@@ -47,6 +62,7 @@ export default async function CallDetailPage({
     structuredIntake: intake,
     appointmentRequest,
   })
+  const callBackHref = toTelHref(itemizedProps.contactNumber)
 
   const formattedDate = new Date(call.createdAt).toLocaleDateString("en-US", {
     weekday: "short",
@@ -74,6 +90,14 @@ export default async function CallDetailPage({
           <p className="text-muted-foreground mt-1">{formattedDate}</p>
         </div>
         <div className="flex items-center gap-2">
+          {callBackHref && (
+            <Button size="sm" className="gap-1.5" asChild>
+              <a href={callBackHref}>
+                <Phone className="h-4 w-4" aria-hidden />
+                Call back
+              </a>
+            </Button>
+          )}
           {call.emergencyFlag && (
             <Badge variant="destructive" className="font-medium">
               Emergency
@@ -93,8 +117,14 @@ export default async function CallDetailPage({
             Name, contact, reason, and appointment preference from this call
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <CallItemizedReport {...itemizedProps} />
+          {recordingUrl && (
+            <div className="pt-1">
+              <p className="text-sm font-medium text-muted-foreground mb-2">Call recording</p>
+              <CallRecordingPlayer url={recordingUrl} />
+            </div>
+          )}
         </CardContent>
       </Card>
 

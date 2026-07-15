@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getDashboard } from '../lib/api'
 import { ApiError } from '../lib/api'
+import { formatPhoneForDisplay, toTelHref } from '../lib/phone'
+import { CallRecordingButton } from '../components/CallRecordingButton'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
 
 interface DashboardProps {
@@ -16,6 +18,7 @@ export default function Dashboard({ onSignOut }: DashboardProps) {
       callerPhone?: string
       issueDescription?: string
       summary?: string
+      recordingUrl?: string | null
       emergencyFlag?: boolean
       createdAt?: string
     }>
@@ -201,25 +204,40 @@ export default function Dashboard({ onSignOut }: DashboardProps) {
                   </p>
                 </div>
               )}
-              {data.recentCalls?.slice(0, 5).map((c, i) => (
-                <div key={i} className="call-item">
-                  <div className="call-header">
-                    <div className="call-name">{c.callerName ?? c.callerPhone ?? 'Unknown'}</div>
-                    <div className="call-time">{formatTime(c.createdAt)}</div>
-                  </div>
-                  {(c.issueDescription || c.summary) && (
-                    <div className="call-description">
-                      {(c.issueDescription || c.summary || '').slice(0, 100)}
-                      {(c.issueDescription || c.summary || '').length > 100 && '...'}
+              {data.recentCalls?.slice(0, 5).map((c, i) => {
+                const telHref = toTelHref(c.callerPhone)
+                const phoneLabel = formatPhoneForDisplay(c.callerPhone) || c.callerPhone
+                return (
+                  <div key={i} className="call-item">
+                    <div className="call-header">
+                      <div className="call-name">{c.callerName ?? phoneLabel ?? 'Unknown'}</div>
+                      <div className="call-time">{formatTime(c.createdAt)}</div>
                     </div>
-                  )}
-                  {c.emergencyFlag && (
-                    <span className="badge error" style={{ marginTop: 6 }}>
-                      🚨 Emergency
-                    </span>
-                  )}
-                </div>
-              ))}
+                    {phoneLabel && c.callerName && (
+                      <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
+                        {phoneLabel}
+                      </div>
+                    )}
+                    {(c.issueDescription || c.summary) && (
+                      <div className="call-description">
+                        {(c.issueDescription || c.summary || '').slice(0, 100)}
+                        {(c.issueDescription || c.summary || '').length > 100 && '...'}
+                      </div>
+                    )}
+                    <div className="call-actions">
+                      {c.emergencyFlag && (
+                        <span className="badge error">🚨 Emergency</span>
+                      )}
+                      {telHref && (
+                        <a href={telHref} className="call-back-link">
+                          📞 Call back
+                        </a>
+                      )}
+                      {c.recordingUrl && <CallRecordingButton url={c.recordingUrl} />}
+                    </div>
+                  </div>
+                )
+              })}
               {data.recentCalls && data.recentCalls.length > 0 && (
                 <button
                   type="button"

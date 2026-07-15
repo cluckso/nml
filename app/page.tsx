@@ -8,7 +8,6 @@ import { SMSPreview } from "@/components/marketing/SMSPreview"
 import { DemoUnlock } from "@/components/marketing/DemoUnlock"
 import { HomeHero } from "@/components/marketing/HomeHero"
 import { IndustryPhotoCards } from "@/components/marketing/IndustryPhotoCards"
-import { PeerProof } from "@/components/marketing/PeerProof"
 import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
 import { TrustStrip } from "@/components/marketing/TrustStrip"
 import { MobileAppDownload } from "@/components/marketing/MobileAppDownload"
@@ -90,8 +89,6 @@ export default function HomePage() {
           </div>
       </SectionBackdrop>
 
-      <PeerProof />
-
       {/* Features — Every call picked up */}
       <section className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center mb-3">Missed calls answered. Leads captured.</h2>
@@ -158,7 +155,7 @@ export default function HomePage() {
       <SectionBackdrop
         src={MARKETING_IMAGES.whyMatters}
         alt={MARKETING_IMAGE_ALT.whyMatters}
-        overlay="medium"
+        overlay="heavy"
         imageClassName="object-cover object-[75%_center]"
         className="py-16 border-y border-border/50"
         contentClassName="container mx-auto px-4"

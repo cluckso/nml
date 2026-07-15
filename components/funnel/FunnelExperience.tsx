@@ -16,7 +16,6 @@ import { trackFunnelConversion, trackFunnelView } from "@/lib/funnel/analytics"
 import { FunnelStepForm, getCallsPerWeekFromVolume } from "./FunnelStepForm"
 import { FunnelRoiCalculator } from "./FunnelRoiCalculator"
 import { FunnelDemoSection } from "./FunnelDemoSection"
-import { FunnelTestimonial } from "./FunnelTestimonial"
 import { FunnelPricingCta } from "./FunnelPricingCta"
 import { useFunnelLead } from "./useFunnelLead"
 import { Card, CardContent } from "@/components/ui/card"
@@ -166,8 +165,6 @@ export function FunnelExperience({ config, metaPrefill }: FunnelExperienceProps)
       </section>
 
       <FunnelDemoSection config={config} />
-
-      {config.testimonial && <FunnelTestimonial testimonial={config.testimonial} />}
 
       <FunnelPricingCta
         config={config}
