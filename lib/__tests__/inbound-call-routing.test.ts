@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest"
 import {
   canAnswerSignupInbound,
   isDemoInboundCall,
+  metadataDemoFlag,
   resolveDemoInboundResponse,
 } from "../inbound-call-routing"
 
@@ -15,6 +16,15 @@ describe("isDemoInboundCall", () => {
     expect(isDemoInboundCall("+12028738983", "+14159682320")).toBe(false)
     expect(isDemoInboundCall(undefined, "+12028738983")).toBe(false)
     expect(isDemoInboundCall("+12028738983", undefined)).toBe(false)
+  })
+})
+
+describe("metadataDemoFlag", () => {
+  it("detects demo_call metadata", () => {
+    expect(metadataDemoFlag({ demo_call: true })).toBe(true)
+    expect(metadataDemoFlag({ demo_call: "true" })).toBe(true)
+    expect(metadataDemoFlag({ client_id: "x" })).toBe(false)
+    expect(metadataDemoFlag(null)).toBe(false)
   })
 })
 

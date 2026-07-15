@@ -30,6 +30,7 @@ import { isSpamByTwilioLookup } from "@/lib/twilio-lookup"
 import {
   parseLeadFromSummaryOrTranscript,
   isLikelyPhysicalAddress,
+  isLikelyPersonName,
   resolveIssueDescription,
 } from "@/lib/parse-lead-from-transcript"
 import { auditCallTranscript } from "@/lib/audit-call-transcript"
@@ -38,6 +39,7 @@ import { captureRouteError } from "@/lib/capture-error"
 import {
   canAnswerSignupInbound,
   isDemoInboundCall,
+  metadataDemoFlag,
   resolveDemoInboundResponse,
 } from "@/lib/inbound-call-routing"
 import { planInboundRingDelay, sleepMs, computeRingDurationMsForInbound } from "@/lib/call-routing"
@@ -378,6 +380,103 @@ interface RetellCallWebhookEvent {
   call_analysis?: RetellCallAnalysis
 }
 
+async function handleDemoCallCompletion(event: RetellCallWebhookEvent, callId: string) {
+  const analysis = event.call_analysis || event.call?.call_analysis || {}
+  const evRaw = analysis.extracted_variables || {}
+  const ev: Record<string, string | undefined> = {}
+  for (const [k, v] of Object.entries(evRaw)) {
+    if (typeof v === "string" && v.trim()) {
+      const key = k.toLowerCase().replace(/\s+/g, "_")
+      ev[key] = v.trim()
+    }
+  }
+  const a = analysis as Record<string, unknown>
+  const summary = analysis.summary || analysis.call_summary || null
+  const transcriptStr = analysis.transcript || event.call?.transcript
+  const textToParse =
+    typeof transcriptStr === "string" && transcriptStr.trim()
+      ? transcriptStr
+      : typeof summary === "string" && summary.trim()
+        ? summary
+        : null
+
+  const structuredIntake: StructuredIntake = {
+    name: typeof (analysis.caller_name || ev.name) === "string" ? String(analysis.caller_name || ev.name) : undefined,
+    phone:
+      (typeof (analysis.caller_phone || ev.phone) === "string"
+        ? String(analysis.caller_phone || ev.phone)
+        : undefined) || event.call?.from_number,
+    address: typeof (analysis.service_address || ev.address) === "string" ? String(analysis.service_address || ev.address) : undefined,
+    city: typeof (analysis.city || ev.city) === "string" ? String(analysis.city || ev.city) : undefined,
+    issue_description:
+      analysis.issue_description ||
+      ev.issue_description ||
+      ev.reason_for_call ||
+      ev.reason ||
+      (typeof a.reason_for_call === "string" ? a.reason_for_call : undefined) ||
+      undefined,
+    emergency: detectEmergency(analysis),
+  }
+
+  if (structuredIntake.name && !isLikelyPersonName(structuredIntake.name)) {
+    structuredIntake.name = undefined
+  }
+  if (structuredIntake.address && !isLikelyPhysicalAddress(structuredIntake.address)) {
+    structuredIntake.address = undefined
+  }
+
+  if (textToParse && (!structuredIntake.name || !structuredIntake.address || !structuredIntake.city)) {
+    const parsed = parseLeadFromSummaryOrTranscript(textToParse)
+    if (parsed.name && isLikelyPersonName(parsed.name) && !structuredIntake.name) {
+      structuredIntake.name = parsed.name
+    }
+    if (parsed.address && isLikelyPhysicalAddress(parsed.address) && !structuredIntake.address) {
+      structuredIntake.address = parsed.address
+    }
+    if (parsed.city && !structuredIntake.city) structuredIntake.city = parsed.city
+  }
+
+  structuredIntake.issue_description = resolveIssueDescription({
+    fromAnalysis:
+      typeof structuredIntake.issue_description === "string"
+        ? structuredIntake.issue_description
+        : undefined,
+    summary: typeof summary === "string" ? summary : undefined,
+    transcript: typeof transcriptStr === "string" ? transcriptStr : undefined,
+  })
+
+  const callerPhone = event.call?.from_number
+    ? normalizeE164(event.call.from_number) ?? event.call.from_number
+    : structuredIntake.phone
+      ? normalizeE164(structuredIntake.phone) ?? structuredIntake.phone
+      : null
+
+  const hasInfo = hasActionableInfo(structuredIntake, {
+    duration: 0,
+    callerPhone,
+  })
+  if (!callerPhone) {
+    console.info("[Notifications] Demo result skipped: no caller phone", { callId })
+    return
+  }
+
+  try {
+    await sendDemoResultSms(
+      callerPhone,
+      structuredIntake,
+      { appointmentRequest: undefined } as import("@prisma/client").Call,
+      hasInfo
+    )
+    console.info("[Notifications] Demo result sent (isolated; no customer Call row)", {
+      callId,
+      to: callerPhone,
+      hasInfo,
+    })
+  } catch (error) {
+    console.error("Demo result SMS error:", error)
+  }
+}
+
 async function handleCallCompletion(event: RetellCallWebhookEvent) {
   // Retell may send call_id at top level or under event.call
   const callId = event.call?.call_id ?? event.call_id
@@ -395,7 +494,18 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
     to_number: event.call?.to_number,
   })
 
+  // Public demo line: one SMS to the caller with a labeled demo result.
+  // Never attach demo calls to a customer business (fallback used to pollute tenants and burn trial minutes).
   const metadata = event.call?.metadata
+  const demoNumberRaw = process.env.NEXT_PUBLIC_DEMO_NUMBER
+  const isDemoCall =
+    isDemoInboundCall(event.call?.to_number, demoNumberRaw) || metadataDemoFlag(metadata)
+
+  if (isDemoCall) {
+    await handleDemoCallCompletion(event, callId)
+    return
+  }
+
   const agentId = event.call?.agent_id
   let business = metadata?.client_id
     ? await db.business.findUnique({
@@ -434,30 +544,10 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
     }
   }
   
-  // Fallback: any business (ACTIVE first, then PAUSED) — single-tenant or last resort
+  // Do not fall back to an arbitrary ACTIVE business — that attaches unknown/demo traffic
+  // to a real customer (wrong owner SMS, polluted dashboard, burned trial minutes).
   if (!business) {
-    business = await db.business.findFirst({
-      where: { status: ClientStatus.ACTIVE },
-      orderBy: { createdAt: "desc" },
-    })
-    if (business) resolutionMethod = "fallback_active"
-  }
-  if (!business) {
-    business = await db.business.findFirst({
-      orderBy: { createdAt: "desc" },
-    })
-    if (business) {
-      resolutionMethod = "fallback_any"
-      console.warn("Using fallback (any business) for call completion:", {
-        callId,
-        businessId: business.id,
-        businessName: business.name,
-      })
-    }
-  }
-  
-  if (!business) {
-    console.error(`Client not found for call ${callId}`, {
+    console.error(`Client not found for call ${callId} — skipping (no tenant fallback)`, {
       metadata_client_id: metadata?.client_id,
       agent_id: agentId,
       metadata_forwarded_from: metadata?.forwarded_from_number,
@@ -549,17 +639,27 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
   const summary = analysis.summary || analysis.call_summary || null
   const transcriptStr = analysis.transcript || event.call?.transcript
 
-  // When extracted_variables are missing, parse transcript/summary for name / address / city
+  // When extracted_variables are missing/wrong, parse transcript/summary for name / address / city
   const textToParse = typeof transcriptStr === "string" && transcriptStr.trim()
     ? transcriptStr
     : typeof summary === "string" && summary.trim()
       ? summary
       : null
+  if (
+    typeof structuredIntake.name === "string" &&
+    structuredIntake.name.trim() &&
+    !isLikelyPersonName(structuredIntake.name)
+  ) {
+    structuredIntake.name = undefined
+  }
   const needsParsing =
-    textToParse && (!structuredIntake.name || !structuredIntake.address)
+    textToParse &&
+    (!structuredIntake.name || !structuredIntake.address || !structuredIntake.city)
   if (needsParsing && textToParse) {
     const parsed = parseLeadFromSummaryOrTranscript(textToParse)
-    if (parsed.name && !structuredIntake.name) structuredIntake.name = parsed.name
+    if (parsed.name && isLikelyPersonName(parsed.name) && !structuredIntake.name) {
+      structuredIntake.name = parsed.name
+    }
     if (parsed.address && isLikelyPhysicalAddress(parsed.address) && !structuredIntake.address) {
       structuredIntake.address = parsed.address
     }
@@ -708,132 +808,112 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
 
   const intakeForNotification = intakeForNotify as import("@/lib/notifications").StructuredIntake
 
-  // Demo number: send exactly one SMS to the caller (lead summary or short fallback). No SMS on unlock; consent = 1 message after call.
-  const demoNumberRaw = process.env.NEXT_PUBLIC_DEMO_NUMBER
-  const toNumberNorm = event.call?.to_number ? (normalizeE164(event.call.to_number) ?? undefined) : undefined
-  const demoNumberNorm = demoNumberRaw ? normalizeE164(demoNumberRaw) : null
-  const isDemoCall = !!(toNumberNorm && demoNumberNorm && toNumberNorm === demoNumberNorm)
+  if (!shouldNotifyByPrefs) {
+    console.info("[Notifications] Skipped: emergencyOnlyAlerts is on and call is not emergency", { callId })
+  }
+  if (!hasInfo) {
+    console.info("[Notifications] Skipped: no actionable info captured", { callId, duration: call.duration, callerPhone: call.callerPhone })
+  }
+  if (likelySpam) {
+    console.info("[Notifications] Skipped: likely spam", { callId, duration: call.duration, callerPhone: call.callerPhone })
+  }
+  if (alreadySent) {
+    console.info("[Notifications] Skipped: already sent for this call", { callId })
+  }
 
-  if (isDemoCall && callerPhone && !alreadySent) {
+  if (shouldNotify) {
     try {
-      await sendDemoResultSms(callerPhone, intakeForNotification, call, hasInfo)
+      const notifies: Promise<any>[] = []
+      if (notifPrefs.emailAlerts) {
+        notifies.push(sendEmailNotification(business, call, intakeForNotification))
+      }
+      if (notifPrefs.smsAlerts) {
+        notifies.push(sendSMSNotification(business, call, intakeForNotification))
+      }
+      if (notifPrefs.pushAlerts) {
+        notifies.push(sendPushNotification(business.id, call, intakeForNotification))
+      }
+      const intakePhone = typeof intakeForNotify.phone === "string" ? intakeForNotify.phone : null
+      if (hasSmsToCallers(planType) && intakePhone) {
+        const confirmMsg = callSettings.followUpSms?.enabled
+          ? callSettings.followUpSms.confirmationMessage
+          : null
+        notifies.push(sendSMSToCaller(business, intakePhone, confirmMsg))
+      }
+      await Promise.all(notifies)
+      const updateData: Record<string, unknown> = { notificationSent: true }
+      if (hasSmsToCallers(planType) && intakePhone && callSettings.followUpSms?.enabled) {
+        updateData.callerConfirmationSentAt = new Date()
+      }
       await db.call.update({
         where: { id: call.id },
-        data: { notificationSent: true },
+        data: updateData,
       })
-      console.info("[Notifications] Demo result sent (1 SMS to caller)", { callId, hasInfo })
+      console.info("[Notifications] Sent", {
+        callId,
+        businessId: business.id,
+        email: notifPrefs.emailAlerts,
+        sms: notifPrefs.smsAlerts,
+        push: notifPrefs.pushAlerts,
+      })
     } catch (error) {
-      console.error("Demo result SMS error:", error)
+      console.error("Notification error:", error)
     }
-  } else {
-    if (!shouldNotifyByPrefs) {
-      console.info("[Notifications] Skipped: emergencyOnlyAlerts is on and call is not emergency", { callId })
-    }
-    if (!hasInfo) {
-      console.info("[Notifications] Skipped: no actionable info captured", { callId, duration: call.duration, callerPhone: call.callerPhone })
-    }
-    if (likelySpam) {
-      console.info("[Notifications] Skipped: likely spam", { callId, duration: call.duration, callerPhone: call.callerPhone })
-    }
-    if (alreadySent) {
-      console.info("[Notifications] Skipped: already sent for this call", { callId })
-    }
+  }
 
-    if (shouldNotify) {
-      try {
-        const notifies: Promise<any>[] = []
-        if (notifPrefs.emailAlerts) {
-          notifies.push(sendEmailNotification(business, call, intakeForNotification))
-        }
-        if (notifPrefs.smsAlerts) {
-          notifies.push(sendSMSNotification(business, call, intakeForNotification))
-        }
-        if (notifPrefs.pushAlerts) {
-          notifies.push(sendPushNotification(business.id, call, intakeForNotification))
-        }
-        const intakePhone = typeof intakeForNotify.phone === "string" ? intakeForNotify.phone : null
-        if (hasSmsToCallers(planType) && intakePhone) {
-          const confirmMsg = callSettings.followUpSms?.enabled
-            ? callSettings.followUpSms.confirmationMessage
-            : null
-          notifies.push(sendSMSToCaller(business, intakePhone, intakeForNotification, confirmMsg))
-        }
-        await Promise.all(notifies)
-        const updateData: Record<string, unknown> = { notificationSent: true }
-        if (hasSmsToCallers(planType) && intakePhone && callSettings.followUpSms?.enabled) {
-          updateData.callerConfirmationSentAt = new Date()
-        }
-        await db.call.update({
-          where: { id: call.id },
-          data: updateData,
-        })
-        console.info("[Notifications] Sent", {
-          callId,
-          businessId: business.id,
-          email: notifPrefs.emailAlerts,
-          sms: notifPrefs.smsAlerts,
-          push: notifPrefs.pushAlerts,
-        })
-      } catch (error) {
-        console.error("Notification error:", error)
-      }
+  // Capacity decline SMS: sent when inbound was over limit in decline mode
+  const capacityMode = metadata?.capacity_mode
+  const capacityDeclineSmsSent =
+    (call as { capacityDeclineSmsSent?: boolean }).capacityDeclineSmsSent === true
+  const shouldSendCapacityDeclineSms =
+    callerPhone &&
+    !capacityDeclineSmsSent &&
+    capacityMode === "decline" &&
+    callSettings.capacity?.enabled &&
+    callSettings.capacity.declineSms?.trim()
+
+  if (shouldSendCapacityDeclineSms) {
+    try {
+      const text = callSettings.capacity.declineSms!.replace(/\[business\]/gi, business.name)
+      await sendMissedCallTextBack(business, callerPhone, text)
+      await db.call.update({
+        where: { id: call.id },
+        data: { capacityDeclineSmsSent: true } as any,
+      })
+    } catch (error) {
+      console.error("Capacity decline SMS error:", error)
     }
+  }
 
-    // Capacity decline SMS: sent when inbound was over limit in decline mode
-    const capacityMode = metadata?.capacity_mode
-    const capacityDeclineSmsSent =
-      (call as { capacityDeclineSmsSent?: boolean }).capacityDeclineSmsSent === true
-    const shouldSendCapacityDeclineSms =
-      !isDemoCall &&
-      callerPhone &&
-      !capacityDeclineSmsSent &&
-      capacityMode === "decline" &&
-      callSettings.capacity?.enabled &&
-      callSettings.capacity.declineSms?.trim()
+  // Missed call text-back: only after call_analyzed when intake is still incomplete.
+  // Retell sends call_ended first (no analysis); texting on that event caused duplicate asks
+  // even when the caller had already provided full details on the call.
+  const textBackSent = (call as { missedCallTextBackSent?: boolean }).missedCallTextBackSent === true
+  const shouldTextBack = shouldSendMissedCallTextBack({
+    isDemoCall: false,
+    callerPhone,
+    textBackSent,
+    notificationSent: alreadySent,
+    capacityDeclineSmsSent,
+    capacityMode,
+    missedCallRecoveryEnabled: callSettings.missedCallRecovery.enabled,
+    hasAnalysis,
+    hasInfo,
+  })
 
-    if (shouldSendCapacityDeclineSms) {
-      try {
-        const text = callSettings.capacity.declineSms!.replace(/\[business\]/gi, business.name)
-        await sendMissedCallTextBack(business, callerPhone, text)
-        await db.call.update({
-          where: { id: call.id },
-          data: { capacityDeclineSmsSent: true } as any,
-        })
-      } catch (error) {
-        console.error("Capacity decline SMS error:", error)
-      }
-    }
-
-    // Missed call text-back: only after call_analyzed when intake is still incomplete.
-    // Retell sends call_ended first (no analysis); texting on that event caused duplicate asks
-    // even when the caller had already provided full details on the call.
-    const textBackSent = (call as { missedCallTextBackSent?: boolean }).missedCallTextBackSent === true
-    const shouldTextBack = shouldSendMissedCallTextBack({
-      isDemoCall,
-      callerPhone,
-      textBackSent,
-      notificationSent: alreadySent,
-      capacityDeclineSmsSent,
-      capacityMode,
-      missedCallRecoveryEnabled: callSettings.missedCallRecovery.enabled,
-      hasAnalysis,
-      hasInfo,
-    })
-
-    if (shouldTextBack) {
-      try {
-        const text = callSettings.missedCallRecovery.smsAutoReplyText.replace(
-          /\[Business\]/g,
-          business.name
-        )
-        await sendMissedCallTextBack(business, callerPhone, text)
-        await db.call.update({
-          where: { id: call.id },
-          data: { missedCallTextBackSent: true },
-        })
-      } catch (error) {
-        console.error("Missed call text-back error:", error)
-      }
+  if (shouldTextBack) {
+    try {
+      const text = callSettings.missedCallRecovery.smsAutoReplyText.replace(
+        /\[Business\]/g,
+        business.name
+      )
+      await sendMissedCallTextBack(business, callerPhone, text)
+      await db.call.update({
+        where: { id: call.id },
+        data: { missedCallTextBackSent: true },
+      })
+    } catch (error) {
+      console.error("Missed call text-back error:", error)
     }
   }
 

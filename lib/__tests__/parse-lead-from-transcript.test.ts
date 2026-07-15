@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import {
   extractCallerReasonFromTranscript,
+  isLikelyPersonName,
   isLikelyPhysicalAddress,
   looksLikeAgentSpeech,
   parseLeadFromSummaryOrTranscript,
@@ -8,7 +9,7 @@ import {
   resolveIssueDescription,
   sanitizeIssueDescription,
 } from "../parse-lead-from-transcript"
-import { buildLeadSummarySmsBodies } from "../notifications"
+import { buildLeadSummarySmsBodies, looksLikeLeadSummarySms } from "../notifications"
 
 describe("isLikelyPhysicalAddress", () => {
   it("accepts numbered street addresses", () => {
@@ -127,6 +128,49 @@ describe("parseLeadFromSummaryOrTranscript", () => {
     )
     expect(parsed.issue_description).toMatch(/garage door spring broke/i)
     expect(parsed.issue_description).not.toMatch(/thanks for calling/i)
+  })
+})
+
+describe("isLikelyPersonName", () => {
+  it("accepts normal person names", () => {
+    expect(isLikelyPersonName("Bobby")).toBe(true)
+    expect(isLikelyPersonName("Jane Doe")).toBe(true)
+  })
+
+  it("rejects location fragments from 'I'm in …'", () => {
+    expect(isLikelyPersonName("in West Des Moines.")).toBe(false)
+    expect(isLikelyPersonName("in West Des Moines")).toBe(false)
+    expect(isLikelyPersonName("West Des Moines")).toBe(false)
+  })
+})
+
+describe("parseLeadFromSummaryOrTranscript name/city", () => {
+  it("extracts Bobby and city from demo-style summary, not location as name", () => {
+    const parsed = parseLeadFromSummaryOrTranscript(
+      "The user, Bobby, called about a sink that needs repair in West Des Moines. He said I need someone to come fix my sync."
+    )
+    expect(parsed.name).toBe("Bobby")
+    expect(parsed.city).toMatch(/West Des Moines/i)
+    expect(parsed.name).not.toMatch(/West Des Moines/i)
+  })
+
+  it("does not treat I'm in City as a name", () => {
+    const parsed = parseLeadFromSummaryOrTranscript(
+      "User: I'm in West Des Moines.\nUser: I need someone to come fix my sink."
+    )
+    expect(parsed.name).toBeUndefined()
+    expect(parsed.city).toMatch(/West Des Moines/i)
+  })
+})
+
+describe("looksLikeLeadSummarySms", () => {
+  it("detects owner lead-summary format", () => {
+    expect(
+      looksLikeLeadSummarySms(
+        "Name: Bobby\nPhone: +13193106852\nAddress: —\nReason for call: fix my sink"
+      )
+    ).toBe(true)
+    expect(looksLikeLeadSummarySms("Thanks for calling. We'll reach out shortly.")).toBe(false)
   })
 })
 

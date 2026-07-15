@@ -263,14 +263,24 @@ export async function sendSMSNotification(
   }
 }
 
+/** True when body looks like an owner lead-summary SMS (must never go to the caller as a "thanks" text). */
+export function looksLikeLeadSummarySms(body: string): boolean {
+  const t = body.trim()
+  return (
+    /^Name:\s*/im.test(t) &&
+    /^Phone:\s*/im.test(t) &&
+    (/^Address:\s*/im.test(t) || /^Reason for call:\s*/im.test(t))
+  )
+}
+
 /** Pro+: send SMS confirmation to caller after the call.
  *  Note: This is a one-time transactional message triggered by the caller's own call.
  *  Includes opt-out instructions per Twilio toll-free compliance.
+ *  Never sends lead-summary bodies (those are owner-only).
  */
 export async function sendSMSToCaller(
   business: Business,
   callerPhone: string,
-  intake: StructuredIntake,
   customMessage?: string | null
 ) {
   if (!twilioClient || !process.env.TWILIO_PHONE_NUMBER) {
@@ -279,6 +289,13 @@ export async function sendSMSToCaller(
   const message =
     customMessage?.trim() ||
     `Thanks for calling ${business.name}. We received your information and will reach out shortly. Reply STOP to opt out of future texts.`
+  if (looksLikeLeadSummarySms(message)) {
+    console.error("[Notifications] Blocked lead-summary SMS to caller (owner-only format)", {
+      businessId: business.id,
+      to: callerPhone,
+    })
+    return
+  }
   try {
     await twilioClient.messages.create({
       body: message,
@@ -370,20 +387,26 @@ export async function sendGoogleReviewRequest(
 
 /** Demo calls only: send exactly one SMS to the caller with their lead summary (or short fallback if nothing captured).
  *  Matches consent: "exactly one SMS with my demo call result (sent after I call)".
+ *  Explicitly labeled as a demo so it is never confused with a business-owner lead alert.
  */
 export async function sendDemoResultSms(
   callerPhone: string,
   intake: StructuredIntake,
-  call: Call,
+  call: Call | { appointmentRequest?: unknown },
   hasActionableInfo: boolean
 ) {
   if (!twilioClient || !process.env.TWILIO_PHONE_NUMBER) {
     console.warn("[Notifications] Demo result SMS skipped: Twilio not configured")
     return
   }
+  const prefix = "CallGrabbr demo result:\n"
   const bodies = hasActionableInfo
-    ? buildLeadSummarySmsBodies(intake, call)
-    : ["CallGrabbr: We didn't capture enough for a summary. Call again and briefly describe a job (e.g. \"I need a plumber for a leak\") to see your demo result."]
+    ? buildLeadSummarySmsBodies(intake, call as Call).map((b) =>
+        b.startsWith("CallGrabbr demo") ? b : prefix + b
+      )
+    : [
+        "CallGrabbr demo: We didn't capture enough for a summary. Call again and briefly describe a job (e.g. \"I need a plumber for a leak\") to see your demo result.",
+      ]
   try {
     for (const body of bodies) {
       await twilioClient.messages.create({
@@ -392,7 +415,11 @@ export async function sendDemoResultSms(
         to: callerPhone,
       })
     }
-    console.info("[Notifications] Demo result SMS sent to caller", { to: callerPhone, hasInfo: hasActionableInfo, parts: bodies.length })
+    console.info("[Notifications] Demo result SMS sent to caller", {
+      to: callerPhone,
+      hasInfo: hasActionableInfo,
+      parts: bodies.length,
+    })
   } catch (error) {
     console.error("[Notifications] Demo result SMS error:", error)
   }

@@ -12,6 +12,14 @@ export type DemoInboundResponse = {
   }
 }
 
+/** True when metadata marks this as a public demo call. */
+export function metadataDemoFlag(
+  metadata: Record<string, unknown> | null | undefined
+): boolean {
+  if (!metadata || typeof metadata !== "object") return false
+  return metadata.demo_call === true || metadata.demo_call === "true"
+}
+
 /** True when the dialed number matches the configured public demo line. */
 export function isDemoInboundCall(
   toNumber: string | null | undefined,

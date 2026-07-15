@@ -40,6 +40,25 @@ const ACK_ONLY = /^(yes|yeah|yep|no|nope|ok(?:ay)?|sure|correct|right|uh.?huh|mm
 const NAME_ONLY = /^[A-Za-z][A-Za-z\s.'-]{1,40}$/
 const PHONE_ONLY = /^[\d\s().+-]{7,20}$/
 
+const LOCATION_PREPOSITION = /^(in|at|near|from|around|outside|inside)\b/i
+
+/** Reject location fragments and reason text mislabeled as a person name. */
+export function isLikelyPersonName(value: string | null | undefined): boolean {
+  if (!value?.trim()) return false
+  const v = value.trim().replace(/\s+/g, " ").replace(/\.+$/, "")
+  if (v.length < 2 || v.length > 50) return false
+  if (!/^[A-Za-z][A-Za-z\s.'-]*$/.test(v)) return false
+  if (LOCATION_PREPOSITION.test(v)) return false
+  if (SERVICE_KEYWORDS.test(v)) return false
+  if (/\b(des moines|west des moines|los angeles|san diego|new york|kansas city)\b/i.test(v)) {
+    return false
+  }
+  const words = v.split(/\s+/)
+  if (words.length > 4) return false
+  if (words.length === 1 && /^(in|at|near|from|the|a|an|my)\b/i.test(words[0])) return false
+  return true
+}
+
 /** Reject reason/summary text that was mis-captured as an address. */
 export function isLikelyPhysicalAddress(value: string | null | undefined): boolean {
   if (!value?.trim()) return false
@@ -266,9 +285,11 @@ export function parseLeadFromSummaryOrTranscript(text: string | null | undefined
   const t = text.trim()
   if (!t) return out
 
-  // Name: common patterns (case-insensitive)
+  // Name: prefer explicit person labels; avoid "I'm in West Des Moines" → name "in West Des Moines"
   const namePatterns = [
-    /(?:caller(?:'s)? name|name is|this is|i'?m|speaking with|contact name)[:\s]+([A-Za-z][A-Za-z\s.'-]{1,40})(?=[.,\n]|$)/i,
+    /(?:the )?(?:user|caller|customer|client),\s*([A-Za-z][A-Za-z.'-]{1,30})\s*,?\s*(?:called|calling|reached|said)/i,
+    /(?:caller(?:'s)? name|contact name|name is|speaking with|my name is)[:\s]+([A-Za-z][A-Za-z\s.'-]{1,40})(?=[.,\n]|$)/i,
+    /(?:this is)\s+([A-Za-z][A-Za-z\s.'-]{1,40})(?=[.,\n]|$)/i,
     /(?:^|\n)([A-Z][a-z]+ [A-Z][a-z]+)(?:\s+called|called in|reached out)/,
     /(?:^|\n)([A-Z][a-z]+ [A-Z][a-z]+)\s+[\(\d]/,
   ]
@@ -276,7 +297,7 @@ export function parseLeadFromSummaryOrTranscript(text: string | null | undefined
     const m = t.match(re)
     if (m && m[1]) {
       const name = m[1].trim()
-      if (name.length >= 2 && name.length <= 50 && !/^\d+$/.test(name)) {
+      if (isLikelyPersonName(name)) {
         out.name = name
         break
       }
@@ -286,9 +307,14 @@ export function parseLeadFromSummaryOrTranscript(text: string | null | undefined
   // Prefer user lines for name when transcript is labeled
   const userTurns = parseTranscriptTurns(t).filter((turn) => turn.speaker === "user")
   for (const turn of userTurns) {
-    const nameMatch = turn.text.match(/^(?:hi,?\s*)?(?:this is|i'?m|my name is)\s+([A-Za-z][A-Za-z\s.'-]{1,40})/i)
-    if (nameMatch?.[1]) {
-      out.name = nameMatch[1].trim()
+    const nameMatch = turn.text.match(
+      /^(?:hi,?\s*)?(?:this is|my name is)\s+([A-Za-z][A-Za-z\s.'-]{1,40})/i
+    )
+    // "I'm <Name>" only when the next token looks like a person name (not "I'm in …")
+    const imMatch = turn.text.match(/^(?:hi,?\s*)?i'?m\s+([A-Za-z][A-Za-z\s.'-]{1,40})/i)
+    const candidate = nameMatch?.[1]?.trim() || (imMatch?.[1] && isLikelyPersonName(imMatch[1].trim()) ? imMatch[1].trim() : null)
+    if (candidate && isLikelyPersonName(candidate)) {
+      out.name = candidate
       break
     }
   }
@@ -310,11 +336,13 @@ export function parseLeadFromSummaryOrTranscript(text: string | null | undefined
     }
   }
 
-  // City: "city is X" or "in X" (short phrase)
-  const cityMatch = t.match(/(?:city|located in)\s*[:\s]+([A-Za-z\s]{2,40})(?=[.,\n]|$)/i)
+  // City: "city is X", "located in X", or trailing "in West Des Moines"
+  const cityMatch =
+    t.match(/(?:city|located in)\s*[:\s]+([A-Za-z\s]{2,40})(?=[.,\n]|$)/i) ||
+    t.match(/\bin\s+([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+){0,3})\.??(?=[.,\n]|$)/)
   if (cityMatch?.[1]) {
-    const city = cityMatch[1].trim()
-    if (city.length >= 2 && city.length <= 50) out.city = city
+    const city = cityMatch[1].trim().replace(/\.+$/, "")
+    if (city.length >= 2 && city.length <= 50 && !SERVICE_KEYWORDS.test(city)) out.city = city
   }
 
   out.issue_description = resolveIssueDescription({ transcript: t, summary: t })
