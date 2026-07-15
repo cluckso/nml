@@ -50,6 +50,7 @@ import {
   getIntakeTemplateMeta,
 } from "@/lib/intake-presets"
 import type { IntakeTemplate } from "@/lib/business-settings"
+import { INTAKE_FIELD_LABELS, buildLeadCaptureSummary, industryToIntakeTemplate } from "@/lib/lead-capture-summary"
 import { getUpgradeTierLabel, PLAN_PLATINUM, PLAN_VOLUME_TAGS } from "@/lib/plan-labels"
 import { hasPremiumElevenLabsVoice } from "@/lib/plans"
 import { PlanType } from "@prisma/client"
@@ -80,11 +81,14 @@ const TIER_GROUP_LABELS = PLAN_VOLUME_TAGS
 
 const SECTION_INTROS: Partial<Record<SettingsSection, string>> = {
   greeting: "How your assistant sounds when it picks up — greeting, tone, and voice.",
-  intakeFields: "What information to collect from callers on every job lead.",
+  intakeFields:
+    "Transparent view of what your live assistant asks for — turn fields on/off and save to update the next call.",
   availability: "Your timezone and business hours — used for after-hours behavior and call routing schedules.",
   notifications: "Where we send call summaries and alerts when a lead comes in.",
   callRouting: "When your assistant answers forwarded calls — quick presets below, or customize the timing.",
   missedCallRecovery: "Follow up automatically when someone hangs up before your assistant finishes intake.",
+  questionDepth: "How thorough questioning is on each call — sits alongside What we capture.",
+  booking: "When callers can request appointments. Appointment preference itself is listed under What we capture.",
 }
 
 export function SettingsClient() {
@@ -94,6 +98,7 @@ export function SettingsClient() {
   const [notificationPhone, setNotificationPhone] = useState<string | null>(null)
   const [smsConsent, setSmsConsent] = useState(false)
   const [businessPhone, setBusinessPhone] = useState<string | null>(null)
+  const [industry, setIndustry] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<SettingsSection>("greeting")
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -108,7 +113,15 @@ export function SettingsClient() {
       ringBeforeAnswerSeconds?: number
       tone?: string
       questionDepth?: string
+      questionDepthGuidance?: string
+      beginMessage?: string
+      capturePreviewLine?: string
+      captureRequired?: string[]
+      captureOptional?: string[]
+      captureIndustryExtras?: string[]
+      captureTemplateLabel?: string
     }
+    beginMessage?: string
     ringDurationMs?: number
   } | null>(null)
   const [agentPreviewVerified, setAgentPreviewVerified] = useState(false)
@@ -141,6 +154,13 @@ export function SettingsClient() {
   }, [refreshAgentPreview])
 
   useEffect(() => {
+    const section = new URLSearchParams(window.location.search).get("section") as SettingsSection | null
+    if (section && TABS.some((t) => t.section === section)) {
+      setActiveTab(section)
+    }
+  }, [])
+
+  useEffect(() => {
     fetch("/api/settings")
       .then(async (r) => {
         const d = await r.json()
@@ -151,6 +171,7 @@ export function SettingsClient() {
           setNotificationPhone(d.notificationPhone ?? null)
           setSmsConsent(d.smsConsent ?? false)
           setBusinessPhone(d.businessPhone ?? null)
+          setIndustry(d.industry ?? null)
           refreshAgentPreview()
         } else setError(d.error)
       })
@@ -213,6 +234,7 @@ export function SettingsClient() {
                 )}
                 <button
                   type="button"
+                  data-settings-section={section}
                   onClick={() => {
                     if (locked) {
                       setUpgradeDialogSection(section)
@@ -260,6 +282,7 @@ export function SettingsClient() {
           verifying={verifyingAgentPreview}
           onVerify={verifyAgentPreview}
           onSettingsLoad={settings !== null}
+          onOpenCapture={() => setActiveTab("intakeFields")}
         />
 
         {isLocked(activeTab) ? (
@@ -278,7 +301,11 @@ export function SettingsClient() {
               <IntakeSection
                 fields={settings.intakeFields}
                 template={settings.intakeTemplate}
+                industry={industry}
                 canPickTemplate={allowed.includes("intakeTemplate")}
+                canEditBooking={allowed.includes("booking")}
+                canEditDepth={allowed.includes("questionDepth")}
+                questionDepth={settings.questionDepth}
                 onSave={(fields, template) =>
                   save("intakeFields", fields, template != null ? { intakeTemplate: template } : undefined)
                 }
@@ -339,6 +366,7 @@ function AgentPreviewCard({
   verifying,
   onVerify,
   onSettingsLoad,
+  onOpenCapture,
 }: {
   agentPreview: {
     summary?: {
@@ -351,6 +379,11 @@ function AgentPreviewCard({
       questionDepth?: string
       questionDepthGuidance?: string
       beginMessage?: string
+      capturePreviewLine?: string
+      captureRequired?: string[]
+      captureOptional?: string[]
+      captureIndustryExtras?: string[]
+      captureTemplateLabel?: string
     }
     beginMessage?: string
     ringDurationMs?: number
@@ -359,6 +392,7 @@ function AgentPreviewCard({
   verifying: boolean
   onVerify: () => void
   onSettingsLoad: boolean
+  onOpenCapture: () => void
 }) {
   if (!onSettingsLoad) return null
   const summary = agentPreview?.summary
@@ -433,6 +467,41 @@ function AgentPreviewCard({
               <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Question depth</dt>
               <dd className="mt-1 capitalize text-foreground">{summary.questionDepth ?? "—"}</dd>
             </div>
+            {(summary.capturePreviewLine || summary.captureRequired?.length) && (
+              <div className="rounded-lg border border-primary/20 bg-primary/5 px-3 py-2.5 sm:col-span-2">
+                <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  What we capture{summary.captureTemplateLabel ? ` · ${summary.captureTemplateLabel}` : ""}
+                </dt>
+                <dd className="mt-1 text-foreground text-sm leading-relaxed">
+                  {summary.captureRequired && summary.captureRequired.length > 0 && (
+                    <p>
+                      <span className="font-medium">Required:</span> {summary.captureRequired.join(", ")}
+                    </p>
+                  )}
+                  {summary.captureOptional && summary.captureOptional.length > 0 && (
+                    <p className="mt-1">
+                      <span className="font-medium">Optional:</span> {summary.captureOptional.join(", ")}
+                    </p>
+                  )}
+                  {summary.captureIndustryExtras && summary.captureIndustryExtras.length > 0 && (
+                    <p className="mt-1 text-muted-foreground">
+                      Also for this trade: {summary.captureIndustryExtras.join(", ")}
+                    </p>
+                  )}
+                </dd>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Edit under{" "}
+                  <button
+                    type="button"
+                    className="text-primary hover:underline font-medium"
+                    onClick={onOpenCapture}
+                  >
+                    What we capture
+                  </button>
+                  .
+                </p>
+              </div>
+            )}
             {(summary.beginMessage ?? agentPreview?.beginMessage) && (
               <div className="rounded-lg border border-border/60 px-3 py-2.5 sm:col-span-2">
                 <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Opening greeting</dt>
@@ -645,35 +714,33 @@ function GreetingSection({
 function IntakeSection({
   fields,
   template,
+  industry,
   canPickTemplate,
+  canEditBooking,
+  canEditDepth,
+  questionDepth,
   onSave,
   saving,
 }: {
   fields: IntakeFieldConfig
   template: string | null
+  industry: string | null
   canPickTemplate: boolean
+  canEditBooking: boolean
+  canEditDepth: boolean
+  questionDepth: QuestionDepth
   onSave: (fields: IntakeFieldConfig, template: IntakeTemplate | null) => void
   saving: boolean
 }) {
   const [d, setD] = useState(fields)
   const [selectedTemplate, setSelectedTemplate] = useState<IntakeTemplate>((template as IntakeTemplate) ?? "generic")
-  const templateMeta = getIntakeTemplateMeta(selectedTemplate)
+  const liveSummary = buildLeadCaptureSummary(d, canPickTemplate ? selectedTemplate : template, industry)
+  const templateMeta = getIntakeTemplateMeta(liveSummary.templateId)
 
   useEffect(() => {
     setD(fields)
-    setSelectedTemplate((template as IntakeTemplate) ?? "generic")
-  }, [fields, template])
-
-  const fieldLabels: Record<keyof IntakeFieldConfig, string> = {
-    name: "Caller Name",
-    phone: "Phone Number",
-    address: "Address",
-    email: "Email",
-    serviceType: "Service Type",
-    urgency: "Urgency Level",
-    budgetRange: "Budget Range",
-    appointmentPreference: "Appointment Preference",
-  }
+    setSelectedTemplate((template as IntakeTemplate) ?? industryToIntakeTemplate(industry))
+  }, [fields, template, industry])
 
   const applyTemplateDefaults = () => {
     setD(getIntakeFieldsForTemplate(selectedTemplate))
@@ -682,12 +749,59 @@ function IntakeSection({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Intake</CardTitle>
+        <CardTitle>What we capture</CardTitle>
         <CardDescription>
-          Choose your business type and which fields your assistant collects. Industry types suggest defaults you can override.
+          Your live assistant asks for these details on every call. Changes apply after you save (and sync to your agent).
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        <div className="rounded-xl border border-primary/25 bg-primary/5 p-4 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm font-semibold text-foreground">Live capture summary</p>
+            <Badge variant="secondary" className="text-xs">
+              {liveSummary.templateLabel}
+              {industry ? ` · signup: ${industry.replace(/_/g, " ")}` : ""}
+            </Badge>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2 text-sm">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1">Required</p>
+              <ul className="list-disc list-inside text-foreground space-y-0.5">
+                {liveSummary.required.map((f) => (
+                  <li key={f}>{f}</li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground mb-1">Optional</p>
+              {liveSummary.optional.length > 0 ? (
+                <ul className="list-disc list-inside text-foreground space-y-0.5">
+                  {liveSummary.optional.map((f) => (
+                    <li key={f}>{f}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-muted-foreground text-xs">None selected</p>
+              )}
+            </div>
+          </div>
+          {liveSummary.industryExtras.length > 0 && (
+            <p className="text-xs text-muted-foreground">
+              Also collected for {liveSummary.templateLabel}: {liveSummary.industryExtras.join(", ")}
+            </p>
+          )}
+          <p className="text-xs text-muted-foreground">
+            Typical flow: {liveSummary.sampleSteps.join(" → ")}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Question depth: <span className="capitalize font-medium text-foreground">{questionDepth}</span>
+            {canEditDepth ? " (Pro+ — edit under Question Depth)." : "."}{" "}
+            {canEditBooking
+              ? "Appointment booking rules live under Booking Controls."
+              : "Appointment preference can be toggled below when enabled on your plan."}
+          </p>
+        </div>
+
         {canPickTemplate ? (
           <div className="space-y-3">
             <Label>Business type</Label>
@@ -719,25 +833,19 @@ function IntakeSection({
             </Button>
           </div>
         ) : (
-          <div className="rounded-lg border border-dashed border-border bg-muted/20 p-3 text-sm text-muted-foreground">
-            Upgrade to Pro to pick an industry intake type and see recommended field presets.
-          </div>
-        )}
-
-        {templateMeta.industryFields.length > 0 && (
-          <div className="rounded-lg bg-muted/30 border border-border p-3 text-sm">
-            <p className="font-medium text-foreground mb-1">Also collected for {templateMeta.label}</p>
-            <ul className="list-disc list-inside text-muted-foreground text-xs space-y-0.5">
-              {templateMeta.industryFields.map((f) => (
-                <li key={f}>{f}</li>
-              ))}
-            </ul>
-            <p className="text-xs text-muted-foreground mt-2">Typical flow: {templateMeta.sampleSteps.join(" → ")}</p>
+          <div className="rounded-lg border border-dashed border-border bg-muted/20 p-3 text-sm text-muted-foreground space-y-1">
+            <p>
+              Business type follows your signup industry
+              {industry ? ` (${industry.replace(/_/g, " ")})` : ""}. Upgrade to Growth to switch industry presets here.
+            </p>
           </div>
         )}
 
         <div className="space-y-3">
-          <Label>Field toggles</Label>
+          <Label>Fields to collect</Label>
+          <p className="text-xs text-muted-foreground -mt-1">
+            Turn fields on or off. Required fields are asked until captured when possible.
+          </p>
           {(Object.keys(d) as (keyof IntakeFieldConfig)[]).map((f) => (
             <div key={f} className="flex items-center gap-4">
               <input
@@ -746,7 +854,7 @@ function IntakeSection({
                 onChange={(e) => setD({ ...d, [f]: { ...d[f], enabled: e.target.checked } })}
                 className="rounded"
               />
-              <span className="text-sm w-40">{fieldLabels[f]}</span>
+              <span className="text-sm w-44">{INTAKE_FIELD_LABELS[f]}</span>
               {d[f].enabled && (
                 <label className="flex items-center gap-1 text-xs text-muted-foreground">
                   <input

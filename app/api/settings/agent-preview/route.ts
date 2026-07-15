@@ -4,6 +4,7 @@ import { db } from "@/lib/db"
 import { mergeWithDefaults, type BusinessSettings } from "@/lib/business-settings"
 import { buildAgentOverride } from "@/lib/agent-override"
 import { formatRingDelayLabel, formatScheduledRingDelaySummary } from "@/lib/call-routing"
+import { buildLeadCaptureSummary } from "@/lib/lead-capture-summary"
 
 /**
  * GET /api/settings/agent-preview
@@ -18,7 +19,7 @@ export async function GET(req: NextRequest) {
 
     const business = await db.business.findUnique({
       where: { id: user.businessId },
-      select: { name: true, settings: true, serviceAreas: true, planType: true },
+      select: { name: true, settings: true, serviceAreas: true, planType: true, industry: true },
     })
     if (!business) return NextResponse.json({ error: "Business not found" }, { status: 404 })
 
@@ -28,6 +29,8 @@ export async function GET(req: NextRequest) {
 
     const { agentOverride, dynamicVars, beginMessage, ringDurationMs, effectiveRingProfile } =
       buildAgentOverride(settings, businessName, serviceAreas, business.planType)
+
+    const capture = buildLeadCaptureSummary(settings.intakeFields, settings.intakeTemplate, business.industry)
 
     return NextResponse.json({
       agentOverride,
@@ -54,6 +57,11 @@ export async function GET(req: NextRequest) {
         beginMessage,
         modelTemperature: agentOverride.conversation_flow?.model_temperature,
         interruptionSensitivity: agentOverride.agent?.interruption_sensitivity,
+        capturePreviewLine: capture.previewLine,
+        captureRequired: capture.required,
+        captureOptional: capture.optional,
+        captureIndustryExtras: capture.industryExtras,
+        captureTemplateLabel: capture.templateLabel,
       },
     })
   } catch (error) {

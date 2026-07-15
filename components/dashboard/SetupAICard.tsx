@@ -177,8 +177,12 @@ export function SetupAICard({
             </div>
           )}
           <p className="text-sm text-muted-foreground">
-            New calls appear under <Link href="/calls" className="text-primary underline">Calls</Link>. Haven&apos;t
-            forwarded yet? Do that now — your trial only counts when real calls come in.
+            New calls appear under <Link href="/calls" className="text-primary underline">Calls</Link>. See{" "}
+            <Link href="/settings?section=intakeFields" className="text-primary underline">
+              Settings → What we capture
+            </Link>{" "}
+            for the fields your assistant asks for. Haven&apos;t forwarded yet? Do that now — your trial only counts when
+            real calls come in.
           </p>
         </CardContent>
       </Card>

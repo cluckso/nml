@@ -645,6 +645,8 @@ export type SyncSettings = {
   callRouting?: Partial<import("./call-routing").CallRoutingSettings>
   availability?: Partial<import("./business-settings").AvailabilitySettings>
   aiBehavior?: { maxCallLengthMinutes?: number; interruptTolerance?: number }
+  intakeFields?: import("./business-settings").IntakeFieldConfig
+  intakeTemplate?: import("./business-settings").IntakeTemplate | null
 }
 
 /**
@@ -683,7 +685,7 @@ export async function syncRetellAgentFromBusiness(
       includeAppointmentCapture: hasAppointmentCapture(effectivePlan),
     }
   )
-  if (settings?.greeting?.tone || settings?.questionDepth || settings?.voiceBrand) {
+  if (settings?.greeting?.tone || settings?.questionDepth || settings?.voiceBrand || settings?.intakeFields) {
     const parts: string[] = []
     if (settings.greeting?.tone) parts.push(`Use a ${settings.greeting.tone} tone.`)
     if (settings.questionDepth) {
@@ -698,6 +700,12 @@ export async function syncRetellAgentFromBusiness(
       if (typeof settings.voiceBrand.warmth === "number") {
         parts.push(buildWarmthGuidance(settings.voiceBrand.warmth))
       }
+    }
+    if (settings.intakeFields) {
+      const { buildDedicatedIntakeGuidance } = await import("./lead-capture-summary")
+      parts.push(
+        buildDedicatedIntakeGuidance(settings.intakeFields, settings.intakeTemplate ?? null, business.industry)
+      )
     }
     if (parts.length) globalPrompt = globalPrompt + "\n\n" + parts.join(" ")
   }

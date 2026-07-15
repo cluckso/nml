@@ -402,7 +402,7 @@ export function isSectionAllowed(section: SettingsSection, planType: PlanType | 
 /** Human-readable section labels */
 export const SECTION_LABELS: Record<SettingsSection, string> = {
   greeting: "Greeting & Voice",
-  intakeFields: "Intake",
+  intakeFields: "What we capture",
   availability: "Hours & Availability",
   notifications: "Notification Settings",
   callRouting: "Call Routing",
@@ -446,7 +446,7 @@ export const SECTION_MIN_TIER: Record<SettingsSection, PlanType> = {
 /** Short upgrade prompt copy shown when a locked settings section is clicked. */
 export const SECTION_UPGRADE_DESCRIPTIONS: Record<SettingsSection, string> = {
   greeting: "Customize how your call assistant greets callers.",
-  intakeFields: "Choose your business type and which lead fields to capture on every call.",
+  intakeFields: "See and edit which lead fields your assistant captures on every call.",
   availability: "Set business hours, holidays, and after-hours behavior.",
   notifications: "Control SMS, email, and emergency alert preferences.",
   callRouting: "Configure ring delay and how calls reach your assistant.",

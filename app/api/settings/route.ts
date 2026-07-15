@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
 
     const business = await db.business.findUnique({
       where: { id: user.businessId },
-      select: { settings: true, planType: true, primaryForwardingNumber: true },
+      select: { settings: true, planType: true, primaryForwardingNumber: true, industry: true },
     })
     if (!business) return NextResponse.json({ error: "Business not found" }, { status: 404 })
 
@@ -40,6 +40,7 @@ export async function GET(req: NextRequest) {
       notificationPhone,
       smsConsent,
       businessPhone: business.primaryForwardingNumber ?? null,
+      industry: business.industry ?? null,
     })
   } catch (error) {
     console.error("Settings GET error:", error)

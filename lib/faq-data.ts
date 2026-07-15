@@ -28,7 +28,7 @@ export const PRODUCT_FAQ: FaqItem[] = [
   {
     question: "What information does CallGrabbr capture from callers?",
     answer:
-      "Typical lead details include caller name, callback number, reason for the call, service address, vehicle info (for auto shops), and appointment preferences—based on your industry and settings.",
+      "Typical lead details include caller name, callback number, reason for the call, service address, vehicle info (for auto shops), and appointment preferences—based on your industry and settings. Review and edit exactly what your assistant collects in Settings → What we capture.",
   },
   {
     question: "Which industries does CallGrabbr support?",

@@ -42,7 +42,7 @@ export default async function SettingsPage() {
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-b from-background via-background to-muted/20">
       <div className="container mx-auto max-w-6xl px-4 py-8">
-        <DashboardPageHeader title="Settings" subtitle="Configure your call assistant and notifications">
+        <DashboardPageHeader title="Settings" subtitle="See what your assistant captures, and tune greeting, routing, and alerts">
           <DashboardNav />
         </DashboardPageHeader>
 
