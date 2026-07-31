@@ -8,6 +8,7 @@ import { getEffectivePlanType } from "@/lib/plans"
 import { getPlanDisplayName } from "@/lib/plan-labels"
 import { PlanType } from "@prisma/client"
 import { isSectionAllowed } from "@/lib/business-settings"
+import { getPostHogClient } from "@/lib/posthog-server"
 
 /** GET /api/appointments — list appointments. Query: from, to (ISO date), status */
 export async function GET(req: NextRequest) {
@@ -90,6 +91,19 @@ export async function POST(req: NextRequest) {
         status: "PENDING",
       },
     })
+
+    const posthog = getPostHogClient()
+    if (posthog) {
+      posthog.capture({
+        distinctId: user.id,
+        event: "appointment_booked",
+        properties: {
+          duration_minutes: durationMinutes,
+          has_issue_description: !!issueDescription,
+        },
+      })
+      await posthog.flush()
+    }
 
     return NextResponse.json({ appointment })
   } catch (error) {

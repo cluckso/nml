@@ -5,6 +5,7 @@ import { db } from "@/lib/db"
 import { PlanType } from "@prisma/client"
 import { Industry } from "@prisma/client"
 import { SETUP_FEES } from "@/lib/plans"
+import { getPostHogClient } from "@/lib/posthog-server"
 
 /** Plan-first flow: create minimal business so user can checkout before onboarding. */
 export async function POST(req: NextRequest) {
@@ -77,6 +78,20 @@ export async function POST(req: NextRequest) {
         "alreadyOnPlan" in result
           ? `${baseUrl}/billing?plan=current`
           : `${baseUrl}/subscribe/success?upgraded=1`
+      const posthog = getPostHogClient()
+      if (posthog) {
+        posthog.capture({
+          distinctId: user.id,
+          event: "checkout_session_created",
+          properties: {
+            plan_type: planType,
+            billing_interval: billingInterval,
+            in_place_upgrade: true,
+            founder_deal: founderDeal,
+          },
+        })
+        await posthog.flush()
+      }
       return NextResponse.json({ url: redirectUrl, inPlaceUpgrade: true })
     }
 
@@ -88,6 +103,21 @@ export async function POST(req: NextRequest) {
       founderDeal,
       billingInterval
     )
+
+    const posthog = getPostHogClient()
+    if (posthog) {
+      posthog.capture({
+        distinctId: user.id,
+        event: "checkout_session_created",
+        properties: {
+          plan_type: planType,
+          billing_interval: billingInterval,
+          in_place_upgrade: false,
+          founder_deal: founderDeal,
+        },
+      })
+      await posthog.flush()
+    }
 
     return NextResponse.json({ url: session.url })
   } catch (error) {

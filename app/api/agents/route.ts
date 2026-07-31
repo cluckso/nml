@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { getAuthUserFromRequest } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { provisionAgentAndNumberForBusiness } from "@/lib/retell"
+import { getPostHogClient } from "@/lib/posthog-server"
 
 /**
  * POST /api/agents
@@ -67,6 +68,19 @@ export async function POST(req: NextRequest) {
       where: { id: user.businessId },
       data: { retellAgentId: provisioned.agent_id, retellPhoneNumber: provisioned.phone_number },
     })
+
+    const posthog = getPostHogClient()
+    if (posthog) {
+      posthog.capture({
+        distinctId: user.id,
+        event: "agent_provisioned",
+        properties: {
+          industry: business.industry,
+          plan_type: business.planType,
+        },
+      })
+      await posthog.flush()
+    }
 
     return NextResponse.json({
       success: true,

@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter, useSearchParams } from "next/navigation"
+import posthog from "posthog-js"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -113,6 +114,7 @@ function SignUpForm() {
       }
       setLoading(false)
     } else {
+      posthog.capture("user_signed_up", { plan: "free" })
       try {
         sessionStorage.setItem(TERMS_ACCEPTED_STORAGE_KEY, "1")
       } catch {
