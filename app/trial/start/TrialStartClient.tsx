@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { PlanType } from "@prisma/client"
 import { trackStartTrial, trackCardTrialStart } from "@/lib/analytics"
+import posthog from "posthog-js"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -114,6 +115,11 @@ export function TrialStartClient() {
       if (url) {
         if (cardMode) trackCardTrialStart(planLabelFor(selectedPlan))
         else trackStartTrial()
+        posthog.capture("trial_started", {
+          plan: selectedPlan,
+          card_mode: cardMode,
+          from_funnel: fromFunnel,
+        })
         clearFunnelTrialContext()
         window.location.href = url
         return

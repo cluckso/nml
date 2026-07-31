@@ -13,6 +13,7 @@ import {
 } from "@/lib/business-settings"
 import { getEffectivePlanType } from "@/lib/plans"
 import { syncRetellAgentFromBusiness } from "@/lib/retell"
+import { getPostHogClient } from "@/lib/posthog-server"
 
 /** GET /api/settings — return current business settings (merged with defaults) and owner notification phone. */
 export async function GET(req: NextRequest) {
@@ -193,6 +194,19 @@ export async function PATCH(req: NextRequest) {
         out.smsConsent = updatedUser.smsConsent
       }
     }
+
+    const posthog = getPostHogClient()
+    if (posthog && sectionKeys.length > 0) {
+      posthog.capture({
+        distinctId: user.id,
+        event: "settings_saved",
+        properties: {
+          sections_updated: sectionKeys,
+        },
+      })
+      await posthog.flush()
+    }
+
     return NextResponse.json(out)
   } catch (error) {
     console.error("Settings PATCH error:", error)

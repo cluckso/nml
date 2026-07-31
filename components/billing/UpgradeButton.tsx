@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { PlanType } from "@prisma/client"
+import posthog from "posthog-js"
 
 interface UpgradeButtonProps {
   planType: PlanType
@@ -27,6 +28,10 @@ export function UpgradeButton({ planType, currentPlan, agreedToLegal = true }: U
 
       const data = await response.json()
       if (data.url) {
+        posthog.capture("checkout_initiated", {
+          plan_type: planType,
+          in_place_upgrade: !!data.inPlaceUpgrade,
+        })
         window.location.href = data.url
         return
       }

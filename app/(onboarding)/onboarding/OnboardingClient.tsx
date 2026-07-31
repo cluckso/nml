@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { trackCompleteRegistration } from "@/lib/analytics"
+import posthog from "posthog-js"
 import { IndustrySelector } from "@/components/onboarding/IndustrySelector"
 import { BusinessInfoForm } from "@/components/onboarding/BusinessInfoForm"
 import { Industry } from "@prisma/client"
@@ -127,6 +128,10 @@ export function OnboardingClient({ planType, initialIndustry, initialBusiness, i
         }
       }
       trackCompleteRegistration()
+      posthog.capture("onboarding_completed", {
+        industry: newData.industry,
+        provisioning_failed: !!result.provisioningFailed,
+      })
       setStep("complete")
       setTimeout(() => router.push("/dashboard"), result.provisioningFailed ? 3000 : 2000)
     } catch (error) {

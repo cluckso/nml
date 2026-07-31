@@ -4,6 +4,7 @@ import { useState, Suspense, useEffect } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { useSearchParams } from "next/navigation"
+import posthog from "posthog-js"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -55,7 +56,7 @@ function SignInContent() {
     }
 
     setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data: signInData, error } = await supabase.auth.signInWithPassword({
       email: emailResult.email,
       password: password.trim(),
     })
@@ -72,6 +73,12 @@ function SignInContent() {
       }
       setLoading(false)
     } else {
+      if (signInData.user) {
+        posthog.identify(signInData.user.id, {
+          email: signInData.user.email,
+        })
+      }
+      posthog.capture("user_signed_in")
       let next: string | null = null
       try {
         next = getSafeRedirectPath(sessionStorage.getItem(AUTH_NEXT_KEY))

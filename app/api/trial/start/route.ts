@@ -3,6 +3,7 @@ import { getAuthUserFromRequest } from "@/lib/auth"
 import { prepareBusinessForTrial } from "@/lib/trial-start-business"
 import { hasAcceptedTerms } from "@/lib/user-legal"
 import { db } from "@/lib/db"
+import { getPostHogClient } from "@/lib/posthog-server"
 
 /**
  * POST /api/trial/start
@@ -58,6 +59,19 @@ export async function POST(req: NextRequest) {
 
     if (prepared.ok === false) {
       return NextResponse.json({ error: prepared.error }, { status: prepared.status })
+    }
+
+    const posthog = getPostHogClient()
+    if (posthog) {
+      posthog.capture({
+        distinctId: user.id,
+        event: "trial_created",
+        properties: {
+          funnel_industry: funnelIndustry || null,
+          sms_consent: smsConsent,
+        },
+      })
+      await posthog.flush()
     }
 
     return NextResponse.json({ url: prepared.onboardingUrl })
