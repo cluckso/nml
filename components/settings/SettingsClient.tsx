@@ -50,7 +50,12 @@ import {
   getIntakeTemplateMeta,
 } from "@/lib/intake-presets"
 import type { IntakeTemplate } from "@/lib/business-settings"
-import { INTAKE_FIELD_LABELS, buildLeadCaptureSummary, industryToIntakeTemplate } from "@/lib/lead-capture-summary"
+import {
+  INTAKE_FIELD_LABELS,
+  buildLeadCaptureSummary,
+  industryToIntakeTemplate,
+  parseIntakeTemplate,
+} from "@/lib/lead-capture-summary"
 import { getUpgradeTierLabel, PLAN_PLATINUM, PLAN_VOLUME_TAGS } from "@/lib/plan-labels"
 import { hasPremiumElevenLabsVoice } from "@/lib/plans"
 import { PlanType } from "@prisma/client"
@@ -733,13 +738,15 @@ function IntakeSection({
   saving: boolean
 }) {
   const [d, setD] = useState(fields)
-  const [selectedTemplate, setSelectedTemplate] = useState<IntakeTemplate>((template as IntakeTemplate) ?? "generic")
+  const [selectedTemplate, setSelectedTemplate] = useState<IntakeTemplate>(
+    parseIntakeTemplate(template) ?? industryToIntakeTemplate(industry)
+  )
   const liveSummary = buildLeadCaptureSummary(d, canPickTemplate ? selectedTemplate : template, industry)
   const templateMeta = getIntakeTemplateMeta(liveSummary.templateId)
 
   useEffect(() => {
     setD(fields)
-    setSelectedTemplate((template as IntakeTemplate) ?? industryToIntakeTemplate(industry))
+    setSelectedTemplate(parseIntakeTemplate(template) ?? industryToIntakeTemplate(industry))
   }, [fields, template, industry])
 
   const applyTemplateDefaults = () => {

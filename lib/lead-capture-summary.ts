@@ -38,11 +38,26 @@ export function industryToIntakeTemplate(industry: Industry | string | null | un
   }
 }
 
+const INTAKE_TEMPLATE_IDS: readonly IntakeTemplate[] = [
+  "hvac",
+  "plumbing",
+  "auto_repair",
+  "childcare",
+  "electrician",
+  "handyman",
+  "generic",
+]
+
+export function parseIntakeTemplate(value: string | null | undefined): IntakeTemplate | null {
+  if (!value) return null
+  return INTAKE_TEMPLATE_IDS.includes(value as IntakeTemplate) ? (value as IntakeTemplate) : null
+}
+
 export function resolveEffectiveIntakeTemplate(
-  template: IntakeTemplate | null | undefined,
+  template: IntakeTemplate | string | null | undefined,
   industry?: Industry | string | null
 ): IntakeTemplate {
-  return template ?? industryToIntakeTemplate(industry)
+  return parseIntakeTemplate(template) ?? industryToIntakeTemplate(industry)
 }
 
 export type LeadCaptureSummary = {
@@ -59,7 +74,7 @@ export type LeadCaptureSummary = {
 /** Build a transparent summary of what the live assistant is set to capture. */
 export function buildLeadCaptureSummary(
   fields: IntakeFieldConfig,
-  template: IntakeTemplate | null | undefined,
+  template: IntakeTemplate | string | null | undefined,
   industry?: Industry | string | null
 ): LeadCaptureSummary {
   const templateId = resolveEffectiveIntakeTemplate(template, industry)

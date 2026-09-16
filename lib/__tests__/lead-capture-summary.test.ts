@@ -4,6 +4,7 @@ import {
   buildDedicatedIntakeGuidance,
   buildLeadCaptureSummary,
   industryToIntakeTemplate,
+  parseIntakeTemplate,
 } from "../lead-capture-summary"
 
 describe("industryToIntakeTemplate", () => {
@@ -23,6 +24,12 @@ describe("buildLeadCaptureSummary", () => {
     expect(summary.required).toContain("Reason for call")
     expect(summary.industryExtras.length).toBeGreaterThan(0)
     expect(summary.previewLine).toMatch(/Required:/)
+  })
+
+  it("accepts a stored template string from settings JSON", () => {
+    const summary = buildLeadCaptureSummary(DEFAULT_INTAKE_FIELDS, "plumbing", "HVAC")
+    expect(summary.templateId).toBe("plumbing")
+    expect(parseIntakeTemplate("not-a-template")).toBeNull()
   })
 })
 
