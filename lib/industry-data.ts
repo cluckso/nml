@@ -50,7 +50,7 @@ const LANDING_PAGES: IndustryLandingData[] = [
     name: "HVAC",
     headline: "Stop Losing HVAC Jobs to Missed Calls",
     subheadline:
-      "When the AC goes out or the furnace dies, homeowners call the next contractor. CallGrabbr answers when you can't and texts you the job details in seconds.",
+      "When the AC goes out or the furnace dies, homeowners call the next contractor. CallGrabbr grabs the job when you can't and texts you the details in seconds.",
     sceneHook:
       "It's 97° and you're under a house finishing a changeout. Your phone buzzes in the truck. By the time you call back, they already booked the next HVAC company on the list.",
     averageJobValue: 475,
@@ -66,11 +66,12 @@ const LANDING_PAGES: IndustryLandingData[] = [
     ],
     statMissedCalls: "28% of HVAC calls go unanswered during peak season",
     relatedGuides: [
-      { label: "Best AI answering for HVAC (2026)", href: "/guides/best-ai-answering-for-hvac-2026" },
-      { label: "AI vs live answering", href: "/guides/ai-vs-live-answering-for-contractors" },
+      { label: "After-hours & missed-call lead capture for HVAC", href: "/guides/best-ai-answering-for-hvac-2026" },
+      { label: "Missed-call lead capture vs live receptionist", href: "/guides/ai-vs-live-answering-for-contractors" },
+      { label: "Missed-call lead capture vs AI answering", href: "/guides/missed-call-lead-capture-vs-ai-answering" },
       { label: "CallGrabbr vs Rosie", href: "/guides/callgrabbr-vs-rosie" },
       { label: "CallGrabbr vs OnCrew", href: "/guides/callgrabbr-vs-oncrew" },
-      { label: "After-hours answering cost for contractors", href: "/guides/after-hours-answering-cost-for-contractors" },
+      { label: "After-hours lead capture cost", href: "/guides/after-hours-answering-cost-for-contractors" },
     ],
   },
   {
@@ -79,7 +80,7 @@ const LANDING_PAGES: IndustryLandingData[] = [
     name: "Plumbing",
     headline: "Capture More Plumbing Leads — Even at 2 AM",
     subheadline:
-      "Burst pipes and clogged drains can't wait. Your call assistant answers instantly, flags emergencies, and texts you the lead before the caller dials your competitor.",
+      "Burst pipes and clogged drains can't wait. We grab the job when you can't answer, flag emergencies, and text you the lead before the caller dials your competitor.",
     sceneHook:
       "It's 2 AM. A homeowner has water running under the sink. They call you, hang up when you don't answer, and dial the next plumber — while you're asleep.",
     averageJobValue: 380,
@@ -95,9 +96,10 @@ const LANDING_PAGES: IndustryLandingData[] = [
     ],
     statMissedCalls: "Most emergency callers hang up — and dial the next plumber",
     relatedGuides: [
-      { label: "Best AI answering for plumbing (2026)", href: "/guides/best-ai-answering-for-plumbing-2026" },
-      { label: "AI vs live answering", href: "/guides/ai-vs-live-answering-for-contractors" },
-      { label: "After-hours answering cost for contractors", href: "/guides/after-hours-answering-cost-for-contractors" },
+      { label: "After-hours & missed-call lead capture for plumbing", href: "/guides/best-ai-answering-for-plumbing-2026" },
+      { label: "Missed-call lead capture vs live receptionist", href: "/guides/ai-vs-live-answering-for-contractors" },
+      { label: "After-hours lead capture cost", href: "/guides/after-hours-answering-cost-for-contractors" },
+      { label: "Missed-call lead capture vs AI answering", href: "/guides/missed-call-lead-capture-vs-ai-answering" },
       { label: "CallGrabbr vs Ruby", href: "/guides/callgrabbr-vs-ruby" },
       { label: "CallGrabbr vs Rosie", href: "/guides/callgrabbr-vs-rosie" },
     ],
@@ -123,6 +125,12 @@ const LANDING_PAGES: IndustryLandingData[] = [
       "What's the best callback number?",
     ],
     statMissedCalls: "One missed emergency walks — callers dial the next electrician",
+    relatedGuides: [
+      { label: "Missed-call lead capture vs AI answering", href: "/guides/missed-call-lead-capture-vs-ai-answering" },
+      { label: "CallGrabbr vs Rosie", href: "/guides/callgrabbr-vs-rosie" },
+      { label: "Missed-call lead capture vs live receptionist", href: "/guides/ai-vs-live-answering-for-contractors" },
+      { label: "After-hours lead capture cost", href: "/guides/after-hours-answering-cost-for-contractors" },
+    ],
   },
   {
     slug: "auto-repair",
@@ -145,6 +153,12 @@ const LANDING_PAGES: IndustryLandingData[] = [
       "Do you need towing or can you drive it in?",
     ],
     statMissedCalls: "Missed calls during shop hours = lost ROs",
+    relatedGuides: [
+      { label: "Missed-call lead capture vs AI answering", href: "/guides/missed-call-lead-capture-vs-ai-answering" },
+      { label: "CallGrabbr vs Rosie", href: "/guides/callgrabbr-vs-rosie" },
+      { label: "Missed-call lead capture vs live receptionist", href: "/guides/ai-vs-live-answering-for-contractors" },
+      { label: "After-hours lead capture cost", href: "/guides/after-hours-answering-cost-for-contractors" },
+    ],
   },
   {
     slug: "handyman",
@@ -152,7 +166,7 @@ const LANDING_PAGES: IndustryLandingData[] = [
     name: "Handyman",
     headline: "Turn Handyman Calls Into Booked Jobs",
     subheadline:
-      "From drywall to deck repairs, callers want fast answers. Your call assistant captures the scope, address, and urgency so you can follow up with a quote.",
+      "From drywall to deck repairs, callers want fast answers. We grab the scope, address, and urgency — and text you the lead so you can follow up with a quote.",
     sceneHook:
       "You're on a ladder with both hands full. The phone rings in your pocket. By lunch you've missed three quotes you never knew about.",
     averageJobValue: 320,
@@ -167,6 +181,12 @@ const LANDING_PAGES: IndustryLandingData[] = [
       "When were you hoping to get this done?",
     ],
     statMissedCalls: "Solo operators miss 3–5 calls per day on average",
+    relatedGuides: [
+      { label: "Missed-call lead capture vs AI answering", href: "/guides/missed-call-lead-capture-vs-ai-answering" },
+      { label: "CallGrabbr vs Rosie", href: "/guides/callgrabbr-vs-rosie" },
+      { label: "Missed-call lead capture vs live receptionist", href: "/guides/ai-vs-live-answering-for-contractors" },
+      { label: "After-hours lead capture cost", href: "/guides/after-hours-answering-cost-for-contractors" },
+    ],
   },
   {
     slug: "childcare",
@@ -252,4 +272,5 @@ export const HOMEPAGE_INDUSTRY_LINKS: { name: string; slug: string }[] = [
   { name: "Handyman", slug: "handyman" },
   { name: "Cleaning", slug: "cleaning" },
   { name: "Landscaping", slug: "landscaping" },
+  { name: "Childcare", slug: "childcare" },
 ]

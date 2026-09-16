@@ -5,6 +5,7 @@ import { getIncludedMinutes, getOverageMinutes, TRIAL_DAYS } from "./plans"
 import { convertReferralOnSubscription } from "@/lib/referrals"
 import { processAgencyCommissionOnSubscription } from "@/lib/agency"
 import { maybeSendUsageSoftAlert } from "@/lib/usage-soft-alert"
+import { trackHeyCatchBusinessOutcome } from "@/lib/heycatch-server"
 import {
   getAnnualStripePriceId,
   type BillingInterval,
@@ -345,6 +346,12 @@ export async function upgradeSubscriptionInPlace(
     },
   })
 
+  await trackHeyCatchBusinessOutcome({
+    businessId,
+    event: "plan_changed",
+    plan: planType,
+  })
+
   return { upgraded: true }
 }
 
@@ -564,6 +571,11 @@ export async function handleStripeWebhook(event: Stripe.Event) {
             status: "ACTIVE",
           },
         })
+        await trackHeyCatchBusinessOutcome({
+          businessId,
+          event: "trial_started",
+          plan: "trial",
+        })
         break
       }
 
@@ -622,6 +634,11 @@ export async function handleStripeWebhook(event: Stripe.Event) {
         } catch (err) {
           console.error("Agency commission error:", err)
         }
+        await trackHeyCatchBusinessOutcome({
+          businessId,
+          event: "subscription_started",
+          plan: planType,
+        })
       }
       break
     }

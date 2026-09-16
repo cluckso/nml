@@ -15,7 +15,13 @@ import {
   type FunnelTrialContext,
 } from "@/lib/funnel/funnel-trial-bridge"
 import { FREE_TRIAL_MINUTES, TRIAL_DAYS } from "@/lib/plans"
-import { trialDaysLabel, trialConversionLine, trialLimitsLine, moneyBackGuaranteeLabel } from "@/lib/trial-marketing"
+import {
+  trialDaysLabel,
+  trialConversionLine,
+  trialLimitsLine,
+  moneyBackGuaranteeLabel,
+  trialActivationGoal,
+} from "@/lib/trial-marketing"
 import { pricingUrl } from "@/lib/monetization-urls"
 import { PLAN_BASIC, PLAN_GROWTH } from "@/lib/plan-labels"
 import { CreditCard, Shield } from "lucide-react"
@@ -150,7 +156,8 @@ export function TrialStartClient() {
               </>
             ) : (
               <>
-                {trialConversionLine()} Add your business phone to start. Trial ends after {trialLimitsLine()}.
+                {trialConversionLine()} Add your business phone to start capturing missed-call leads.
+                Trial ends after {trialLimitsLine()}. {trialActivationGoal()}
               </>
             )}
           </CardDescription>
@@ -220,7 +227,8 @@ export function TrialStartClient() {
               </p>
             ) : (
               <p className="text-xs text-muted-foreground text-center">
-                No payment until you choose a plan. Test with real forwarded calls first.
+                No payment until you choose a plan. Forward your line and capture a real lead before
+                you decide.
               </p>
             )}
           </form>

@@ -19,6 +19,7 @@ import {
   formatIncludedUsagePrimary,
   formatIncludedUsageShort,
 } from "./plan-usage"
+import { BASIC_BADGE } from "./marketing/positioning"
 
 export { OVERAGE_RATE_PER_MIN, getIncludedMinutes, getMonthlyPrice }
 export type { PricingTierKey }
@@ -31,7 +32,7 @@ export interface PricingTier {
   price: number
   includedMinutes: number
   /** Shown on plan card when set */
-  badge?: "Best to start" | "Most popular" | "Growing shops" | "For busy shops"
+  badge?: "Lead insurance" | "Best to start" | "Most popular" | "Full coverage" | "Growing shops" | "For busy shops"
   popular: boolean
   features: string[]
   /** Short subtitle under plan name on landing */
@@ -40,7 +41,7 @@ export interface PricingTier {
   usageNote: string
 }
 
-/** Typical human virtual receptionist entry price — for comparison copy. */
+/** Typical human answering-service entry price — for comparison copy only. */
 export const HUMAN_RECEPTIONIST_FROM_MONTHLY = 235
 
 /** Single source for pricing page, landing, and checkout cards. Amounts come from lib/plans.ts. */
@@ -50,19 +51,19 @@ export const PRICING_TIERS: PricingTier[] = [
     planType: PLAN_TYPE_BY_DISPLAY_KEY[PLAN_BASIC],
     name: PLAN_BASIC,
     description:
-      "Catch missed and after-hours calls when you're on a job or the shop is closed — without hiring front-desk staff.",
+      "Lead insurance for one-truck shops — grab missed and after-hours jobs when you're on a call or closed, without paying for a full front desk.",
     price: MONTHLY_PRICES[PlanType.STARTER],
     includedMinutes: INCLUDED_MINUTES[PlanType.STARTER],
-    badge: "Best to start",
-    popular: false,
-    subtitle: "On the job · evenings · weekends",
-    usageNote: "Most one-truck shops start here — covers the calls you miss, not every ring all day",
+    badge: BASIC_BADGE,
+    popular: true,
+    subtitle: "Overflow · nights · weekends",
+    usageNote: "Hero plan for most shops — covers the calls you miss, not every ring all day",
     features: [
-      "Missed & after-hours call capture",
+      "Missed & after-hours job capture",
       "Spam call filtering",
-      "Caller name, phone, and reason",
-      "Lead alerts to you by email & SMS",
-      "Service-business lead capture",
+      "Name, phone, job, urgency, preferred time",
+      "Lead alerts by email & SMS",
+      "Trade-ready lead capture",
       "No setup fee",
     ],
   },
@@ -71,16 +72,16 @@ export const PRICING_TIERS: PricingTier[] = [
     planType: PLAN_TYPE_BY_DISPLAY_KEY[PLAN_GROWTH],
     name: PLAN_GROWTH,
     description:
-      "Your 24/7 front desk — answer most inbound calls so growing crews never lose a lead to a missed ring.",
+      "Full front desk when you're ready — capture most inbound calls 24/7 so growing crews never lose a lead to a missed ring.",
     price: MONTHLY_PRICES[PlanType.PRO],
     includedMinutes: INCLUDED_MINUTES[PlanType.PRO],
-    badge: "Most popular",
-    popular: true,
+    badge: "Full coverage",
+    popular: false,
     subtitle: "Growing crew · steady inbound volume",
-    usageNote: "When you need every call answered, not just the ones you miss",
+    usageNote: "When you want every inbound call captured, not just overflow",
     features: [
       "Everything in Basic",
-      "24/7 call answering",
+      "24/7 inbound lead capture",
       "Industry-specific intake flows",
       "Appointment & emergency handling",
       "Text callers back (confirmation & follow-up)",
@@ -93,13 +94,13 @@ export const PRICING_TIERS: PricingTier[] = [
     planType: PLAN_TYPE_BY_DISPLAY_KEY[PLAN_PLATINUM],
     name: PLAN_PLATINUM,
     description:
-      "Full coverage for busy shops, multiple crews, and operations that can't afford a single dropped call.",
+      "Full front desk for busy multi-crew shops — high volume, branded scripting, and routing that can't drop a paying job.",
     price: MONTHLY_PRICES[PlanType.ELITE],
     includedMinutes: INCLUDED_MINUTES[PlanType.ELITE],
     badge: "For busy shops",
     popular: false,
     subtitle: "Multi-crew · high call volume",
-    usageNote: "For operations answering every line throughout the day",
+    usageNote: "For operations capturing every line throughout the day",
     features: [
       "Everything in Growth",
       "Branded voice and scripting",
@@ -119,7 +120,7 @@ export const PRICING_TIERS_BY_KEY: Record<PricingTierKey, PricingTier> = Object.
 /** For meta tags and hero copy */
 export function formatPricingSummary(): string {
   const basic = PRICING_TIERS_BY_KEY[PLAN_BASIC]
-  return `${PLAN_BASIC} from $${basic.price}/mo · one captured job pays for months`
+  return `${PLAN_BASIC} lead insurance from $${basic.price}/mo · one captured job pays for months`
 }
 
 export function formatOverageRate(): string {

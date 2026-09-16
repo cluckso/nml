@@ -11,6 +11,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes = [
     "",
     "/pricing",
+    "/about",
+    "/compare",
+    "/changelog",
     "/docs/faq",
     "/privacy",
     "/terms",
@@ -18,6 +21,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/trial/start",
     "/integrations/zapier",
     "/guides",
+    "/llms.txt",
   ]
 
   const industryRoutes = getAllIndustrySlugs().map((industry) => `/for/${industry}`)

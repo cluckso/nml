@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { analytics } from "@heycatch/sdk"
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
@@ -93,6 +94,7 @@ export function Nav() {
   const handleSignOut = async () => {
     const supabase = createClient()
     await supabase.auth.signOut()
+    analytics.resetIdentity()
     router.push("/")
     router.refresh()
   }
@@ -115,6 +117,9 @@ export function Nav() {
         <div className="flex gap-4 items-center shrink-0">
           <Link href="/guides">
             <Button variant="ghost">Guides</Button>
+          </Link>
+          <Link href="/about">
+            <Button variant="ghost">About</Button>
           </Link>
           <Link href="/pricing">
             <Button variant="ghost">Pricing</Button>

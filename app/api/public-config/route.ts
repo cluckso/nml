@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server"
+import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/supabase/public-env"
 
 /** Public client config for Capacitor/mobile apps (anon key is safe to expose). */
 export async function GET() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim()
+  const supabaseUrl = getSupabaseUrl()
+  const supabaseAnonKey = getSupabaseAnonKey()
 
   if (!supabaseUrl || !supabaseAnonKey) {
     return NextResponse.json({ error: "Supabase is not configured" }, { status: 503 })

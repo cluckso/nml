@@ -18,7 +18,7 @@ const STEPS = [
   },
   {
     title: "Create a Zap",
-    description: "In Zapier, search for CallGrabbr (or use Webhooks by Zapier with our REST Hook endpoints).",
+    description: "In Zapier, use Webhooks by Zapier with our REST Hook endpoints. There is no CallGrabbr app in the Zapier directory yet.",
   },
   {
     title: "Choose the New Lead trigger",
@@ -42,9 +42,9 @@ export default function ZapierIntegrationPage() {
       <div className="text-center mb-12">
         <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary mb-4">
           <Zap className="h-4 w-4" />
-          Official Integration
+          Webhook integration
         </div>
-        <h1 className="text-4xl font-bold mb-4">Connect CallGrabbr to Zapier</h1>
+        <h1 className="text-4xl font-bold mb-4">Send CallGrabbr leads to Zapier</h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
           Automatically send every captured lead to your CRM, job management software, or team chat — no manual data entry.
         </p>
@@ -137,8 +137,8 @@ export default function ZapierIntegrationPage() {
           </Link>
         </Button>
         <Button size="lg" variant="outline" asChild>
-          <a href="https://zapier.com/apps" target="_blank" rel="noopener noreferrer">
-            Browse Zapier Apps
+          <a href="https://zapier.com/apps/webhook/integrations" target="_blank" rel="noopener noreferrer">
+            Open Webhooks by Zapier
           </a>
         </Button>
       </div>

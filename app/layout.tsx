@@ -6,6 +6,8 @@ import "./globals.css"
 import { Providers } from "./providers"
 import { Nav } from "@/components/nav"
 import { SUPPORT_EMAIL } from "@/lib/site-contact"
+import { founderByline } from "@/lib/marketing/founder"
+import { VS_PAGE_LINKS } from "@/lib/marketing/comparisons"
 import { GOOGLE_PLAY_STORE_URL } from "@/lib/mobile-app"
 import { SITE_URL } from "@/lib/site-url"
 import { siteMetaDescription } from "@/lib/trial-marketing"
@@ -183,14 +185,23 @@ rkp("init","PaccPmsytSiq");rkp("event","PAGE_VIEW");
           <footer className="border-t border-border/50 py-8 bg-muted/30">
             <div className="container mx-auto px-4">
               <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm text-muted-foreground">
+                <Link href="/about" className="hover:text-foreground font-medium">
+                  About
+                </Link>
                 <Link href="/pricing" className="hover:text-foreground font-medium">
                   Pricing
                 </Link>
                 <Link href="/guides" className="hover:text-foreground font-medium">
                   Guides
                 </Link>
+                <Link href="/compare" className="hover:text-foreground font-medium">
+                  Compare
+                </Link>
                 <Link href="/docs/faq" className="hover:text-foreground font-medium">
                   Help &amp; FAQ
+                </Link>
+                <Link href="/changelog" className="hover:text-foreground font-medium">
+                  Changelog
                 </Link>
                 <a
                   href={GOOGLE_PLAY_STORE_URL}
@@ -200,7 +211,7 @@ rkp("init","PaccPmsytSiq");rkp("event","PAGE_VIEW");
                 >
                   Android app
                 </a>
-                <Link href="/funnel/hvac" className="hover:text-foreground text-xs opacity-70">
+                <Link href="/funnel/hvac" className="hover:text-foreground font-medium">
                   See how it works
                 </Link>
                 <Link href="/privacy" className="hover:text-foreground">
@@ -216,8 +227,28 @@ rkp("init","PaccPmsytSiq");rkp("event","PAGE_VIEW");
                   {SUPPORT_EMAIL}
                 </a>
               </div>
+              <div className="mt-6 text-center">
+                <p className="text-xs font-medium text-foreground/80 mb-2">Compare</p>
+                <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
+                  {VS_PAGE_LINKS.map((item) => (
+                    <Link key={item.href} href={item.href} className="hover:text-foreground">
+                      {item.title}
+                    </Link>
+                  ))}
+                </div>
+              </div>
               <p className="text-center text-xs text-muted-foreground/80 mt-4">
-                © {new Date().getFullYear()} CallGrabbr. Call answering for local service businesses.
+                {founderByline() ? (
+                  <>{founderByline()} · </>
+                ) : (
+                  <>
+                    <Link href="/about" className="hover:text-foreground">
+                      Why I built this
+                    </Link>
+                    {" · "}
+                  </>
+                )}
+                © {new Date().getFullYear()} CallGrabbr. Missed-call lead capture for local service businesses.
               </p>
             </div>
           </footer>

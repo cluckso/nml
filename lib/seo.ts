@@ -1,17 +1,18 @@
 import type { Metadata } from "next"
 import { siteMetaDescription } from "@/lib/trial-marketing"
 
-/** Shared SEO keywords for local service / trades marketing pages. */
+/** Shared SEO keywords — lead with missed-call lead capture; legacy answering terms secondary. */
 export const SEO_KEYWORDS = [
-  "AI answering service",
+  "missed call lead capture",
+  "after hours lead capture HVAC",
+  "voicemail alternative for contractors",
+  "stop losing jobs to missed calls",
+  "contractor lead capture from missed calls",
+  "lead capture phone system",
   "missed call solution",
-  "call forwarding",
   "HVAC answering service",
   "plumber answering service",
   "local service business",
-  "after hours call answering",
-  "voicemail alternative",
-  "lead capture phone system",
   "CallGrabbr",
 ] as const
 
@@ -56,9 +57,10 @@ export function industryPageMetadata(input: {
   const description = input.subheadline
   const keywords = [
     ...SEO_KEYWORDS,
-    `${input.industryName} answering service`,
+    `${input.industryName} missed call lead capture`,
+    `${input.industryName} after hours lead capture`,
     `${input.industryName} missed calls`,
-    `${input.industryName} call forwarding`,
+    `${input.industryName} answering service`,
   ]
 
   return {

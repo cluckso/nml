@@ -10,33 +10,38 @@ import { MARKETING_IMAGES, MARKETING_IMAGE_ALT } from "@/lib/marketing-images"
 import {
   formatJobRoiLine,
   formatOverageRate,
-  formatPricingSummary,
   formatVsHumanLine,
   PRICING_TIERS,
 } from "@/lib/pricing-catalog"
 import { PLAN_BASIC, PLAN_GROWTH } from "@/lib/plan-labels"
 import { FREE_TRIAL_MINUTES } from "@/lib/plans"
-import { trialSummaryShort, moneyBackGuaranteeLabel, trialConversionLine } from "@/lib/trial-marketing"
+import { moneyBackGuaranteeLabel, trialConversionLine } from "@/lib/trial-marketing"
 import { DEFAULT_OG_IMAGE, SEO_KEYWORDS } from "@/lib/seo"
+import { ROSIE_PRICE_OBJECTION } from "@/lib/marketing/positioning"
+import { CompareUsLinks } from "@/components/marketing/CompareUsLinks"
 import Link from "next/link"
 import { pricingUrl } from "@/lib/monetization-urls"
 import { PlanType } from "@prisma/client"
 
+const PRICING_TITLE = "Pricing - AI Answering Service for Trades | CallGrabbr"
+const PRICING_DESCRIPTION =
+  "AI answering service pricing for HVAC, plumbing, and trades. Plans from $99/mo. 14-day free trial. 30-day money-back guarantee."
+
 export const metadata: Metadata = {
-  title: "Pricing - CallGrabbr",
-  description: `${formatPricingSummary()}. ${formatJobRoiLine()} ${trialSummaryShort()}.`,
-  keywords: [...SEO_KEYWORDS, "CallGrabbr pricing", "AI answering service pricing"],
+  title: PRICING_TITLE,
+  description: PRICING_DESCRIPTION,
+  keywords: [...SEO_KEYWORDS, "AI answering service pricing", "CallGrabbr pricing", "HVAC answering service"],
   alternates: { canonical: "/pricing" },
   openGraph: {
-    title: "Pricing - CallGrabbr",
-    description: `${formatPricingSummary()}. ${formatJobRoiLine()}`,
+    title: PRICING_TITLE,
+    description: PRICING_DESCRIPTION,
     type: "website",
     images: [DEFAULT_OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Pricing - CallGrabbr",
-    description: `${formatPricingSummary()}. ${formatJobRoiLine()}`,
+    title: PRICING_TITLE,
+    description: PRICING_DESCRIPTION,
     images: [DEFAULT_OG_IMAGE.url],
   },
 }
@@ -109,14 +114,22 @@ export default async function PricingPage() {
             <Link href={pricingUrl({ intent: "paid", plan: PlanType.STARTER })} className="text-primary underline">
               Subscribe with {moneyBackGuaranteeLabel()}
             </Link>
-            . Most owners start on <strong>{PLAN_BASIC}</strong> for missed &amp; after-hours coverage, then move to{" "}
-            <strong>{PLAN_GROWTH}</strong> when they want every call answered.
+            . Most owners start on <strong>{PLAN_BASIC}</strong> lead insurance for missed &amp; after-hours jobs, then move to{" "}
+            <strong>{PLAN_GROWTH}</strong> when they want full front-desk coverage.
           </p>
           <PricingTrialCta isLoggedIn={isLoggedIn} />
+          <p className="text-xs text-muted-foreground mt-4">Payments securely processed by Stripe.</p>
         </div>
       )}
 
+      <div className="max-w-2xl mx-auto mb-14 p-6 rounded-xl border border-border/60 bg-card/40 text-center">
+        <h2 className="text-lg font-semibold tracking-tight mb-2">Why not the $49 tools?</h2>
+        <p className="text-sm text-muted-foreground leading-relaxed">{ROSIE_PRICE_OBJECTION}</p>
+      </div>
+
       <PricingComparisonTable className="mb-16" />
+
+      <CompareUsLinks className="mb-16" />
 
       <AudioExamples />
 

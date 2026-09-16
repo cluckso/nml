@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { GUIDE_TRIAL_HREF, getAllGuides } from "@/lib/guides"
+import { CATEGORY_NAME } from "@/lib/marketing/positioning"
 import { DEFAULT_OG_IMAGE, SEO_KEYWORDS } from "@/lib/seo"
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data"
 import { trialNavCtaLabel, trialSummaryShort } from "@/lib/trial-marketing"
@@ -11,20 +12,20 @@ import { trialNavCtaLabel, trialSummaryShort } from "@/lib/trial-marketing"
 export const metadata: Metadata = {
   title: "Guides for Contractors | CallGrabbr",
   description:
-    "Comparisons and buyer guides for HVAC and plumbing shops: vs Ruby, Smith.ai, Rosie, OnCrew, AI vs live, and after-hours cost.",
-  keywords: [...SEO_KEYWORDS, "CallGrabbr guides", "contractor answering service comparison"],
+    "Comparisons and buyer guides for HVAC and plumbing shops: missed-call lead capture, vs Ruby, Smith.ai, Rosie, OnCrew, and after-hours cost.",
+  keywords: [...SEO_KEYWORDS, "CallGrabbr guides", "missed call lead capture comparison"],
   alternates: { canonical: "/guides" },
   openGraph: {
     title: "Guides for Contractors | CallGrabbr",
     description:
-      "Contractor guides: AI vs live, plumbing and HVAC buyers, and comparisons vs Ruby, Smith.ai, Rosie, and OnCrew.",
+      "Contractor guides: missed-call lead capture, plumbing and HVAC buyers, and comparisons vs Ruby, Smith.ai, Rosie, and OnCrew.",
     type: "website",
     images: [DEFAULT_OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
     title: "Guides for Contractors | CallGrabbr",
-    description: "Eight contractor guides: comparisons, buyer guides, and after-hours cost.",
+    description: "Nine contractor guides: lead capture comparisons, buyer guides, and after-hours cost.",
     images: [DEFAULT_OG_IMAGE.url],
   },
 }
@@ -39,7 +40,7 @@ export default function GuidesIndexPage() {
           webPageJsonLd({
             name: "CallGrabbr Guides",
             description:
-              "Comparisons and buyer guides for HVAC and plumbing contractors choosing an answering service.",
+              "Comparisons and buyer guides for HVAC and plumbing contractors evaluating missed-call lead capture and voicemail alternatives.",
             path: "/guides",
           }),
           breadcrumbJsonLd([
@@ -53,7 +54,12 @@ export default function GuidesIndexPage() {
         <div className="max-w-3xl mx-auto text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">Guides for contractors</h1>
           <p className="text-lg text-muted-foreground mb-8">
-            Straight comparisons and cost guides for shops that can&apos;t afford missed after-hours jobs.
+            Straight comparisons and cost guides for shops that can&apos;t afford missed after-hours jobs —{" "}
+            {CATEGORY_NAME} vs receptionist software, not another voicemail box.{" "}
+            <Link href="/compare" className="text-primary hover:underline underline-offset-2">
+              See all comparisons
+            </Link>
+            .
           </p>
           <Button size="lg" asChild>
             <Link href={GUIDE_TRIAL_HREF}>

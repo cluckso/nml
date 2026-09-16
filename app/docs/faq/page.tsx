@@ -14,23 +14,25 @@ import { PRODUCT_FAQ } from "@/lib/faq-data"
 import { faqPageJsonLd } from "@/lib/structured-data"
 import { DEFAULT_OG_IMAGE, SEO_KEYWORDS } from "@/lib/seo"
 
+const FAQ_TITLE = "HVAC and Plumbing Answering Service FAQ | CallGrabbr"
+const FAQ_DESCRIPTION =
+  "HVAC and plumbing answering service FAQ. Call forwarding for AT&T, Verizon, and T-Mobile. Pricing, trial, and missed-call leads."
+
 export const metadata: Metadata = {
-  title: "Help & FAQ - CallGrabbr",
-  description:
-    "Answers about CallGrabbr plus step-by-step call forwarding instructions for AT&T, Verizon, T-Mobile, and other carriers.",
-  keywords: [...SEO_KEYWORDS, "call forwarding setup", "AT&T call forwarding", "Verizon call forwarding"],
+  title: FAQ_TITLE,
+  description: FAQ_DESCRIPTION,
+  keywords: [...SEO_KEYWORDS, "HVAC answering service FAQ", "plumber answering service", "call forwarding setup"],
   alternates: { canonical: "/docs/faq" },
   openGraph: {
-    title: "Help & FAQ - CallGrabbr",
-    description:
-      "How CallGrabbr works, pricing and trial details, and carrier call forwarding setup guides.",
+    title: FAQ_TITLE,
+    description: FAQ_DESCRIPTION,
     type: "website",
     images: [DEFAULT_OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Help & FAQ - CallGrabbr",
-    description: "How CallGrabbr works, pricing, trial details, and carrier call forwarding guides.",
+    title: FAQ_TITLE,
+    description: FAQ_DESCRIPTION,
     images: [DEFAULT_OG_IMAGE.url],
   },
 }
@@ -340,12 +342,12 @@ export default function DocsFaqPage() {
         <CardHeader>
           <CardTitle>Forward your business line to CallGrabbr</CardTitle>
           <CardDescription>
-            CallGrabbr has its own phone number (shown on your dashboard after you connect). Forward your existing business number to that forwarding number so your call assistant answers when customers call you.
+            CallGrabbr has its own phone number (shown on your dashboard after you connect). Forward your existing business number to that forwarding number so we pick up when you can&apos;t and capture the lead.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <ol className="list-decimal list-inside space-y-2 text-sm">
-            <li>Get your <strong>forwarding number</strong> from the dashboard (after you connect your call assistant).</li>
+            <li>Get your <strong>forwarding number</strong> from the dashboard (after you connect your line).</li>
             <li>Use the steps below for <strong>your carrier</strong> to set up <strong>call forwarding</strong> to that forwarding number.</li>
             <li>Configure when your assistant answers in <strong>Settings → Call Routing</strong>: pick a quick-setup preset (e.g. ring 10 seconds during business hours) or customize the delay.</li>
             <li>Save and test by calling your business line from another phone.</li>

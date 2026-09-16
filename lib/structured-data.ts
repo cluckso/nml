@@ -2,6 +2,11 @@ import { GOOGLE_PLAY_STORE_URL } from "@/lib/mobile-app"
 import { SUPPORT_EMAIL } from "@/lib/site-contact"
 import { SITE_URL } from "@/lib/site-url"
 import { pricingSchemaTrialDescription } from "@/lib/trial-marketing"
+import {
+  organizationDescription,
+  softwareApplicationDescription,
+  webSiteDescription,
+} from "@/lib/marketing/positioning"
 
 export function organizationJsonLd() {
   return {
@@ -10,14 +15,14 @@ export function organizationJsonLd() {
     name: "CallGrabbr",
     url: SITE_URL,
     logo: `${SITE_URL}/icon.png`,
-    description:
-      "Call answering for local service businesses. Answers missed calls and texts you the lead in seconds.",
+    description: organizationDescription(),
     contactPoint: {
       "@type": "ContactPoint",
       email: SUPPORT_EMAIL,
       contactType: "customer support",
       availableLanguage: "English",
     },
+    sameAs: [GOOGLE_PLAY_STORE_URL],
   }
 }
 
@@ -27,8 +32,7 @@ export function webSiteJsonLd() {
     "@type": "WebSite",
     name: "CallGrabbr",
     url: SITE_URL,
-    description:
-      "Stop losing jobs to missed calls. CallGrabbr answers when you can't and delivers lead details by text or email. One captured job pays for months.",
+    description: webSiteDescription(),
     publisher: {
       "@type": "Organization",
       name: "CallGrabbr",
@@ -98,8 +102,7 @@ export function softwareApplicationJsonLd() {
     operatingSystem: ["Web", "Android"],
     url: SITE_URL,
     downloadUrl: GOOGLE_PLAY_STORE_URL,
-    description:
-      "AI call answering for HVAC, plumbing, auto repair, and other local service businesses. Captures lead details and sends instant text or email summaries.",
+    description: softwareApplicationDescription(),
     offers: {
       "@type": "Offer",
       price: "99",

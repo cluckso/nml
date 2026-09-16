@@ -15,6 +15,22 @@ export const META_FORM_INDUSTRY_OPTIONS = [
   { label: "Other home or service business", slug: "handyman" },
 ] as const
 
+/** Trades with dedicated intake — use these on /start and first-revenue ads. */
+export const PRIMARY_GTM_INDUSTRY_SLUGS = [
+  "hvac",
+  "plumbing",
+  "electrical",
+  "auto-repair",
+  "handyman",
+] as const
+
+const PRIMARY_GTM_SLUG_SET = new Set<string>(PRIMARY_GTM_INDUSTRY_SLUGS)
+
+/** Industry picker on /start — core trades only so paid traffic is not sent to generic agents. */
+export const META_START_PICKER_OPTIONS = META_FORM_INDUSTRY_OPTIONS.filter(
+  (option) => PRIMARY_GTM_SLUG_SET.has(option.slug) || option.label === "Other home or service business"
+)
+
 export type MetaLeadPrefill = {
   source: "meta"
   contactName?: string

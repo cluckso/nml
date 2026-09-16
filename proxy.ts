@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
+import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/supabase/public-env"
 
 /** Origins allowed for CORS (Capacitor app, local dev). API routes accept Bearer token from these. */
 const CORS_ORIGINS = ["https://localhost", "capacitor://localhost", "http://localhost", "http://localhost:3000"]
@@ -54,8 +55,8 @@ export async function proxy(request: NextRequest) {
   })
 
   // Skip auth if Supabase isn't configured — prevents hang when env vars are missing or invalid
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const supabaseUrl = getSupabaseUrl()
+  const supabaseAnonKey = getSupabaseAnonKey()
   if (!supabaseUrl || !supabaseAnonKey) {
     return supabaseResponse
   }

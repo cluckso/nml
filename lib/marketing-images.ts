@@ -39,6 +39,7 @@ export const INDUSTRY_CARD_IMAGES: Record<string, string> = {
   handyman: industry("handyman"),
   cleaning: industry("cleaning"),
   landscaping: industry("landscaping"),
+  childcare: MARKETING_IMAGES.teamTrust,
 }
 
 /** Default industry imagery (funnel heroes where available, else local portraits). */

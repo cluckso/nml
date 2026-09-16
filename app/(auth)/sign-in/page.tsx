@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, Suspense, useEffect, useRef } from "react"
+import { analytics } from "@heycatch/sdk"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { useSearchParams } from "next/navigation"
@@ -64,6 +65,17 @@ function SignInContent() {
     setCheckingEmailConfirm(true)
     setError(null)
 
+    async function identifyConfirmedSignup(client: ReturnType<typeof createClient>) {
+      const { data } = await client.auth.getUser()
+      if (!data.user) return
+      analytics.setIdentity(
+        data.user.id,
+        { email: data.user.email ?? undefined },
+        { signup_date: data.user.created_at }
+      )
+      analytics.trackEvent("signup_completed")
+    }
+
     async function handleEmailConfirm() {
       const authClient = createClient()
       const { error: exchangeError } = await authClient.auth.exchangeCodeForSession(code!)
@@ -74,6 +86,7 @@ function SignInContent() {
         // If we already have a session briefly, still treat as confirmed.
         const { data } = await authClient.auth.getSession()
         if (data.session) {
+          await identifyConfirmedSignup(authClient)
           await authClient.auth.signOut()
           if (cancelled) return
           router.replace("/sign-in?message=email-confirmed")
@@ -90,6 +103,7 @@ function SignInContent() {
         return
       }
 
+      await identifyConfirmedSignup(authClient)
       await authClient.auth.signOut()
       if (cancelled) return
 
@@ -124,7 +138,7 @@ function SignInContent() {
     setLoading(true)
     setRememberMePreference(staySignedIn)
     const authClient = createClient({ rememberMe: staySignedIn, forceNew: true })
-    const { error } = await authClient.auth.signInWithPassword({
+    const { data, error } = await authClient.auth.signInWithPassword({
       email: emailResult.email,
       password: password.trim(),
     })
@@ -141,6 +155,9 @@ function SignInContent() {
       }
       setLoading(false)
     } else {
+      if (data.user) {
+        analytics.setIdentity(data.user.id, { email: data.user.email ?? emailResult.email })
+      }
       let next: string | null = null
       try {
         next = getSafeRedirectPath(sessionStorage.getItem(AUTH_NEXT_KEY))

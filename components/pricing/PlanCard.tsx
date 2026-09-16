@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { trackSubscribe } from "@/lib/analytics"
+import { trackInitiateCheckout } from "@/lib/analytics"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Check, Loader2 } from "lucide-react"
@@ -68,7 +68,7 @@ export function PlanCard({
       })
       const data = await res.json()
       if (data.url) {
-        trackSubscribe(plan.name)
+        trackInitiateCheckout(plan.name, { value: displayPrice, currency: "USD" })
         window.location.href = data.url
       } else setCheckoutError(data.error || data.details || "Something went wrong. Please try again.")
     } catch {

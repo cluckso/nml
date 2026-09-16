@@ -1,5 +1,6 @@
 import { createBrowserClient } from "@supabase/ssr"
 import { getRememberMePreference, PERSISTENT_SESSION_MAX_AGE } from "@/lib/auth-session"
+import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/supabase/public-env"
 
 let browserClient: ReturnType<typeof createBrowserClient> | null = null
 let clientRememberMe: boolean | null = null
@@ -10,8 +11,13 @@ type CreateClientOptions = {
 }
 
 export function createClient(options?: CreateClientOptions) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  const url = getSupabaseUrl()
+  const key = getSupabaseAnonKey()
+  if (!url || !key) {
+    throw new Error(
+      "Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) in nml-main/.env"
+    )
+  }
 
   if (typeof window === "undefined") {
     return createBrowserClient(url, key)

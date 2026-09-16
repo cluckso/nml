@@ -155,9 +155,9 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
   fromLanding("hvac", {
     displayName: "HVAC",
     icon: "❄️",
-    headline: "Stop Losing HVAC Jobs to Voicemail",
+    headline: "Stop Losing HVAC Jobs to Missed Calls",
     subheadline:
-      "When the AC goes out or the furnace dies, homeowners call the next contractor. Answer every forwarded call 24/7.",
+      "When the AC goes out or the furnace dies, homeowners call the next contractor. We grab the job and text you the lead in seconds.",
     painPoint: "28% of HVAC calls go unanswered during peak season — each missed emergency can mean $400+ lost.",
     averageSale: 475,
     missedCallRate: 0.28,
@@ -177,7 +177,7 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     icon: "🔧",
     headline: "Capture More Plumbing Leads — Even at 2 AM",
     subheadline:
-      "Burst pipes and clogged drains can't wait. Your call assistant flags emergencies and texts you the lead instantly.",
+      "Burst pipes and clogged drains can't wait. We grab the job, flag emergencies, and text you the lead before they dial your competitor.",
     painPoint: "80% of callers won't leave voicemail — they dial your competitor instead.",
     averageSale: 380,
     missedCallRate: 0.35,
@@ -197,7 +197,7 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     icon: "⚡",
     headline: "Never Miss an Electrical Service Call Again",
     subheadline:
-      "Power outages, panel upgrades, and sparking outlets need fast response. Capture every detail for faster quoting.",
+      "Power outages, panel upgrades, and sparking outlets need fast response. We grab the job details and text you the lead so you can quote faster.",
     painPoint: "Emergency callers hang up fast — and dial the next electrician who answers.",
     averageSale: 420,
     missedCallRate: 0.3,
@@ -216,7 +216,8 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     displayName: "Auto Repair",
     icon: "🚗",
     headline: "Book More Auto Repair Jobs From Missed Calls",
-    subheadline: "Capture year, make, model, and symptoms while your techs are under the hood.",
+    subheadline:
+      "We grab year, make, model, and symptoms while your techs are under the hood — and text you the lead in seconds.",
     painPoint: "Missed calls during shop hours mean lost repair orders every day.",
     averageSale: 550,
     missedCallRate: 0.25,
@@ -235,7 +236,8 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     displayName: "Handyman",
     icon: "🛠️",
     headline: "Turn Handyman Calls Into Booked Jobs",
-    subheadline: "From drywall to deck repairs — capture scope, address, and urgency so you can quote faster.",
+    subheadline:
+      "From drywall to deck repairs — we grab scope, address, and urgency, then text you the lead so you can quote faster.",
     painPoint: "Solo operators miss 3–5 calls per day on average while on a ladder or at a job.",
     averageSale: 320,
     missedCallRate: 0.32,
@@ -280,7 +282,7 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     displayName: "Law Firm",
     icon: "⚖️",
     headline: "Capture Every Legal Intake Call",
-    subheadline: "Potential clients call multiple firms — first response wins. Your assistant collects case basics 24/7.",
+    subheadline: "Potential clients call multiple firms — first response wins. Capture case basics when you can't answer.",
     painPoint: "Intake calls during court or client meetings often go unanswered — and legal leads rarely leave voicemail.",
     averageSale: 3500,
     missedCallRate: 0.4,
@@ -329,7 +331,7 @@ export const FUNNEL_CONFIGS: FunnelConfig[] = [
     displayName: "Dental Practice",
     icon: "🦷",
     headline: "Fill Your Chair — Capture Every New Patient Call",
-    subheadline: "Front desk busy with patients? Your call assistant handles new patient inquiries and appointment requests.",
+    subheadline: "Front desk busy with patients? Capture new patient inquiries and appointment requests when you can't answer.",
     painPoint: "New patient calls during procedures often go to voicemail — and patients call the next office on the list.",
     averageSale: 650,
     missedCallRate: 0.28,

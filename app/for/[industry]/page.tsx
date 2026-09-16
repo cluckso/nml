@@ -125,7 +125,7 @@ export default async function IndustryLandingPage({ params }: PageProps) {
             <p className="text-muted-foreground mb-6">
               You get captured lead info in a neat, easy-to-read text or email—or sent directly to your CRM on {GROWTH_AND_PLATINUM_LABEL}.
             </p>
-            <h3 className="text-lg font-semibold mb-4">Your call assistant collects as much pertinent lead information as possible, including:</h3>
+            <h3 className="text-lg font-semibold mb-4">We grab trade intake and job details when you can&apos;t answer, including:</h3>
             <ul className="space-y-2 text-sm text-muted-foreground mb-6 list-none">
               {[
                 "Caller name + phone number",

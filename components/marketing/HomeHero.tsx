@@ -2,7 +2,15 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
 import { MARKETING_IMAGES, MARKETING_IMAGE_ALT } from "@/lib/marketing-images"
-import { trialDaysLabel, trialNavCtaLabel } from "@/lib/trial-marketing"
+import { heroGuaranteeLine, moneyBackGuaranteeLabel, trialDaysLabel, trialNavCtaLabel } from "@/lib/trial-marketing"
+import {
+  HERO_CATEGORY_LINE,
+  HERO_SUB,
+  HANGUP_RATE_LABEL,
+  LOSS_CTA,
+  TYPICAL_CAPTURE_RATE,
+  VOICEMAIL_CAPTURE_RATE,
+} from "@/lib/marketing/positioning"
 import {
   ArrowRight,
   Clock,
@@ -26,9 +34,12 @@ export function HomeHero() {
       <div className="mb-8 flex w-full justify-center">
         <BrandMark size="xl" className="drop-shadow-sm" />
       </div>
+      <p className="text-sm sm:text-base font-medium text-foreground/90 mb-4">
+        {HERO_CATEGORY_LINE}
+      </p>
       <div className="mx-auto mb-5 inline-flex items-center gap-2 rounded-full border border-destructive/30 bg-background/60 backdrop-blur-sm px-4 py-1.5 text-sm font-medium text-destructive">
         <PhoneOff className="h-4 w-4" aria-hidden />
-        When you miss a call, 80% of callers hang up — and dial your competitor
+        {HANGUP_RATE_LABEL}
       </div>
       <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-5 tracking-tight">
         Stop Losing Jobs to{" "}
@@ -38,8 +49,13 @@ export function HomeHero() {
         You&apos;re on a job. The phone rings. You can&apos;t pick up. They hang up —
         and call the next guy on the list.
       </p>
-      <p className="text-xl sm:text-2xl font-semibold text-foreground/95 mb-8 max-w-2xl mx-auto">
-        We answer when you can&apos;t and text you the lead in seconds.
+      <p className="text-xl sm:text-2xl font-semibold text-foreground/95 mb-4 max-w-2xl mx-auto">
+        {HERO_SUB}
+      </p>
+      <p className="text-sm text-muted-foreground mb-8 max-w-xl mx-auto">
+        Typical voicemail capture: {VOICEMAIL_CAPTURE_RATE}. When the call gets answered:{" "}
+        {TYPICAL_CAPTURE_RATE}{" "}
+        <span className="text-muted-foreground/80">(industry rates, not first-party stats)</span>.
       </p>
       <div className="flex flex-wrap gap-4 justify-center mb-3">
         <Link href="/sign-up?next=%2Ftrial%2Fstart" className="min-h-[44px] flex items-center">
@@ -51,20 +67,28 @@ export function HomeHero() {
             <ArrowRight className="h-5 w-5" aria-hidden />
           </Button>
         </Link>
-        <Link href="#demo" className="min-h-[44px] flex items-center">
+        <Link href="#lost-jobs" className="min-h-[44px] flex items-center">
           <Button
             size="lg"
             variant="outline"
             className="border-2 border-white/20 bg-background/40 backdrop-blur-sm hover:bg-background/60 min-h-[44px]"
           >
-            Try a demo call
+            {LOSS_CTA}
           </Button>
         </Link>
       </div>
       <p className="text-sm text-muted-foreground mb-6 max-w-xl mx-auto">
-        If it doesn&apos;t capture a lead you&apos;d have lost, don&apos;t pay.{" "}
+        {heroGuaranteeLine()}{" "}
+        <Link href="/terms" className="text-primary/90 hover:text-primary hover:underline">
+          Terms
+        </Link>
+        {" · "}
         <Link href="/pricing" className="text-primary/90 hover:text-primary hover:underline">
           See plans
+        </Link>
+        {" · "}
+        <Link href="#demo" className="text-primary/90 hover:text-primary hover:underline">
+          Try a demo call
         </Link>
       </p>
       <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-sm text-muted-foreground mb-6">
@@ -78,6 +102,10 @@ export function HomeHero() {
         </span>
         <span className="inline-flex items-center gap-2">
           <Shield className="h-4 w-4 text-primary/80" aria-hidden />
+          {moneyBackGuaranteeLabel()}
+        </span>
+        <span className="inline-flex items-center gap-2">
+          <Shield className="h-4 w-4 text-primary/80" aria-hidden />
           Cancel anytime
         </span>
       </div>
@@ -85,6 +113,7 @@ export function HomeHero() {
         Built for HVAC, plumbing, electrical, and auto repair. Most callers won&apos;t
         leave a message — we catch the jobs voicemail loses.
       </p>
+      <p className="text-xs text-muted-foreground mt-3">Payments securely processed by Stripe.</p>
     </SectionBackdrop>
   )
 }

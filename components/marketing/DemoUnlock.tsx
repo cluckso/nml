@@ -93,7 +93,8 @@ export function DemoUnlock({ className = "" }: DemoUnlockProps) {
         </div>
         <CardTitle className="text-2xl">Try a demo call</CardTitle>
         <p className="text-muted-foreground mt-2">
-          Hear what your callers hear — call now. Optionally get a text with the lead summary after.
+          Hear how we capture a lead when you can&apos;t answer — call now. Optionally get a text with
+          the lead summary after.
         </p>
       </CardHeader>
       <CardContent className="text-center space-y-6">
@@ -114,7 +115,7 @@ export function DemoUnlock({ className = "" }: DemoUnlockProps) {
             <li>Call the number above</li>
             <li>Pretend you&apos;re a customer with a job request</li>
             <li>Example: &quot;I need a plumber for a leak under my kitchen sink&quot;</li>
-            <li>Your call assistant will collect your info like a real call</li>
+            <li>We&apos;ll grab the job details — name, phone, urgency — like a real missed-call lead</li>
           </ol>
         </div>
 

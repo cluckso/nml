@@ -8,6 +8,7 @@ import { isComplexSetup } from "@/lib/industries"
 import { getConfiguredIntakeNumbersE164 } from "@/lib/intake-routing"
 import { provisionAgentAndNumberForBusiness, ensureRetellInboundWebhookForBusiness } from "@/lib/retell"
 import { isMultiTrialPhone, releasePrimaryForwardingNumberFromOtherBusinesses } from "@/lib/trial"
+import { heycatchAnalytics } from "@/lib/heycatch-server"
 
 export async function POST(req: NextRequest) {
   try {
@@ -204,6 +205,18 @@ export async function POST(req: NextRequest) {
         console.error("Onboarding: ensureRetellInboundWebhookForBusiness failed:", business.id, err)
       }
     }
+
+    if (!requiresManualSetup && !user.business?.onboardingComplete && user.supabaseUserId) {
+      await heycatchAnalytics.setIdentity(user.supabaseUserId, {
+        email: user.email,
+        ...(user.name ? { name: user.name } : {}),
+      })
+      await heycatchAnalytics.trackEvent("onboarding_completed", undefined, {
+        userId: user.supabaseUserId,
+        request: req,
+      })
+    }
+
     return NextResponse.json({
       success: true,
       business: updatedBusiness,

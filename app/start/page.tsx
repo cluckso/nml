@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Suspense } from "react"
 import { redirect } from "next/navigation"
 import { MetaStartPicker } from "@/components/funnel/MetaStartPicker"
+import { CATEGORY_NAME } from "@/lib/marketing/positioning"
 import {
   buildMetaStartRedirectUrl,
   getMetaIndustryFromParams,
@@ -10,7 +11,7 @@ import {
 
 export const metadata: Metadata = {
   title: "Get Started | CallGrabbr",
-  description: "Choose your industry to see how much missed calls are costing your business.",
+  description: `Choose your trade to see your missed-call estimate — ${CATEGORY_NAME} that texts you the lead in seconds.`,
   robots: { index: false, follow: true },
 }
 

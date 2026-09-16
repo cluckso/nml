@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { createClient as createSupabaseClient } from "@supabase/supabase-js"
+import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/supabase/public-env"
 import { db } from "./db"
 import { UserRole } from "@prisma/client"
 import { redirect } from "next/navigation"
@@ -66,8 +67,8 @@ export async function getAuthUserFromRequest(req: NextRequest) {
   const authHeader = req.headers.get("Authorization")
   if (authHeader?.startsWith("Bearer ")) {
     const token = authHeader.slice(7)
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    const url = getSupabaseUrl()
+    const key = getSupabaseAnonKey()
     if (!url || !key) return null
     const supabase = createSupabaseClient(url, key)
     const { data: { user }, error } = await supabase.auth.getUser(token)

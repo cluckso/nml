@@ -4,6 +4,12 @@ import {
   PRICING_TIERS_BY_KEY,
 } from "@/lib/pricing-catalog"
 import { PLAN_BASIC, PLAN_GROWTH, PLAN_PLATINUM } from "@/lib/plan-labels"
+import {
+  BASIC_FRAME,
+  CATEGORY_NAME,
+  PRODUCT_ONE_LINER,
+  ROSIE_PRICE_OBJECTION,
+} from "@/lib/marketing/positioning"
 import { trialDaysLabel, trialSummaryShort } from "@/lib/trial-marketing"
 import type { Guide } from "./types"
 
@@ -18,35 +24,35 @@ export const GUIDE_TRIAL_HREF = TRIAL_SIGNUP
 const GUIDES: Guide[] = [
   {
     slug: "callgrabbr-vs-ruby",
-    title: "CallGrabbr vs Ruby: Which Answering Service Fits Contractors?",
-    description: `Compare CallGrabbr and Ruby for HVAC, plumbing, and trade shops. Pricing, lead capture, after-hours coverage, and when a live receptionist is worth $${HUMAN_RECEPTIONIST_FROM_MONTHLY}+/mo.`,
+    title: "CallGrabbr vs Ruby: Missed-Call Lead Capture vs Live Receptionist",
+    description: `Compare CallGrabbr and Ruby for HVAC, plumbing, and trade shops. ${CATEGORY_NAME}, lead capture, after-hours coverage, and when a live receptionist is worth $${HUMAN_RECEPTIONIST_FROM_MONTHLY}+/mo.`,
     eyebrow: "Comparison guide",
     headline: "CallGrabbr vs Ruby",
     intro:
-      "Ruby is a well-known live answering service. CallGrabbr is built for contractors who need missed and after-hours calls captured as job-ready leads — without paying full receptionist rates. Here’s how they differ for local service businesses.",
+      "Ruby is a well-known live receptionist service. CallGrabbr is missed-call lead capture for contractors — we grab job-ready leads when you miss a ring, without paying full receptionist rates. Here's how they differ for local service businesses.",
     sections: [
       {
         heading: "Who each option is for",
         paragraphs: [
           "Ruby fits businesses that want a human voice on every call and can budget for live receptionist pricing — often starting around $235/month and climbing with volume.",
-          "CallGrabbr fits one-truck and growing trade shops that lose jobs when the phone rings during a service call or after hours. Plans start at Basic for missed and after-hours coverage, with Growth and Platinum when you want more inbound answered like a front desk.",
+          `CallGrabbr fits one-truck and growing trade shops that lose revenue when the phone rings during a service call or after hours. ${PLAN_BASIC} (${BASIC_FRAME}) covers missed and after-hours capture; ${PLAN_GROWTH} and ${PLAN_PLATINUM} when you want more inbound handled like a front desk.`,
         ],
       },
       {
         heading: "Pricing snapshot",
         paragraphs: [
-          `Ruby-style live answering typically starts near $${HUMAN_RECEPTIONIST_FROM_MONTHLY}/month and rises with minutes and features.`,
-          `CallGrabbr: ${PLAN_BASIC} $${basic.price}/mo · ${PLAN_GROWTH} $${growth.price}/mo · ${PLAN_PLATINUM} $${platinum.price}/mo. ${trialSummaryShort()}. ${formatJobValuePromptLine()} Capture one you'd have lost and the plan often pays for itself for months.`,
+          `Ruby-style live receptionist services typically start near $${HUMAN_RECEPTIONIST_FROM_MONTHLY}/month and rise with minutes and features.`,
+          `CallGrabbr: ${PLAN_BASIC} $${basic.price}/mo · ${PLAN_GROWTH} $${growth.price}/mo · ${PLAN_PLATINUM} $${platinum.price}/mo. ${trialSummaryShort()}. ${formatJobValuePromptLine()} Capture one job you'd have lost and the plan often pays for itself for months.`,
         ],
       },
       {
         heading: "Lead capture for trades",
         paragraphs: [
           "Contractors need more than a message: name, callback number, address, urgency, and what broke. CallGrabbr is tuned for service intake and texts or emails you the lead summary in seconds.",
-          "Ruby can take detailed messages with trained agents. You’re paying for human judgment and conversation quality — valuable if brand voice and complex phone trees matter more than cost per captured job.",
+          "Ruby can take detailed messages with trained agents. You're paying for human judgment and conversation quality — valuable if brand voice and complex phone trees matter more than cost per captured job.",
         ],
         bullets: [
-          "CallGrabbr: AI intake for HVAC, plumbing, and other local services; instant SMS/email lead alerts",
+          "CallGrabbr: trade intake for HVAC, plumbing, and other local services; instant SMS/email lead alerts",
           "Ruby: live agents; stronger when you need a human on every ring",
           "Both: can cover after hours when you configure forwarding",
         ],
@@ -54,7 +60,7 @@ const GUIDES: Guide[] = [
       {
         heading: "When to choose CallGrabbr",
         paragraphs: [
-          "Choose CallGrabbr if your main problem is missed jobs while you’re on a ladder, under a sink, or closed for the night — and one recovered emergency call covers months of software.",
+          "Choose CallGrabbr if your main problem is missed jobs while you're on a ladder, under a sink, or closed for the night — and one recovered emergency call covers months of software.",
           "Stick with (or add) a live service like Ruby if you need complex live transfers, white-glove scripting across many departments, or a human receptionist as a brand requirement.",
         ],
       },
@@ -63,7 +69,7 @@ const GUIDES: Guide[] = [
       competitorName: "Ruby",
       rows: [
         { label: "Starting price (typical)", callgrabbr: `$${basic.price}/mo (${PLAN_BASIC})`, competitor: `~$${HUMAN_RECEPTIONIST_FROM_MONTHLY}+/mo` },
-        { label: "Who answers", callgrabbr: "AI call assistant", competitor: "Live receptionists" },
+        { label: "Category", callgrabbr: CATEGORY_NAME, competitor: "Live receptionist service" },
         { label: "Built for trades intake", callgrabbr: "Yes — service, address, urgency", competitor: "Message-taking (configurable)" },
         { label: "Lead alerts", callgrabbr: "SMS & email in seconds", competitor: "Depends on plan / setup" },
         { label: "Trial", callgrabbr: `${trialDaysLabel()} free · no card`, competitor: "Varies" },
@@ -74,43 +80,44 @@ const GUIDES: Guide[] = [
     faq: [
       {
         question: "Is CallGrabbr cheaper than Ruby?",
-        answer: `Usually yes for contractor shops. CallGrabbr ${PLAN_BASIC} is $${basic.price}/mo for missed and after-hours capture. Live answering services like Ruby often start around $${HUMAN_RECEPTIONIST_FROM_MONTHLY}/mo and scale with usage.`,
+        answer: `Usually yes for contractor shops. CallGrabbr ${PLAN_BASIC} is $${basic.price}/mo for missed and after-hours capture. Live receptionist services like Ruby often start around $${HUMAN_RECEPTIONIST_FROM_MONTHLY}/mo and scale with usage.`,
       },
       {
-        question: "Can CallGrabbr replace a live answering service?",
+        question: "Can CallGrabbr replace a live receptionist?",
         answer:
-          "For many HVAC and plumbing shops, yes — if your goal is capturing job details when you can’t pick up. If you need a human on every call for brand or complex transfers, a live service may still fit better (or alongside AI for overflow).",
+          "For many HVAC and plumbing shops, yes — if your goal is capturing job details when you can't pick up. If you need a human on every call for brand or complex transfers, a live receptionist service may still fit better (or alongside lead capture for overflow).",
       },
       {
         question: "Does CallGrabbr work after hours?",
         answer:
-          "Yes. Forward your business line (or after-hours only) and CallGrabbr answers, captures the lead, and texts or emails you so you can call back first.",
+          "Yes. Forward your business line (or after-hours only) and CallGrabbr picks up missed rings, captures the lead, and texts or emails you so you can call back first.",
       },
     ],
     relatedLinks: [
       { label: "CallGrabbr vs Smith.ai", href: "/guides/callgrabbr-vs-smith-ai" },
-      { label: "After-hours answering cost", href: "/guides/after-hours-answering-cost-for-contractors" },
-      { label: "AI answering for HVAC", href: "/guides/best-ai-answering-for-hvac-2026" },
+      { label: "After-hours lead capture cost", href: "/guides/after-hours-answering-cost-for-contractors" },
+      { label: "After-hours lead capture for HVAC", href: "/guides/best-ai-answering-for-hvac-2026" },
+      { label: "Missed-call lead capture vs AI answering", href: "/guides/missed-call-lead-capture-vs-ai-answering" },
       { label: "HVAC landing page", href: "/for/hvac" },
       { label: "Pricing", href: "/pricing" },
     ],
-    keywords: ["CallGrabbr vs Ruby", "Ruby answering service alternative", "contractor answering service", "HVAC answering service"],
+    keywords: ["CallGrabbr vs Ruby", "Ruby receptionist alternative", "missed call lead capture contractors", "HVAC missed call capture"],
   },
   {
     slug: "callgrabbr-vs-smith-ai",
-    title: "CallGrabbr vs Smith.ai: AI Answering for Service Businesses",
+    title: "CallGrabbr vs Smith.ai: Missed-Call Lead Capture for Service Businesses",
     description:
-      "Compare CallGrabbr and Smith.ai for contractors. Hybrid receptionist pricing (~$95–$300+), trade-focused lead capture, and when a simpler AI answering plan wins.",
+      "Compare CallGrabbr and Smith.ai for contractors. Hybrid receptionist pricing (~$95–$300+), trade-focused lead capture, and when missed-call lead capture beats a generalist receptionist platform.",
     eyebrow: "Comparison guide",
     headline: "CallGrabbr vs Smith.ai",
     intro:
-      "Smith.ai offers AI and hybrid live answering for many industries. CallGrabbr focuses on local service businesses — especially HVAC and plumbing — with clear trade pricing and job-ready lead alerts. Use this guide to pick the right fit.",
+      "Smith.ai is a broad receptionist platform (AI plus optional live agents). CallGrabbr is missed-call lead capture for local service businesses — especially HVAC and plumbing — with clear trade pricing and job-ready lead alerts. Use this guide to pick the right fit.",
     sections: [
       {
         heading: "Positioning difference",
         paragraphs: [
           "Smith.ai is a broad receptionist platform (AI plus optional live agents). Public hybrid pricing often lands roughly in the $95–$300+/month range depending on minutes and human backup.",
-          `CallGrabbr is narrower on purpose: stop losing contractor jobs to missed and after-hours calls. ${PLAN_BASIC} covers the rings you miss; ${PLAN_GROWTH} and ${PLAN_PLATINUM} step up when you want more of the line answered around the clock.`,
+          `CallGrabbr is narrower on purpose: stop losing contractor jobs to missed and after-hours calls. ${PLAN_BASIC} covers the rings you miss; ${PLAN_GROWTH} and ${PLAN_PLATINUM} step up when you want more of the line handled around the clock.`,
         ],
       },
       {
@@ -123,20 +130,20 @@ const GUIDES: Guide[] = [
       {
         heading: "Intake quality for home services",
         paragraphs: [
-          "Homeowners calling about no heat, a leak, or a breaker trip expect fast questions: what’s wrong, where, how urgent. CallGrabbr’s industry flows are built around that.",
+          "Homeowners calling about no heat, a leak, or a breaker trip expect fast questions: what's wrong, where, how urgent. CallGrabbr's industry flows are built around that.",
           "Smith.ai can be configured for many verticals. Expect more setup if you want the same depth of trade-specific intake out of the box.",
         ],
         bullets: [
           "CallGrabbr: SMS/email lead summaries tuned for service jobs",
-          "Smith.ai: AI + optional live agents; strong if you need hybrid coverage",
+          "Smith.ai: AI + optional live agents; strong if you need hybrid receptionist coverage",
           "Both: work with call forwarding for after-hours",
         ],
       },
       {
         heading: "Bottom line",
         paragraphs: [
-          "Pick CallGrabbr when you’re a contractor optimizing for cost per captured job and speed-to-lead after missed rings.",
-          "Pick Smith.ai (or a hybrid) when you want a generalist receptionist stack with live backup as a core product feature — and you’re ready for that pricing band.",
+          "Pick CallGrabbr when you're a contractor optimizing for cost per captured job and speed-to-lead after missed rings.",
+          "Pick Smith.ai (or a hybrid) when you want a generalist receptionist stack with live backup as a core product feature — and you're ready for that pricing band.",
         ],
       },
     ],
@@ -144,8 +151,8 @@ const GUIDES: Guide[] = [
       competitorName: "Smith.ai",
       rows: [
         { label: "Typical monthly range", callgrabbr: `$${basic.price}–$${platinum.price}`, competitor: "~$95–$300+" },
-        { label: "Focus", callgrabbr: "Local service / trades", competitor: "Broad SMB receptionist" },
-        { label: "Live agents", callgrabbr: "AI-first", competitor: "AI + hybrid live options" },
+        { label: "Category", callgrabbr: CATEGORY_NAME, competitor: "Broad SMB receptionist platform" },
+        { label: "Live agents", callgrabbr: "Lead capture first", competitor: "AI + hybrid live options" },
         { label: "Lead delivery", callgrabbr: "Instant SMS & email", competitor: "Varies by plan" },
         { label: "Trial", callgrabbr: `${trialDaysLabel()} free · no card`, competitor: "Varies" },
       ],
@@ -156,7 +163,7 @@ const GUIDES: Guide[] = [
       {
         question: "Is CallGrabbr the same as Smith.ai?",
         answer:
-          "No. Smith.ai is a general AI/hybrid answering platform. CallGrabbr is built specifically for contractors who need missed-call and after-hours lead capture with trade-style intake.",
+          "No. Smith.ai is a general AI/hybrid receptionist platform. CallGrabbr is missed-call lead capture built specifically for contractors who need missed and after-hours calls turned into job-ready leads with trade-style intake.",
       },
       {
         question: "Why would a plumber choose CallGrabbr over Smith.ai?",
@@ -169,27 +176,28 @@ const GUIDES: Guide[] = [
     ],
     relatedLinks: [
       { label: "CallGrabbr vs Ruby", href: "/guides/callgrabbr-vs-ruby" },
-      { label: "After-hours answering cost", href: "/guides/after-hours-answering-cost-for-contractors" },
+      { label: "After-hours lead capture cost", href: "/guides/after-hours-answering-cost-for-contractors" },
+      { label: "Missed-call lead capture vs AI answering", href: "/guides/missed-call-lead-capture-vs-ai-answering" },
       { label: "Plumbing landing page", href: "/for/plumbing" },
       { label: "Pricing", href: "/pricing" },
     ],
-    keywords: ["CallGrabbr vs Smith.ai", "Smith.ai alternative", "AI answering service contractors", "plumber answering service"],
+    keywords: ["CallGrabbr vs Smith.ai", "Smith.ai alternative", "missed call lead capture contractors", "plumber missed call capture"],
   },
   {
     slug: "best-ai-answering-for-hvac-2026",
-    title: "Best AI Answering for HVAC in 2026",
+    title: "After-Hours & Missed-Call Lead Capture for HVAC (2026)",
     description:
-      "What HVAC owners should look for in an AI answering service in 2026: after-hours coverage, emergency intake, pricing, and how CallGrabbr compares for no-heat and no-AC calls.",
+      "What HVAC owners should look for in after-hours and missed-call lead capture in 2026: emergency intake, pricing, and how CallGrabbr compares for no-heat and no-AC calls.",
     eyebrow: "HVAC buyer guide · 2026",
-    headline: "Best AI answering for HVAC (2026)",
+    headline: "After-hours & missed-call lead capture for HVAC (2026)",
     intro:
-      "Peak season and after-hours no-heat / no-AC calls don’t wait. The best AI answering setup for HVAC shops captures address, system issue, and urgency — then texts you so you call back before the homeowner dials the next contractor.",
+      "Peak season and after-hours no-heat / no-AC calls don't wait. The best missed-call lead capture setup for HVAC shops grabs address, system issue, and urgency — then texts you so you call back before the homeowner dials the next contractor.",
     sections: [
       {
         heading: "What “best” means for HVAC in 2026",
         paragraphs: [
-          "Skip vanity features. For HVAC, best means: answers when techs can’t, asks the right questions, flags emergencies, and delivers a lead you can act on in seconds.",
-          "Budget tools that only leave a name and number still lose jobs. Live receptionist plans at $235+/mo work, but many shops don’t need a human on every ring — they need the emergency job details.",
+          "Skip vanity features. For HVAC, best means: picks up when techs can't, asks the right questions, flags emergencies, and delivers a lead you can act on in seconds.",
+          "Budget receptionist tools that only leave a name and number still lose jobs. Live receptionist plans at $235+/mo work, but many shops don't need a human on every ring — they need the emergency job details.",
         ],
         bullets: [
           "After-hours and weekend coverage via call forwarding",
@@ -201,21 +209,21 @@ const GUIDES: Guide[] = [
       {
         heading: "How CallGrabbr fits HVAC",
         paragraphs: [
-          `CallGrabbr answers when you forward the line, collects HVAC-relevant details, and alerts you immediately. ${PLAN_BASIC} ($${basic.price}/mo) covers missed and after-hours. ${PLAN_GROWTH} ($${growth.price}/mo) is for shops that want most inbound answered like a 24/7 desk. ${PLAN_PLATINUM} ($${platinum.price}/mo) fits multi-crew volume.`,
-          `${formatJobValuePromptLine()} One recovered HVAC emergency often covers months of answering.`,
+          `CallGrabbr picks up when you forward the line, collects HVAC-relevant details, and alerts you immediately. ${PLAN_BASIC} ($${basic.price}/mo) covers missed and after-hours. ${PLAN_GROWTH} ($${growth.price}/mo) is for shops that want most inbound handled like a 24/7 desk. ${PLAN_PLATINUM} ($${platinum.price}/mo) fits multi-crew volume.`,
+          `${formatJobValuePromptLine()} One recovered HVAC emergency often covers months of lead capture.`,
         ],
       },
       {
-        heading: "How to evaluate any AI answering vendor",
+        heading: "How to evaluate any lead capture vendor",
         paragraphs: [
-          "Run a live test: call after hours, describe a furnace that won’t start, and check whether the summary includes address and urgency. Time-to-text matters more than a polished homepage.",
-          "Compare total monthly cost at your real volume — not just the entry price. Entry AI tools near $49/mo exist; human services start much higher. CallGrabbr sits in the middle with trade-specific intake.",
+          "Run a live test: call after hours, describe a furnace that won't start, and check whether the summary includes address and urgency. Time-to-text matters more than a polished homepage.",
+          "Compare total monthly cost at your real volume — not just the entry price. Entry receptionist tools near $49/mo exist; human services start much higher. CallGrabbr sits in the middle with trade-specific intake.",
         ],
       },
       {
         heading: "Next step",
         paragraphs: [
-          `Start a ${trialDaysLabel()} trial, forward your business line (or after-hours only), and place a test call. If the lead text looks like a job ticket, you’re close to the right setup.`,
+          `Start a ${trialDaysLabel()} trial, forward your business line (or after-hours only), and place a test call. If the lead text looks like a job ticket, you're close to the right setup.`,
         ],
       },
     ],
@@ -223,61 +231,62 @@ const GUIDES: Guide[] = [
     showDemo: true,
     faq: [
       {
-        question: "What is the best AI answering service for HVAC companies?",
+        question: "What is the best missed-call lead capture for HVAC companies?",
         answer: `Look for after-hours coverage, HVAC-style intake (issue, address, urgency), and instant lead alerts. CallGrabbr is built for that workflow, with ${PLAN_BASIC} from $${basic.price}/mo and a ${trialDaysLabel()} free trial.`,
       },
       {
-        question: "Should HVAC companies use AI or a live answering service?",
-        answer: `If you mainly lose jobs on missed and after-hours rings, AI answering is usually enough and far cheaper than live receptionists from ~$${HUMAN_RECEPTIONIST_FROM_MONTHLY}/mo. Choose live or hybrid if you need a human on every call.`,
+        question: "Should HVAC companies use lead capture or a live receptionist?",
+        answer: `If you mainly lose jobs on missed and after-hours rings, missed-call lead capture is usually enough and far cheaper than live receptionists from ~$${HUMAN_RECEPTIONIST_FROM_MONTHLY}/mo. Choose live or hybrid receptionist software if you need a human on every call.`,
       },
       {
         question: "Does CallGrabbr handle emergency no-heat calls?",
         answer:
-          "Yes. The assistant can collect urgency and service details so you know which callbacks to prioritize when you get the text or email summary.",
+          "Yes. CallGrabbr collects urgency and service details so you know which callbacks to prioritize when you get the text or email summary.",
       },
     ],
     relatedLinks: [
-      { label: "HVAC answering landing page", href: "/for/hvac" },
+      { label: "HVAC landing page", href: "/for/hvac" },
       { label: "CallGrabbr vs Ruby", href: "/guides/callgrabbr-vs-ruby" },
-      { label: "After-hours answering cost", href: "/guides/after-hours-answering-cost-for-contractors" },
+      { label: "After-hours lead capture cost", href: "/guides/after-hours-answering-cost-for-contractors" },
+      { label: "Missed-call lead capture vs AI answering", href: "/guides/missed-call-lead-capture-vs-ai-answering" },
       { label: "Pricing", href: "/pricing" },
     ],
     keywords: [
-      "best AI answering for HVAC",
-      "HVAC answering service 2026",
-      "AI receptionist HVAC",
+      "HVAC missed call lead capture",
+      "after hours HVAC lead capture 2026",
+      "HVAC voicemail alternative",
       "after hours HVAC phone answering",
     ],
   },
   {
     slug: "after-hours-answering-cost-for-contractors",
-    title: "After-Hours Answering Cost for Contractors (2026)",
-    description: `What contractors actually pay for after-hours answering: live receptionists from ~$${HUMAN_RECEPTIONIST_FROM_MONTHLY}/mo, hybrid AI ~$95–$300+, and CallGrabbr from $${basic.price}/mo — plus the cost of one missed emergency job.`,
+    title: "After-Hours Lead Capture Cost for Contractors (2026)",
+    description: `What contractors actually pay for after-hours lead capture: live receptionists from ~$${HUMAN_RECEPTIONIST_FROM_MONTHLY}/mo, hybrid receptionist ~$95–$300+, and CallGrabbr from $${basic.price}/mo — plus the cost of one missed emergency job.`,
     eyebrow: "Cost guide",
-    headline: "After-hours answering cost for contractors",
+    headline: "After-hours lead capture cost for contractors",
     intro:
-      "After-hours calls are often your highest-value jobs — and the ones that go to whoever picks up first. Here’s what after-hours answering typically costs in 2026, and how to think about ROI.",
+      "After-hours calls are often your highest-value jobs — and the ones that go to whoever picks up first. Here's what after-hours lead capture typically costs in 2026, and how to think about ROI.",
     sections: [
       {
         heading: "What shops usually pay",
         paragraphs: [
-          `Live answering services (e.g. Ruby-style) often start around $${HUMAN_RECEPTIONIST_FROM_MONTHLY}/month and climb with minutes.`,
-          "Hybrid AI + live platforms (e.g. Smith.ai-style) commonly land roughly $95–$300+/month depending on human backup and volume.",
-          `Entry AI receptionist tools may advertise near $49/mo. CallGrabbr ${PLAN_BASIC} is $${basic.price}/mo for missed and after-hours capture — with ${PLAN_GROWTH} at $${growth.price}/mo and ${PLAN_PLATINUM} at $${platinum.price}/mo when you need more coverage.`,
+          `Live receptionist services (e.g. Ruby-style) often start around $${HUMAN_RECEPTIONIST_FROM_MONTHLY}/month and climb with minutes.`,
+          "Hybrid AI + live receptionist platforms (e.g. Smith.ai-style) commonly land roughly $95–$300+/month depending on human backup and volume.",
+          `Entry receptionist tools may advertise near $49/mo. CallGrabbr ${PLAN_BASIC} is $${basic.price}/mo for missed and after-hours capture — with ${PLAN_GROWTH} at $${growth.price}/mo and ${PLAN_PLATINUM} at $${platinum.price}/mo when you need more coverage.`,
         ],
       },
       {
         heading: "The real cost: missed emergencies",
         paragraphs: [
           `${formatJobValuePromptLine()} For HVAC, plumbing, and similar trades, that one after-hours job can cover months of CallGrabbr.`,
-          "Voicemail is free until it isn’t — most emergency callers hang up and dial the next number on the list.",
+          "Voicemail is free until it isn't — most emergency callers hang up and dial the next number on the list.",
         ],
       },
       {
         heading: "How to size the right plan",
         paragraphs: [
-          `${PLAN_BASIC}: you’re on jobs all day and mainly need evenings, weekends, and the rings you miss.`,
-          `${PLAN_GROWTH}: you want most inbound answered so the shop phone never goes to voicemail during busy hours.`,
+          `${PLAN_BASIC}: you're on jobs all day and mainly need evenings, weekends, and the rings you miss.`,
+          `${PLAN_GROWTH}: you want most inbound handled so the shop phone never goes to voicemail during busy hours.`,
           `${PLAN_PLATINUM}: multi-crew or high volume where dropped calls are expensive every day.`,
         ],
         bullets: [
@@ -288,9 +297,9 @@ const GUIDES: Guide[] = [
         ],
       },
       {
-        heading: "DIY vs answering service",
+        heading: "DIY vs lead capture",
         paragraphs: [
-          "Forwarding to a personal cell after hours is free but burns your evenings and still drops calls when you’re unavailable. An answering layer (AI or live) exists so the caller gets intake instead of a busy signal or voicemail.",
+          "Forwarding to a personal cell after hours is free but burns your evenings and still drops calls when you're unavailable. A lead capture layer exists so the caller gets intake instead of a busy signal or voicemail.",
         ],
       },
     ],
@@ -298,12 +307,12 @@ const GUIDES: Guide[] = [
     showDemo: true,
     faq: [
       {
-        question: "How much does after-hours answering cost for contractors?",
-        answer: `Expect ~$${HUMAN_RECEPTIONIST_FROM_MONTHLY}+/mo for live receptionists, roughly $95–$300+ for many hybrid AI plans, and from $${basic.price}/mo for CallGrabbr ${PLAN_BASIC} missed and after-hours coverage.`,
+        question: "How much does after-hours lead capture cost for contractors?",
+        answer: `Expect ~$${HUMAN_RECEPTIONIST_FROM_MONTHLY}+/mo for live receptionists, roughly $95–$300+ for many hybrid receptionist plans, and from $${basic.price}/mo for CallGrabbr ${PLAN_BASIC} missed and after-hours coverage.`,
       },
       {
-        question: "Is after-hours answering worth it?",
-        answer: `Usually yes if you take emergency work. ${formatJobValuePromptLine()} One missed job often exceeds several months of AI answering.`,
+        question: "Is after-hours lead capture worth it?",
+        answer: `Usually yes if you take emergency work. ${formatJobValuePromptLine()} One missed job often exceeds several months of lead capture software.`,
       },
       {
         question: "Can I only forward after hours?",
@@ -314,38 +323,39 @@ const GUIDES: Guide[] = [
     relatedLinks: [
       { label: "CallGrabbr vs Ruby", href: "/guides/callgrabbr-vs-ruby" },
       { label: "CallGrabbr vs Smith.ai", href: "/guides/callgrabbr-vs-smith-ai" },
-      { label: "Best AI answering for HVAC", href: "/guides/best-ai-answering-for-hvac-2026" },
+      { label: "After-hours lead capture for HVAC", href: "/guides/best-ai-answering-for-hvac-2026" },
+      { label: "Missed-call lead capture vs AI answering", href: "/guides/missed-call-lead-capture-vs-ai-answering" },
       { label: "Plumbing landing page", href: "/for/plumbing" },
       { label: "Pricing", href: "/pricing" },
     ],
     keywords: [
-      "after hours answering cost",
-      "contractor answering service price",
+      "after hours lead capture cost",
+      "contractor missed call capture price",
       "after hours phone answering HVAC",
-      "plumber after hours answering service",
+      "plumber after hours lead capture",
     ],
   },
   {
     slug: "callgrabbr-vs-rosie",
-    title: "CallGrabbr vs Rosie: AI Answering for Contractors",
+    title: "CallGrabbr vs Rosie: Missed-Call Lead Capture for Contractors",
     description:
-      "Compare CallGrabbr and Rosie for HVAC and plumbing shops. Trade intake, missed-call capture, pricing, and when each AI answering tool fits.",
+      "Compare CallGrabbr and Rosie for HVAC and plumbing shops. Trade intake, missed-call capture, pricing, and when each tool fits.",
     eyebrow: "Comparison guide",
     headline: "CallGrabbr vs Rosie",
     intro:
-      "You're under a truck or on a roof when the phone rings. Rosie and CallGrabbr both aim to catch that call with AI — but they're built for slightly different shops. Here's how to choose.",
+      "You're under a truck or on a roof when the phone rings. Rosie and CallGrabbr both aim to catch that call — but they're built for slightly different shops. Here's how to choose between receptionist software and trade-focused lead capture.",
     sections: [
       {
         heading: "The scene both products solve",
         paragraphs: [
-          "A homeowner with no AC or a burst pipe will not wait on voicemail. They dial the next number. Any AI answering tool that picks up and captures the job details beats silence.",
+          "A homeowner with no AC or a burst pipe will not wait on voicemail. They dial the next number. Any tool that picks up and captures the job details beats silence.",
           "The difference is how deep the trade intake goes, how leads get to you, and whether the pricing matches a one-truck shop or a growing crew.",
         ],
       },
       {
         heading: "Where CallGrabbr focuses",
         paragraphs: [
-          `CallGrabbr is built for local service businesses — HVAC, plumbing, electrical, auto, and similar trades. ${PLAN_BASIC} covers the rings you miss; ${PLAN_GROWTH} and ${PLAN_PLATINUM} step up when you want most inbound answered like a front desk.`,
+          `CallGrabbr is ${CATEGORY_NAME} for local service businesses — HVAC, plumbing, electrical, auto, and similar trades. ${PLAN_BASIC} covers the rings you miss; ${PLAN_GROWTH} and ${PLAN_PLATINUM} step up when you want most inbound handled like a front desk.`,
           `${formatJobValuePromptLine()} Capture one you'd have lost and the plan often pays for itself for months.`,
         ],
         bullets: [
@@ -356,8 +366,9 @@ const GUIDES: Guide[] = [
         ],
       },
       {
-        heading: "How to evaluate Rosie (or any peer AI tool)",
+        heading: "How to evaluate Rosie (or any peer receptionist tool)",
         paragraphs: [
+          ROSIE_PRICE_OBJECTION,
           "Run the same mystery shop on both: forward a test line, call as a panicked homeowner, and check whether the summary includes address and urgency — not just a name and number.",
           "Compare monthly cost at your real volume, after-hours coverage, and how fast the lead hits your phone. Prefer the tool that feels like a job ticket, not a generic voicemail transcript.",
         ],
@@ -373,8 +384,8 @@ const GUIDES: Guide[] = [
     comparison: {
       competitorName: "Rosie",
       rows: [
-        { label: "Primary focus", callgrabbr: "Local service / trades", competitor: "AI phone answering (general SMB)" },
-        { label: "Starting plan (CallGrabbr)", callgrabbr: `$${basic.price}/mo (${PLAN_BASIC})`, competitor: "Check current public pricing" },
+        { label: "Category", callgrabbr: CATEGORY_NAME, competitor: "AI phone receptionist (general SMB)" },
+        { label: "Entry price", callgrabbr: `$${basic.price}/mo (${PLAN_BASIC})`, competitor: "~$49/mo (answers phones)" },
         { label: "Trade intake", callgrabbr: "Built for service jobs", competitor: "Varies by setup" },
         { label: "Lead delivery", callgrabbr: "SMS & email in seconds", competitor: "Varies by product" },
         { label: "Trial", callgrabbr: `${trialDaysLabel()} free · no card`, competitor: "Varies" },
@@ -386,7 +397,7 @@ const GUIDES: Guide[] = [
       {
         question: "Is CallGrabbr the same as Rosie?",
         answer:
-          "No. Both use AI to answer phones, but CallGrabbr is packaged for contractors who need missed and after-hours calls turned into job-ready leads with trade-style intake.",
+          "No. Both pick up phones when you can't, but CallGrabbr is missed-call lead capture packaged for contractors — turning missed and after-hours calls into job-ready leads with trade-style intake.",
       },
       {
         question: "How should I compare CallGrabbr and Rosie?",
@@ -401,13 +412,14 @@ const GUIDES: Guide[] = [
     relatedLinks: [
       { label: "CallGrabbr vs OnCrew", href: "/guides/callgrabbr-vs-oncrew" },
       { label: "CallGrabbr vs Ruby", href: "/guides/callgrabbr-vs-ruby" },
-      { label: "AI vs live receptionist", href: "/guides/ai-vs-live-answering-for-contractors" },
+      { label: "Missed-call lead capture vs AI answering", href: "/guides/missed-call-lead-capture-vs-ai-answering" },
+      { label: "Lead capture vs live receptionist", href: "/guides/ai-vs-live-answering-for-contractors" },
       { label: "Pricing", href: "/pricing" },
     ],
     keywords: [
       "CallGrabbr vs Rosie",
-      "Rosie AI answering alternative",
-      "AI answering service contractors",
+      "Rosie missed call alternative",
+      "missed call lead capture contractors",
       "Rosie vs CallGrabbr",
     ],
   },
@@ -415,7 +427,7 @@ const GUIDES: Guide[] = [
     slug: "callgrabbr-vs-oncrew",
     title: "CallGrabbr vs OnCrew: Which Fits Trade Shops?",
     description:
-      "Compare CallGrabbr and OnCrew for HVAC, plumbing, and home-service shops. Missed-call capture, after-hours coverage, and how to pick the right answering stack.",
+      "Compare CallGrabbr and OnCrew for HVAC, plumbing, and home-service shops. Missed-call capture, after-hours coverage, and how to pick the right lead capture stack.",
     eyebrow: "Comparison guide",
     headline: "CallGrabbr vs OnCrew",
     intro:
@@ -424,14 +436,14 @@ const GUIDES: Guide[] = [
       {
         heading: "Start with the job you lose",
         paragraphs: [
-          "You're finishing a changeout. The phone rings in the truck. By the time you call back, the homeowner booked someone else. That scene — not a feature matrix — is what answering tools are for.",
+          "You're finishing a changeout. The phone rings in the truck. By the time you call back, the homeowner booked someone else. That scene — not a feature matrix — is what lead capture tools are for.",
           `${formatJobValuePromptLine()} The right product is the one that recovers that job without forcing you into a full receptionist budget.`,
         ],
       },
       {
         heading: "CallGrabbr's lane",
         paragraphs: [
-          `CallGrabbr answers when you forward the line, collects trade-relevant details, and texts or emails you the lead. ${PLAN_BASIC} ($${basic.price}/mo) for missed and after-hours; ${PLAN_GROWTH} ($${growth.price}/mo) when you want most inbound answered; ${PLAN_PLATINUM} ($${platinum.price}/mo) for busy multi-crew shops.`,
+          `CallGrabbr picks up when you forward the line, collects trade-relevant details, and texts or emails you the lead. ${PLAN_BASIC} ($${basic.price}/mo) for missed and after-hours; ${PLAN_GROWTH} ($${growth.price}/mo) when you want most inbound handled; ${PLAN_PLATINUM} ($${platinum.price}/mo) for busy multi-crew shops.`,
           `${trialSummaryShort()}. Keep your existing business number.`,
         ],
       },
@@ -444,7 +456,7 @@ const GUIDES: Guide[] = [
         bullets: [
           "Mystery-shop both with the same emergency script",
           "Compare time-to-text and completeness of address / urgency",
-          "Map monthly cost to missed-only vs always-on answering",
+          "Map monthly cost to missed-only vs always-on coverage",
         ],
       },
       {
@@ -485,33 +497,33 @@ const GUIDES: Guide[] = [
     ],
     relatedLinks: [
       { label: "CallGrabbr vs Rosie", href: "/guides/callgrabbr-vs-rosie" },
-      { label: "Best AI answering for HVAC", href: "/guides/best-ai-answering-for-hvac-2026" },
-      { label: "AI vs live receptionist", href: "/guides/ai-vs-live-answering-for-contractors" },
+      { label: "After-hours lead capture for HVAC", href: "/guides/best-ai-answering-for-hvac-2026" },
+      { label: "Lead capture vs live receptionist", href: "/guides/ai-vs-live-answering-for-contractors" },
       { label: "HVAC landing page", href: "/for/hvac" },
       { label: "Pricing", href: "/pricing" },
     ],
     keywords: [
       "CallGrabbr vs OnCrew",
       "OnCrew alternative",
-      "home service answering service",
-      "HVAC AI answering comparison",
+      "home service missed call capture",
+      "HVAC lead capture comparison",
     ],
   },
   {
     slug: "best-ai-answering-for-plumbing-2026",
-    title: "Best AI Answering for Plumbing in 2026",
+    title: "After-Hours & Missed-Call Lead Capture for Plumbing (2026)",
     description:
-      "What plumbing owners should look for in an AI answering service in 2026: 2 AM emergencies, leak intake, after-hours coverage, and how CallGrabbr fits.",
+      "What plumbing owners should look for in after-hours and missed-call lead capture in 2026: 2 AM emergencies, leak intake, and how CallGrabbr fits.",
     eyebrow: "Plumbing buyer guide · 2026",
-    headline: "Best AI answering for plumbing (2026)",
+    headline: "After-hours & missed-call lead capture for plumbing (2026)",
     intro:
-      "It's 2 AM. Water is running under a sink. The homeowner calls you, hangs up when you don't answer, and dials the next plumber. The best AI answering setup for plumbing shops catches that call, flags the emergency, and texts you before they book someone else.",
+      "It's 2 AM. Water is running under a sink. The homeowner calls you, hangs up when you don't answer, and dials the next plumber. The best missed-call lead capture setup for plumbing shops catches that call, flags the emergency, and texts you before they book someone else.",
     sections: [
       {
         heading: "What “best” means for plumbers",
         paragraphs: [
-          "Skip generic receptionist demos. For plumbing, best means: answers when you're on a job or asleep, asks whether it's a leak or flood, grabs the address, and gets the lead to your phone in seconds.",
-          "Live answering from ~$235+/mo works — but many shops don't need a human on every ring. They need the emergency details before the next plumber picks up.",
+          "Skip generic receptionist demos. For plumbing, best means: picks up when you're on a job or asleep, asks whether it's a leak or flood, grabs the address, and gets the lead to your phone in seconds.",
+          "Live receptionist plans from ~$235+/mo work — but many shops don't need a human on every ring. They need the emergency details before the next plumber picks up.",
         ],
         bullets: [
           "After-hours and weekend coverage via forwarding",
@@ -523,15 +535,15 @@ const GUIDES: Guide[] = [
       {
         heading: "How CallGrabbr fits plumbing",
         paragraphs: [
-          `CallGrabbr answers when you forward the line, collects plumbing-relevant details, and alerts you immediately. ${PLAN_BASIC} ($${basic.price}/mo) covers missed and after-hours. ${PLAN_GROWTH} ($${growth.price}/mo) is for shops that want most inbound answered. ${PLAN_PLATINUM} ($${platinum.price}/mo) fits multi-crew volume.`,
-          `${formatJobValuePromptLine()} One recovered after-hours emergency often covers months of answering.`,
+          `CallGrabbr picks up when you forward the line, collects plumbing-relevant details, and alerts you immediately. ${PLAN_BASIC} ($${basic.price}/mo) covers missed and after-hours. ${PLAN_GROWTH} ($${growth.price}/mo) is for shops that want most inbound handled. ${PLAN_PLATINUM} ($${platinum.price}/mo) fits multi-crew volume.`,
+          `${formatJobValuePromptLine()} One recovered after-hours emergency often covers months of lead capture.`,
         ],
       },
       {
         heading: "How to evaluate any vendor",
         paragraphs: [
           "Mystery-shop after hours: describe an active leak and check whether the summary includes address and urgency. Time-to-text beats a polished homepage.",
-          "Compare total monthly cost at your real volume. Entry AI tools near $49/mo exist; human services start much higher. CallGrabbr sits in the middle with trade-specific intake.",
+          "Compare total monthly cost at your real volume. Entry receptionist tools near $49/mo exist; human services start much higher. CallGrabbr sits in the middle with trade-specific intake.",
         ],
       },
       {
@@ -545,53 +557,53 @@ const GUIDES: Guide[] = [
     showDemo: true,
     faq: [
       {
-        question: "What is the best AI answering service for plumbing companies?",
+        question: "What is the best missed-call lead capture for plumbing companies?",
         answer: `Look for after-hours coverage, plumbing-style intake (leak, address, urgency), and instant lead alerts. CallGrabbr is built for that workflow, with ${PLAN_BASIC} from $${basic.price}/mo and a ${trialDaysLabel()} free trial.`,
       },
       {
-        question: "Should plumbers use AI or a live answering service?",
-        answer: `If you mainly lose jobs on missed and after-hours rings, AI answering is usually enough and far cheaper than live receptionists from ~$${HUMAN_RECEPTIONIST_FROM_MONTHLY}/mo. Choose live or hybrid if you need a human on every call.`,
+        question: "Should plumbers use lead capture or a live receptionist?",
+        answer: `If you mainly lose jobs on missed and after-hours rings, missed-call lead capture is usually enough and far cheaper than live receptionists from ~$${HUMAN_RECEPTIONIST_FROM_MONTHLY}/mo. Choose live or hybrid receptionist software if you need a human on every call.`,
       },
       {
         question: "Does CallGrabbr handle emergency leak calls?",
         answer:
-          "Yes. The assistant can collect urgency and service details so you know which callbacks to prioritize when you get the text or email summary.",
+          "Yes. CallGrabbr collects urgency and service details so you know which callbacks to prioritize when you get the text or email summary.",
       },
     ],
     relatedLinks: [
       { label: "Plumbing landing page", href: "/for/plumbing" },
-      { label: "AI vs live receptionist", href: "/guides/ai-vs-live-answering-for-contractors" },
-      { label: "After-hours answering cost", href: "/guides/after-hours-answering-cost-for-contractors" },
+      { label: "Lead capture vs live receptionist", href: "/guides/ai-vs-live-answering-for-contractors" },
+      { label: "After-hours lead capture cost", href: "/guides/after-hours-answering-cost-for-contractors" },
       { label: "CallGrabbr vs Ruby", href: "/guides/callgrabbr-vs-ruby" },
       { label: "Pricing", href: "/pricing" },
     ],
     keywords: [
-      "best AI answering for plumbing",
-      "plumbing answering service 2026",
-      "AI receptionist plumber",
+      "plumbing missed call lead capture",
+      "plumbing lead capture 2026",
+      "plumber voicemail alternative",
       "after hours plumbing phone answering",
     ],
   },
   {
     slug: "ai-vs-live-answering-for-contractors",
-    title: "AI vs Live Answering for Contractors",
-    description: `AI answering vs live receptionists for HVAC and plumbing: cost from $${basic.price}/mo vs ~$${HUMAN_RECEPTIONIST_FROM_MONTHLY}+/mo, when you need a human on every ring, and how to choose.`,
+    title: "Missed-Call Lead Capture vs Live Receptionist for Contractors",
+    description: `Missed-call lead capture vs live receptionists for HVAC and plumbing: cost from $${basic.price}/mo vs ~$${HUMAN_RECEPTIONIST_FROM_MONTHLY}+/mo, when you need a human on every ring, and how to choose.`,
     eyebrow: "Buyer guide",
-    headline: "AI vs live answering for contractors",
+    headline: "Missed-call lead capture vs live receptionist for contractors",
     intro:
-      "You're on a job. The phone rings. Someone has to pick up — or the homeowner calls your competitor. The question isn't “AI or nothing.” It's whether you need a human on every ring, or an AI that captures the job when you can't.",
+      "You're on a job. The phone rings. Someone has to pick up — or the homeowner calls your competitor. The question isn't lead capture or nothing. It's whether you need a human on every ring, or missed-call lead capture that grabs the job when you can't.",
     sections: [
       {
         heading: "What each option is really buying",
         paragraphs: [
-          "Live answering buys a human voice, judgment, and often complex transfers — typically from around $235/month and up with volume.",
-          "AI answering buys consistent pickup, trade-style questions, and a lead text when you're unavailable — usually a fraction of live receptionist pricing.",
+          "Live receptionist services buy a human voice, judgment, and often complex transfers — typically from around $235/month and up with volume.",
+          "Missed-call lead capture buys consistent pickup, trade-style questions, and a lead text when you're unavailable — usually a fraction of live receptionist pricing.",
         ],
       },
       {
-        heading: "When AI is enough",
+        heading: "When lead capture is enough",
         paragraphs: [
-          "Most one-truck and small-crew shops lose work because nobody answered — not because the greeting wasn't human enough. If your pain is missed and after-hours calls, AI that texts you the address and urgency usually wins on cost per captured job.",
+          "Most one-truck and small-crew shops lose work because nobody answered — not because the greeting wasn't human enough. If your pain is missed and after-hours calls, lead capture that texts you the address and urgency usually wins on cost per captured job.",
           `${formatJobValuePromptLine()} One recovered emergency often beats months of either option.`,
         ],
         bullets: [
@@ -603,23 +615,23 @@ const GUIDES: Guide[] = [
       {
         heading: "When live (or hybrid) still wins",
         paragraphs: [
-          "Choose live or hybrid if you need complex live transfers, multi-department phone trees, or a human receptionist as a brand requirement on every ring.",
-          "Some shops run AI for overflow and after hours, and keep live coverage for peak daytime — that's a valid stack if the math still works.",
+          "Choose live or hybrid receptionist software if you need complex live transfers, multi-department phone trees, or a human receptionist as a brand requirement on every ring.",
+          "Some shops run lead capture for overflow and after hours, and keep live coverage for peak daytime — that's a valid stack if the math still works.",
         ],
       },
       {
         heading: "How CallGrabbr fits",
         paragraphs: [
-          `CallGrabbr is AI-first for contractors: ${PLAN_BASIC} $${basic.price}/mo for missed and after-hours, ${PLAN_GROWTH} $${growth.price}/mo when you want most inbound answered, ${PLAN_PLATINUM} $${platinum.price}/mo for busy shops. ${trialSummaryShort()}.`,
-          "If you later need a human on every call, you can still add a live service — start by stopping the silent losses first.",
+          `CallGrabbr is ${CATEGORY_NAME} for contractors: ${PLAN_BASIC} $${basic.price}/mo for missed and after-hours, ${PLAN_GROWTH} $${growth.price}/mo when you want most inbound handled, ${PLAN_PLATINUM} $${platinum.price}/mo for busy shops. ${trialSummaryShort()}.`,
+          "If you later need a human on every call, you can still add a live receptionist service — start by stopping the silent losses first.",
         ],
       },
     ],
     comparison: {
       competitorName: "Live receptionist",
       rows: [
-        { label: "Typical starting cost", callgrabbr: `$${basic.price}/mo AI (${PLAN_BASIC})`, competitor: `~$${HUMAN_RECEPTIONIST_FROM_MONTHLY}+/mo` },
-        { label: "Who answers", callgrabbr: "AI call assistant", competitor: "Live agents" },
+        { label: "Typical starting cost", callgrabbr: `$${basic.price}/mo (${PLAN_BASIC})`, competitor: `~$${HUMAN_RECEPTIONIST_FROM_MONTHLY}+/mo` },
+        { label: "Category", callgrabbr: CATEGORY_NAME, competitor: "Live receptionist service" },
         { label: "Best for", callgrabbr: "Missed / after-hours job capture", competitor: "Human on every ring, complex transfers" },
         { label: "Lead alerts", callgrabbr: "SMS & email in seconds", competitor: "Depends on service" },
         { label: "Trial", callgrabbr: `${trialDaysLabel()} free · no card`, competitor: "Varies" },
@@ -629,31 +641,116 @@ const GUIDES: Guide[] = [
     showDemo: true,
     faq: [
       {
-        question: "Is AI answering good enough for HVAC and plumbing?",
+        question: "Is missed-call lead capture good enough for HVAC and plumbing?",
         answer:
-          "For capturing missed and after-hours jobs — name, phone, address, urgency — yes for most shops. Use live answering if you need a human on every call or complex live transfers.",
+          "For capturing missed and after-hours jobs — name, phone, address, urgency — yes for most shops. Use live receptionist services if you need a human on every call or complex live transfers.",
       },
       {
-        question: "How much cheaper is AI than a live receptionist?",
+        question: "How much cheaper is lead capture than a live receptionist?",
         answer: `CallGrabbr ${PLAN_BASIC} is $${basic.price}/mo. Live receptionist services often start around $${HUMAN_RECEPTIONIST_FROM_MONTHLY}/mo and climb with minutes. Exact savings depend on your volume.`,
       },
       {
-        question: "Can I switch from live answering to CallGrabbr?",
+        question: "Can I switch from live receptionist to CallGrabbr?",
         answer: `Yes. Start a ${trialDaysLabel()} trial, forward a test line (or after-hours only), and compare lead quality before you cancel an existing service.`,
       },
     ],
     relatedLinks: [
       { label: "CallGrabbr vs Ruby", href: "/guides/callgrabbr-vs-ruby" },
-      { label: "After-hours answering cost", href: "/guides/after-hours-answering-cost-for-contractors" },
-      { label: "Best AI answering for plumbing", href: "/guides/best-ai-answering-for-plumbing-2026" },
-      { label: "Best AI answering for HVAC", href: "/guides/best-ai-answering-for-hvac-2026" },
+      { label: "After-hours lead capture cost", href: "/guides/after-hours-answering-cost-for-contractors" },
+      { label: "After-hours lead capture for plumbing", href: "/guides/best-ai-answering-for-plumbing-2026" },
+      { label: "After-hours lead capture for HVAC", href: "/guides/best-ai-answering-for-hvac-2026" },
       { label: "Pricing", href: "/pricing" },
     ],
     keywords: [
-      "AI vs live answering service",
-      "AI receptionist vs human",
-      "contractor answering service AI or live",
-      "virtual receptionist vs AI for HVAC",
+      "missed call lead capture vs live receptionist",
+      "lead capture vs human receptionist",
+      "contractor missed call capture",
+      "virtual receptionist vs lead capture for HVAC",
+    ],
+  },
+  {
+    slug: "missed-call-lead-capture-vs-ai-answering",
+    title: "Missed-Call Lead Capture vs AI Answering for Contractors",
+    description: `${PRODUCT_ONE_LINER} Compare missed-call lead capture to AI answering and receptionist software — trade intake, SMS alerts, missed-only plans, and why one captured job pays for months.`,
+    eyebrow: "Category guide",
+    headline: "Missed-call lead capture vs AI answering",
+    intro:
+      "AI answering tools and receptionist software compete on who picks up the phone. CallGrabbr competes on revenue — capturing trade job details when you miss a ring and texting you the lead in seconds. This guide explains the difference so you don't buy the wrong category.",
+    sections: [
+      {
+        heading: "Two different problems",
+        paragraphs: [
+          "Receptionist software (Ruby, Smith.ai, Rosie, and similar) sells a voice on your line — human or AI — often priced per minute or as a full-time front desk.",
+          `${PRODUCT_ONE_LINER} You're not buying a receptionist. You're buying back jobs that would have gone to voicemail or your competitor.`,
+        ],
+      },
+      {
+        heading: "What contractors actually need",
+        paragraphs: [
+          "When you're under a sink or on a roof, you don't need small talk. You need name, phone, address, what's broken, and how urgent — in a text you can act on before the homeowner dials the next contractor.",
+          `${formatJobValuePromptLine()} That's the ROI test: one captured emergency job, not how polished the greeting sounds.`,
+        ],
+        bullets: [
+          "Job details built for trades — not generic message-taking",
+          "SMS or email lead summary in seconds",
+          "A missed-only plan so you're not paying for rings you already answer",
+          "Pricing that pays for itself with one recovered job",
+        ],
+      },
+      {
+        heading: "The Rosie price trap",
+        paragraphs: [
+          ROSIE_PRICE_OBJECTION,
+          `CallGrabbr ${PLAN_BASIC} is $${basic.price}/mo (${BASIC_FRAME}). We don't race receptionist tools to ~$49/mo — we sell cost per captured job and intake depth that lets you sell the call back.`,
+        ],
+      },
+      {
+        heading: "When receptionist software still fits",
+        paragraphs: [
+          "Choose AI answering or live receptionist platforms if you need a human-quality voice on every ring, complex live transfers, or multi-department phone trees as a brand requirement.",
+          "Choose CallGrabbr if your main leak is missed and after-hours revenue — and you want a trial, clear Basic / Growth / Platinum steps, and lead texts that read like job tickets.",
+        ],
+      },
+    ],
+    comparison: {
+      competitorName: "AI answering / receptionist tools",
+      rows: [
+        { label: "Captures job details for trades", callgrabbr: "Built in — issue, address, urgency", competitor: "Often generic transcripts" },
+        { label: "SMS lead in seconds", callgrabbr: "Yes — text & email alerts", competitor: "Varies by product" },
+        { label: "Missed-only plan", callgrabbr: `${PLAN_BASIC} — ${BASIC_FRAME}`, competitor: "Usually full-time answering" },
+        { label: "Pays for itself with 1 job", callgrabbr: "Yes — typical emergency ROI", competitor: "Depends on volume & intake" },
+        { label: "Entry price", callgrabbr: `$${basic.price}/mo (${PLAN_BASIC})`, competitor: "e.g. Rosie ~$49/mo (answers phones)" },
+      ],
+    },
+    showPricingSnippet: true,
+    showDemo: true,
+    faq: [
+      {
+        question: "Is CallGrabbr an AI answering service?",
+        answer:
+          "No. CallGrabbr is missed-call lead capture for trades. It picks up when you can't answer and texts you job-ready lead details. AI answering tools compete as receptionist software — CallGrabbr competes on captured revenue.",
+      },
+      {
+        question: "Why is CallGrabbr more than ~$49/mo tools like Rosie?",
+        answer: ROSIE_PRICE_OBJECTION,
+      },
+      {
+        question: "Can I use CallGrabbr only for missed calls?",
+        answer: `Yes. ${PLAN_BASIC} ($${basic.price}/mo) is ${BASIC_FRAME.toLowerCase()} — forward after hours or when unanswered, and keep daytime rings on your phone if you prefer.`,
+      },
+    ],
+    relatedLinks: [
+      { label: "CallGrabbr vs Rosie", href: "/guides/callgrabbr-vs-rosie" },
+      { label: "CallGrabbr vs Ruby", href: "/guides/callgrabbr-vs-ruby" },
+      { label: "Lead capture vs live receptionist", href: "/guides/ai-vs-live-answering-for-contractors" },
+      { label: "Full comparison hub", href: "/compare" },
+      { label: "Pricing", href: "/pricing" },
+    ],
+    keywords: [
+      "missed call lead capture vs AI answering",
+      "AI answering alternative for contractors",
+      "missed call capture for trades",
+      "voicemail alternative for HVAC plumbing",
     ],
   },
 ]

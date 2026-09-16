@@ -5,7 +5,11 @@ const REQUIRED = [
   "DATABASE_URL",
   "DIRECT_URL",
   "NEXT_PUBLIC_SUPABASE_URL",
+] as const
+
+const SUPABASE_KEY_ALIASES = [
   "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+  "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
 ] as const
 
 function main() {
@@ -18,6 +22,14 @@ function main() {
     } else {
       console.log(`✓ ${key}`)
     }
+  }
+
+  if (!SUPABASE_KEY_ALIASES.some((key) => process.env[key]?.trim())) {
+    console.error(`✗ Set ${SUPABASE_KEY_ALIASES.join(" or ")}`)
+    failed = true
+  } else {
+    const present = SUPABASE_KEY_ALIASES.filter((key) => process.env[key]?.trim())
+    console.log(`✓ ${present.join(", ")}`)
   }
 
   const db = getDatabaseEnvSummary()

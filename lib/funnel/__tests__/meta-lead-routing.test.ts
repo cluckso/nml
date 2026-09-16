@@ -5,6 +5,7 @@ import {
   getMetaIndustryFromParams,
   getMetaSkippedStepIds,
   hasCompleteMetaContact,
+  META_START_PICKER_OPTIONS,
   parseMetaLeadPrefill,
   resolveMetaIndustrySlug,
 } from "@/lib/meta-lead-routing"
@@ -77,5 +78,12 @@ describe("meta-lead-routing", () => {
   it("reads industry from common query param names", () => {
     expect(getMetaIndustryFromParams({ industry: "plumbing" })).toBe("plumbing")
     expect(getMetaIndustryFromParams({ business_type: "Roofing" })).toBe("roofing")
+  })
+
+  it("limits /start picker to trades with dedicated intake plus Other", () => {
+    const slugs = META_START_PICKER_OPTIONS.map((option) => option.slug)
+    expect(slugs).toEqual(["hvac", "plumbing", "electrical", "auto-repair", "handyman", "handyman"])
+    expect(META_START_PICKER_OPTIONS.some((option) => option.slug === "lawyers")).toBe(false)
+    expect(META_START_PICKER_OPTIONS.some((option) => option.slug === "dentists")).toBe(false)
   })
 })

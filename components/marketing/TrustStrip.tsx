@@ -1,17 +1,21 @@
 import { Clock, Phone, Shield, Zap } from "lucide-react"
 import { trialDaysLabel } from "@/lib/trial-marketing"
+import { CustomerCountBadge } from "@/components/marketing/CustomerCountBadge"
 
 const TRUST_ITEMS = [
   { icon: Zap, label: "Leads texted in seconds" },
+  { icon: Shield, label: "One captured job = months of service" },
   { icon: Clock, label: `${trialDaysLabel()} free trial · no card` },
   { icon: Phone, label: "Keep your existing number" },
-  { icon: Shield, label: "Cancel anytime" },
 ] as const
 
 export function TrustStrip() {
   return (
     <div className="border-y border-border/40 bg-card/40 backdrop-blur-md">
       <div className="container mx-auto px-4 py-4">
+        <div className="mb-4">
+          <CustomerCountBadge />
+        </div>
         <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
           {TRUST_ITEMS.map(({ icon: Icon, label }) => (
             <div

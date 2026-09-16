@@ -44,14 +44,14 @@ export function trialActivationGoal(): string {
 /** Onboarding welcome subtitle for trial users. */
 export function onboardingWelcomeSubtitle(hasPlan: boolean): string {
   if (hasPlan) {
-    return "You're subscribed — add your business details so your call assistant knows how to answer."
+    return "You're subscribed — add your business details so we know how to capture each job."
   }
   return `${TRIAL_DAYS}-day trial · ${FREE_TRIAL_MINUTES} call minutes (${trialLimitsLine()}) · About 5 minutes to go live.`
 }
 
 /** Shown after onboarding completes — pushes user to dashboard setup. */
 export function onboardingCompleteNextStep(): string {
-  return "Next: connect your call assistant on the dashboard and forward your business line."
+  return "Next: connect your line on the dashboard and forward your business number so we can grab missed-call leads."
 }
 
 export function trialBillingDescription(): string {
@@ -63,7 +63,11 @@ export function trialBillingCardLabel(): string {
 }
 
 export function siteMetaDescription(): string {
-  return `When you miss a call, most callers hang up and dial your competitor. CallGrabbr answers and texts you the lead in seconds. One captured job pays for months. ${trialSummaryShort()}.`
+  return `AI answering service for HVAC and plumbing. We grab missed-call leads and text you in seconds. ${trialDaysLabel()} free trial, no card.`
+}
+
+export function heroGuaranteeLine(): string {
+  return `${trialDaysLabel()} free trial. No card required. ${moneyBackGuaranteeLabel()}. Cancel anytime.`
 }
 
 export function authMetaDescription(): string {
@@ -71,7 +75,7 @@ export function authMetaDescription(): string {
 }
 
 export function trialStartMetaDescription(): string {
-  return `Start your ${TRIAL_DAYS}-day free trial. No card required. Add your business phone to get your call assistant.`
+  return `Start your ${TRIAL_DAYS}-day free trial. No card required. Add your business phone to start capturing missed-call leads.`
 }
 
 export function pricingSchemaTrialDescription(): string {
@@ -100,12 +104,12 @@ export function trialNavCtaLabel(): string {
 
 /** Loss-framed upgrade CTA — use instead of leading with price. */
 export function upgradeKeepAnsweringLabel(): string {
-  return "Keep answering calls"
+  return "Keep capturing leads"
 }
 
 /** After trial ends or minutes exhausted. */
 export function upgradeTrialEndedLabel(): string {
-  return "Turn your assistant back on"
+  return "Turn lead capture back on"
 }
 
 /** Mid-trial save — show around day 5 or when ~70% of minutes are used. */
@@ -125,7 +129,7 @@ export function signupPageDescription(): string {
 
 /** Sign-in page for returning users who may not have finished setup. */
 export function signInPageDescription(): string {
-  return "Sign in to finish setup, view captured leads, and manage your call assistant."
+  return "Sign in to finish setup, view captured leads, and manage missed-call lead capture."
 }
 
 /** Onboarding completion — urgency without pricing. */

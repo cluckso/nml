@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { analytics } from "@heycatch/sdk"
 import { useRouter } from "next/navigation"
 import { Loader2 } from "lucide-react"
 import {
@@ -29,6 +30,7 @@ export function DeleteAccountControl() {
         setError(data.error ?? "Could not delete account")
         return
       }
+      analytics.resetIdentity()
       setOpen(false)
       router.push("/sign-in?message=account-deleted")
       router.refresh()

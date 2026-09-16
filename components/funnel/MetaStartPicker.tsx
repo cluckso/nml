@@ -2,7 +2,8 @@
 
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
-import { META_FORM_INDUSTRY_OPTIONS } from "@/lib/meta-lead-routing"
+import { LOSS_CTA } from "@/lib/marketing/positioning"
+import { META_START_PICKER_OPTIONS } from "@/lib/meta-lead-routing"
 import { getFunnelConfig } from "@/lib/funnel/industry-configs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { ArrowRight } from "lucide-react"
@@ -24,12 +25,12 @@ export function MetaStartPicker() {
         <CardHeader className="text-center">
           <CardTitle className="text-2xl">What type of business do you run?</CardTitle>
           <CardDescription>
-            Pick your industry to see a personalized missed-call ROI estimate and start your trial.
+            HVAC, plumbing, electrical, auto, or handyman — {LOSS_CTA.toLowerCase()} with a missed-call estimate, then start capturing leads free.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid sm:grid-cols-2 gap-3">
-            {META_FORM_INDUSTRY_OPTIONS.map((option) => {
+            {META_START_PICKER_OPTIONS.map((option) => {
               const config = getFunnelConfig(option.slug)
               const icon = config?.icon ?? "📞"
               const href = `/start?industry=${encodeURIComponent(option.slug)}${utmSuffix}`
