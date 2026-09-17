@@ -30,21 +30,23 @@ Meta form (industry + contact)
 
 ### Screen 2 — Q1: Industry (custom multiple choice)
 
-Use these **exact** answer labels (source: `META_FORM_INDUSTRY_OPTIONS` in `lib/meta-lead-routing.ts`):
+Use these **exact** answer labels (source: `META_FORM_INDUSTRY_OPTIONS` in `lib/meta-lead-routing.ts`).
 
-| Answer label |
-|--------------|
-| HVAC |
-| Plumbing |
-| Electrical |
-| Auto repair |
-| Handyman |
-| Roofing |
-| Law firm |
-| Real estate |
-| Dental practice |
-| Salon |
-| Other home or service business |
+**First-revenue ads:** use only HVAC, Plumbing, Electrical, Auto repair, Handyman, and Other. The `/start` picker now shows those trades. Roofing / law / real estate / dental / salon still route if a form already uses them, but they onboard as a generic agent.
+
+| Answer label | First-revenue? |
+|--------------|----------------|
+| HVAC | Yes |
+| Plumbing | Yes |
+| Electrical | Yes |
+| Auto repair | Yes |
+| Handyman | Yes |
+| Other home or service business | Yes |
+| Roofing | Skip for new ads |
+| Law firm | Skip for new ads |
+| Real estate | Skip for new ads |
+| Dental practice | Skip for new ads |
+| Salon | Skip for new ads |
 
 ### Thank-you screen — Website URL
 
@@ -64,7 +66,7 @@ Replace `{{What type of business do you run?}}` with the **exact custom question
 
 ### Privacy / description (contact screen)
 
-> CallGrabbr is an AI phone assistant for home and service businesses. We use your info to show a personalized missed-call ROI estimate and help you start a free trial. See our Privacy Policy at callgrabbr.com/privacy.
+> CallGrabbr is missed-call lead capture for home and service businesses. We use your info to show a personalized missed-call ROI estimate and help you start a free trial. See our Privacy Policy at callgrabbr.com/privacy.
 
 ## Website routes
 

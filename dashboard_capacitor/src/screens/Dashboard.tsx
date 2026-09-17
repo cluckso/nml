@@ -2,8 +2,10 @@ import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getDashboard } from '../lib/api'
 import { ApiError } from '../lib/api'
-import { formatPhoneForDisplay, toTelHref } from '../lib/phone'
+import { formatPhoneForDisplay, resolveCallbackPhone } from '../lib/phone'
+import { CallBackButton } from '../components/CallBackButton'
 import { CallRecordingButton } from '../components/CallRecordingButton'
+import { AppLogo } from '../components/AppLogo'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
 
 interface DashboardProps {
@@ -16,6 +18,7 @@ export default function Dashboard({ onSignOut }: DashboardProps) {
     recentCalls?: Array<{
       callerName?: string
       callerPhone?: string
+      structuredIntake?: unknown
       issueDescription?: string
       summary?: string
       recordingUrl?: string | null
@@ -75,7 +78,10 @@ export default function Dashboard({ onSignOut }: DashboardProps) {
   return (
     <>
       <header className="app-bar">
-        <h1>CallGrabbr</h1>
+        <h1>
+          <AppLogo size={28} />
+          CallGrabbr
+        </h1>
         <button type="button" className="btn btn-outline" onClick={onSignOut} style={{ padding: '6px 12px' }}>
           Sign out
         </button>
@@ -121,6 +127,9 @@ export default function Dashboard({ onSignOut }: DashboardProps) {
                     </div>
                   )}
                 </div>
+                <button type="button" className="btn" style={{ width: '100%', marginTop: 12 }} onClick={() => navigate('/billing')}>
+                  See plans &amp; billing
+                </button>
               </div>
             )}
 
@@ -205,8 +214,8 @@ export default function Dashboard({ onSignOut }: DashboardProps) {
                 </div>
               )}
               {data.recentCalls?.slice(0, 5).map((c, i) => {
-                const telHref = toTelHref(c.callerPhone)
-                const phoneLabel = formatPhoneForDisplay(c.callerPhone) || c.callerPhone
+                const callbackPhone = resolveCallbackPhone(c)
+                const phoneLabel = formatPhoneForDisplay(callbackPhone) || callbackPhone
                 return (
                   <div key={i} className="call-item">
                     <div className="call-header">
@@ -228,11 +237,7 @@ export default function Dashboard({ onSignOut }: DashboardProps) {
                       {c.emergencyFlag && (
                         <span className="badge error">🚨 Emergency</span>
                       )}
-                      {telHref && (
-                        <a href={telHref} className="call-back-link">
-                          📞 Call back
-                        </a>
-                      )}
+                      <CallBackButton phone={callbackPhone} />
                       {c.recordingUrl && <CallRecordingButton url={c.recordingUrl} />}
                     </div>
                   </div>
@@ -254,8 +259,14 @@ export default function Dashboard({ onSignOut }: DashboardProps) {
               <button type="button" className="btn btn-outline" onClick={() => navigate('/appointments')}>
                 📅 Appointments
               </button>
+              <button type="button" className="btn btn-outline" onClick={() => navigate('/billing')}>
+                💳 Billing
+              </button>
               <button type="button" className="btn btn-outline" onClick={() => navigate('/settings')}>
                 ⚙️ Settings
+              </button>
+              <button type="button" className="btn btn-outline" onClick={() => navigate('/calls')}>
+                📞 Calls
               </button>
             </div>
           </>

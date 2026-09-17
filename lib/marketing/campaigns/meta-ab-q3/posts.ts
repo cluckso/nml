@@ -13,9 +13,9 @@ You're on a ladder, under a sink, or driving between jobs. The phone rings. You 
 
 How much was that job worth to you — $300? $500? $600+? Gone.
 
-CallGrabbr answers your forwarded business line 24/7. Industry-specific intake for HVAC, plumbing, electrical, and auto repair — not a generic robot menu. You get a text and email summary in seconds when callers share their details.
+CallGrabbr is missed-call lead capture for trades. We grab the job when you can't answer — industry-specific intake for HVAC, plumbing, electrical, and auto repair. Name, phone, address, and urgency texted to you in seconds when callers share them.
 
-Capture one job you'd have lost and CallGrabbr pays for itself for months. Plans from $99/mo.
+Recover one job you'd have lost and CallGrabbr pays for itself for months. Plans from $99/mo.
 
 Start your 14-day free trial — no credit card required.`,
     cta: "SIGN_UP",
@@ -39,9 +39,9 @@ Start your 14-day free trial — no credit card required.`,
         { time: "0-2s", visual: "Phone ringing, screen flash", caption: "YOUR PHONE IS LOSING YOU JOBS" },
         { time: "2-5s", visual: "Contractor on ladder, phone ringing in pocket", caption: "You can't answer every call." },
         { time: "5-7s", visual: "Phone leaks flying dollar bills", caption: "They hang up. Next shop gets the job." },
-        { time: "7-10s", visual: "Competitor phone shows CallGrabbr AI answering", caption: "AI: Thanks for calling! What's the address?" },
+        { time: "7-10s", visual: "CallGrabbr picks up — lead captured on screen", caption: "Thanks for calling! What's the address?" },
         { time: "10-12s", visual: "Phone screen: instant lead card", caption: "Lead texted in seconds." },
-        { time: "12-15s", visual: "Logo on black", caption: "Stop Losing Leads. We answer when you can't." },
+        { time: "12-15s", visual: "Logo on black", caption: "Stop losing leads to voicemail. We grab the job." },
       ],
       videoPrompt:
         "Vertical 9:16, 15 seconds, fast cuts 0.7s each, bold white captions with red accent on hook line, dark navy UI frames, electric blue glow on CallGrabbr moments. Scene 1: phone ringing alarm red text YOUR PHONE IS LOSING YOU JOBS. Scene 2: stylized contractor silhouette on ladder phone vibrating pocket not photorealistic. Scene 3: dollar bills flying off phone screen. Scene 4: split screen competitor phone answered with blue AI glow speech bubble Thanks for calling whats the address. Scene 5: smartphone New Lead notification card name phone urgency. Scene 6: CallGrabbr logo end card 14-day free trial no card. No watermarks.",
@@ -139,11 +139,13 @@ Call the demo line on our site if you want to hear it first.`,
     adSetName: "AdSet_D_Competition",
     headline: "They Called. You Didn't Answer.",
     description: "Your competition did.",
-    primaryText: `When you miss a call, they don't leave a message. They call the next name on Google.
+    primaryText: `Your competitors answer. You get the voicemail.
 
-That emergency HVAC call. The burst pipe. The "my AC died" at 9pm. Your competitor answers. You never even knew it happened.
+When you miss a call, they don't leave a message. They call the next name on Google.
 
-CallGrabbr answers your forwarded line 24/7 — captures name, phone, job details, and urgency when callers share them — and texts you a summary in seconds.
+That emergency HVAC call. The burst pipe. The "my AC died" at 9pm. Your competitor grabs the lead. You never even knew it happened.
+
+CallGrabbr is missed-call lead capture — we pick up your forwarded line 24/7, grab name, phone, job details, and urgency when callers share them, and text you a summary in seconds.
 
 Your missed call shouldn't be their next job. Plans from $99/mo. How much is one job worth — $300? $500? $600+?
 
@@ -168,7 +170,7 @@ Start your 14-day free trial. No credit card required.`,
         { time: "0-2s", visual: "Split screen: You on job vs Competitor nearby", caption: "When you miss a call..." },
         { time: "2-5s", visual: "Your phone goes to voicemail, money birds fly out", caption: "...they don't leave a message." },
         { time: "5-8s", visual: "Money birds fly to competitor", caption: "They call the next listing." },
-        { time: "8-11s", visual: "Competitor phone: AI captures the lead", caption: "Your missed call is their next job." },
+        { time: "8-11s", visual: "Competitor phone: lead captured", caption: "Your missed call is their next job." },
         { time: "11-15s", visual: "Your phone: missed call. His: new lead.", caption: "Stop Losing Leads. CallGrabbr.com" },
       ],
       videoPrompt:

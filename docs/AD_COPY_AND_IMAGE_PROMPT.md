@@ -1,41 +1,74 @@
 # CallGrabbr — Ad Copy & Ad Image Generation Prompt
 
-> **Keep in sync with the live site** (`app/page.tsx`, `lib/pricing-catalog.ts`). Pricing: Solo $99 / Team $159 / Pro $279. Trial: 7 days, 40 minutes, no card. Lead fields are captured when callers share them — do not promise every field on every call.
+> **Keep in sync with the live site** (`app/page.tsx`, `lib/pricing-catalog.ts`). Pricing: Basic $99 / Growth $159 / Platinum $279. Trial: 14 days, 40 minutes, no card. Lead fields are captured when callers share them — do not promise every field on every call.
 
 ## Product summary (for reference)
-- **What:** Automated call answering for forwarded business lines; captures intake info and sends summaries.
-- **Who:** Local service businesses (HVAC, plumbing, electrician, auto repair, childcare, handyman).
-- **Trial:** 7-day free trial, 40 included minutes; ~5-minute setup; no card required to start.
-- **Plans:** Solo $99 (300 min), Team $159 (800 min), Pro $279 (1,500 min). Overage $0.22/min.
+- **What:** Missed-call lead capture for forwarded business lines — grab the job when you can't answer; text/email summary in seconds.
+- **Who:** Local service businesses (HVAC, plumbing, electrician, auto repair, handyman).
+- **Trial:** 14-day free trial, 40 included minutes; ~5-minute setup; no card required to start.
+- **Plans:** Basic $99 (300 min), Growth $159 (800 min), Platinum $279 (1,500 min). Overage $0.22/min.
+- **Category:** Lead recovery — not a generic AI receptionist. Angles: *"Your competitors answer. You get the voicemail."* / *"80% of callers hang up. We don't let them."*
 
 ---
 
 ## Ad copy
 
 ### Headlines (short)
-- Never miss another call.
+- Stop losing jobs to missed calls.
 - Turn missed calls into booked work.
-- Your call assistant. 24/7.
-- No voicemail. No hold. No lost leads.
-- When you don’t answer, they call the next company. We answer.
+- Your competitors answer. You get voicemail.
+- 80% of callers hang up. We grab the lead.
+- No voicemail black hole. No lost jobs.
+- When you don’t answer, they call the next company.
 
 ### Subheads / one-liners
-- Call answering for local service businesses. Start your free trial in 5 minutes.
-- Answers forwarded calls, captures lead details, sends a summary — usually within seconds.
-- 24/7 when your line forwards to CallGrabbr. No voicemail black hole.
-- Forward your business line. We answer, qualify, and send you what was captured.
+- Missed-call lead capture for local service businesses. Start your free trial in 5 minutes.
+- We grab the job when you can't answer — lead summary by text, usually within seconds.
+- 24/7 lead recovery when your line forwards to CallGrabbr.
+- Forward your business line. We capture name, address, urgency, and job details when shared.
 
 ### Short body (social / display)
-- When you don’t answer, they call the next company. CallGrabbr answers forwarded calls, captures lead details when callers share them, and sends a summary by text and email — usually within seconds. Plans from $99/mo. Start your 7-day free trial, no card required.
+- When you don’t answer, they call the next company. CallGrabbr is missed-call lead capture for trades — we grab name, phone, job details, and urgency when callers share them, and text you a summary in seconds. Plans from $99/mo. Start your 14-day free trial, no card required.
 
 ### Long body (landing / email)
-- CallGrabbr answers your business line when you forward it to us. Your call assistant greets callers, asks industry-specific questions (HVAC, plumbing, electrician, auto repair, childcare, handyman), and captures name, phone, and job details when provided. Summaries go out by email and SMS based on your settings; CRM webhook on Team and Pro. Setup takes about 5 minutes. Start with a 7-day free trial — no credit card required.
+- CallGrabbr is missed-call lead capture for HVAC, plumbing, electrical, auto repair, and handyman shops. Forward your business line; when you can't answer, we grab the job — industry-specific intake, name, phone, and job details when provided. Summaries go out by email and SMS based on your settings; CRM webhook on Growth and Platinum. Setup takes about 5 minutes. Start with a 14-day free trial — no credit card required.
+
+### Google Search — RSA headlines (≤ 30 characters)
+
+Use 10–15; pin 2–3 per ad group. **Do not lead with "best AI answering service."**
+
+| Headline | Chars |
+|----------|-------|
+| Missed Call Lead Capture | 24 |
+| Stop Losing Jobs to Missed Calls | 30 |
+| After-Hours HVAC Lead Capture | 29 |
+| Voicemail Alternative for Trades | 30 |
+| Capture Leads When You're Busy | 30 |
+| Turn Missed Calls Into Leads | 27 |
+| Grab the Job When You Can't Answer | 30 |
+| After-Hours Lead Capture | 24 |
+| Never Lose a Job to Voicemail | 29 |
+| Contractor Missed Call Recovery | 29 |
+| HVAC After-Hours Lead Capture | 29 |
+| Plumbing Lead Capture 24/7 | 26 |
+| Text Lead Summaries in Seconds | 30 |
+| 14-Day Free Trial · No Card | 27 |
+| Forward Your Line · Grab Leads | 30 |
+
+### Google Search — RSA descriptions (≤ 90 characters)
+
+| Description | Chars |
+|-------------|-------|
+| When you miss a call, 80% hang up and call your competitor. Capture the lead instead. | 85 |
+| Missed-call lead capture for HVAC, plumbing & trades. Text summary in seconds. Try free. | 87 |
+| After-hours lead capture for contractors. We grab job details when you can't answer. | 84 |
+| Voicemail alternative that texts name, address, urgency & job details. 14-day trial. | 85 |
 
 ### CTA phrases
 - Start free trial
 - Activate CallGrabbr
 - Get your forwarding number
-- Try free — 7-day trial
+- Try free — 14-day trial
 
 ---
 
@@ -50,7 +83,7 @@ Match the approved CallGrabbr poster style — **not** photorealistic contractor
 | **Typography** | Bold modern sans-serif; white headlines with key words in bright blue gradient |
 | **Hero graphic** | Glossy 3D blue headset with phone icon, OR smartphone mockup showing a “New Lead” card |
 | **Supporting** | Neon blue soundwave across mid-frame; circular glowing blue icon badges (headset, clipboard, chat, calendar) |
-| **Mood** | High-tech B2B SaaS, trustworthy, 24/7 AI call assistant — not stock photo tradespeople |
+| **Mood** | High-tech B2B SaaS, trustworthy, 24/7 missed-call lead capture — not stock photo tradespeople |
 | **Text in image** | Add headlines/CTA in **Canva** after generation; keep AI output mostly visual (or use very short placeholder text only) |
 
 **Prodia:** FLUX.2 Dev + `photographic` or `cinematic` (if too warm, stick to default) · guidance **4–5** · 1024×1024 or 1024×1280 · polish winners on FLUX.2 Pro.
@@ -91,7 +124,7 @@ Append this block to every variant prompt below:
 | 0-2s | Phone ringing, screen flash | YOUR PHONE IS LOSING YOU JOBS (red, bold) | Loud alarm-style ring |
 | 2-5s | Contractor on ladder, phone ringing in pocket | You can't answer every call. | Phone keeps ringing |
 | 5-7s | Phone leaks flying dollar bills, money flies away | 28% of business calls go unanswered. | Cash flutter sound |
-| 7-10s | Competitor phone shows CallGrabbr AI answering | AI: Thanks for calling! What's the address? | AI voice, natural |
+| 7-10s | Competitor phone shows CallGrabbr grabbing the job | Lead capture: Thanks for calling! What's the address? | Natural voice |
 | 10-12s | Phone screen: instant lead card | Contractor receives text notification | Notification ding |
 | 12-15s | Logo on black | Stop Losing Leads. We answer when you can't. | - |
 
@@ -113,7 +146,7 @@ Append this block to every variant prompt below:
 | 0-3s | @supasteveman throwing objects perfectly into targets | THIS GUY NEVER MISSES. | Energetic music |
 | 3-5s | Hard cut: Contractor on ladder, phone ringing | BUT YOUR BUSINESS PHONE DOES. | Phone ringing |
 | 5-7s | Cash flies out of phone toward competitor | 28% of calls go unanswered. | Cash flutter |
-| 7-10s | Competitor phone: AI answering, asks for address | - | AI voice |
+| 7-10s | Competitor phone: CallGrabbr captures address & urgency | - | Natural voice |
 | 10-12s | Lead card appears, contractor gets text | - | Notification |
 | 12-15s | Logo + CTA | Stop Losing Leads. CallGrabbr.com | - |
 
@@ -161,7 +194,7 @@ Pair each image with the ad copy from the Meta A/B kit. Add headline + CTA in Ca
 **Full prompt:**
 > Professional CallGrabbr B2B SaaS marketing poster, dark navy gradient background with digital network grid and neon blue soundwave, centered modern smartphone mockup showing a clean “New Lead” notification card UI with fields for name phone address service needed and urgency high, glowing electric blue accent on key UI elements, four circular glowing blue icon badges in a row below phone (headset AI answers, clipboard captures details, chat bubble instant text, calendar follow up on your schedule), bold headline area at top left empty for overlay, neon blue glow and lens flare, square 1:1, no watermarks, no tiny illegible text
 
-**Canva overlay:** `One captured job pays for months` · subline `24/7 AI Call Assistant`
+**Canva overlay:** `One captured job pays for months` · subline `Missed-call lead capture`
 
 ---
 
@@ -194,7 +227,7 @@ Pair each image with the ad copy from the Meta A/B kit. Add headline + CTA in Ca
 **Full prompt:**
 > CallGrabbr B2B SaaS marketing poster, dark navy background with subtle grid, large bold headline zone at top (empty for overlay), row of four circular glowing electric blue icons with soft 3D depth (headset, clipboard, chat bubble, calendar), neon blue soundwave behind icons, smartphone mockup on right showing lead summary notification, bottom banner area with rounded blue border glow reserved for CTA button overlay, lens flare, square 1:1, no watermarks
 
-**Canva overlay:** `Built for HVAC & plumbing shops` · `7-day free trial — no card`
+**Canva overlay:** `Built for HVAC & plumbing shops` · `14-day free trial — no card`
 
 ---
 
@@ -203,7 +236,7 @@ Pair each image with the ad copy from the Meta A/B kit. Add headline + CTA in Ca
 **Full prompt:**
 > Vertical 9:16 CallGrabbr branded end card, dark navy gradient, large glowing 3D blue headset with phone icon center frame, neon blue soundwave, electric blue lens flare, minimal clean space at bottom third for CTA text overlay, futuristic B2B SaaS style, no watermarks
 
-**Canva overlay:** `7-day free trial · No card · callgrabbr.com`
+**Canva overlay:** `14-day free trial · No card · callgrabbr.com`
 
 ---
 
@@ -222,7 +255,7 @@ Pairs with the three static creatives: **Voicemail loss**, **Competitor steal**,
 | Brand | Dark navy UI (`#0f172a`), electric blue glow (`#3b82f6`) on CallGrabbr moments |
 | Style | Stylized / motion-graphic — **not** photorealistic job-site footage |
 | Audio | Phone ring → cash flutter (loss scenes) → notification ding → subtle upbeat outro |
-| End card | CallGrabbr logo + `7-day free trial · No card` |
+| End card | CallGrabbr logo + `14-day free trial · No card` |
 
 **Shared negative prompt (video gen):**
 `photorealistic contractor, job site, ladder, workshop, warm orange lighting, cartoon anime, shaky handheld, cluttered tiny text, watermark, logo distortion, low quality, stock footage people`
@@ -249,7 +282,7 @@ Pairs with the three static creatives: **Voicemail loss**, **Competitor steal**,
 
 **Full generative prompt (Runway / Kling / Pika — paste as one block or per scene):**
 ```
-Vertical 9:16, 15 seconds total, fast cuts 0.7s each, CallGrabbr ad. Scene 1: smartphone ringing alarm red pulse, bold caption zone YOUR PHONE IS LOSING YOU JOBS. Scene 2: stylized trade worker silhouette on ladder phone vibrating pocket not photorealistic. Scene 3: voicemail inbox UI with cobweb dust metaphor muted gray-red dollar bills floating away. Scene 4: split screen left gray dead voicemail right bright electric blue glow glossy headset AI answering speech bubble Thanks for calling whats the address. Scene 5: smartphone New Lead notification card name phone urgency high. Scene 6: dark navy end card CallGrabbr logo glow 7-day free trial no card. Dark navy and electric blue brand, bold white captions red hook accent, motion graphic SaaS style not photorealistic job site, no watermarks.
+Vertical 9:16, 15 seconds total, fast cuts 0.7s each, CallGrabbr ad. Scene 1: smartphone ringing alarm red pulse, bold caption zone YOUR PHONE IS LOSING YOU JOBS. Scene 2: stylized trade worker silhouette on ladder phone vibrating pocket not photorealistic. Scene 3: voicemail inbox UI with cobweb dust metaphor muted gray-red dollar bills floating away. Scene 4: split screen left gray dead voicemail right bright electric blue glow NEW LEAD CAPTURED card name address urgency. Scene 5: smartphone New Lead notification card name phone urgency high. Scene 6: dark navy end card CallGrabbr logo glow missed-call lead capture 14-day free trial no card. Dark navy and electric blue brand, bold white captions red hook accent, motion graphic SaaS style not photorealistic job site, no watermarks.
 ```
 
 ---
@@ -267,11 +300,11 @@ Vertical 9:16, 15 seconds total, fast cuts 0.7s each, CallGrabbr ad. Scene 1: sm
 | 5–8s | Birds fly to competitor's phone; Google search "HVAC near me" scroll | They call the next listing. |
 | 8–11s | Competitor phone: blue AI glow, lead captured checkmark | **Your missed call is their next job.** |
 | 11–13s | Side-by-side: your phone missed call / their phone New Lead | Stop losing jobs to voicemail. |
-| 13–15s | Logo end card | 7-day free trial · callgrabbr.com |
+| 13–15s | Logo end card | 14-day free trial · callgrabbr.com |
 
 **Full generative prompt:**
 ```
-Vertical 9:16, 15 second Meta ad, split-screen competitor narrative. Scene 1: split panel stylized worker on job left competitor shop right phone ringing. Scene 2: missed call notification red tint money birds flying away from smartphone. Scene 3: birds fly toward second phone Google listing scroll stylized. Scene 4: competitor smartphone electric blue glow AI headset New Lead success checkmark captured lead card. Scene 5: side by side your phone missed call their phone new lead green check. Scene 6: CallGrabbr logo end card navy background 7-day free trial no card. Bold captions each beat, dark navy electric blue CallGrabbr brand, motion graphic not photorealistic, no watermarks.
+Vertical 9:16, 15 second Meta ad, split-screen competitor narrative. Scene 1: split panel stylized worker on job left competitor shop right phone ringing. Scene 2: missed call notification red tint money birds flying away from smartphone. Scene 3: birds fly toward second phone Google listing scroll stylized. Scene 4: competitor smartphone electric blue glow AI headset New Lead success checkmark captured lead card. Scene 5: side by side your phone missed call their phone new lead green check. Scene 6: CallGrabbr logo end card navy background 14-day free trial no card. Bold captions each beat, dark navy electric blue CallGrabbr brand, motion graphic not photorealistic, no watermarks.
 ```
 
 ---
@@ -292,7 +325,7 @@ Vertical 9:16, 15 second Meta ad, split-screen competitor narrative. Scene 1: sp
 
 **Full generative prompt:**
 ```
-Vertical 9:16, 15 second emotional relief ad for local service business owners. Scene 1: stylized family dinner table warm tones phone buzzing on counter many notification badges not photorealistic. Scene 2: conflicted glance at phone stress captions Miss it lost job Answer it never off. Scene 3: transition to dark navy CallGrabbr UI electric blue glow headset AI answering call smoothly. Scene 4: calm single New Lead notification owner smiles puts phone face down relief. Scene 5: CallGrabbr logo end card Get Your Family Time Back 7-day free trial no card. Bold mobile captions, trustworthy not corporate, stylized motion graphic not stock photo tradespeople, no watermarks.
+Vertical 9:16, 15 second emotional relief ad for local service business owners. Scene 1: stylized family dinner table warm tones phone buzzing on counter many notification badges not photorealistic. Scene 2: conflicted glance at phone stress captions Miss it lost job Answer it never off. Scene 3: transition to dark navy CallGrabbr UI electric blue glow NEW LEAD CAPTURED notification. Scene 4: calm single New Lead notification owner smiles puts phone face down relief. Scene 5: CallGrabbr logo end card Get Your Family Time Back 14-day free trial no card. Bold mobile captions, trustworthy not corporate, stylized motion graphic not stock photo tradespeople, no watermarks.
 ```
 
 ---

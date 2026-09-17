@@ -11,10 +11,12 @@ import {
   TYPICAL_CAPTURE_RATE,
   VOICEMAIL_CAPTURE_RATE,
 } from "@/lib/marketing/positioning"
+import { getDemoNumberDisplay, getDemoNumberTel } from "@/lib/demo-line"
 import {
   ArrowRight,
   Clock,
   CreditCard,
+  Phone,
   PhoneOff,
   Shield,
 } from "lucide-react"
@@ -57,7 +59,7 @@ export function HomeHero() {
         {TYPICAL_CAPTURE_RATE}{" "}
         <span className="text-muted-foreground/80">(industry rates, not first-party stats)</span>.
       </p>
-      <div className="flex flex-wrap gap-4 justify-center mb-3">
+      <div className="flex flex-wrap gap-4 justify-center mb-5">
         <Link href="/sign-up?next=%2Ftrial%2Fstart" className="min-h-[44px] flex items-center">
           <Button
             size="lg"
@@ -67,6 +69,16 @@ export function HomeHero() {
             <ArrowRight className="h-5 w-5" aria-hidden />
           </Button>
         </Link>
+        <a href={`tel:${getDemoNumberTel()}`} className="min-h-[44px] flex items-center">
+          <Button
+            size="lg"
+            variant="outline"
+            className="gap-2 border-2 border-primary/40 bg-background/50 backdrop-blur-sm hover:bg-background/70 min-h-[44px]"
+          >
+            <Phone className="h-5 w-5" aria-hidden />
+            Call the demo
+          </Button>
+        </a>
         <Link href="#lost-jobs" className="min-h-[44px] flex items-center">
           <Button
             size="lg"
@@ -77,6 +89,16 @@ export function HomeHero() {
           </Button>
         </Link>
       </div>
+      <a
+        href={`tel:${getDemoNumberTel()}`}
+        className="mb-6 inline-flex flex-col items-center rounded-2xl border border-primary/40 bg-background/70 px-6 py-4 backdrop-blur-sm hover:border-primary/70 hover:bg-background/80"
+      >
+        <span className="text-xs uppercase tracking-wide text-muted-foreground">Hear a live demo</span>
+        <span className="text-2xl sm:text-3xl font-bold tracking-wide text-primary">
+          {getDemoNumberDisplay()}
+        </span>
+        <span className="text-xs text-muted-foreground mt-1">Tap to call · 60-second sample · no signup</span>
+      </a>
       <p className="text-sm text-muted-foreground mb-6 max-w-xl mx-auto">
         {heroGuaranteeLine()}{" "}
         <Link href="/terms" className="text-primary/90 hover:text-primary hover:underline">

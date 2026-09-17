@@ -4,7 +4,7 @@ Source of truth: [`lib/marketing/campaigns/meta-ab-q3/`](../lib/marketing/campai
 
 ## Week 3 launch (founder ops)
 
-Code/copy is ready (14-day trial, scene-first, rhetorical job value, landing **`/start`**). You still flip ads on in Meta Ads Manager:
+Code/copy is ready (14-day trial, missed-call lead capture positioning, rhetorical job value, landing **`/start`**). Round 1 hooks: **a-voicemail** + **d-competition**. You still flip ads on in Meta Ads Manager:
 
 1. Deploy this branch so `/start` + guides are live on production.
 2. Export assets:

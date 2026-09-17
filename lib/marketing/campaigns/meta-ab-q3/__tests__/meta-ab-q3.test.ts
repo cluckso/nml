@@ -6,6 +6,7 @@ import {
   listMetaAbVariants,
   buildMetaAbLandingUrl,
 } from "@/lib/marketing/campaigns/meta-ab-q3"
+import { FORBIDDEN_CATEGORY_PHRASES } from "@/lib/marketing/positioning"
 
 describe("meta-ab-q3 campaign", () => {
   it("has lean $15/day budget config", () => {
@@ -47,5 +48,21 @@ describe("meta-ab-q3 campaign", () => {
     for (const v of listMetaAbVariants()) {
       expect(v.primaryText).not.toContain("CallGrabber")
     }
+  })
+
+  it("avoids commodity receptionist phrasing in ad bodies", () => {
+    for (const v of listMetaAbVariants()) {
+      const body = v.primaryText.toLowerCase()
+      for (const phrase of FORBIDDEN_CATEGORY_PHRASES) {
+        expect(body).not.toContain(phrase.toLowerCase())
+      }
+    }
+  })
+
+  it("round 1 variants lead with missed-call recovery angles", () => {
+    const voicemail = getMetaAbVariant("a-voicemail").primaryText
+    const competition = getMetaAbVariant("d-competition").primaryText
+    expect(voicemail).toMatch(/80%|voicemail/i)
+    expect(competition).toMatch(/competitor|next (name|company|listing)/i)
   })
 })

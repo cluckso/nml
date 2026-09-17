@@ -2,8 +2,12 @@ import { useEffect, useState, useRef } from 'react'
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { getSupabase } from './lib/supabase'
 import { registerPushNotifications } from './lib/notifications'
+import { AppLogo } from './components/AppLogo'
 import type { Session, SupabaseClient } from '@supabase/supabase-js'
 import Login from './screens/Login'
+import Welcome from './screens/Welcome'
+import Plans from './screens/Plans'
+import Billing from './screens/Billing'
 import Dashboard from './screens/Dashboard'
 import Calls from './screens/Calls'
 import Appointments from './screens/Appointments'
@@ -77,12 +81,15 @@ export default function App() {
 
   const handleSignOut = async () => {
     await supabase?.auth.signOut()
-    navigate('/login', { replace: true })
+    navigate('/welcome', { replace: true })
   }
 
   if (loading) {
     return (
       <div className="page" style={{ paddingTop: 48, textAlign: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+          <AppLogo size={64} />
+        </div>
         Loading…
       </div>
     )
@@ -104,8 +111,10 @@ export default function App() {
   if (!session) {
     return (
       <Routes>
+        <Route path="/welcome" element={<Welcome />} />
+        <Route path="/plans" element={<Plans />} />
         <Route path="/login" element={<Login supabase={supabase} />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/welcome" replace />} />
       </Routes>
     )
   }
@@ -115,6 +124,7 @@ export default function App() {
       <Route path="/" element={<Dashboard onSignOut={handleSignOut} />} />
       <Route path="/calls" element={<Calls />} />
       <Route path="/appointments" element={<Appointments />} />
+      <Route path="/billing" element={<Billing />} />
       <Route path="/settings" element={<Settings onSignOut={handleSignOut} />} />
       <Route path="/login" element={<Navigate to="/" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />

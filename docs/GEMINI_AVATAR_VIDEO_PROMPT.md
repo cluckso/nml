@@ -16,7 +16,7 @@ Use this in **Google Gemini** (Veo video generation) with your avatar/reference 
 ```
 Use the uploaded person as the main character throughout this video. Keep their face recognizable and consistent in every shot.
 
-Create a 15-second vertical (9:16) semi-humorous advertisement for CallGrabbr, an AI phone answering service for contractors and local trades businesses.
+Create a 15-second vertical (9:16) semi-humorous advertisement for CallGrabbr, missed-call lead capture for contractors and local trades businesses.
 
 STYLE: Fast-paced social media ad. Photorealistic. Slightly exaggerated comedy timing like a viral TikTok skit — not cartoonish. Bright, confident energy. Quick cuts every 1–2 seconds. Mobile-friendly framing.
 
@@ -28,7 +28,7 @@ SHOT 2 (3–5 sec): Hard comedic cut. Same person is now on a ladder against a h
 
 SHOT 3 (5–7 sec): Close-up of the ringing phone. Cartoon-style dollar bills or cash visually fly out of the phone screen and drift away toward the distance, as if money is escaping. Slightly surreal but funny, not horror. Text vibe: "28% OF CALLS GO UNANSWERED."
 
-SHOT 4 (7–10 sec): Split or cut to a different phone on a clean desk. A friendly professional voice is implied — show a subtle "call answered" UI or green active-call glow. A calm conversation mood. Text vibe: "CALLGRABBR ANSWERS FOR YOU."
+SHOT 4 (7–10 sec): Split or cut to a different phone on a clean desk. A friendly professional voice is implied — show a subtle "call answered" UI or green active-call glow. A calm conversation mood. Text vibe: "CALLGRABBR GRABS THE LEAD."
 
 SHOT 5 (10–12 sec): The contractor's phone buzzes with a new text notification showing a lead summary (blurred or generic text like "New Lead — Burst pipe, 123 Oak St, URGENT"). The person on the ladder smiles with relief. Text vibe: "LEAD TEXTED IN SECONDS."
 
@@ -46,9 +46,9 @@ AUDIO MOOD (if supported): Upbeat punchy music that drops on the hard cut at sho
 ## Shorter prompt (if character limit is tight)
 
 ```
-Use the uploaded person as the consistent main character. 15-second vertical 9:16 semi-humorous ad for CallGrabbr AI call answering for contractors.
+Use the uploaded person as the consistent main character. 15-second vertical 9:16 semi-humorous ad for CallGrabbr missed-call lead capture for contractors.
 
-Fast cuts: (1) Person perfectly throws tools into a truck — "never misses" energy. (2) Hard cut: same person on a ladder, phone ringing, can't answer — frustrated. (3) Cash flies out of the ringing phone. (4) Another phone shows call answered / AI handling it. (5) Contractor gets a "New Lead" text, relieved smile. (6) End card: "Stop Losing Jobs to Voicemail — CallGrabbr.com — 7-Day Free Trial."
+Fast cuts: (1) Person perfectly throws tools into a truck — "never misses" energy. (2) Hard cut: same person on a ladder, phone ringing, can't answer — frustrated. (3) Cash flies out of the ringing phone. (4) Another phone shows call answered / lead captured. (5) Contractor gets a "New Lead" text, relieved smile. (6) End card: "Stop Losing Jobs to Voicemail — CallGrabbr.com — 7-Day Free Trial."
 
 Photorealistic, viral TikTok ad pacing, relatable contractor humor, bright lighting, no distorted faces, no brand logos.
 ```
@@ -94,7 +94,7 @@ Your business phone? Different story. 📞💸
 CallGrabbr answers when you can't and texts you the lead in seconds.
 
 Stop losing jobs to voicemail → callgrabbr.com
-7-day free trial. No card required.
+14-day free trial. No card required.
 ```
 
 ---

@@ -78,6 +78,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    Center(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.asset(
+                          'assets/logo.png',
+                          width: 88,
+                          height: 88,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     Text(
                       'CallGrabbr',
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(

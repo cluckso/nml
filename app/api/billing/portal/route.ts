@@ -20,7 +20,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No business on this account" }, { status: 400 })
     }
 
-    const returnUrl = `${SITE_URL}/billing`
+    let source = "web"
+    try {
+      const body = (await req.json()) as { source?: string }
+      if (body?.source === "android") source = "android"
+    } catch {
+      // Optional body — web clients may send none
+    }
+
+    const returnUrl =
+      source === "android" ? `${SITE_URL}/billing?source=android` : `${SITE_URL}/billing`
     const url = await createBillingPortalSession(user.businessId, returnUrl)
     return NextResponse.json({ url })
   } catch (error) {

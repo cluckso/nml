@@ -2,9 +2,9 @@
 
 **Goal:** Re-energize existing profiles (~500 Facebook followers), drive traffic to [callgrabbr.com](https://www.callgrabbr.com), and convert to free trials.
 
-**Core message:** Lead with lost money / missed calls (pain), show the fix (AI answers + texts you the lead), end with “try it free.”
+**Core message:** Lead with lost money / missed calls (pain), show the fix (we grab the lead + text you the summary), end with “try it free.” Category: **missed-call lead capture** — not AI receptionist.
 
-**Primary CTA:** 7-day free trial · No credit card · ~5-minute setup  
+**Primary CTA:** 14-day free trial · No credit card · ~5-minute setup  
 **URL:** https://www.callgrabbr.com  
 **Sign-up URL:** https://www.callgrabbr.com/sign-up
 
@@ -32,13 +32,13 @@ CallGrabbr answers when you can’t — on the ladder, under a sink, driving bet
 
 No hold music. No voicemail black hole. 24/7.
 
-✅ 7-day free trial
+✅ 14-day free trial
 ✅ No credit card to start
 ✅ Setup in about 5 minutes (forward your existing line)
 
 HVAC, plumbing, electrical, auto repair, handyman — built for trades.
 
-Try the AI live on the site or start your trial:
+Try the demo call on the site or start your trial:
 👉 https://www.callgrabbr.com
 
 Drop your trade in the comments — we’ll tell you what CallGrabbr would ask your callers.
@@ -68,7 +68,7 @@ They just call the next listing.
 
 CallGrabbr picks up 24/7, asks the right questions for your trade, and texts you the lead before your competitor even knows you missed it.
 
-7-day free trial. No card required.
+14-day free trial. No card required.
 https://www.callgrabbr.com
 ```
 
@@ -112,12 +112,12 @@ https://www.callgrabbr.com
 ```
 Don’t take our word for it. Call it.
 
-Go to callgrabbr.com → “Test the AI” → call the demo line like you’re a customer with a burst pipe / dead AC / check engine light.
+Go to callgrabbr.com → “Try a demo call” → call the demo line like you’re a customer with a burst pipe / dead AC / check engine light.
 
 You’ll hear what your callers hear.
 Then imagine that text hitting your phone while you’re on a job.
 
-7-day free trial. No card.
+14-day free trial. No card.
 https://www.callgrabbr.com
 ```
 
@@ -138,7 +138,7 @@ Customer doesn’t wait. They call the next HVAC company.
 
 CallGrabbr answers, asks address + issue + urgency, and texts you the lead while you’re still sweating.
 
-Built for HVAC shops. 7-day free trial, no card.
+Built for HVAC shops. 14-day free trial, no card.
 https://www.callgrabbr.com
 ```
 
@@ -206,7 +206,7 @@ CallGrabbr:
 • Pro — $279/mo (1,500 min)
 
 No setup fee. No contract. Cancel anytime.
-7-day free trial — no credit card to start.
+14-day free trial — no credit card to start.
 
 One captured job ($350–$600+) often pays for months of service.
 
@@ -228,7 +228,7 @@ They call the next company.
 
 CallGrabbr answers 24/7 and texts you the lead in seconds.
 
-7-day free trial. No card.
+14-day free trial. No card.
 → callgrabbr.com
 ```
 
@@ -246,7 +246,7 @@ CallGrabbr fixes that.
 ```
 Voicemail captures ~5–15% of callers.
 
-AI answering captures ~80–95%.
+Missed-call capture recovers ~80–95% vs voicemail.
 
 Stop losing jobs to voicemail.
 → callgrabbr.com
@@ -254,7 +254,7 @@ Stop losing jobs to voicemail.
 
 ### Instagram
 
-- **Bio:** `Stop losing jobs to voicemail. AI answers 24/7 → texts you the lead. 7-day free trial 👇`
+- **Bio:** `Stop losing jobs to missed calls. We grab the lead → text you in seconds. 14-day free trial 👇`
 - **Link:** callgrabbr.com (or link-in-bio to /sign-up)
 - **Hashtags (rotate 8–12 per post):**  
   `#smallbusiness #contractorlife #hvac #plumber #electrician #autorepair #handyman #localbusiness #entrepreneur #trades #servicebusiness #leadgeneration`
@@ -266,9 +266,9 @@ Local service businesses lose 20–40% of inbound calls when crews are on jobs.
 
 Voicemail doesn't fix it — most callers won't leave a message.
 
-We built CallGrabbr: an AI receptionist that answers 24/7, runs industry-specific intake (HVAC, plumbing, electrical, auto, handyman), and delivers qualified leads by SMS + email.
+We built CallGrabbr: missed-call lead capture for trades — we grab the job when you can't answer, run industry-specific intake (HVAC, plumbing, electrical, auto, handyman), and text qualified leads by SMS + email in seconds.
 
-• 7-day free trial, no card
+• 14-day free trial, no card
 • ~5 min setup via call forwarding
 • Plans from $99/mo
 

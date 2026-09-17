@@ -19,7 +19,13 @@ export async function POST(req: NextRequest) {
     const user = await getAuthUserFromRequest(req)
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    let body: { planType?: string; founderDeal?: boolean; billingInterval?: string }
+    let body: {
+      planType?: string
+      founderDeal?: boolean
+      billingInterval?: string
+      playExternalTransactionToken?: string
+      source?: string
+    }
     try {
       body = await req.json()
     } catch {
@@ -80,13 +86,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ url: redirectUrl, inPlaceUpgrade: true })
     }
 
+    const playToken =
+      typeof body.playExternalTransactionToken === "string"
+        ? body.playExternalTransactionToken.trim()
+        : ""
     const session = await createCheckoutSession(
       businessId,
       planType as PlanType,
       setupFee,
       appUrl,
       founderDeal,
-      billingInterval
+      billingInterval,
+      {
+        source: body.source === "android" ? "android" : "web",
+        playExternalTransactionToken: playToken || undefined,
+      }
     )
 
     return NextResponse.json({ url: session.url })

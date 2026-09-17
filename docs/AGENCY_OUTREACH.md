@@ -5,10 +5,10 @@
 CallGrabbr offers a **20% recurring revenue share** to marketing agencies who refer contractor and service business clients.
 
 **What CallGrabbr does:**
-- AI answers missed calls 24/7
-- Captures lead info (name, phone, address, job type, urgency)
+- Missed-call lead capture — grabs the job when your client can't answer
+- Captures lead info (name, phone, address, job type, urgency when shared)
 - Sends instant SMS + email notification to business owner
-- Works with any existing business phone number
+- Works with any existing business phone number via call forwarding
 
 **Why agencies should care:**
 - Your clients lose 20-40% of calls when on jobs
@@ -38,7 +38,7 @@ CallGrabbr offers a **20% recurring revenue share** to marketing agencies who re
 - Priority support for your clients
 
 ### What we provide:
-- 7-day free trial for all referrals
+- 14-day free trial for all referrals
 - No card required to start
 - Full onboarding support
 - White-label option for Pro tier agencies (coming soon)
@@ -49,14 +49,14 @@ CallGrabbr offers a **20% recurring revenue share** to marketing agencies who re
 
 ### Cold Email Template (Short)
 
-**Subject:** 20% recurring commission — call answering for your contractor clients
+**Subject:** 20% recurring commission — missed-call lead capture for your contractor clients
 
 ```
 Hi [Agency Name] team,
 
 Quick question: Do your contractor clients miss calls when they're on jobs?
 
-We built CallGrabbr — automated call answering that captures missed-call leads and texts the details to your client.
+We built CallGrabbr — missed-call lead capture that grabs the job when your client can't answer and texts the details instantly.
 
 Your clients lose 20-40% of calls. We help fix that.
 
@@ -85,9 +85,9 @@ Quick problem we solve:
 - 80% of callers won't leave voicemail
 - They just call the next listing
 
-We built CallGrabbr — a phone system that:
-1. Answers forwarded and missed calls
-2. Asks the right questions (name, address, job type, urgency when shared)
+We built CallGrabbr — missed-call lead capture that:
+1. Picks up when your client can't answer (forwarded line)
+2. Grabs the right details (name, address, job type, urgency when shared)
 3. Texts or emails the lead to the business owner, usually within seconds
 
 One captured job ($350-600) pays for months of service ($99-279/mo).
@@ -110,7 +110,7 @@ Hi [Name] — saw you work with [contractors/plumbers/HVAC companies].
 
 Quick question: how do your clients handle missed calls?
 
-We built an AI that answers when they can't and texts them the lead.
+We built missed-call lead capture — grab the job when they can't answer, text the summary in seconds.
 
 Offering 20% recurring to agencies who refer clients.
 
@@ -128,7 +128,7 @@ Hi [Name],
 
 Following up on my note about CallGrabbr.
 
-TL;DR: AI answers missed calls for contractors, texts them the lead.
+TL;DR: Missed-call lead capture for contractors — grab the job, text the lead.
 
 We're offering 20% recurring commission for agency partners.
 
@@ -168,7 +168,7 @@ Platforms to find them:
 > Voicemail captures 5-15% of callers. AI captures 80-95%. Most people hang up on voicemail and call the next listing.
 
 **"My clients won't trust AI."**
-> They don't have to. 7-day free trial, no card required. Let them test with real calls.
+> They don't have to. 14-day free trial, no card required. Let them test with real calls.
 
 **"What's the catch?"**
 > No catch. We pay 20% recurring as long as the client stays. Monthly payment via Stripe or PayPal.

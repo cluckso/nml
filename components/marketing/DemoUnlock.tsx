@@ -7,8 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Phone, ArrowRight, Check } from "lucide-react"
-
-const DEMO_NUMBER = process.env.NEXT_PUBLIC_DEMO_NUMBER || "+1 (202) 952-6890"
+import { getDemoNumberDisplay, getDemoNumberTel } from "@/lib/demo-line"
 
 const BUSINESS_TYPES = [
   "HVAC",
@@ -101,10 +100,10 @@ export function DemoUnlock({ className = "" }: DemoUnlockProps) {
         <div className="bg-background rounded-xl p-6 border border-border/50">
           <p className="text-sm text-muted-foreground mb-2">Demo number:</p>
           <a
-            href={`tel:${DEMO_NUMBER.replace(/[^\d+]/g, "")}`}
+            href={`tel:${getDemoNumberTel()}`}
             className="text-3xl font-bold text-primary tracking-wide hover:underline"
           >
-            {DEMO_NUMBER}
+            {getDemoNumberDisplay()}
           </a>
           <p className="text-xs text-muted-foreground mt-2">Tap to call on mobile</p>
         </div>

@@ -9,6 +9,21 @@ export function toTelHref(raw: string | null | undefined): string | null {
   return `tel:${cleaned}`
 }
 
+/** Prefer callerPhone; fall back to structuredIntake.phone when present. */
+export function resolveCallbackPhone(call: {
+  callerPhone?: string | null
+  structuredIntake?: unknown
+}): string | null {
+  const direct = call.callerPhone?.trim()
+  if (direct) return direct
+  const intake = call.structuredIntake
+  if (intake && typeof intake === "object" && intake !== null && "phone" in intake) {
+    const phone = (intake as { phone?: unknown }).phone
+    if (typeof phone === "string" && phone.trim()) return phone.trim()
+  }
+  return null
+}
+
 /** Format a US phone number for display. */
 export function formatPhoneForDisplay(raw: string | null | undefined): string {
   if (raw == null || raw === "") return ""

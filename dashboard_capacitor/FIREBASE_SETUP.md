@@ -51,7 +51,7 @@ Open Android Studio, rebuild, and install. On login the app will:
 
 | Symptom | Fix |
 |--------|-----|
-| Crash right after allowing notifications | Missing or wrong `google-services.json` for `com.me.adhd` |
+| Crash right after allowing notifications | Rebuild after placing `google-services.json` for `com.me.adhd`. Firebase must initialize in `CallGrabbrApplication` before `PushNotifications.register()`. |
 | Push never arrives | Set `FIREBASE_SERVICE_ACCOUNT_JSON` on Vercel; confirm token saved in DB |
 | `registration-token-not-registered` | Reinstall app / log in again to refresh token |
 | Wrong package | `capacitor.config.ts` and `android/app/build.gradle` must both use `com.me.adhd` |

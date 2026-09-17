@@ -564,7 +564,7 @@ CallGrabbr gets the lead while you work safely. Try free.`,
     title: "GBP — Question hook",
     googleBusiness: {
       headline: "How many jobs did you lose last month?",
-      body: "If it's even one, CallGrabbr likely pays for itself. We answer when you can't and send you the lead in seconds. Try our AI free.",
+      body: "If it's even one, CallGrabbr likely pays for itself. We grab the lead when you can't answer and text you in seconds. Try free.",
       cta: "Learn more",
     },
     caption: "",
@@ -602,7 +602,7 @@ If you capture one extra job a month, it pays for itself.`,
 
 Missed calls aren't "annoying" — they're lost revenue.
 
-CallGrabbr: AI call answering built for local trades. 80–95% capture rate vs. 5–15% for voicemail.`,
+CallGrabbr: missed-call lead capture built for local trades. 80–95% capture rate vs. 5–15% for voicemail.`,
     hashtags: ["LeadGeneration", "Trades"],
   },
 

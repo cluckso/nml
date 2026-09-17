@@ -153,13 +153,19 @@ export async function createTrialSetupSession(
   } as Stripe.Checkout.SessionCreateParams)
 }
 
+export type CreateCheckoutSessionOptions = {
+  playExternalTransactionToken?: string
+  source?: "android" | "web"
+}
+
 export async function createCheckoutSession(
   businessId: string,
   planType: PlanType,
   setupFee: number,
   appUrl: string = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   founderDeal?: boolean,
-  billingInterval: BillingInterval = "monthly"
+  billingInterval: BillingInterval = "monthly",
+  options: CreateCheckoutSessionOptions = {}
 ) {
   if (!stripe) {
     throw new Error("STRIPE_SECRET_KEY is not configured. Add it to .env to enable billing.")
@@ -221,11 +227,18 @@ export async function createCheckoutSession(
       planType,
       billingInterval,
       ...(founderDeal ? { founderDeal: "true" } : {}),
+      ...(options.source ? { checkoutSource: options.source } : {}),
+      ...(options.playExternalTransactionToken
+        ? { playExternalTransactionToken: options.playExternalTransactionToken }
+        : {}),
     },
     subscription_data: {
       metadata: {
         businessId,
         planType,
+        ...(options.playExternalTransactionToken
+          ? { playExternalTransactionToken: options.playExternalTransactionToken }
+          : {}),
       },
       ...(founderCouponId ? { coupon: founderCouponId } : {}),
     },
@@ -599,6 +612,9 @@ export async function handleStripeWebhook(event: Stripe.Event) {
 
         const isFounderDeal = session.metadata?.founderDeal === "true"
         const isTrialCheckout = session.metadata?.trialCheckout === "true"
+        if (session.metadata?.playExternalTransactionToken) {
+          console.info("[Play Billing] Stripe checkout completed with Play external transaction token")
+        }
         await db.business.update({
           where: { id: businessId },
           data: {

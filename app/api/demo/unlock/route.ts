@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { getDemoNumberDisplay } from "@/lib/demo-line"
 
 interface DemoUnlockRequest {
   name: string
@@ -31,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ 
       success: true,
-      demoNumber: process.env.NEXT_PUBLIC_DEMO_NUMBER || "+1 (202) 952-6890"
+      demoNumber: getDemoNumberDisplay(),
     })
   } catch (error) {
     console.error("[Demo Unlock] Error:", error)

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getSettings, patchSettings, ApiError } from '../lib/api'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
+import { openLegalUrl, PRIVACY_POLICY_URL, SMS_TERMS_URL, TERMS_OF_SERVICE_URL } from '../lib/legal'
 
 interface SettingsProps {
   onSignOut: () => void
@@ -109,10 +110,41 @@ export default function Settings({ onSignOut }: SettingsProps) {
             <div className="card">
               <h2 className="section-title">Account</h2>
               <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 16 }}>
-                For full settings and business configuration, visit the web dashboard.
+                Plans and invoices are billed by CallGrabbr through Stripe.
               </p>
-              <button type="button" className="btn" onClick={onSignOut} style={{ width: '100%' }}>
+              <button type="button" className="btn" onClick={() => navigate('/billing')} style={{ width: '100%', marginBottom: 10 }}>
+                Billing
+              </button>
+              <button type="button" className="btn btn-outline" onClick={onSignOut} style={{ width: '100%' }}>
                 Sign out
+              </button>
+            </div>
+
+            <div className="card">
+              <h2 className="section-title">Legal</h2>
+              <button
+                type="button"
+                className="btn btn-outline"
+                style={{ width: '100%', marginBottom: 10 }}
+                onClick={() => openLegalUrl(PRIVACY_POLICY_URL)}
+              >
+                Privacy Policy
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline"
+                style={{ width: '100%', marginBottom: 10 }}
+                onClick={() => openLegalUrl(TERMS_OF_SERVICE_URL)}
+              >
+                Terms of Service
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline"
+                style={{ width: '100%' }}
+                onClick={() => openLegalUrl(SMS_TERMS_URL)}
+              >
+                SMS Terms
               </button>
             </div>
 

@@ -115,6 +115,11 @@ export function Nav() {
           {trialBadge && <TrialNavBadge badge={trialBadge} />}
         </div>
         <div className="flex gap-4 items-center shrink-0">
+          {!user && (
+            <Link href="/#demo">
+              <Button variant="ghost">Demo</Button>
+            </Link>
+          )}
           <Link href="/guides">
             <Button variant="ghost">Guides</Button>
           </Link>

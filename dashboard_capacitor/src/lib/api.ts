@@ -101,3 +101,97 @@ export async function savePushToken(token: string): Promise<void> {
     console.error('[API] Save push token error:', error)
   }
 }
+
+export type PublicPlan = {
+  planType: string
+  name: string
+  description: string
+  price: number
+  includedMinutes: number
+  badge: string | null
+  popular: boolean
+  subtitle: string
+  features: string[]
+}
+
+export type PublicPricing = {
+  marketing: {
+    headline: string
+    categoryLine: string
+    sub: string
+    primaryCta: string
+    trialSummary: string
+  }
+  trial: { days: number; minutes: number; noCardRequired: boolean }
+  overageRatePerMin: number
+  billing: { processor: string; merchantOfRecord: string; playDisclosure: string }
+  plans: PublicPlan[]
+}
+
+export async function getPublicPricing(): Promise<PublicPricing> {
+  const res = await request('api/public-pricing')
+  if (!res.ok) throw new ApiError(await res.text(), res.status)
+  return res.json()
+}
+
+export type BillingSummary = {
+  businessId: string | null
+  hasPaidPlan: boolean
+  canManage: boolean
+  subscriptionStatus: string | null
+  trial: {
+    isOnTrial: boolean
+    minutesUsed: number
+    minutesRemaining: number
+    isExhausted: boolean
+    isExpired: boolean
+    daysRemaining: number | null
+  } | null
+  plan: {
+    planType: string
+    name: string
+    price: number
+    includedMinutes: number
+  } | null
+  usage: {
+    minutesUsed: number
+    minutesIncluded: number
+    overageMinutes: number
+    overageRatePerMin: number
+  } | null
+}
+
+export async function getBillingSummary(): Promise<BillingSummary> {
+  const res = await request('api/billing/summary')
+  if (res.status === 401) throw new ApiError('Unauthorized', 401)
+  if (!res.ok) throw new ApiError(await res.text(), res.status)
+  return res.json()
+}
+
+export async function createCheckout(planType: string, playExternalTransactionToken?: string) {
+  const res = await request('api/checkout', {
+    method: 'POST',
+    body: JSON.stringify({
+      planType,
+      source: 'android',
+      playExternalTransactionToken: playExternalTransactionToken || undefined,
+    }),
+  })
+  if (res.status === 401) throw new ApiError('Unauthorized', 401)
+  const data = (await res.json()) as { url?: string; error?: string }
+  if (!res.ok) throw new ApiError(data.error || 'Checkout failed', res.status)
+  if (!data.url) throw new ApiError('Checkout did not return a URL', 500)
+  return data.url
+}
+
+export async function createBillingPortal() {
+  const res = await request('api/billing/portal', {
+    method: 'POST',
+    body: JSON.stringify({ source: 'android' }),
+  })
+  if (res.status === 401) throw new ApiError('Unauthorized', 401)
+  const data = (await res.json()) as { url?: string; error?: string }
+  if (!res.ok) throw new ApiError(data.error || 'Could not open billing portal', res.status)
+  if (!data.url) throw new ApiError('Billing portal did not return a URL', 500)
+  return data.url
+}

@@ -11,6 +11,8 @@ Android mobile app for CallGrabbr businesses to monitor calls, appointments, and
 ## Features
 
 - **Dashboard:** Real-time stats, recent calls, trial status, and usage metrics
+- **Marketing:** Logged-out overview, trial CTA, and plan cards
+- **Billing:** Current plan/usage plus Stripe Checkout and Customer Portal (Play Billing Choice external links when eligible)
 - **Calls:** Searchable call history with emergency filtering
 - **Appointments:** View and manage scheduled appointments
 - **Settings:** Configure push notifications and app preferences
@@ -73,13 +75,23 @@ The app registers for push notifications on login and saves the FCM token to the
 
 ## API Endpoints Used
 
+- `GET /api/public-pricing` - Marketing copy and plan catalog
 - `GET /api/dashboard` - Dashboard stats and recent calls
+- `GET /api/billing/summary` - Current plan, trial, and usage
+- `POST /api/checkout` - Stripe Checkout session (Android uses `source: "android"`)
+- `POST /api/billing/portal` - Stripe Customer Portal
 - `GET /api/calls` - Call history with pagination and search
 - `GET /api/appointments` - Upcoming and past appointments
 - `GET /api/settings` - User notification preferences
 - `PATCH /api/settings` - Update notification settings
 - `DELETE /api/appointments/:id` - Cancel an appointment
 - `POST /api/push-token` - Save FCM push token
+
+## Billing (Stripe + Play policy)
+
+CallGrabbr is billed by **CallGrabbr through Stripe**, not as a Google Play in-app product. Checkout and the customer portal open in the system browser. When the device is enrolled in Play **Billing Choice**, the app uses Play Billing Library 9.1 `launchExternalLink` and stores Play's external transaction token on the Stripe session.
+
+In Play Console, enroll the app in **Billing Choice / external web links** for US, UK, and EEA if Google treats the subscription as digital content. Until enrollment is approved, the app still opens Stripe checkout in the browser and discloses that Google Play is not the merchant of record.
 
 ## Notes
 

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getCalls, ApiError } from '../lib/api'
-import { formatPhoneForDisplay, toTelHref } from '../lib/phone'
+import { formatPhoneForDisplay, resolveCallbackPhone } from '../lib/phone'
+import { CallBackButton } from '../components/CallBackButton'
 import { CallRecordingButton } from '../components/CallRecordingButton'
 import { Haptics, ImpactStyle } from '@capacitor/haptics'
 
@@ -10,6 +11,7 @@ export default function Calls() {
     id?: string
     callerName?: string
     callerPhone?: string
+    structuredIntake?: unknown
     issueDescription?: string
     summary?: string
     recordingUrl?: string | null
@@ -140,8 +142,8 @@ export default function Calls() {
             {calls.length > 0 && (
               <div className="card">
                 {calls.map((c, i) => {
-                  const telHref = toTelHref(c.callerPhone)
-                  const phoneLabel = formatPhoneForDisplay(c.callerPhone) || c.callerPhone
+                  const callbackPhone = resolveCallbackPhone(c)
+                  const phoneLabel = formatPhoneForDisplay(callbackPhone) || callbackPhone
                   return (
                   <div key={c.id ?? i} className="call-item">
                     <div className="call-header">
@@ -168,11 +170,7 @@ export default function Calls() {
                       {c.emergencyFlag && (
                         <span className="badge error">🚨 Emergency</span>
                       )}
-                      {telHref && (
-                        <a href={telHref} className="call-back-link">
-                          📞 Call back
-                        </a>
-                      )}
+                      <CallBackButton phone={callbackPhone} />
                       {c.recordingUrl && <CallRecordingButton url={c.recordingUrl} />}
                     </div>
                   </div>

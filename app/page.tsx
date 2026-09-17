@@ -49,6 +49,14 @@ export default function HomePage() {
       <HomeHero />
       <TrustStrip />
 
+      <section id="demo" className="bg-muted/30 py-16 border-y border-border/50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-md mx-auto">
+            <DemoUnlock />
+          </div>
+        </div>
+      </section>
+
       <SectionBackdrop
         src={MARKETING_IMAGES.whyMatters}
         alt={MARKETING_IMAGE_ALT.whyMatters}
@@ -156,15 +164,6 @@ export default function HomePage() {
             See setup guide by carrier →
           </Link>
         </p>
-      </section>
-
-      {/* Demo */}
-      <section id="demo" className="bg-muted/30 py-16 border-y border-border/50">
-        <div className="container mx-auto px-4">
-          <div className="max-w-md mx-auto">
-            <DemoUnlock />
-          </div>
-        </div>
       </section>
 
       {/* Insurance-tier plan teaser */}
