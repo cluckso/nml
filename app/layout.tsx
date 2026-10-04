@@ -228,14 +228,17 @@ rkp("init","PaccPmsytSiq");rkp("event","PAGE_VIEW");
                 </a>
               </div>
               <div className="mt-6 text-center">
-                <p className="text-xs font-medium text-foreground/80 mb-2">Compare</p>
-                <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-muted-foreground">
-                  {VS_PAGE_LINKS.map((item) => (
-                    <Link key={item.href} href={item.href} className="hover:text-foreground">
-                      {item.title}
-                    </Link>
+                <p className="text-sm text-muted-foreground">
+                  Compare:{" "}
+                  {VS_PAGE_LINKS.map((item, i) => (
+                    <span key={item.href}>
+                      {i > 0 && <span className="text-muted-foreground/60"> · </span>}
+                      <Link href={item.href} className="hover:text-foreground font-medium">
+                        {item.shortLabel}
+                      </Link>
+                    </span>
                   ))}
-                </div>
+                </p>
               </div>
               <p className="text-center text-xs text-muted-foreground/80 mt-4">
                 {founderByline() ? (

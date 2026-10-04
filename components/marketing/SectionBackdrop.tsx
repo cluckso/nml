@@ -1,4 +1,5 @@
 import Image from "next/image"
+import { getImageDimensions } from "@/lib/marketing-images"
 import { cn } from "@/lib/utils"
 
 type OverlayStrength = "light" | "medium" | "heavy" | "hero"
@@ -34,13 +35,15 @@ export function SectionBackdrop({
   as: Tag = "section",
   imageClassName = "object-cover object-center",
 }: SectionBackdropProps) {
+  const size = getImageDimensions(src)
   return (
     <Tag className={cn("relative overflow-hidden", className)}>
       <Image
         src={src}
         alt={alt}
-        fill
-        className={imageClassName}
+        width={size.width}
+        height={size.height}
+        className={cn("absolute inset-0 h-full w-full max-w-none", imageClassName)}
         priority={priority}
         sizes="100vw"
       />

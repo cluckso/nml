@@ -39,7 +39,7 @@ import { captureRouteError } from "@/lib/capture-error"
 import {
   canAnswerSignupInbound,
   isDemoInboundCall,
-  metadataDemoFlag,
+  isDemoCallCompletion,
   resolveDemoInboundResponse,
 } from "@/lib/inbound-call-routing"
 import { planInboundRingDelay, sleepMs, computeRingDurationMsForInbound } from "@/lib/call-routing"
@@ -52,6 +52,7 @@ export const maxDuration = 60
 const RETELL_SUCCESS = new NextResponse(null, { status: 204 })
 
 export async function POST(req: NextRequest) {
+  const webhookStartedAt = Date.now()
   try {
     const forwarded = req.headers.get("x-forwarded-for")
     const ip = forwarded ? forwarded.split(",")[0].trim() : req.headers.get("x-real-ip") || "unknown"
@@ -97,17 +98,16 @@ export async function POST(req: NextRequest) {
       callId: event.call?.call_id || event.call_id,
     })
 
-    // Inbound: resolve client by forwarded_from; pick agent by to_number (service vs childcare intake).
-    // Only ACTIVE businesses are returned by resolveClient; PAUSED/unknown → we return empty call_inbound
-    // (no override_agent_id), so Retell rejects the call — no connection, no Retell usage.
+    // Inbound: match an active business by its Retell number or explicit forwarded business number.
+    // Reject unknown or paused calls explicitly so Retell cannot fall back to the number's agent.
     if (event.event === "call_inbound") {
       const inbound = (event as RetellInboundEvent).call_inbound
       const toNumber = inbound?.to_number
       const fromNumber = inbound?.from_number
-      const forwardedFrom =
+      const forwardedBusinessNumber =
         (inbound as { forwarded_from_number?: string; forwarded_from?: string })?.forwarded_from_number ??
-        (inbound as { forwarded_from_number?: string; forwarded_from?: string })?.forwarded_from ??
-        fromNumber
+        (inbound as { forwarded_from_number?: string; forwarded_from?: string })?.forwarded_from
+      const forwardedFrom = forwardedBusinessNumber ?? fromNumber
       
       console.info("Retell call_inbound details:", {
         to_number: toNumber,
@@ -119,12 +119,12 @@ export async function POST(req: NextRequest) {
 
       if (isKnownSpamOrTestNumber(fromNumber)) {
         console.info("Retell inbound rejected: known spam/test number", { from_number: fromNumber })
-        return NextResponse.json({ call_inbound: {} })
+        return NextResponse.json({ call_inbound: { reject: true } })
       }
 
       if (await isSpamByTwilioLookup(fromNumber)) {
         console.info("Retell inbound rejected: Twilio Lookup marked spam", { from_number: fromNumber })
-        return NextResponse.json({ call_inbound: {} })
+        return NextResponse.json({ call_inbound: { reject: true } })
       }
 
       // Demo number: route to dedicated demo agent (RETELL_DEMO_AGENT_ID)
@@ -141,36 +141,17 @@ export async function POST(req: NextRequest) {
         console.warn("Retell inbound: demo number called but RETELL_DEMO_AGENT_ID not set", {
           to_number: toNumber,
         })
+        return NextResponse.json({ call_inbound: { reject: true } })
       }
       
-      // Resolution priority:
-      // 1. By to_number (business's dedicated Retell number) - PREFERRED for multi-tenant
-      // 2. By forwarded_from (if carrier provides it) - LEGACY
-      // 3. Fallback to any active business - SINGLE-TENANT mode
-      
+      // Match only the business that owns the dialed Retell number or a verified
+      // forwarded business number. Never send an unmatched call to another tenant.
       let client = await resolveClientByRetellNumber(toNumber)
       let resolutionMethod = client ? "retellPhoneNumber" : null
-      
-      if (!client) {
-        client = await resolveClient(forwardedFrom)
+
+      if (!client && forwardedBusinessNumber) {
+        client = await resolveClient(forwardedBusinessNumber)
         resolutionMethod = client ? "primaryForwardingNumber" : null
-      }
-      
-      // FALLBACK: If no client found, fall back to ANY active business (single-tenant mode)
-      if (!client) {
-        const fallbackClient = await db.business.findFirst({
-          where: { status: ClientStatus.ACTIVE },
-          orderBy: { createdAt: "desc" },
-        })
-        if (fallbackClient) {
-          console.warn("Using fallback business:", {
-            businessId: fallbackClient.id,
-            businessName: fallbackClient.name,
-            reason: "No match by retellPhoneNumber or primaryForwardingNumber - using single-tenant fallback",
-          })
-          client = fallbackClient
-          resolutionMethod = "fallback"
-        }
       }
       
       // Agent: prefer business's dedicated agent (one per business), else industry/env fallback for legacy
@@ -190,10 +171,10 @@ export async function POST(req: NextRequest) {
       })
       
       if (!canAnswerSignupInbound(client, agentId)) {
-        // Block call: no override_agent_id = Retell rejects → caller hears unavailable / disconnect
+        // Explicitly reject: an empty override would use the phone number's fallback agent.
         const reason = !agentId
           ? "No agent ID (business has no retellAgentId and RETELL_AGENT_ID / RETELL_AGENT_ID_<INDUSTRY> not set)"
-          : "No business found for this call (to_number not in retellPhoneNumber, forwarded_from not in primaryForwardingNumber, and no ACTIVE fallback business)"
+          : "No active business matched the dialed Retell number or forwarded business number"
         console.warn("Retell inbound rejected — caller will hear unavailable:", {
           reason,
           to_number: toNumber,
@@ -212,7 +193,7 @@ export async function POST(req: NextRequest) {
             console.info("Retell inbound blocked: PAUSED client", { businessId: paused.id, name: paused.name, from: normalizedFrom })
           }
         }
-        return NextResponse.json({ call_inbound: {} })
+        return NextResponse.json({ call_inbound: { reject: true } })
       }
       const forwardedFromNormalized = normalizeE164(forwardedFrom) ?? forwardedFrom
       const settings = mergeWithDefaults((client as any).settings as Partial<BusinessSettings> | null)
@@ -222,26 +203,6 @@ export async function POST(req: NextRequest) {
         : []
 
       const ringDurationMs = computeRingDurationMsForInbound(settings.callRouting, settings.availability)
-      const ringDelayPlan = planInboundRingDelay(ringDurationMs)
-      if (ringDurationMs > 0) {
-        console.info("Retell call_inbound: ring delay", ringDurationMs, "ms", {
-          webhookSleepMs: ringDelayPlan.webhookSleepMs,
-          retellRingDurationMs: ringDelayPlan.retellRingDurationMs ?? null,
-          scheduleByBusinessHours: settings.callRouting.scheduleByBusinessHours,
-          answerAllCalls: settings.callRouting.answerAllCalls,
-        })
-        if (ringDelayPlan.webhookSleepMs > 0) {
-          await sleepMs(ringDelayPlan.webhookSleepMs)
-        }
-      } else {
-        console.info("Retell call_inbound: answer immediately (ring delay 0ms)", {
-          scheduleByBusinessHours: settings.callRouting.scheduleByBusinessHours,
-          answerAllCalls: settings.callRouting.answerAllCalls,
-          duringHoursAnswerAll: settings.callRouting.duringHours?.answerAllCalls,
-          afterHoursAnswerAll: settings.callRouting.afterHours?.answerAllCalls,
-        })
-      }
-
       const capacityEval = await evaluateCapacity(settings, client.id)
       const capacityMode = capacityEval.overLimit ? capacityEval.mode : "normal"
       const beginMessageOverride =
@@ -264,6 +225,23 @@ export async function POST(req: NextRequest) {
           beginMessageOverride,
         }
       )
+
+      const ringDelayPlan = planInboundRingDelay(ringDurationMs, Date.now() - webhookStartedAt)
+      if (ringDurationMs > 0) {
+        console.info("Retell call_inbound: ring delay", ringDurationMs, "ms", {
+          webhookSleepMs: ringDelayPlan.webhookSleepMs,
+          retellRingDurationMs: ringDelayPlan.retellRingDurationMs ?? null,
+          scheduleByBusinessHours: settings.callRouting.scheduleByBusinessHours,
+          answerAllCalls: settings.callRouting.answerAllCalls,
+        })
+      } else {
+        console.info("Retell call_inbound: answer immediately (ring delay 0ms)", {
+          scheduleByBusinessHours: settings.callRouting.scheduleByBusinessHours,
+          answerAllCalls: settings.callRouting.answerAllCalls,
+          duringHoursAnswerAll: settings.callRouting.duringHours?.answerAllCalls,
+          afterHoursAnswerAll: settings.callRouting.afterHours?.answerAllCalls,
+        })
+      }
 
       const agentOverrideForCall = { ...agentOverride, agent: { ...agentOverride.agent } }
       if (ringDelayPlan.retellRingDurationMs != null) {
@@ -301,6 +279,9 @@ export async function POST(req: NextRequest) {
       }
       
       console.info("Retell inbound response:", JSON.stringify(response, null, 2))
+      if (ringDelayPlan.webhookSleepMs > 0) {
+        await sleepMs(ringDelayPlan.webhookSleepMs)
+      }
       return NextResponse.json(response)
     }
 
@@ -498,8 +479,13 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
   // Never attach demo calls to a customer business (fallback used to pollute tenants and burn trial minutes).
   const metadata = event.call?.metadata
   const demoNumberRaw = process.env.NEXT_PUBLIC_DEMO_NUMBER
-  const isDemoCall =
-    isDemoInboundCall(event.call?.to_number, demoNumberRaw) || metadataDemoFlag(metadata)
+  const isDemoCall = isDemoCallCompletion(
+    event.call?.to_number,
+    metadata,
+    event.call?.agent_id,
+    demoNumberRaw,
+    process.env.RETELL_DEMO_AGENT_ID
+  )
 
   if (isDemoCall) {
     await handleDemoCallCompletion(event, callId)

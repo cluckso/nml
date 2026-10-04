@@ -75,7 +75,7 @@ export function authMetaDescription(): string {
 }
 
 export function trialStartMetaDescription(): string {
-  return `Start your ${TRIAL_DAYS}-day free trial. No card required. Add your business phone to start capturing missed-call leads.`
+  return `Start a 14-day CallGrabbr trial with 40 real call minutes. No card required. One trial per business phone number.`
 }
 
 export function pricingSchemaTrialDescription(): string {

@@ -2,4 +2,4 @@
 export const SUPPORT_EMAIL = "support@callgrabbr.com"
 
 /** Update when Privacy, Terms, or SMS Terms content changes. */
-export const LEGAL_LAST_UPDATED = "September 15, 2026"
+export const LEGAL_LAST_UPDATED = "September 19, 2026"

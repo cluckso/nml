@@ -204,22 +204,26 @@ export type InboundRingDelayPlan = {
  * ring_duration_ms override. Retell documents both; conversation-flow agents often need
  * the webhook sleep for short delays (e.g. 10s) to take effect.
  */
-export function planInboundRingDelay(ringDurationMs: number): InboundRingDelayPlan {
+export function planInboundRingDelay(ringDurationMs: number, elapsedMs = 0): InboundRingDelayPlan {
   if (ringDurationMs <= 0) {
     return { webhookSleepMs: 0, retellRingDurationMs: undefined }
   }
 
+  // Auth, lookups, capacity checks, and override construction all consume the
+  // same 10-second inbound webhook deadline. They also count toward caller ring time.
+  const elapsed = Math.max(0, Math.floor(elapsedMs))
+  const remainingRingMs = Math.max(0, Math.round(ringDurationMs) - elapsed)
   const maxWebhookSleepMs = Math.max(
     0,
-    RETELL_INBOUND_WEBHOOK_TIMEOUT_MS - INBOUND_WEBHOOK_RING_SLEEP_HEADROOM_MS
+    RETELL_INBOUND_WEBHOOK_TIMEOUT_MS - INBOUND_WEBHOOK_RING_SLEEP_HEADROOM_MS - elapsed
   )
 
-  if (ringDurationMs <= maxWebhookSleepMs) {
-    return { webhookSleepMs: ringDurationMs, retellRingDurationMs: undefined }
+  if (remainingRingMs <= maxWebhookSleepMs) {
+    return { webhookSleepMs: remainingRingMs, retellRingDurationMs: undefined }
   }
 
   const webhookSleepMs = maxWebhookSleepMs
-  const remainder = ringDurationMs - webhookSleepMs
+  const remainder = remainingRingMs - webhookSleepMs
   return {
     webhookSleepMs,
     retellRingDurationMs: ringDurationMsForRetellAgent(remainder),

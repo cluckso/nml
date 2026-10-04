@@ -14,6 +14,10 @@ export interface IndustryLandingData {
   statMissedCalls: string
   /** Internal SEO links to /guides/* pages */
   relatedGuides?: { label: string; href: string }[]
+  /** Optional rendered <title>, 30–60 characters including the brand. */
+  metaTitle?: string
+  /** Optional meta description, 110–160 characters. */
+  metaDescription?: string
 }
 
 /** Average job value (USD) used for ROI estimates on the dashboard */
@@ -81,6 +85,8 @@ const LANDING_PAGES: IndustryLandingData[] = [
     headline: "Capture More Plumbing Leads — Even at 2 AM",
     subheadline:
       "Burst pipes and clogged drains can't wait. We grab the job when you can't answer, flag emergencies, and text you the lead before the caller dials your competitor.",
+    metaDescription:
+      "Burst-pipe and clog calls: CallGrabbr grabs the address and urgency and texts the plumber when the shop cannot pick up.",
     sceneHook:
       "It's 2 AM. A homeowner has water running under the sink. They call you, hang up when you don't answer, and dial the next plumber — while you're asleep.",
     averageJobValue: 380,
@@ -235,6 +241,7 @@ const LANDING_PAGES: IndustryLandingData[] = [
     slug: "landscaping",
     name: "Landscaping",
     headline: "Grow Your Landscaping Business — Capture More Leads",
+    metaTitle: "Landscaping missed-call lead capture | CallGrabbr",
     subheadline:
       "Seasonal demand spikes mean missed calls = missed revenue. CallGrabbr answers while your crew is on a job site.",
     sceneHook:

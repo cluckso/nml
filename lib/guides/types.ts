@@ -36,4 +36,6 @@ export type Guide = {
   /** Related internal links */
   relatedLinks: { label: string; href: string }[]
   keywords: string[]
+  /** Independent primary sources cited in the body. */
+  sources?: { name: string; href: string; usedFor: string }[]
 }

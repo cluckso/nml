@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
+import Image from "next/image"
 import Link from "next/link"
-import { User } from "lucide-react"
-import { FOUNDER, WHY_I_BUILT_THIS, founderByline } from "@/lib/marketing/founder"
+import { FOUNDER, WHY_I_BUILT_THIS } from "@/lib/marketing/founder"
 import { DEFAULT_OG_IMAGE, SEO_KEYWORDS } from "@/lib/seo"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data"
@@ -33,7 +33,6 @@ export const metadata: Metadata = {
 }
 
 export default function AboutPage() {
-  const byline = founderByline()
   const paragraphs = WHY_I_BUILT_THIS.split("\n\n")
 
   return (
@@ -56,42 +55,17 @@ export default function AboutPage() {
       <h1 className="text-4xl font-bold tracking-tight mb-8">Why I built this</h1>
 
       <div className="flex flex-col sm:flex-row gap-6 items-start mb-10">
-        {FOUNDER.photoSrc ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={FOUNDER.photoSrc}
-            alt={FOUNDER.name ? `${FOUNDER.name}` : "Founder"}
-            className="h-36 w-36 rounded-xl object-cover border border-border/60"
-          />
-        ) : (
-          <div
-            className="flex h-36 w-36 shrink-0 flex-col items-center justify-center rounded-xl border border-dashed border-border/70 bg-muted/40 text-muted-foreground"
-            role="img"
-            aria-label="Founder photo placeholder"
-          >
-            <User className="h-10 w-10 mb-2" aria-hidden />
-            <span className="text-xs text-center px-2">Founder photo goes here</span>
-          </div>
-        )}
-        <div className="space-y-2 text-sm text-muted-foreground">
-          <p className="text-lg font-semibold text-foreground">
-            {FOUNDER.name ?? "Founder name goes here"}
-          </p>
-          {byline ? <p>{byline}</p> : <p>Add name, trade background, and LinkedIn — do not invent them.</p>}
-          {FOUNDER.linkedInUrl ? (
-            <p>
-              <a
-                href={FOUNDER.linkedInUrl}
-                className="text-primary hover:underline"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                LinkedIn
-              </a>
-            </p>
-          ) : (
-            <p>LinkedIn link goes here.</p>
-          )}
+        <Image
+          src={FOUNDER.photoSrc}
+          alt={`${FOUNDER.name}, founder of CallGrabbr`}
+          width={288}
+          height={288}
+          className="h-36 w-36 rounded-xl object-cover object-top border border-border/60"
+          priority
+        />
+        <div className="space-y-1">
+          <p className="text-lg font-semibold text-foreground">{FOUNDER.name}</p>
+          <p className="text-sm text-muted-foreground">{FOUNDER.title}</p>
         </div>
       </div>
 

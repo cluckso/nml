@@ -10,10 +10,18 @@ import {
   getAllGuideSlugs,
   getGuideBySlug,
 } from "@/lib/guides"
+import {
+  GUIDE_PUBLISHED,
+  GUIDE_UPDATED,
+  AUTHOR_PATH,
+  EDITORIAL_DISCLOSURE,
+  GUIDE_AUTHOR_NAME,
+} from "@/lib/guides/authorship"
+import { guideLimitsParagraphs } from "@/lib/guides/limits-copy"
 import { PLAN_BASIC, PLAN_GROWTH, PLAN_PLATINUM } from "@/lib/plan-labels"
 import { PRICING_TIERS_BY_KEY, formatJobRoiLine } from "@/lib/pricing-catalog"
 import { guidePageMetadata } from "@/lib/seo"
-import { breadcrumbJsonLd, faqPageJsonLd, webPageJsonLd } from "@/lib/structured-data"
+import { articleJsonLd, breadcrumbJsonLd, faqPageJsonLd } from "@/lib/structured-data"
 import { trialConversionLine, trialNavCtaLabel, trialSummaryShort } from "@/lib/trial-marketing"
 
 type PageProps = { params: Promise<{ slug: string }> }
@@ -48,10 +56,12 @@ export default async function GuidePage({ params }: PageProps) {
     <div className="flex flex-col">
       <JsonLd
         data={[
-          webPageJsonLd({
-            name: guide.headline,
+          articleJsonLd({
+            headline: guide.headline,
             description: guide.description,
             path: pagePath,
+            datePublished: GUIDE_PUBLISHED,
+            dateModified: GUIDE_UPDATED,
           }),
           breadcrumbJsonLd([
             { name: "Home", path: "/" },
@@ -67,6 +77,16 @@ export default async function GuidePage({ params }: PageProps) {
           <div className="max-w-3xl mx-auto">
             <p className="text-sm font-medium text-primary mb-3">{guide.eyebrow}</p>
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">{guide.headline}</h1>
+            <p className="text-sm text-muted-foreground mb-4">
+              By{" "}
+              <Link href={AUTHOR_PATH} className="text-primary underline underline-offset-2">
+                {GUIDE_AUTHOR_NAME}
+              </Link>
+              {" · "}
+              <time dateTime={GUIDE_PUBLISHED}>Published {GUIDE_PUBLISHED}</time>
+              {" · "}
+              <time dateTime={GUIDE_UPDATED}>Updated {GUIDE_UPDATED}</time>
+            </p>
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed">{guide.intro}</p>
             <div className="flex flex-wrap gap-3">
               <Button size="lg" asChild>
@@ -137,6 +157,36 @@ export default async function GuidePage({ params }: PageProps) {
             </section>
           ))}
 
+          {guide.sources && guide.sources.length > 0 && (
+            <section>
+              <h2 className="text-2xl font-bold mb-4">Sources</h2>
+              <ul className="space-y-3 text-sm text-muted-foreground">
+                {guide.sources.map((source) => (
+                  <li key={source.href}>
+                    <a
+                      href={source.href}
+                      className="text-primary underline underline-offset-2"
+                      rel="noopener noreferrer"
+                    >
+                      {source.name}
+                    </a>
+                    {" — "}
+                    {source.usedFor}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          <section>
+            <h2 className="text-2xl font-bold mb-4">Numbers, limits, and edge cases</h2>
+            {guideLimitsParagraphs().map((p) => (
+              <p key={p.slice(0, 48)} className="text-muted-foreground leading-relaxed mb-4">
+                {p}
+              </p>
+            ))}
+          </section>
+
           {guide.showPricingSnippet && (
             <section className="rounded-xl border border-border/60 bg-muted/20 p-6 md:p-8">
               <h2 className="text-xl font-bold mb-2">CallGrabbr plans</h2>
@@ -192,6 +242,8 @@ export default async function GuidePage({ params }: PageProps) {
               </ul>
             </section>
           )}
+
+          <p className="text-sm text-muted-foreground leading-relaxed">{EDITORIAL_DISCLOSURE}</p>
         </div>
 
         {guide.showDemo && (

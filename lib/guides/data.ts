@@ -24,8 +24,9 @@ export const GUIDE_TRIAL_HREF = TRIAL_SIGNUP
 const GUIDES: Guide[] = [
   {
     slug: "callgrabbr-vs-ruby",
-    title: "CallGrabbr vs Ruby: Missed-Call Lead Capture vs Live Receptionist",
-    description: `Compare CallGrabbr and Ruby for HVAC, plumbing, and trade shops. ${CATEGORY_NAME}, lead capture, after-hours coverage, and when a live receptionist is worth $${HUMAN_RECEPTIONIST_FROM_MONTHLY}+/mo.`,
+    title: "CallGrabbr vs Ruby for trade shops",
+    description:
+      "Compare CallGrabbr and Ruby for HVAC and plumbing: missed-call texts from $99/mo, or a live receptionist from $235/mo.",
     eyebrow: "Comparison guide",
     headline: "CallGrabbr vs Ruby",
     intro:
@@ -105,9 +106,9 @@ const GUIDES: Guide[] = [
   },
   {
     slug: "callgrabbr-vs-smith-ai",
-    title: "CallGrabbr vs Smith.ai: Missed-Call Lead Capture for Service Businesses",
+    title: "CallGrabbr vs Smith.ai for trades",
     description:
-      "Compare CallGrabbr and Smith.ai for contractors. Hybrid receptionist pricing (~$95–$300+), trade-focused lead capture, and when missed-call lead capture beats a generalist receptionist platform.",
+      "CallGrabbr vs Smith.ai for service shops. Flat monthly missed-call capture from $99, versus per-call hybrid reception.",
     eyebrow: "Comparison guide",
     headline: "CallGrabbr vs Smith.ai",
     intro:
@@ -185,9 +186,9 @@ const GUIDES: Guide[] = [
   },
   {
     slug: "best-ai-answering-for-hvac-2026",
-    title: "After-Hours & Missed-Call Lead Capture for HVAC (2026)",
+    title: "HVAC missed-call lead capture, 2026",
     description:
-      "What HVAC owners should look for in after-hours and missed-call lead capture in 2026: emergency intake, pricing, and how CallGrabbr compares for no-heat and no-AC calls.",
+      "After-hours and missed-call lead capture for HVAC shops: what Basic, Growth, and Platinum include, and what they do not.",
     eyebrow: "HVAC buyer guide · 2026",
     headline: "After-hours & missed-call lead capture for HVAC (2026)",
     intro:
@@ -260,8 +261,8 @@ const GUIDES: Guide[] = [
   },
   {
     slug: "after-hours-answering-cost-for-contractors",
-    title: "After-Hours Lead Capture Cost for Contractors (2026)",
-    description: `What contractors actually pay for after-hours lead capture: live receptionists from ~$${HUMAN_RECEPTIONIST_FROM_MONTHLY}/mo, hybrid receptionist ~$95–$300+, and CallGrabbr from $${basic.price}/mo — plus the cost of one missed emergency job.`,
+    title: "After-hours lead capture cost, 2026",
+    description: `What contractors pay for after-hours lead capture: CallGrabbr from $${basic.price}/mo, human answering from $${HUMAN_RECEPTIONIST_FROM_MONTHLY}/mo, overage $0.22/min.`,
     eyebrow: "Cost guide",
     headline: "After-hours lead capture cost for contractors",
     intro:
@@ -337,9 +338,9 @@ const GUIDES: Guide[] = [
   },
   {
     slug: "callgrabbr-vs-rosie",
-    title: "CallGrabbr vs Rosie: Missed-Call Lead Capture for Contractors",
+    title: "CallGrabbr vs Rosie for contractors",
     description:
-      "Compare CallGrabbr and Rosie for HVAC and plumbing shops. Trade intake, missed-call capture, pricing, and when each tool fits.",
+      "CallGrabbr vs Rosie for contractors. Trade job texts versus a cheaper tool that answers and sends a transcript.",
     eyebrow: "Comparison guide",
     headline: "CallGrabbr vs Rosie",
     intro:
@@ -427,7 +428,7 @@ const GUIDES: Guide[] = [
     slug: "callgrabbr-vs-oncrew",
     title: "CallGrabbr vs OnCrew: Which Fits Trade Shops?",
     description:
-      "Compare CallGrabbr and OnCrew for HVAC, plumbing, and home-service shops. Missed-call capture, after-hours coverage, and how to pick the right lead capture stack.",
+      "CallGrabbr vs OnCrew for HVAC and plumbing: missed-call lead texts from $99/mo, versus a field-dispatch product.",
     eyebrow: "Comparison guide",
     headline: "CallGrabbr vs OnCrew",
     intro:
@@ -511,9 +512,9 @@ const GUIDES: Guide[] = [
   },
   {
     slug: "best-ai-answering-for-plumbing-2026",
-    title: "After-Hours & Missed-Call Lead Capture for Plumbing (2026)",
+    title: "Plumbing missed-call capture, 2026",
     description:
-      "What plumbing owners should look for in after-hours and missed-call lead capture in 2026: 2 AM emergencies, leak intake, and how CallGrabbr fits.",
+      "After-hours missed-call lead capture for plumbers: leak intake, emergency flags, and plans from $99/mo with a 14-day trial.",
     eyebrow: "Plumbing buyer guide · 2026",
     headline: "After-hours & missed-call lead capture for plumbing (2026)",
     intro:
@@ -586,8 +587,9 @@ const GUIDES: Guide[] = [
   },
   {
     slug: "ai-vs-live-answering-for-contractors",
-    title: "Missed-Call Lead Capture vs Live Receptionist for Contractors",
-    description: `Missed-call lead capture vs live receptionists for HVAC and plumbing: cost from $${basic.price}/mo vs ~$${HUMAN_RECEPTIONIST_FROM_MONTHLY}+/mo, when you need a human on every ring, and how to choose.`,
+    title: "Lead capture vs a live receptionist",
+    description:
+      "Missed-call lead capture versus a live receptionist for HVAC and plumbing, with prices, minute caps, and when to hire a person.",
     eyebrow: "Buyer guide",
     headline: "Missed-call lead capture vs live receptionist for contractors",
     intro:
@@ -670,8 +672,9 @@ const GUIDES: Guide[] = [
   },
   {
     slug: "missed-call-lead-capture-vs-ai-answering",
-    title: "Missed-Call Lead Capture vs AI Answering for Contractors",
-    description: `${PRODUCT_ONE_LINER} Compare missed-call lead capture to AI answering and receptionist software — trade intake, SMS alerts, missed-only plans, and why one captured job pays for months.`,
+    title: "Missed-call capture vs AI answering",
+    description:
+      "Missed-call lead capture versus AI answering for contractors: trade intake, SMS leads, and flat plans from $99/mo.",
     eyebrow: "Category guide",
     headline: "Missed-call lead capture vs AI answering",
     intro:
@@ -710,6 +713,25 @@ const GUIDES: Guide[] = [
           "Choose AI answering or live receptionist platforms if you need a human-quality voice on every ring, complex live transfers, or multi-department phone trees as a brand requirement.",
           "Choose CallGrabbr if your main leak is missed and after-hours revenue — and you want a trial, clear Basic / Growth / Platinum steps, and lead texts that read like job tickets.",
         ],
+      },
+      {
+        heading: "Who is on the tools, and how spam checks work",
+        paragraphs: [
+          "The U.S. Bureau of Labor Statistics counted 440,900 heating, air conditioning, and refrigeration mechanic and installer jobs in 2025, with a median wage of $61,010 in May 2025. Those jobs are on roofs, in attics, and in cramped mechanical rooms — the hours when a shop phone goes unanswered. That is a labor-market fact, not a CallGrabbr customer count.",
+          "Spam checks on CallGrabbr use Twilio Lookup with the Nomorobo add-on. If the lookup errors, the call is not blocked. The product fails open so a real customer is not dropped because a score failed to load.",
+        ],
+      },
+    ],
+    sources: [
+      {
+        name: "U.S. Bureau of Labor Statistics, HVAC mechanics and installers",
+        href: "https://www.bls.gov/ooh/installation-maintenance-and-repair/heating-air-conditioning-and-refrigeration-mechanics-and-installers.htm",
+        usedFor: "2025 job count (440,900) and May 2025 median pay ($61,010)",
+      },
+      {
+        name: "Twilio Lookup v2 API",
+        href: "https://www.twilio.com/docs/lookup/v2-api",
+        usedFor: "The lookup CallGrabbr uses for Nomorobo spam scores",
       },
     ],
     comparison: {

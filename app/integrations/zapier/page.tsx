@@ -4,10 +4,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Zap, Webhook, Key, ArrowRight } from "lucide-react"
 import { GROWTH_AND_PLATINUM_LABEL } from "@/lib/plan-labels"
+import { JsonLd } from "@/components/seo/JsonLd"
+import { webPageJsonLd } from "@/lib/structured-data"
+
+const ZAPIER_TITLE = "Zapier Integration - CallGrabbr"
+const ZAPIER_DESCRIPTION =
+  "Connect CallGrabbr to 6,000+ apps with Zapier. Automatically send new leads to your CRM, Slack, Google Sheets, and more."
 
 export const metadata: Metadata = {
-  title: "Zapier Integration - CallGrabbr",
-  description: "Connect CallGrabbr to 6,000+ apps with Zapier. Automatically send new leads to your CRM, Slack, Google Sheets, and more.",
+  title: ZAPIER_TITLE,
+  description: ZAPIER_DESCRIPTION,
   alternates: { canonical: "/integrations/zapier" },
 }
 
@@ -39,6 +45,13 @@ export default function ZapierIntegrationPage() {
 
   return (
     <div className="container mx-auto px-4 py-16 max-w-4xl">
+      <JsonLd
+        data={webPageJsonLd({
+          name: ZAPIER_TITLE,
+          description: ZAPIER_DESCRIPTION,
+          path: "/integrations/zapier",
+        })}
+      />
       <div className="text-center mb-12">
         <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary mb-4">
           <Zap className="h-4 w-4" />

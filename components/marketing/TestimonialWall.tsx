@@ -33,6 +33,11 @@ export function TestimonialWall() {
           <Card key={story.name + story.role} className="glass-card">
             <CardContent className="pt-6 space-y-4">
               <p className="text-sm leading-relaxed">&ldquo;{story.quote}&rdquo;</p>
+              {story.jobCaptured && (
+                <p className="text-xs text-muted-foreground">
+                  Job captured: {story.jobCaptured}
+                </p>
+              )}
               <div className="flex items-center gap-3">
                 {story.photoSrc ? (
                   // eslint-disable-next-line @next/next/no-img-element

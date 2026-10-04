@@ -69,3 +69,20 @@ export function getIndustryImage(slug: string): string {
 export function getIndustryImageAlt(name: string): string {
   return `${name} service professional smiling, ready to help customers`
 }
+
+/** Intrinsic pixel size so <img> gets width and height (CLS). */
+export const IMAGE_DIMENSIONS: Record<string, { width: number; height: number }> = {
+  [section("hero")]: { width: 1920, height: 1080 },
+  [section("workflow")]: { width: 1920, height: 1080 },
+  [section("why-matters")]: { width: 1920, height: 1080 },
+  [section("lead-capture")]: { width: 1920, height: 1080 },
+  [section("final-cta")]: { width: 1920, height: 1080 },
+  [section("team-trust")]: { width: 1536, height: 1024 },
+}
+
+export const INDUSTRY_CARD_DIMENSIONS = { width: 1536, height: 1024 } as const
+export const MOBILE_SCREENSHOT_DIMENSIONS = { width: 1080, height: 2340 } as const
+
+export function getImageDimensions(src: string): { width: number; height: number } {
+  return IMAGE_DIMENSIONS[src] ?? { width: 1920, height: 1080 }
+}

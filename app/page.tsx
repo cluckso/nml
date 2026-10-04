@@ -17,6 +17,7 @@ import { CompareUsLinks } from "@/components/marketing/CompareUsLinks"
 import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
 import { TrustStrip } from "@/components/marketing/TrustStrip"
 import { MobileAppDownload } from "@/components/marketing/MobileAppDownload"
+import { TradeIntakeCompare } from "@/components/marketing/TradeIntakeCompare"
 import { MARKETING_IMAGES, MARKETING_IMAGE_ALT } from "@/lib/marketing-images"
 import { formatJobValuePromptLine, PRICING_TIERS } from "@/lib/pricing-catalog"
 import {
@@ -98,6 +99,7 @@ export default function HomePage() {
                 "Preferred appointment time",
                 "Full call summary",
                 "Recording (optional)",
+                "Text-back confirmation to callers (on Growth and Platinum) so they don't dial the next shop while you're still on a job.",
               ].map((item) => (
                 <li key={item} className="flex items-center gap-3">
                   <Check className="h-5 w-5 text-primary shrink-0" />
@@ -166,6 +168,8 @@ export default function HomePage() {
         </p>
       </section>
 
+      <TradeIntakeCompare />
+
       {/* Insurance-tier plan teaser */}
       <section className="bg-muted/30 py-16 border-y border-border/50">
         <div className="container mx-auto px-4">
@@ -173,7 +177,7 @@ export default function HomePage() {
             Lead insurance first. Full front desk when you&apos;re ready.
           </h2>
           <p className="text-center text-muted-foreground mb-10 max-w-xl mx-auto leading-relaxed">
-            Most owners start on Basic — overflow and nights/weekends. Upgrade when you want every inbound call captured.
+            Basic covers overflow and nights/weekends. Growth is the full front desk when you want every inbound call captured.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {PRICING_TIERS.map((tier) => (
@@ -184,7 +188,7 @@ export default function HomePage() {
                       className={`mb-1 inline-block w-fit rounded px-2 py-1 text-xs font-semibold uppercase tracking-wide ${
                         tier.badge === "Lead insurance" || tier.badge === "Best to start"
                           ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
-                          : tier.badge === "Full coverage" || tier.popular
+                          : tier.badge === "Most popular" || tier.badge === "Full coverage" || tier.popular
                             ? "bg-primary/15 text-primary"
                             : "bg-muted text-muted-foreground"
                       }`}
@@ -225,6 +229,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <CompareUsLinks className="container mx-auto px-4 py-16" />
 
       {/* Integrations */}
       <section className="border-y border-border/50 bg-muted/20 py-16">
@@ -401,7 +407,6 @@ export default function HomePage() {
 
       <TestimonialWall />
       <ReviewSignals />
-      <CompareUsLinks className="container mx-auto px-4 py-16" />
 
       {/* Cost of inaction */}
       <section className="bg-muted/30 py-16 border-y border-border/50">

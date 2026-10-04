@@ -2,11 +2,16 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { PublicSmsOptInForm } from "@/components/consent/PublicSmsOptInForm"
 import { LEGAL_LAST_UPDATED } from "@/lib/site-contact"
+import { JsonLd } from "@/components/seo/JsonLd"
+import { webPageJsonLd } from "@/lib/structured-data"
+
+const SMS_TITLE = "SMS Opt-In & Messaging Terms - CallGrabbr"
+const SMS_DESCRIPTION =
+  "SMS opt-in and messaging terms for CallGrabbr. Call alerts, lead texts, and account notices. Message frequency varies. Reply STOP to opt out."
 
 export const metadata: Metadata = {
-  title: "SMS Opt-In & Messaging Terms - CallGrabbr",
-  description:
-    "SMS opt-in form and messaging terms for CallGrabbr. Subscribe to call alerts and account notifications.",
+  title: SMS_TITLE,
+  description: SMS_DESCRIPTION,
   alternates: { canonical: "/sms-terms" },
 }
 
@@ -17,6 +22,13 @@ export const metadata: Metadata = {
 export default function SmsTermsPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-3xl">
+      <JsonLd
+        data={webPageJsonLd({
+          name: SMS_TITLE,
+          description: SMS_DESCRIPTION,
+          path: "/sms-terms",
+        })}
+      />
       <h1 className="text-3xl font-bold mb-2">SMS Opt-In & Messaging Terms</h1>
       <p className="text-sm text-muted-foreground mb-6">
         Last updated: {LEGAL_LAST_UPDATED}

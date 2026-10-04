@@ -1,18 +1,15 @@
 /**
- * Founder details for /about and footer trust. Leave fields null until real
- * name, photo, and LinkedIn are supplied — do not invent them.
+ * Founder details for /about and footer trust.
  */
 export const FOUNDER = {
-  name: null as string | null,
-  photoSrc: null as string | null,
-  linkedInUrl: null as string | null,
-  /** e.g. "a one-truck plumber" — only set when true */
-  background: null as string | null,
+  name: "Steven Steinhoff",
+  photoSrc: "/marketing/founder.jpg",
+  title: "Service Business Expert",
 } as const
 
 export function founderByline(): string | null {
   if (!FOUNDER.name) return null
-  if (FOUNDER.background) return `Built by ${FOUNDER.name}, ${FOUNDER.background}`
+  if (FOUNDER.title) return `Built by ${FOUNDER.name}, ${FOUNDER.title}`
   return `Built by ${FOUNDER.name}`
 }
 

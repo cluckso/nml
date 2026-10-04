@@ -1,7 +1,11 @@
 import Image from "next/image"
 import Link from "next/link"
 import { HOMEPAGE_INDUSTRY_LINKS } from "@/lib/industry-data"
-import { getIndustryCardImage, getIndustryImageAlt } from "@/lib/marketing-images"
+import {
+  getIndustryCardImage,
+  getIndustryImageAlt,
+  INDUSTRY_CARD_DIMENSIONS,
+} from "@/lib/marketing-images"
 import { ArrowRight } from "lucide-react"
 
 export function IndustryPhotoCards() {
@@ -20,8 +24,9 @@ export function IndustryPhotoCards() {
           <Image
             src={getIndustryCardImage(slug)}
             alt={getIndustryImageAlt(name)}
-            fill
-            className="object-cover object-[center_20%] transition duration-500 group-hover:scale-105"
+            width={INDUSTRY_CARD_DIMENSIONS.width}
+            height={INDUSTRY_CARD_DIMENSIONS.height}
+            className="absolute inset-0 h-full w-full max-w-none object-cover object-[center_20%] transition duration-500 group-hover:scale-105"
             sizes="(max-width: 768px) 50vw, 25vw"
           />
           <div

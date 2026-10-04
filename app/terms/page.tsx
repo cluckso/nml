@@ -47,7 +47,7 @@ export default function TermsPage() {
         <section>
           <h2 className="text-xl font-semibold text-foreground mb-2">4. Subscription and Payment</h2>
           <p>
-            Subscription plans, fees, and included minutes are described on our pricing page. You agree to pay all applicable subscription and overage fees. There are no separate setup fees for standard plans listed on our pricing page. Payments are processed by Stripe; by subscribing, you agree to their terms. Fees are generally billed in advance; overage may be billed in arrears. We offer a 30-day money-back guarantee on paid subscriptions. If you are not satisfied within 30 days of your first paid subscription, contact {SUPPORT_EMAIL} for a full refund. Overage charges for minutes actually used may not be refundable. After that 30-day window, refunds are at our discretion unless required by law. Canceling stops future billing; it does not automatically refund past periods.
+            Subscription plans, fees, and included minutes are described on our pricing page. You agree to pay all applicable subscription and overage fees. There are no separate setup fees for standard plans listed on our pricing page. Payments are processed by Stripe; by subscribing, you agree to their terms. Fees are generally billed in advance; overage may be billed in arrears. We offer a 30-day money-back guarantee on paid subscriptions. If you are not satisfied within 30 days of your first paid subscription, contact {SUPPORT_EMAIL} for a full refund. Overage charges for minutes actually used may not be refundable. Canceling stops future billing; it does not automatically refund past periods.
           </p>
         </section>
 

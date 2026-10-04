@@ -1,3 +1,4 @@
+import { AUTHOR_PATH, GUIDE_AUTHOR_NAME } from "@/lib/guides/authorship"
 import { GOOGLE_PLAY_STORE_URL } from "@/lib/mobile-app"
 import { SUPPORT_EMAIL } from "@/lib/site-contact"
 import { SITE_URL } from "@/lib/site-url"
@@ -90,6 +91,60 @@ export function webPageJsonLd(input: {
       name: "CallGrabbr",
       url: SITE_URL,
     },
+  }
+}
+
+export function personAuthorJsonLd() {
+  const url = `${SITE_URL}${AUTHOR_PATH}`
+  return {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "@id": `${url}#person`,
+    name: GUIDE_AUTHOR_NAME,
+    jobTitle: "Service Business Expert",
+    url,
+    image: `${SITE_URL}/marketing/founder.jpg`,
+    worksFor: {
+      "@type": "Organization",
+      name: "CallGrabbr",
+      url: SITE_URL,
+    },
+  }
+}
+
+export function articleJsonLd(input: {
+  headline: string
+  description: string
+  path: string
+  datePublished: string
+  dateModified: string
+}) {
+  const url = `${SITE_URL}${input.path.startsWith("/") ? input.path : `/${input.path}`}`
+  const authorUrl = `${SITE_URL}${AUTHOR_PATH}`
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: input.headline,
+    description: input.description,
+    datePublished: input.datePublished,
+    dateModified: input.dateModified,
+    author: {
+      "@type": "Person",
+      "@id": `${authorUrl}#person`,
+      name: GUIDE_AUTHOR_NAME,
+      url: authorUrl,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "CallGrabbr",
+      url: SITE_URL,
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE_URL}/icon.png`,
+      },
+    },
+    mainEntityOfPage: url,
+    image: `${SITE_URL}/opengraph-image`,
   }
 }
 

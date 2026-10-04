@@ -5,9 +5,13 @@ import { getCurrentUser } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { TrialStartClient } from "./TrialStartClient"
 import { trialStartMetaDescription } from "@/lib/trial-marketing"
+import { JsonLd } from "@/components/seo/JsonLd"
+import { webPageJsonLd } from "@/lib/structured-data"
+
+const TRIAL_TITLE = "Start your CallGrabbr free trial"
 
 export const metadata: Metadata = {
-  title: "Start Free Trial - CallGrabbr",
+  title: TRIAL_TITLE,
   description: trialStartMetaDescription(),
   alternates: { canonical: "/trial/start" },
 }
@@ -28,6 +32,13 @@ export default async function TrialStartPage() {
   if (!user.businessId) {
     return (
       <Suspense fallback={<div className="container mx-auto max-w-md py-12 text-center text-muted-foreground">Loading…</div>}>
+        <JsonLd
+          data={webPageJsonLd({
+            name: TRIAL_TITLE,
+            description: trialStartMetaDescription(),
+            path: "/trial/start",
+          })}
+        />
         <TrialStartClient />
       </Suspense>
     )

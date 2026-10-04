@@ -36,7 +36,9 @@ export function BrandMark({
         className={`rounded-xl shrink-0 ${size === "xl" ? "h-16 w-16 sm:h-[4.5rem] sm:w-[4.5rem]" : ""}`}
         priority
       />
-      <span className={`font-bold tracking-tight ${textClass}`}>CallGrabbr</span>
+      <span className={`font-bold tracking-tight ${textClass} ${size === "sm" ? "max-sm:hidden" : ""}`}>
+        CallGrabbr
+      </span>
     </Link>
   )
 }

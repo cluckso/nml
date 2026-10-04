@@ -44,3 +44,9 @@ next-env.d.ts
 /prisma/migrations
 
 .vercel
+
+# Nested Capacitor dependencies and Android build output
+dashboard_capacitor/node_modules/
+dashboard_capacitor/android/.gradle/
+dashboard_capacitor/android/build/
+dashboard_capacitor/android/app/build/

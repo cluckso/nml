@@ -74,6 +74,7 @@ describe("buildAgentOverride", () => {
       ...DEFAULT_SETTINGS,
       callRouting: {
         ...DEFAULT_SETTINGS.callRouting,
+        scheduleByBusinessHours: false,
         answerAllCalls: false,
         ringBeforeAnswerSeconds: 10 as const,
       },
@@ -81,5 +82,14 @@ describe("buildAgentOverride", () => {
     const { agentOverride, ringDurationMs } = buildAgentOverride(settings, "Acme", [], PlanType.STARTER)
     expect(ringDurationMs).toBe(10_000)
     expect(agentOverride.agent?.ring_duration_ms).toBe(10_000)
+  })
+
+  it("uses scheduled hours instead of the general ring setting", () => {
+    const duringHours = new Date("2026-06-29T15:00:00.000Z")
+    const afterHours = new Date("2026-06-30T02:00:00.000Z")
+    const during = buildAgentOverride(DEFAULT_SETTINGS, "Acme", [], PlanType.STARTER, duringHours)
+    const after = buildAgentOverride(DEFAULT_SETTINGS, "Acme", [], PlanType.STARTER, afterHours)
+    expect(during.ringDurationMs).toBe(10_000)
+    expect(after.ringDurationMs).toBe(0)
   })
 })

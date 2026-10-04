@@ -18,7 +18,32 @@ const nextConfig = {
   },
   // CORS for /api/* so Capacitor app (origin https://localhost or capacitor://localhost) can call API with Bearer token
   async headers() {
+    const contentSecurityPolicy = [
+      "default-src 'self'",
+      "base-uri 'self'",
+      "object-src 'none'",
+      "frame-ancestors 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
+      "style-src 'self' 'unsafe-inline' https:",
+      "img-src 'self' data: blob: https:",
+      "font-src 'self' data: https:",
+      "connect-src 'self' https: wss:",
+      "frame-src 'self' https:",
+      "media-src 'self' blob: https:",
+      "worker-src 'self' blob:",
+      "form-action 'self' https:",
+    ].join("; ")
+
     return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Content-Security-Policy", value: contentSecurityPolicy },
+        ],
+      },
       {
         source: "/api/:path*",
         headers: [

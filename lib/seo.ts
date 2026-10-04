@@ -52,9 +52,11 @@ export function industryPageMetadata(input: {
   subheadline: string
   slug: string
   industryName: string
+  metaTitle?: string
+  metaDescription?: string
 }): Metadata {
-  const title = `${input.headline} | CallGrabbr`
-  const description = input.subheadline
+  const title = input.metaTitle ?? `${input.headline} | CallGrabbr`
+  const description = input.metaDescription ?? input.subheadline
   const keywords = [
     ...SEO_KEYWORDS,
     `${input.industryName} missed call lead capture`,
@@ -83,13 +85,17 @@ export function industryPageMetadata(input: {
   }
 }
 
+export function guideDocumentTitle(title: string): string {
+  return title.includes("CallGrabbr") ? title : `${title} | CallGrabbr`
+}
+
 export function guidePageMetadata(input: {
   title: string
   description: string
   slug: string
   keywords?: string[]
 }): Metadata {
-  const title = input.title.includes("CallGrabbr") ? input.title : `${input.title} | CallGrabbr`
+  const title = guideDocumentTitle(input.title)
   const description = input.description
   const keywords = [...SEO_KEYWORDS, ...(input.keywords ?? [])]
 

@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useCallback, useState } from "react"
 import { ChevronLeft, ChevronRight, Smartphone } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { MOBILE_SCREENSHOT_DIMENSIONS } from "@/lib/marketing-images"
 import { GOOGLE_PLAY_STORE_URL, MOBILE_SCREENSHOTS } from "@/lib/mobile-app"
 
 export function MobileAppDownload() {
@@ -53,8 +54,9 @@ export function MobileAppDownload() {
               <Image
                 src={active.src}
                 alt={active.alt}
-                fill
-                className="object-cover object-top"
+                width={MOBILE_SCREENSHOT_DIMENSIONS.width}
+                height={MOBILE_SCREENSHOT_DIMENSIONS.height}
+                className="absolute inset-0 h-full w-full max-w-none object-cover object-top"
                 sizes="260px"
                 priority={activeIndex === 0}
               />

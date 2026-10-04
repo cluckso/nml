@@ -30,6 +30,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     subheadline: data.subheadline,
     slug,
     industryName: data.name,
+    metaTitle: data.metaTitle,
+    metaDescription: data.metaDescription,
   })
 }
 
@@ -134,6 +136,7 @@ export default async function IndustryLandingPage({ params }: PageProps) {
                 "Address / location",
                 "Urgency level",
                 "Preferred appointment time",
+                "Text-back confirmation to callers (on Growth and Platinum)",
               ].map((item) => (
                 <li key={item} className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-primary shrink-0" />

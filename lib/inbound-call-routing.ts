@@ -30,6 +30,19 @@ export function isDemoInboundCall(
   return !!(toNumberNorm && demoNumberNorm && toNumberNorm === demoNumberNorm)
 }
 
+/** Detect demo completions even if a call bypassed the inbound webhook or lacks metadata. */
+export function isDemoCallCompletion(
+  toNumber: string | null | undefined,
+  metadata: Record<string, unknown> | null | undefined,
+  agentId: string | null | undefined,
+  demoNumber: string | null | undefined,
+  demoAgentId: string | null | undefined
+): boolean {
+  return isDemoInboundCall(toNumber, demoNumber) ||
+    metadataDemoFlag(metadata) ||
+    !!(agentId && demoAgentId && agentId === demoAgentId)
+}
+
 /** Demo calls always route to the dedicated demo agent when env is configured. */
 export function resolveDemoInboundResponse(
   config: DemoInboundConfig
@@ -59,5 +72,5 @@ export function canAnswerSignupInbound(
   client: SignupInboundClient | null | undefined,
   agentId: string | null | undefined
 ): client is SignupInboundClient {
-  return !!(client && agentId)
+  return !!(client && client.status === "ACTIVE" && agentId)
 }

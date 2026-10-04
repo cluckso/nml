@@ -15,7 +15,8 @@ const FLEX_MODE_PLAYBOOK_INTRO = `## Call Flow (Flex Mode)
 Tasks in the flow mark progress — follow this playbook for what to collect and in what order.
 - Skip any step the caller already answered; never re-ask captured details.
 - One question at a time. Validate urgency before location when appropriate.
-- Confirm only once at the end (name, callback number, short paraphrase of need).
+- For a normal close, once you have the name, actionable reason, and callback number, give one brief read-back of those details and any location or vehicle already given. Ask whether you got it right, then wait for the caller's answer. Receiving the callback number is not confirmation.
+- If the caller corrects a detail, acknowledge and update it without repeating the full summary; then close.
 - If caller wants a manager now: take message and callback number; no promised callback time.
 - If caller asks pricing: defer to team follow-up — no quotes on the phone.`
 
@@ -45,12 +46,13 @@ const RECEPTIONIST_CORE_SECTIONS = {
 - If they already gave info you were about to ask for: acknowledge it and move on — never re-ask.`,
 }
 
-const CLOSE_STEP = `then say: "${CALL_CLOSING_LINE}"`
+const CLOSE_STEP = `ask once if you got it right and wait for the caller's answer, then say: "${CALL_CLOSING_LINE}"`
 
 const FLEX_PLAYBOOKS = {
   propertyService: (serviceAreas: string) => `${FLEX_MODE_PLAYBOOK_INTRO}
 1. Greet — thank them for calling; get name.
 2. Reason — what they need; one follow-up if vague. If emergency (flood, no heat, gas smell, sparks, etc.): validate and flag priority.
+   If they smell gas, interrupt intake: tell them to leave the building immediately and, from a safe distance, call 911 or their gas utility. Avoid switches and flames. Do not ask for an address or present a callback as the emergency response; continue intake only after they are safe.
 3. City — property city.
 4. Verify area — service areas: ${serviceAreas}. Do not read the full list aloud. If not supported, apologize and end with the required closing line.
 5. Address — full service address when in area.
@@ -82,10 +84,10 @@ const FLEX_PLAYBOOKS = {
 4. Confirm — one read-back, ${CLOSE_STEP}.`,
 
   demo: `${FLEX_MODE_PLAYBOOK_INTRO}
-1. Greet — mention demo line once; get name.
+1. Greet — mention demo line once; ask only for the name. Do not combine name and reason in the opening question. If the caller offers a vague need instead, clarify that need with one question before returning to name.
 2. Reason — what they need; collect city/address for home service, vehicle for auto, or appointment pref if relevant.
 3. Phone — callback number.
-4. Confirm — save details silently, one read-back, ${CLOSE_STEP}. Mention "demo" only in opening.`,
+4. Confirm — receiving the callback number is not the end of the call. Save details silently, give one read-back even when the caller supplied everything upfront, ${CLOSE_STEP}. Mention "demo" only in opening.`,
 
   steve: `${FLEX_MODE_PLAYBOOK_INTRO}
 1. Greet — static welcome; get name.
@@ -132,7 +134,7 @@ If {{escalate_after_retries}} is true and the caller is still unclear after {{qu
   return `## Guardrails
 - Never collect payment information, give pricing or quotes, diagnose problems, or promise scheduling, availability, or specific callback times.
 - Follow the Call Flow playbook; flow nodes mark task progress only — do not repeat confirmations.
-- One natural read-back at Confirm, then say exactly: "${CALL_CLOSING_LINE}" and end the call.
+- One natural read-back at Confirm; wait for the caller's answer, then say exactly: "${CALL_CLOSING_LINE}" and end the call.
 - Explain what happens next in plain language before the closing line when helpful.
 - If a situation requires emergency services, say "Nine-One-One" clearly.${capacity}`
 }

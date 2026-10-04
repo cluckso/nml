@@ -141,4 +141,15 @@ describe("planInboundRingDelay", () => {
     expect(plan.webhookSleepMs).toBe(9200)
     expect(plan.retellRingDurationMs).toBe(20_800)
   })
+  it("counts processing time against both ringing and the webhook deadline", () => {
+    expect(planInboundRingDelay(10_000, 2_500)).toEqual({
+      webhookSleepMs: 6_700,
+      retellRingDurationMs: undefined,
+    })
+    expect(planInboundRingDelay(30_000, 2_500)).toEqual({
+      webhookSleepMs: 6_700,
+      retellRingDurationMs: 20_800,
+    })
+    expect(planInboundRingDelay(10_000, 9_500).webhookSleepMs).toBe(0)
+  })
 })

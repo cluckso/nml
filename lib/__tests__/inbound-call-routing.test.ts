@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest"
 import {
   canAnswerSignupInbound,
   isDemoInboundCall,
+  isDemoCallCompletion,
   metadataDemoFlag,
   resolveDemoInboundResponse,
 } from "../inbound-call-routing"
@@ -25,6 +26,13 @@ describe("metadataDemoFlag", () => {
     expect(metadataDemoFlag({ demo_call: "true" })).toBe(true)
     expect(metadataDemoFlag({ client_id: "x" })).toBe(false)
     expect(metadataDemoFlag(null)).toBe(false)
+  })
+})
+
+describe("isDemoCallCompletion", () => {
+  it("recognizes the demo agent when number and metadata are absent", () => {
+    expect(isDemoCallCompletion("+12029526890", null, "agent_demo", undefined, "agent_demo")).toBe(true)
+    expect(isDemoCallCompletion("+12029526890", null, "agent_other", undefined, "agent_demo")).toBe(false)
   })
 })
 
@@ -66,5 +74,6 @@ describe("canAnswerSignupInbound", () => {
     expect(canAnswerSignupInbound(null, "agent_abc")).toBe(false)
     expect(canAnswerSignupInbound({ id: "biz-1" }, null)).toBe(false)
     expect(canAnswerSignupInbound({ id: "biz-1" }, undefined)).toBe(false)
+    expect(canAnswerSignupInbound({ id: "biz-1", status: "PAUSED" }, "agent_abc")).toBe(false)
   })
 })

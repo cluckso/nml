@@ -3,6 +3,7 @@ export const VS_PAGE_LINKS = [
   {
     href: "/guides/callgrabbr-vs-ruby",
     title: "CallGrabbr vs Ruby",
+    shortLabel: "Ruby",
     description:
       "Live receptionist pricing vs missed-call lead capture for HVAC and plumbing shops.",
     eyebrow: "Live answering",
@@ -10,6 +11,7 @@ export const VS_PAGE_LINKS = [
   {
     href: "/guides/callgrabbr-vs-smith-ai",
     title: "CallGrabbr vs Smith AI",
+    shortLabel: "Smith AI",
     description:
       "Hybrid receptionist plans vs simpler missed-call capture for contractors.",
     eyebrow: "Hybrid receptionist",
@@ -17,6 +19,7 @@ export const VS_PAGE_LINKS = [
   {
     href: "/guides/callgrabbr-vs-rosie",
     title: "CallGrabbr vs Rosie",
+    shortLabel: "Rosie",
     description:
       "Trade-focused lead capture vs entry-level AI answering — when each fits your shop.",
     eyebrow: "AI answering tools",
@@ -24,6 +27,7 @@ export const VS_PAGE_LINKS = [
   {
     href: "/guides/callgrabbr-vs-oncrew",
     title: "CallGrabbr vs OnCrew",
+    shortLabel: "OnCrew",
     description:
       "On-crew dispatch tools vs dedicated missed-call lead recovery for trades.",
     eyebrow: "Field service",

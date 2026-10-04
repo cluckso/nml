@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { DeleteAccountControl } from "@/components/help/DeleteAccountControl"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { PRODUCT_FAQ } from "@/lib/faq-data"
-import { faqPageJsonLd } from "@/lib/structured-data"
+import { faqPageJsonLd, webPageJsonLd } from "@/lib/structured-data"
 import { DEFAULT_OG_IMAGE, SEO_KEYWORDS } from "@/lib/seo"
 
 const FAQ_TITLE = "HVAC and Plumbing Answering Service FAQ | CallGrabbr"
@@ -308,7 +308,16 @@ const CARRIERS = [
 export default function DocsFaqPage() {
   return (
     <div className="container mx-auto px-4 py-12 max-w-4xl">
-      <JsonLd data={faqPageJsonLd(PRODUCT_FAQ)} />
+      <JsonLd
+        data={[
+          faqPageJsonLd(PRODUCT_FAQ),
+          webPageJsonLd({
+            name: FAQ_TITLE,
+            description: FAQ_DESCRIPTION,
+            path: "/docs/faq",
+          }),
+        ]}
+      />
       <div className="mb-10">
         <h1 className="text-3xl font-bold mb-2">Help & FAQ</h1>
         <p className="text-muted-foreground">

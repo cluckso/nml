@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import type { User } from "@supabase/supabase-js"
+import { Menu, X } from "lucide-react"
 import { trialNavCtaLabel } from "@/lib/trial-marketing"
 import { getTrialNavBadge, type TrialNavBadge as TrialNavBadgeData } from "@/lib/trial-nav-badge"
 import { TrialNavBadge } from "@/components/nav/TrialNavBadge"
@@ -25,10 +26,13 @@ type DashboardNavPayload = {
   } | null
 }
 
+type NavLink = { href: string; label: string }
+
 export function Nav() {
   const [user, setUser] = useState<User | null>(null)
   const [businessName, setBusinessName] = useState<string | null>(null)
   const [trialBadge, setTrialBadge] = useState<TrialNavBadgeData | null>(null)
+  const [menuOpen, setMenuOpen] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -91,7 +95,12 @@ export function Nav() {
     }
   }, [user])
 
+  useEffect(() => {
+    setMenuOpen(false)
+  }, [user])
+
   const handleSignOut = async () => {
+    setMenuOpen(false)
     const supabase = createClient()
     await supabase.auth.signOut()
     analytics.resetIdentity()
@@ -99,72 +108,145 @@ export function Nav() {
     router.refresh()
   }
 
+  const marketingLinks: NavLink[] = [
+    ...(!user ? [{ href: "/#demo", label: "Demo" }] : []),
+    { href: "/guides", label: "Guides" },
+    { href: "/about", label: "About" },
+    { href: "/pricing", label: "Pricing" },
+    { href: "/docs/faq", label: "Help" },
+  ]
+
+  const appLinks: NavLink[] = user
+    ? [
+        { href: "/dashboard", label: "Dashboard" },
+        { href: "/calls", label: "Calls" },
+        { href: "/appointments", label: "Appointments" },
+        { href: "/settings", label: "Settings" },
+        { href: "/billing", label: "Billing" },
+      ]
+    : []
+
+  const allMenuLinks = [...marketingLinks, ...appLinks]
+
   return (
     <nav className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center gap-3">
-        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-          <BrandMark size="sm" />
+      <div className="container mx-auto px-4 py-3 flex justify-between items-center gap-3 min-h-14">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+          <BrandMark size="sm" className="shrink-0" />
           {businessName && (
             <span
-              className="text-sm text-muted-foreground border-l border-border/60 pl-3 font-medium truncate max-w-[120px] sm:max-w-[200px] md:max-w-[280px]"
+              className="hidden sm:inline text-sm text-muted-foreground border-l border-border/60 pl-3 font-medium truncate max-w-[100px] md:max-w-[160px] lg:max-w-[220px]"
               title={businessName}
             >
               {businessName}
             </span>
           )}
-          {trialBadge && <TrialNavBadge badge={trialBadge} />}
-        </div>
-        <div className="flex gap-4 items-center shrink-0">
-          {!user && (
-            <Link href="/#demo">
-              <Button variant="ghost">Demo</Button>
-            </Link>
+          {trialBadge && (
+            <span className="hidden md:inline-flex min-w-0">
+              <TrialNavBadge badge={trialBadge} />
+            </span>
           )}
-          <Link href="/guides">
-            <Button variant="ghost">Guides</Button>
-          </Link>
-          <Link href="/about">
-            <Button variant="ghost">About</Button>
-          </Link>
-          <Link href="/pricing">
-            <Button variant="ghost">Pricing</Button>
-          </Link>
-          <Link href="/docs/faq">
-            <Button variant="ghost">Help</Button>
-          </Link>
-          {user ? (
-            <>
-              <Link href="/dashboard">
-                <Button variant="ghost">Dashboard</Button>
-              </Link>
-              <Link href="/calls">
-                <Button variant="ghost">Calls</Button>
-              </Link>
-              <Link href="/appointments">
-                <Button variant="ghost">Appointments</Button>
-              </Link>
-              <Link href="/settings">
-                <Button variant="ghost">Settings</Button>
-              </Link>
-              <Link href="/billing">
-                <Button variant="ghost">Billing</Button>
-              </Link>
-              <Button variant="outline" onClick={handleSignOut}>
-                Sign Out
+        </div>
+
+        {/* Desktop links — only when there is room */}
+        <div className="hidden lg:flex items-center gap-1 xl:gap-2 shrink-0">
+          {allMenuLinks.map((link) => (
+            <Link key={link.href} href={link.href}>
+              <Button variant="ghost" size="sm">
+                {link.label}
               </Button>
-            </>
+            </Link>
+          ))}
+          {user ? (
+            <Button variant="outline" size="sm" onClick={handleSignOut}>
+              Sign Out
+            </Button>
           ) : (
             <>
               <Link href="/sign-in">
-                <Button variant="outline">Sign In</Button>
+                <Button variant="outline" size="sm">
+                  Sign In
+                </Button>
               </Link>
               <Link href="/sign-up?next=%2Ftrial%2Fstart">
-                <Button>{trialNavCtaLabel()}</Button>
+                <Button size="sm">{trialNavCtaLabel()}</Button>
               </Link>
             </>
           )}
         </div>
+
+        {/* Tablet/mobile: primary CTA + menu toggle */}
+        <div className="flex lg:hidden items-center gap-2 shrink-0">
+          {user ? (
+            <Link href="/dashboard">
+              <Button size="sm">Dashboard</Button>
+            </Link>
+          ) : (
+            <Link href="/sign-up?next=%2Ftrial%2Fstart">
+              <Button size="sm">{trialNavCtaLabel()}</Button>
+            </Link>
+          )}
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9"
+            aria-expanded={menuOpen}
+            aria-controls="mobile-nav-menu"
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            onClick={() => setMenuOpen((open) => !open)}
+          >
+            {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </Button>
+        </div>
       </div>
+
+      {menuOpen && (
+        <div
+          id="mobile-nav-menu"
+          className="lg:hidden border-t border-border/50 bg-background/98"
+        >
+          <div className="container mx-auto px-4 py-3 flex flex-col gap-1">
+            {businessName && (
+              <p className="sm:hidden px-3 py-2 text-sm text-muted-foreground font-medium truncate">
+                {businessName}
+              </p>
+            )}
+            {trialBadge && (
+              <div className="md:hidden px-3 py-2">
+                <TrialNavBadge badge={trialBadge} />
+              </div>
+            )}
+            {allMenuLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+                className="rounded-md px-3 py-2.5 text-sm font-medium hover:bg-accent"
+              >
+                {link.label}
+              </Link>
+            ))}
+            <div className="border-t border-border/50 mt-2 pt-2 flex flex-col gap-1">
+              {user ? (
+                <Button
+                  variant="outline"
+                  className="justify-start"
+                  onClick={handleSignOut}
+                >
+                  Sign Out
+                </Button>
+              ) : (
+                <Link href="/sign-in" onClick={() => setMenuOpen(false)}>
+                  <Button variant="outline" className="w-full justify-start">
+                    Sign In
+                  </Button>
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   )
 }

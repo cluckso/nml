@@ -55,10 +55,15 @@ async function listDemoCalls(limit = 10): Promise<CallRow[]> {
   const filter = demoAgentId
     ? { filter_criteria: { agent: [{ agent_id: demoAgentId }] } }
     : {}
-  const result = await retellPost<{ calls?: CallRow[] }>("/v2/list-calls", { ...filter, limit })
-  const calls = result.calls ?? []
+  const result = await retellPost<{ items?: CallRow[] }>("/v3/list-calls", { ...filter, limit })
+  const calls = result.items ?? []
   if (demoAgentId) return calls
   return calls.filter((c) => c.agent_name === "CallGrabbr Demo")
+}
+
+/** v3 list-calls omits transcript and recording_url; load those from get-call. */
+async function getCall(callId: string): Promise<CallRow> {
+  return retellGet<CallRow>(`/v2/get-call/${encodeURIComponent(callId)}`)
 }
 
 function slugify(s: string): string {
@@ -98,12 +103,13 @@ async function main() {
     ?? (args.includes("--call-id") ? args[args.indexOf("--call-id") + 1] : undefined)
 
   if (listOnly) {
-    const calls = await listDemoCalls(15)
-    if (!calls.length) {
+    const summaries = await listDemoCalls(15)
+    if (!summaries.length) {
       console.log("No demo calls found. Call the demo line or use Retell web call playground first.")
       return
     }
-    for (const c of calls) {
+    for (const summary of summaries) {
+      const c = await getCall(summary.call_id)
       console.log(
         `${c.call_id}  ${Math.round((c.duration_ms ?? 0) / 1000)}s  ${c.recording_url ? "has recording" : "no recording"}`
       )
@@ -114,11 +120,20 @@ async function main() {
 
   let call: CallRow
   if (callIdArg) {
-    call = await retellGet<CallRow>(`/v2/get-call/${callIdArg}`)
+    call = await getCall(callIdArg)
   } else {
-    const calls = await listDemoCalls(20)
-    call = calls.find((c) => c.recording_url && (c.duration_ms ?? 0) > 15000) ?? calls.find((c) => c.recording_url) ?? calls[0]
-    if (!call) throw new Error("No demo calls with recordings. Make a test call first.")
+    const summaries = await listDemoCalls(20)
+    const ranked = [...summaries].sort((a, b) => (b.duration_ms ?? 0) - (a.duration_ms ?? 0))
+    let selected: CallRow | undefined
+    for (const summary of ranked) {
+      const full = await getCall(summary.call_id)
+      if (full.recording_url) {
+        selected = full
+        break
+      }
+    }
+    if (!selected) throw new Error("No demo calls with recordings. Make a test call first.")
+    call = selected
   }
 
   if (!call.recording_url) {
