@@ -16,7 +16,7 @@ import { sendPushNotification } from "@/lib/push-notifications"
 import { reportUsageToStripe } from "@/lib/stripe"
 import { releaseRetellNumber } from "@/lib/retell"
 import { isSubscriptionActive } from "@/lib/subscription"
-import { hasSmsToCallers, hasCrmForwarding, hasLeadTagging, hasAppointmentCapture, getEffectivePlanType, FREE_TRIAL_MINUTES, TRIAL_DAYS, MAX_CALL_DURATION_SECONDS, toBillableMinutes } from "@/lib/plans"
+import { hasSmsToCallers, hasCallerFollowUpSms, hasCrmForwarding, hasLeadTagging, hasAppointmentCapture, getEffectivePlanType, FREE_TRIAL_MINUTES, TRIAL_DAYS, MAX_CALL_DURATION_SECONDS, toBillableMinutes } from "@/lib/plans"
 import { rateLimit } from "@/lib/rate-limit"
 import { getAgentIdForInbound, getAgentIdForIndustry } from "@/lib/intake-routing"
 import { ClientStatus } from "@prisma/client"
@@ -223,6 +223,7 @@ export async function POST(req: NextRequest) {
         {
           capacityMode: capacityMode as "normal" | "intake_only" | "decline",
           beginMessageOverride,
+          industry: (client as { industry?: import("@prisma/client").Industry }).industry,
         }
       )
 
@@ -828,7 +829,12 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
       }
       await Promise.all(notifies)
       const updateData: Record<string, unknown> = { notificationSent: true }
-      if (hasSmsToCallers(planType) && intakePhone && callSettings.followUpSms?.enabled) {
+      if (
+        hasSmsToCallers(planType) &&
+        intakePhone &&
+        callSettings.followUpSms?.enabled &&
+        hasCallerFollowUpSms(planType)
+      ) {
         updateData.callerConfirmationSentAt = new Date()
       }
       await db.call.update({

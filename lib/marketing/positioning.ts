@@ -46,7 +46,7 @@ export const PLATINUM_FRAME = "Full front desk for busy multi-crew shops"
  * Do not race to $49 — sell $/captured job and trade intake depth.
  */
 export const ROSIE_PRICE_OBJECTION =
-  "Cheaper tools answer phones. CallGrabbr is built to capture trade jobs — name, address, urgency, preferred time — so you can sell the call back, not just get a transcript."
+  "Cheaper tools answer phones. Basic is built to capture trade jobs — and text the caller back — so you can sell the call back, not read a transcript."
 
 /** Buyer question every marketing page should answer. */
 export const BUYER_QUESTION = "How many jobs does this put back on my board?"

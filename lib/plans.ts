@@ -75,9 +75,9 @@ export function getOverageMinutes(planType: PlanType, minutesUsed: number): numb
   return Math.max(0, minutesUsed - getIncludedMinutes(planType))
 }
 
-/** Whether plan has industry-optimized / prebuilt agents (Growth+) */
-export function hasIndustryOptimizedAgents(planType: PlanType): boolean {
-  return isProOrElite(planType)
+/** Whether plan has trade-tuned intake scripts (all paid tiers including Basic). */
+export function hasIndustryOptimizedAgents(_planType: PlanType): boolean {
+  return true
 }
 
 /** Whether plan has appointment booking (Growth+) */
@@ -85,8 +85,13 @@ export function hasAppointmentCapture(planType: PlanType): boolean {
   return isProOrElite(planType)
 }
 
-/** Whether plan sends SMS follow-up to callers (Growth+) */
-export function hasSmsToCallers(planType: PlanType): boolean {
+/** Whether plan sends caller confirmation SMS after a captured lead (Basic+). */
+export function hasSmsToCallers(_planType: PlanType): boolean {
+  return true
+}
+
+/** Whether plan sends scheduled follow-up SMS to callers (Growth+). */
+export function hasCallerFollowUpSms(planType: PlanType): boolean {
   return isProOrElite(planType)
 }
 

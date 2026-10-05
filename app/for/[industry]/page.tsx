@@ -136,7 +136,7 @@ export default async function IndustryLandingPage({ params }: PageProps) {
                 "Address / location",
                 "Urgency level",
                 "Preferred appointment time",
-                "Text-back confirmation to callers (on Growth and Platinum)",
+                "Text-back confirmation to callers",
               ].map((item) => (
                 <li key={item} className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-primary shrink-0" />
@@ -145,7 +145,7 @@ export default async function IndustryLandingPage({ params }: PageProps) {
               ))}
             </ul>
             <ul className="space-y-2 text-sm">
-              {["24/7 call answering (when forwarded)", `Industry-specific intake on ${PLAN_GROWTH} & ${PLAN_PLATINUM}`, `Emergency flagging on ${PLAN_GROWTH} & ${PLAN_PLATINUM}`, funnelTrialFeatureLabel()].map((f) => (
+              {["Trade-tuned intake on every plan", "24/7 call answering on Growth & Platinum (when forwarded)", `Emergency flagging on ${PLAN_GROWTH} & ${PLAN_PLATINUM}`, funnelTrialFeatureLabel()].map((f) => (
                 <li key={f} className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-primary" />
                   {f}

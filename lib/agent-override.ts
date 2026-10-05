@@ -8,6 +8,8 @@ import {
 } from "./call-routing"
 import type { BusinessSettings, QuestionDepth } from "./business-settings"
 import { buildIntakeTemplateGuidance } from "./intake-presets"
+import { resolveEffectiveIntakeTemplate } from "./lead-capture-summary"
+import type { Industry } from "@prisma/client"
 
 /** Map strictness slider (0=conversational, 1=strict script) to prompt guidance. */
 export function buildStrictnessGuidance(strictness: number): string {
@@ -63,6 +65,8 @@ export function computeModelTemperature(
 export type BuildAgentOverrideOptions = {
   capacityMode?: "normal" | "intake_only" | "decline"
   beginMessageOverride?: string
+  /** When intake template is unset, derive trade script from business industry (Basic+). */
+  industry?: Industry | string | null
 }
 
 /**
@@ -114,6 +118,10 @@ export function buildAgentOverride(
   const strictnessGuidance = buildStrictnessGuidance(strictness)
   const warmthGuidance = buildWarmthGuidance(warmth)
   const questionDepthGuidance = buildQuestionDepthGuidance(settings.questionDepth)
+  const effectiveIntakeTemplate = resolveEffectiveIntakeTemplate(
+    settings.intakeTemplate,
+    options?.industry
+  )
 
   const dynamicVars: Record<string, string> = {
     business_name: businessName,
@@ -132,8 +140,8 @@ export function buildAgentOverride(
     voice_style: settings.greeting.voiceStyle ?? "",
     voice_gender: settings.greeting.voiceGender ?? "",
     intake_fields: JSON.stringify(settings.intakeFields),
-    intake_template: settings.intakeTemplate ?? "generic",
-    intake_template_guidance: buildIntakeTemplateGuidance(settings.intakeTemplate),
+    intake_template: effectiveIntakeTemplate,
+    intake_template_guidance: buildIntakeTemplateGuidance(effectiveIntakeTemplate),
     booking_ask_appointment: String(settings.booking.askForAppointment),
     booking_only_offer_when_asked: String(settings.booking.onlyOfferWhenAsked ?? true),
     booking_default_minutes: String(settings.booking.defaultAppointmentMinutes ?? 60),

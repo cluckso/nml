@@ -64,8 +64,7 @@ export const PRODUCT_FAQ: FaqItem[] = [
   },
   {
     question: "Do callers get a text-back?",
-    answer:
-      "On Growth and Platinum, callers can get a confirmation text and a follow-up so they do not dial the next shop while you are still on a job.",
+    answer: `${PLAN_BASIC} includes a text-back confirmation to callers after a lead is captured so they know you got it. ${PLAN_GROWTH} and ${PLAN_PLATINUM} add scheduled follow-up texts if you want another nudge before you call back.`,
   },
   {
     question: "Is it AI?",

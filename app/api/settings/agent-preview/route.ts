@@ -28,7 +28,9 @@ export async function GET(req: NextRequest) {
     const serviceAreas = Array.isArray(business.serviceAreas) ? business.serviceAreas : []
 
     const { agentOverride, dynamicVars, beginMessage, ringDurationMs, effectiveRingProfile } =
-      buildAgentOverride(settings, businessName, serviceAreas, business.planType)
+      buildAgentOverride(settings, businessName, serviceAreas, business.planType, new Date(), {
+        industry: business.industry,
+      })
 
     const capture = buildLeadCaptureSummary(settings.intakeFields, settings.intakeTemplate, business.industry)
 
