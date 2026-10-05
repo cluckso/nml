@@ -360,6 +360,7 @@ const STARTER_SECTIONS: SettingsSection[] = [
   "notifications",
   "callRouting",
   "missedCallRecovery",
+  "intakeTemplate",
 ]
 
 const PRO_SECTIONS: SettingsSection[] = [
@@ -431,7 +432,7 @@ export const SECTION_MIN_TIER: Record<SettingsSection, PlanType> = {
   missedCallRecovery: PlanType.STARTER,
   followUpSms: PlanType.PRO,
   reputation: PlanType.PRO,
-  intakeTemplate: PlanType.PRO,
+  intakeTemplate: PlanType.STARTER,
   questionDepth: PlanType.PRO,
   booking: PlanType.PRO,
   capacity: PlanType.PRO,

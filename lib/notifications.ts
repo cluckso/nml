@@ -273,7 +273,7 @@ export function looksLikeLeadSummarySms(body: string): boolean {
   )
 }
 
-/** Pro+: send SMS confirmation to caller after the call.
+/** Basic+: send SMS confirmation to caller after the call.
  *  Note: This is a one-time transactional message triggered by the caller's own call.
  *  Includes opt-out instructions per Twilio toll-free compliance.
  *  Never sends lead-summary bodies (those are owner-only).

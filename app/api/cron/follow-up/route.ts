@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { sendFollowUpSMS } from "@/lib/notifications"
 import { mergeWithDefaults } from "@/lib/business-settings"
-import { hasSmsToCallers, getEffectivePlanType } from "@/lib/plans"
+import { hasCallerFollowUpSms, getEffectivePlanType } from "@/lib/plans"
 import { captureRouteError } from "@/lib/capture-error"
 
 /** Cron: send 24hr follow-up SMS to callers who haven't booked an appointment */
@@ -44,7 +44,7 @@ async function runFollowUpCron() {
   let sent = 0
   for (const call of calls) {
     const planType = getEffectivePlanType(call.business.planType)
-    if (!hasSmsToCallers(planType)) continue
+    if (!hasCallerFollowUpSms(planType)) continue
 
     const settings = mergeWithDefaults(call.business.settings as Parameters<typeof mergeWithDefaults>[0])
     if (!settings.followUpSms.enabled) continue

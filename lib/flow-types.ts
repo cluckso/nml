@@ -3,7 +3,7 @@ import { PlanType } from "@prisma/client"
 import { hasIndustryOptimizedAgents } from "./plans"
 
 /**
- * Flow categories for UI: Basic = barebones only; Pro/Local Plus = choose from these.
+ * Flow categories for UI: barebones or trade-tuned flows (all plans; trial included).
  * Maps to Industry (+ offersRoadsideService for Automotive).
  */
 export type FlowCategoryId = "barebones" | "home_service" | "automotive" | "childcare"
@@ -18,7 +18,7 @@ export interface FlowOption {
   subOptions?: { value: string; label: string; industry?: Industry }[]
   /** Preview steps shown in UI */
   previewSteps: string[]
-  /** Pro+ only; Basic sees this grayed out with upgrade link */
+  /** Legacy flag — trade flows are included on Basic; kept for UI grouping. */
   requiresPro: boolean
 }
 
@@ -98,7 +98,7 @@ export function getFlowOptionsForPlan(planType: PlanType | null | undefined): {
   selectable: FlowOption[]
   locked: FlowOption[]
 } {
-  const canSelectProFlows = planType && hasIndustryOptimizedAgents(planType)
+  const canSelectProFlows = planType == null || hasIndustryOptimizedAgents(planType)
   const selectable = FLOW_OPTIONS.filter((f) => !f.requiresPro || canSelectProFlows)
   const locked = FLOW_OPTIONS.filter((f) => f.requiresPro && !canSelectProFlows)
   return { selectable, locked }

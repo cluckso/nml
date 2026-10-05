@@ -99,7 +99,7 @@ export default function HomePage() {
                 "Preferred appointment time",
                 "Full call summary",
                 "Recording (optional)",
-                "Text-back confirmation to callers (on Growth and Platinum) so they don't dial the next shop while you're still on a job.",
+                "Text-back confirmation to callers so they don't dial the next shop while you're still on a job.",
               ].map((item) => (
                 <li key={item} className="flex items-center gap-3">
                   <Check className="h-5 w-5 text-primary shrink-0" />
@@ -157,7 +157,7 @@ export default function HomePage() {
             </div>
             <h3 className="font-semibold text-lg mb-2">4. You get the lead</h3>
             <p className="text-muted-foreground text-sm">
-              SMS and email with name, phone, job, and urgency. Text-back confirmation and follow-up on {PLAN_GROWTH}. CRM webhook on {GROWTH_AND_PLATINUM_LABEL} for ServiceTitan, Housecall Pro, or Jobber.
+              SMS and email with name, phone, job, and urgency — plus text-back confirmation on every plan. Follow-up texts and CRM webhook on {GROWTH_AND_PLATINUM_LABEL} for ServiceTitan, Housecall Pro, or Jobber.
             </p>
           </div>
         </div>

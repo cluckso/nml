@@ -5,6 +5,10 @@ import {
   getOverageMinutes,
   FREE_TRIAL_MINUTES,
   MAX_CALL_DURATION_SECONDS,
+  hasIndustryOptimizedAgents,
+  hasSmsToCallers,
+  hasCallerFollowUpSms,
+  hasCrmForwarding,
 } from "./plans"
 import { PlanType } from "@prisma/client"
 
@@ -78,5 +82,19 @@ describe("getOverageMinutes", () => {
 describe("FREE_TRIAL_MINUTES", () => {
   it("is 40", () => {
     expect(FREE_TRIAL_MINUTES).toBe(40)
+  })
+})
+
+describe("Week 1 packaging entitlements (Basic)", () => {
+  it("includes trade scripts and caller confirmation SMS on Basic", () => {
+    expect(hasIndustryOptimizedAgents(PlanType.STARTER)).toBe(true)
+    expect(hasSmsToCallers(PlanType.STARTER)).toBe(true)
+  })
+
+  it("keeps CRM and follow-up SMS on Growth+", () => {
+    expect(hasCallerFollowUpSms(PlanType.STARTER)).toBe(false)
+    expect(hasCallerFollowUpSms(PlanType.PRO)).toBe(true)
+    expect(hasCrmForwarding(PlanType.STARTER)).toBe(false)
+    expect(hasCrmForwarding(PlanType.PRO)).toBe(true)
   })
 })

@@ -134,14 +134,15 @@ export default function ChangelogPage() {
         </p>
         <p>
           Basic is overflow: missed calls, nights, and weekends. It is not a full-day front desk.
-          Growth adds 24/7 capture, trade-specific intake, appointments, emergency handling, a text
-          back to the caller, and CRM email or a webhook into ServiceTitan, Housecall Pro, Jobber, or
-          Zapier. Platinum adds a branded voice, multi-department routing, after-hours emergency
-          routing, weekly reports, and priority support.
+          Basic includes trade-tuned intake and text-back confirmation to callers on captured leads.
+          Growth adds 24/7 capture on every ring, appointments, emergency handling, follow-up texts,
+          and CRM email or a webhook into ServiceTitan, Housecall Pro, Jobber, or Zapier. Platinum
+          adds a branded voice, multi-department routing, after-hours emergency routing, weekly
+          reports, and priority support.
         </p>
         <p>
           Dedicated intake questions exist for HVAC, plumbing, electrical, auto repair, handyman, and
-          childcare, on Growth and Platinum. Cleaning and landscaping use the generic script. Spam
+          childcare on Basic and above. Cleaning and landscaping use the generic script. Spam
           filtering uses a phone lookup and fails open: if the lookup errors, the call is not dropped.
           If a caller asks, the assistant says it is automated.
         </p>
@@ -161,8 +162,9 @@ export default function ChangelogPage() {
         <p>
           A captured lead can include the caller&apos;s name, callback number, service address, what
           is broken, how urgent it is, a preferred time, a short summary, and an optional recording.
-          Growth and Platinum can text the caller a confirmation so they do not dial the next shop
-          while you are still on the job. The webhook posts that same summary to whatever URL you
+          Every paid plan can text the caller a confirmation after capture so they do not dial the
+          next shop while you are still on the job. Growth and Platinum add CRM webhook delivery and
+          optional follow-up texts. The webhook posts that same summary to whatever URL you
           save. There is no CallGrabbr app inside the Zapier directory yet. You connect it with
           Zapier&apos;s webhook trigger.
         </p>

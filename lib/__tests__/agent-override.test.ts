@@ -63,6 +63,14 @@ describe("buildAgentOverride", () => {
     expect(agentOverride.agent?.interruption_sensitivity).toBe(0.68)
   })
 
+  it("derives HVAC intake template on Basic when template unset", () => {
+    const { dynamicVars } = buildAgentOverride(DEFAULT_SETTINGS, "Acme HVAC", [], PlanType.STARTER, new Date(), {
+      industry: "HVAC",
+    })
+    expect(dynamicVars.intake_template).toBe("hvac")
+    expect(dynamicVars.intake_template_guidance).toMatch(/HVAC|heating|cooling/i)
+  })
+
   it("wires question depth to behavior guidance", () => {
     const settings = { ...DEFAULT_SETTINGS, questionDepth: "fast" as const }
     const { dynamicVars } = buildAgentOverride(settings, "Acme", [], PlanType.PRO)
