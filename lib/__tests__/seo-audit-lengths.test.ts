@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest"
 import { getAllGuides } from "@/lib/guides"
-import { EDITORIAL_DISCLOSURE } from "@/lib/guides/authorship"
 import { guideLimitsPlainText } from "@/lib/guides/limits-copy"
 import { getIndustryLandingBySlug } from "@/lib/industry-data"
 import { guideDocumentTitle, industryPageMetadata } from "@/lib/seo"
@@ -18,7 +17,6 @@ function guideWordCount(slug: string): number {
     ...guide.sections.flatMap((section) => [section.heading, ...section.paragraphs, ...(section.bullets ?? [])]),
     ...guide.faq.flatMap((item) => [item.question, item.answer]),
     guideLimitsPlainText(),
-    EDITORIAL_DISCLOSURE,
     ...(guide.sources ?? []).map((source) => `${source.name} ${source.usedFor}`),
   ]
   return words(parts.join(" "))

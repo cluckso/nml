@@ -14,7 +14,6 @@ import {
   GUIDE_PUBLISHED,
   GUIDE_UPDATED,
   AUTHOR_PATH,
-  EDITORIAL_DISCLOSURE,
   GUIDE_AUTHOR_NAME,
 } from "@/lib/guides/authorship"
 import { guideLimitsParagraphs } from "@/lib/guides/limits-copy"
@@ -242,8 +241,6 @@ export default async function GuidePage({ params }: PageProps) {
               </ul>
             </section>
           )}
-
-          <p className="text-sm text-muted-foreground leading-relaxed">{EDITORIAL_DISCLOSURE}</p>
         </div>
 
         {guide.showDemo && (

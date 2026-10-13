@@ -5,7 +5,6 @@ import { JsonLd } from "@/components/seo/JsonLd"
 import { getAllGuides } from "@/lib/guides"
 import {
   AUTHOR_PATH,
-  EDITORIAL_DISCLOSURE,
   GUIDE_AUTHOR_NAME,
 } from "@/lib/guides/authorship"
 import { FOUNDER, WHY_I_BUILT_THIS } from "@/lib/marketing/founder"
@@ -54,7 +53,6 @@ export default function AuthorPage() {
         />
         <div className="space-y-2">
           <p className="text-lg font-semibold">{FOUNDER.title}</p>
-          <p className="text-sm text-muted-foreground leading-relaxed">{EDITORIAL_DISCLOSURE}</p>
         </div>
       </div>
       <div className="space-y-4 text-muted-foreground leading-relaxed mb-12">
