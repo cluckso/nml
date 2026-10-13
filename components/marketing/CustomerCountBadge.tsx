@@ -8,31 +8,14 @@ export function CustomerCountBadge() {
   const label = customerCountLabel()
 
   if (!label || CUSTOMER_COUNT == null) {
-    return (
-      <div className="flex flex-col items-center gap-2 text-center">
-        <div className="flex -space-x-2" aria-hidden>
-          {Array.from({ length: 8 }).map((_, i) => (
-            <span
-              key={i}
-              className="h-8 w-8 rounded-full border-2 border-background bg-muted text-[10px] font-medium text-muted-foreground flex items-center justify-center"
-            >
-              —
-            </span>
-          ))}
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Customer count and photos go here once we have permission to show them — no fake
-          &quot;trusted by 1,000&quot; number.
-        </p>
-      </div>
-    )
+    return null
   }
 
   const photoStories = CUSTOMER_STORIES.filter((s) => s.photoSrc)
   const avatarSlots = Math.min(12, CUSTOMER_COUNT)
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+    <div className="mb-4 flex flex-col sm:flex-row items-center justify-center gap-3">
       <div className="flex -space-x-2" aria-hidden>
         {Array.from({ length: avatarSlots }).map((_, i) => {
           const story = photoStories[i]
