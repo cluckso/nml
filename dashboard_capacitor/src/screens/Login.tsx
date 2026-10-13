@@ -32,20 +32,17 @@ export default function Login({ supabase }: LoginProps) {
   }
 
   return (
-    <div className="page" style={{ paddingTop: 48, maxWidth: 400, margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-        <AppLogo size={80} />
+    <div className="page auth-page">
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>
+        <AppLogo size={56} />
       </div>
-      <h1 style={{ textAlign: 'center', marginBottom: 4 }}>CallGrabbr</h1>
-      <p style={{ textAlign: 'center', color: 'var(--text-muted)', marginBottom: 8 }}>
-        Missed calls answered. Leads texted to you.
-      </p>
-      <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 13, marginBottom: 24 }}>
-        Sign in to view calls, alerts, billing, and your dashboard.
+      <h1 style={{ textAlign: 'center', marginBottom: 4, fontSize: '1.35rem' }}>CallGrabbr</h1>
+      <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 13, marginBottom: 16 }}>
+        Sign in to calls, alerts, billing, and settings.
       </p>
       <form onSubmit={handleSubmit}>
-        <label style={{ display: 'block', marginBottom: 16 }}>
-          <span style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Email</span>
+        <label style={{ display: 'block', marginBottom: 12 }}>
+          <span style={{ display: 'block', marginBottom: 4, fontSize: 13 }}>Email</span>
           <input
             type="email"
             className="input"
@@ -55,8 +52,8 @@ export default function Login({ supabase }: LoginProps) {
             autoComplete="email"
           />
         </label>
-        <label style={{ display: 'block', marginBottom: 16 }}>
-          <span style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Password</span>
+        <label style={{ display: 'block', marginBottom: 12 }}>
+          <span style={{ display: 'block', marginBottom: 4, fontSize: 13 }}>Password</span>
           <input
             type="password"
             className="input"
@@ -71,46 +68,31 @@ export default function Login({ supabase }: LoginProps) {
           {loading ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
-      <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--text-muted)', marginTop: 16 }}>
+      <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--text-muted)', marginTop: 12 }}>
+        <button type="button" className="text-link" onClick={() => navigate('/forgot-password')}>
+          Forgot password?
+        </button>
+      </p>
+      <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--text-muted)', marginTop: 10 }}>
+        <button type="button" className="text-link" onClick={() => navigate('/signup')}>
+          Create account
+        </button>
+        {' · '}
         <button type="button" className="text-link" onClick={() => navigate('/welcome')}>
-          Back to overview
+          Overview
         </button>
         {' · '}
         <button type="button" className="text-link" onClick={() => navigate('/plans')}>
-          See plans
+          Plans
         </button>
       </p>
-      <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--text-muted)', marginTop: 24 }}>
+      <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted)', marginTop: 14 }}>
         By signing in you agree to our{' '}
-        <button
-          type="button"
-          onClick={() => openLegalUrl(TERMS_OF_SERVICE_URL)}
-          style={{
-            background: 'none',
-            border: 'none',
-            padding: 0,
-            color: 'var(--primary)',
-            textDecoration: 'underline',
-            font: 'inherit',
-            cursor: 'pointer',
-          }}
-        >
+        <button type="button" className="text-link" onClick={() => openLegalUrl(TERMS_OF_SERVICE_URL)}>
           Terms
         </button>{' '}
         and{' '}
-        <button
-          type="button"
-          onClick={() => openLegalUrl(PRIVACY_POLICY_URL)}
-          style={{
-            background: 'none',
-            border: 'none',
-            padding: 0,
-            color: 'var(--primary)',
-            textDecoration: 'underline',
-            font: 'inherit',
-            cursor: 'pointer',
-          }}
-        >
+        <button type="button" className="text-link" onClick={() => openLegalUrl(PRIVACY_POLICY_URL)}>
           Privacy Policy
         </button>
         .

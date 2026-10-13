@@ -58,7 +58,15 @@ export async function GET(req: NextRequest) {
             name: business.name,
             primaryForwardingNumber: business.primaryForwardingNumber,
             phoneNumber: business.retellPhoneNumber ?? business.primaryForwardingNumber,
+            retellPhoneNumber: business.retellPhoneNumber,
             retellAgentId: business.retellAgentId,
+            onboardingComplete: business.onboardingComplete,
+            industry: business.industry,
+            forwardingSetupComplete: !!(
+              business.settings &&
+              typeof business.settings === "object" &&
+              (business.settings as { forwardingSetupComplete?: boolean }).forwardingSetupComplete
+            ),
           }
         : null,
       recentCalls,

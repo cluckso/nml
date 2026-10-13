@@ -11,7 +11,9 @@ import {
 } from '../lib/api'
 import { openStripeCheckoutUrl, preparePlayExternalToken } from '../lib/play-billing'
 
-export default function Billing() {
+type Props = { refreshKey?: number }
+
+export default function Billing({ refreshKey = 0 }: Props) {
   const navigate = useNavigate()
   const [summary, setSummary] = useState<BillingSummary | null>(null)
   const [pricing, setPricing] = useState<PublicPricing | null>(null)
@@ -36,7 +38,7 @@ export default function Billing() {
 
   useEffect(() => {
     void load()
-  }, [load])
+  }, [load, refreshKey])
 
   const startCheckout = async (planType: string) => {
     setActionError(null)
@@ -123,8 +125,8 @@ export default function Billing() {
               <div className="card">
                 <h2 className="section-title">No paid plan yet</h2>
                 <p style={{ fontSize: 14, color: 'var(--text-muted)' }}>
-                  Subscribe on the CallGrabbr website with Stripe. Checkout opens in your browser — Google Play is not
-                  charged.
+                  Subscribe with Stripe (CallGrabbr is the merchant of record). Checkout opens via Play Billing Choice /
+                  your browser when eligible — Google Play is not charged.
                 </p>
               </div>
             )}

@@ -145,7 +145,17 @@ export default function Calls() {
                   const callbackPhone = resolveCallbackPhone(c)
                   const phoneLabel = formatPhoneForDisplay(callbackPhone) || callbackPhone
                   return (
-                  <div key={c.id ?? i} className="call-item">
+                  <div
+                    key={c.id ?? i}
+                    className="call-item"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => c.id && navigate(`/calls/${c.id}`)}
+                    onKeyDown={(e) => {
+                      if (c.id && (e.key === 'Enter' || e.key === ' ')) navigate(`/calls/${c.id}`)
+                    }}
+                    style={{ cursor: c.id ? 'pointer' : undefined }}
+                  >
                     <div className="call-header">
                       <div className="call-name">{c.callerName ?? phoneLabel ?? 'Unknown'}</div>
                       <div className="call-time">{formatTime(c.createdAt)}</div>

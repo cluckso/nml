@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getPublicPricing, type PublicPricing } from '../lib/api'
-import { openExternalUrl, TRIAL_START_URL } from '../lib/site'
 
 export default function Plans() {
   const navigate = useNavigate()
@@ -37,60 +36,62 @@ export default function Plans() {
           ← Back
         </button>
         <h1>Plans</h1>
-        <div style={{ width: 32 }} />
+        <div style={{ width: 64 }} />
       </header>
-      <div className="page">
+      <div className="page page-fit">
         {loading && (
-          <div style={{ textAlign: 'center', padding: 32 }}>
+          <div style={{ textAlign: 'center', padding: 24 }}>
             <div className="loading-spinner" />
           </div>
         )}
         {error && (
-          <div className="card">
+          <div className="card card-compact">
             <p className="error">{error}</p>
-            <button type="button" className="btn btn-outline" style={{ marginTop: 12 }} onClick={() => window.location.reload()}>
+            <button type="button" className="btn btn-outline" style={{ marginTop: 10, width: '100%' }} onClick={() => window.location.reload()}>
               Retry
             </button>
           </div>
         )}
         {!loading && !error && data && (
           <>
-            <p className="marketing-sub" style={{ marginTop: 0 }}>
-              {data.marketing.trialSummary}
-            </p>
-            {data.plans.length === 0 && (
-              <div className="empty-state">
-                <p>Plans are not available right now.</p>
-              </div>
-            )}
-            {data.plans.map((plan) => (
-              <div key={plan.planType} className={`card plan-card${plan.popular ? ' plan-card-popular' : ''}`}>
-                <div className="plan-card-header">
-                  <h2 className="section-title" style={{ margin: 0 }}>
-                    {plan.name}
-                  </h2>
-                  {plan.badge && <span className="badge default">{plan.badge}</span>}
+            <div className="page-fit-body">
+              <p className="plans-intro">{data.marketing.trialSummary}</p>
+              {data.plans.length === 0 && (
+                <div className="empty-state">
+                  <p>Plans are not available right now.</p>
                 </div>
-                <p className="plan-price">
-                  ${plan.price}
-                  <span>/mo</span>
-                </p>
-                <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>{plan.subtitle}</p>
-                <p style={{ fontSize: 14, marginBottom: 12 }}>{plan.includedMinutes.toLocaleString()} included minutes</p>
-                <ul className="feature-list">
-                  {plan.features.slice(0, 5).map((feature) => (
-                    <li key={feature}>{feature}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-            <p className="billing-note">{data.billing.playDisclosure}</p>
-            <button type="button" className="btn" style={{ width: '100%', marginTop: 8 }} onClick={() => openExternalUrl(TRIAL_START_URL)}>
-              {data.marketing.primaryCta}
-            </button>
-            <button type="button" className="btn btn-outline" style={{ width: '100%', marginTop: 10 }} onClick={() => navigate('/login')}>
-              Sign in to subscribe
-            </button>
+              )}
+              {data.plans.map((plan) => (
+                <div key={plan.planType} className={`card card-compact plan-card${plan.popular ? ' plan-card-popular' : ''}`}>
+                  <div className="plan-card-header">
+                    <strong style={{ fontSize: 15 }}>{plan.name}</strong>
+                    <span className="plan-price" style={{ margin: 0, fontSize: '1.15rem' }}>
+                      ${plan.price}
+                      <span>/mo</span>
+                    </span>
+                  </div>
+                  <p className="plan-meta">
+                    {plan.includedMinutes.toLocaleString()} min
+                    {plan.badge ? ` · ${plan.badge}` : ''}
+                    {plan.popular ? ' · Most popular' : ''}
+                  </p>
+                  <ul className="feature-list-tight">
+                    {plan.features.slice(0, 3).map((feature) => (
+                      <li key={feature}>{feature}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+              <p className="billing-note">{data.billing.playDisclosure}</p>
+            </div>
+            <div className="page-fit-footer">
+              <button type="button" className="btn" style={{ width: '100%' }} onClick={() => navigate('/signup')}>
+                {data.marketing.primaryCta}
+              </button>
+              <button type="button" className="btn btn-outline" style={{ width: '100%' }} onClick={() => navigate('/login')}>
+                Sign in to subscribe
+              </button>
+            </div>
           </>
         )}
       </div>

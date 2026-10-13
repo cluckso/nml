@@ -9,6 +9,9 @@
   --error: #ef4444;
   --success: #10b981;
   --warning: #f59e0b;
+  /* Android WebView often reports 0 for safe-area; JS sets --sat-fallback when needed */
+  --sat: max(env(safe-area-inset-top, 0px), var(--sat-fallback, 0px));
+  --sab: max(env(safe-area-inset-bottom, 0px), var(--sab-fallback, 0px));
 }
 
 * {
@@ -16,6 +19,11 @@
   margin: 0;
   padding: 0;
   -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  height: 100%;
 }
 
 body {
@@ -27,28 +35,31 @@ body {
   color: var(--text);
   overscroll-behavior-y: none;
   margin: 0;
-  min-height: 100vh;
+  min-height: 100%;
+  min-height: 100dvh;
 }
 
 #root {
-  min-height: 100vh;
+  min-height: 100%;
+  min-height: 100dvh;
 }
 
 .app-bar {
   position: sticky;
   top: 0;
-  background: rgba(30, 41, 59, 0.95);
-  padding: 12px 16px;
+  background: rgba(30, 41, 59, 0.97);
+  padding: calc(10px + var(--sat)) 12px 10px;
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
   z-index: 10;
   backdrop-filter: blur(10px);
+  min-height: calc(48px + var(--sat));
 }
 
 .app-bar h1 {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -60,8 +71,10 @@ body {
   background: transparent;
   border: none;
   color: var(--primary);
-  font-size: 16px;
-  padding: 8px;
+  font-size: 15px;
+  padding: 8px 6px;
+  min-height: 40px;
+  min-width: 64px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -69,22 +82,50 @@ body {
 }
 
 .page {
-  padding: 16px;
+  padding: 12px 14px calc(20px + var(--sab));
   max-width: 600px;
   margin: 0 auto;
-  padding-bottom: 32px;
+}
+
+.page-fit {
+  min-height: calc(100dvh - 48px - var(--sat));
+  display: flex;
+  flex-direction: column;
+  padding-bottom: calc(12px + var(--sab));
+}
+
+.page-fit-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+}
+
+.page-fit-footer {
+  margin-top: auto;
+  padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .card {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+.card-compact {
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border-radius: 10px;
 }
 
 .btn {
-  padding: 10px 20px;
+  padding: 10px 18px;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
@@ -116,6 +157,12 @@ body {
   cursor: not-allowed;
 }
 
+.btn-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
 .input {
   width: 100%;
   padding: 10px 12px;
@@ -134,9 +181,9 @@ body {
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 4px 10px;
+  padding: 3px 8px;
   border-radius: 12px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
 }
 
@@ -282,13 +329,13 @@ body {
 
 .empty-state {
   text-align: center;
-  padding: 32px 16px;
+  padding: 24px 16px;
   color: var(--text-muted);
 }
 
 .empty-state-icon {
-  font-size: 48px;
-  margin-bottom: 12px;
+  font-size: 40px;
+  margin-bottom: 10px;
   opacity: 0.5;
 }
 
@@ -296,67 +343,103 @@ body {
   color: var(--error);
   font-size: 14px;
   margin-top: 8px;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  max-height: 6.5em;
+  overflow: hidden;
 }
 
 .section-title {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
-  margin: 0 0 12px 0;
+  margin: 0 0 10px 0;
 }
 
 .divider {
   height: 1px;
   background: var(--border);
-  margin: 16px 0;
+  margin: 12px 0;
 }
 
 .marketing-page {
-  padding-top: 36px;
+  padding-top: calc(16px + var(--sat));
+  padding-bottom: calc(16px + var(--sab));
   text-align: center;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.marketing-page.page {
+  max-width: 420px;
+}
+
+.auth-page {
+  padding-top: calc(20px + var(--sat));
+  padding-bottom: calc(16px + var(--sab));
+  max-width: 400px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .eyebrow {
-  font-size: 12px;
+  font-size: 11px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--text-muted);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .marketing-headline {
-  font-size: 1.7rem;
+  font-size: 1.45rem;
   line-height: 1.2;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .marketing-sub {
-  font-size: 15px;
+  font-size: 14px;
   color: var(--text-muted);
-  line-height: 1.45;
-  margin-bottom: 16px;
+  line-height: 1.4;
+  margin-bottom: 12px;
 }
 
 .trial-chip {
   display: inline-block;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--success);
   background: rgba(16, 185, 129, 0.12);
   border: 1px solid rgba(16, 185, 129, 0.35);
   border-radius: 999px;
-  padding: 6px 12px;
-  margin-bottom: 20px;
+  padding: 5px 10px;
+  margin-bottom: 14px;
 }
 
 .feature-list {
   text-align: left;
   padding-left: 18px;
   color: var(--text);
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .feature-list li + li {
-  margin-top: 6px;
+  margin-top: 4px;
+}
+
+.feature-list-tight {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+.feature-list-tight li + li {
+  margin-top: 2px;
 }
 
 .plan-card-header {
@@ -364,7 +447,7 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  margin-bottom: 8px;
+  margin-bottom: 2px;
 }
 
 .plan-card-popular {
@@ -372,22 +455,35 @@ body {
 }
 
 .plan-price {
-  font-size: 1.6rem;
+  font-size: 1.35rem;
   font-weight: 700;
-  margin: 4px 0 8px;
+  margin: 2px 0 4px;
 }
 
 .plan-price span {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--text-muted);
 }
 
-.billing-note {
+.plan-meta {
   font-size: 12px;
   color: var(--text-muted);
-  line-height: 1.45;
-  margin: 8px 0 0;
+  margin: 0 0 6px;
+}
+
+.plans-intro {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.35;
+  margin: 0 0 4px;
+}
+
+.billing-note {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  margin: 4px 0 0;
 }
 
 .text-link {
@@ -398,4 +494,18 @@ body {
   text-decoration: underline;
   font: inherit;
   cursor: pointer;
+}
+
+@media (max-height: 720px) {
+  .marketing-headline {
+    font-size: 1.3rem;
+  }
+
+  .plan-price {
+    font-size: 1.2rem;
+  }
+
+  .card-compact {
+    padding: 8px 10px;
+  }
 }

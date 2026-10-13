@@ -1,35 +1,38 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getSettings, patchSettings, ApiError } from '../lib/api'
-import { Haptics, ImpactStyle } from '@capacitor/haptics'
+import { ApiError, deleteAccount, getSettings, patchSettings } from '../lib/api'
+import { SECTION_LABELS } from '../lib/industries'
 import { openLegalUrl, PRIVACY_POLICY_URL, SMS_TERMS_URL, TERMS_OF_SERVICE_URL } from '../lib/legal'
+import { formatPhoneForDisplay } from '../lib/phone'
 
 interface SettingsProps {
   onSignOut: () => void
 }
 
-interface MobileNotificationPrefs {
-  pushAlerts: boolean
-  emergencyOnlyAlerts: boolean
-}
-
 export default function Settings({ onSignOut }: SettingsProps) {
-  const [settings, setSettings] = useState<MobileNotificationPrefs | null>(null)
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const navigate = useNavigate()
+  const [success, setSuccess] = useState<string | null>(null)
+  const [allowedSections, setAllowedSections] = useState<string[]>([])
+  const [planType, setPlanType] = useState<string | null>(null)
+  const [notificationPhone, setNotificationPhone] = useState('')
+  const [smsConsent, setSmsConsent] = useState(false)
+  const [businessPhone, setBusinessPhone] = useState<string | null>(null)
+  const [industry, setIndustry] = useState<string | null>(null)
 
   const load = async () => {
     setLoading(true)
     setError(null)
     try {
       const res = await getSettings()
-      const notifications = res.settings?.notifications ?? {}
-      setSettings({
-        pushAlerts: notifications.pushAlerts ?? true,
-        emergencyOnlyAlerts: notifications.emergencyOnlyAlerts ?? false,
-      })
+      setAllowedSections(res.allowedSections ?? [])
+      setPlanType(res.planType ?? null)
+      setNotificationPhone(res.notificationPhone ?? '')
+      setSmsConsent(!!res.smsConsent)
+      setBusinessPhone(res.businessPhone ?? null)
+      setIndustry(res.industry ?? null)
     } catch (e) {
       setError(e instanceof ApiError ? e.message : String(e))
     } finally {
@@ -38,22 +41,36 @@ export default function Settings({ onSignOut }: SettingsProps) {
   }
 
   useEffect(() => {
-    load()
+    void load()
   }, [])
 
-  const handleToggle = async (key: keyof MobileNotificationPrefs, value: boolean) => {
-    if (!settings) return
+  const saveContact = async () => {
+    setSaving(true)
+    setError(null)
+    setSuccess(null)
     try {
-      await Haptics.impact({ style: ImpactStyle.Light })
-      setSaving(true)
-      const updated = { ...settings, [key]: value }
       await patchSettings({
-        notifications: updated,
+        notificationPhone: notificationPhone.trim() || null,
+        smsConsent,
       })
-      setSettings(updated)
+      setSuccess('Contact prefs saved — synced with the website.')
     } catch (e) {
       setError(e instanceof ApiError ? e.message : String(e))
     } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!confirm('Permanently delete your CallGrabbr account and business data? This cannot be undone.')) return
+    if (!confirm('Type confirm mentally: delete everything. Continue?')) return
+    setSaving(true)
+    setError(null)
+    try {
+      await deleteAccount()
+      onSignOut()
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : String(e))
       setSaving(false)
     }
   }
@@ -68,7 +85,7 @@ export default function Settings({ onSignOut }: SettingsProps) {
         <div style={{ width: 32 }} />
       </header>
       <div className="page">
-        {loading && !settings && (
+        {loading && (
           <div style={{ textAlign: 'center', padding: 32 }}>
             <div className="loading-spinner" />
           </div>
@@ -76,84 +93,100 @@ export default function Settings({ onSignOut }: SettingsProps) {
         {error && (
           <div className="card">
             <p className="error">{error}</p>
-            <button type="button" className="btn btn-outline" onClick={() => load()} style={{ marginTop: 12 }}>
+            <button type="button" className="btn btn-outline" onClick={() => void load()} style={{ marginTop: 12 }}>
               Retry
             </button>
           </div>
         )}
-        {!loading && !error && settings && (
+        {!loading && !error && (
           <>
             <div className="card">
-              <h2 className="section-title">Notifications</h2>
-              <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12 }}>
-                <span style={{ fontSize: 14 }}>Enable push notifications</span>
-                <input
-                  type="checkbox"
-                  checked={settings.pushAlerts}
-                  onChange={(e) => handleToggle('pushAlerts', e.target.checked)}
-                  disabled={saving}
-                  style={{ width: 20, height: 20 }}
-                />
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 16 }}>
-                <span style={{ fontSize: 14 }}>Emergency alerts only</span>
-                <input
-                  type="checkbox"
-                  checked={settings.emergencyOnlyAlerts}
-                  onChange={(e) => handleToggle('emergencyOnlyAlerts', e.target.checked)}
-                  disabled={saving}
-                  style={{ width: 20, height: 20 }}
-                />
-              </label>
+              <h2 className="section-title">Your line</h2>
+              <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 4 }}>
+                Plan: {planType ?? '—'}
+                {industry ? ` · ${industry}` : ''}
+              </p>
+              <p style={{ fontSize: 15 }}>
+                Business phone:{' '}
+                <strong>{businessPhone ? formatPhoneForDisplay(businessPhone) : 'Not set'}</strong>
+              </p>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 8 }}>
+                Changes here sync instantly with callgrabbr.com.
+              </p>
             </div>
 
             <div className="card">
-              <h2 className="section-title">Account</h2>
-              <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 16 }}>
-                Plans and invoices are billed by CallGrabbr through Stripe.
-              </p>
-              <button type="button" className="btn" onClick={() => navigate('/billing')} style={{ width: '100%', marginBottom: 10 }}>
+              <h2 className="section-title">Lead alerts</h2>
+              <label style={{ display: 'block', marginBottom: 12 }}>
+                <span style={{ display: 'block', marginBottom: 4, fontSize: 14 }}>Notification phone</span>
+                <input
+                  className="input"
+                  type="tel"
+                  value={notificationPhone}
+                  onChange={(e) => setNotificationPhone(e.target.value)}
+                />
+              </label>
+              <label style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 12, fontSize: 13 }}>
+                <input type="checkbox" checked={smsConsent} onChange={(e) => setSmsConsent(e.target.checked)} />
+                <span>SMS lead alerts (reply STOP to opt out)</span>
+              </label>
+              {success && <p style={{ color: 'var(--success)', fontSize: 13, marginBottom: 8 }}>{success}</p>}
+              <button type="button" className="btn" style={{ width: '100%' }} disabled={saving} onClick={() => void saveContact()}>
+                {saving ? 'Saving…' : 'Save contact prefs'}
+              </button>
+            </div>
+
+            <div className="card">
+              <h2 className="section-title">Assistant settings</h2>
+              {allowedSections.length === 0 ? (
+                <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>No sections available for your plan.</p>
+              ) : (
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                  {allowedSections.map((section) => (
+                    <li key={section}>
+                      <button
+                        type="button"
+                        className="btn btn-outline"
+                        style={{ width: '100%', marginBottom: 8, textAlign: 'left' }}
+                        onClick={() => navigate(`/settings/${section}`)}
+                      >
+                        {SECTION_LABELS[section] ?? section}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="card">
+              <h2 className="section-title">More</h2>
+              <button type="button" className="btn btn-outline" style={{ width: '100%', marginBottom: 8 }} onClick={() => navigate('/agency')}>
+                Partner / agency
+              </button>
+              <button type="button" className="btn btn-outline" style={{ width: '100%', marginBottom: 8 }} onClick={() => navigate('/billing')}>
                 Billing
               </button>
-              <button type="button" className="btn btn-outline" onClick={onSignOut} style={{ width: '100%' }}>
+              <button type="button" className="btn btn-outline" style={{ width: '100%', marginBottom: 8 }} onClick={onSignOut}>
                 Sign out
               </button>
-            </div>
-
-            <div className="card">
-              <h2 className="section-title">Legal</h2>
-              <button
-                type="button"
-                className="btn btn-outline"
-                style={{ width: '100%', marginBottom: 10 }}
-                onClick={() => openLegalUrl(PRIVACY_POLICY_URL)}
-              >
-                Privacy Policy
-              </button>
-              <button
-                type="button"
-                className="btn btn-outline"
-                style={{ width: '100%', marginBottom: 10 }}
-                onClick={() => openLegalUrl(TERMS_OF_SERVICE_URL)}
-              >
-                Terms of Service
-              </button>
-              <button
-                type="button"
-                className="btn btn-outline"
-                style={{ width: '100%' }}
-                onClick={() => openLegalUrl(SMS_TERMS_URL)}
-              >
-                SMS Terms
+              <button type="button" className="btn btn-outline" style={{ width: '100%', color: 'var(--error)' }} disabled={saving} onClick={() => void handleDelete()}>
+                Delete account
               </button>
             </div>
 
-            <div className="card" style={{ background: 'rgba(59, 130, 246, 0.1)', borderColor: 'var(--primary)' }}>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center' }}>
-                <p>CallGrabbr Mobile v1.0.0</p>
-                <p style={{ marginTop: 4 }}>App ID: com.me.adhd</p>
-              </div>
-            </div>
+            <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>
+              <button type="button" className="text-link" onClick={() => openLegalUrl(TERMS_OF_SERVICE_URL)}>
+                Terms
+              </button>
+              {' · '}
+              <button type="button" className="text-link" onClick={() => openLegalUrl(PRIVACY_POLICY_URL)}>
+                Privacy
+              </button>
+              {' · '}
+              <button type="button" className="text-link" onClick={() => openLegalUrl(SMS_TERMS_URL)}>
+                SMS terms
+              </button>
+            </p>
           </>
         )}
       </div>

@@ -1,29 +1,61 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import { App as CapApp } from '@capacitor/app'
 import { getSupabase } from './lib/supabase'
 import { registerPushNotifications } from './lib/notifications'
+import { getActivation, sanitizeApiMessage, savePushToken } from './lib/api'
 import { AppLogo } from './components/AppLogo'
 import type { Session, SupabaseClient } from '@supabase/supabase-js'
 import Login from './screens/Login'
+import SignUp from './screens/SignUp'
+import ForgotPassword from './screens/ForgotPassword'
 import Welcome from './screens/Welcome'
 import Plans from './screens/Plans'
 import Billing from './screens/Billing'
 import Dashboard from './screens/Dashboard'
 import Calls from './screens/Calls'
+import CallDetail from './screens/CallDetail'
 import Appointments from './screens/Appointments'
 import Settings from './screens/Settings'
+import SettingsSection from './screens/SettingsSection'
+import TrialStart from './screens/TrialStart'
+import Onboarding from './screens/Onboarding'
+import Agency from './screens/Agency'
+
+type Gate = 'loading' | 'trial' | 'onboarding' | 'ready' | 'error'
 
 export default function App() {
   const [session, setSession] = useState<Session | null>(null)
   const [supabase, setSupabase] = useState<SupabaseClient | null>(null)
   const [loading, setLoading] = useState(true)
   const [configError, setConfigError] = useState<string | null>(null)
+  const [gate, setGate] = useState<Gate>('loading')
+  const [gateError, setGateError] = useState<string | null>(null)
+  const [billingRefreshKey, setBillingRefreshKey] = useState(0)
   const navigate = useNavigate()
   const navigateRef = useRef(navigate)
 
   useEffect(() => {
     navigateRef.current = navigate
   }, [navigate])
+
+  const refreshGate = useCallback(async () => {
+    if (!session) {
+      setGate('loading')
+      return
+    }
+    setGateError(null)
+    try {
+      const activation = await getActivation()
+      if (activation.needsTrialStart) setGate('trial')
+      else if (activation.needsOnboarding) setGate('onboarding')
+      else setGate('ready')
+    } catch (e) {
+      setGate('error')
+      const raw = e instanceof Error ? e.message : 'Could not load account status'
+      setGateError(sanitizeApiMessage(raw))
+    }
+  }, [session])
 
   useEffect(() => {
     let active = true
@@ -34,9 +66,9 @@ export default function App() {
         const client = await getSupabase()
         if (!active) return
         setSupabase(client)
-        const { data: { session } } = await client.auth.getSession()
+        const { data: { session: current } } = await client.auth.getSession()
         if (!active) return
-        setSession(session)
+        setSession(current)
         const { data: { subscription: authSub } } = client.auth.onAuthStateChange((_event, nextSession) => {
           setSession(nextSession)
         })
@@ -57,20 +89,22 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    if (!session) {
+      setGate('loading')
+      return
+    }
+    void refreshGate()
+  }, [session, refreshGate])
+
+  useEffect(() => {
     if (!session) return
 
     void registerPushNotifications(
       (token) => {
-        console.log('[App] Push token registered:', token)
-        import('./lib/api').then(({ savePushToken }) => {
-          savePushToken(token).catch(console.error)
-        })
+        savePushToken(token).catch(console.error)
       },
-      (notification) => {
-        console.log('[App] Notification received in foreground:', notification)
-      },
+      () => {},
       (action) => {
-        console.log('[App] Notification action:', action)
         const route = action.notification.data?.route
         if (typeof route === 'string' && route.length > 0) {
           navigateRef.current(route)
@@ -78,6 +112,20 @@ export default function App() {
       }
     )
   }, [session])
+
+  useEffect(() => {
+    let handle: { remove: () => Promise<void> } | undefined
+    void CapApp.addListener('appStateChange', ({ isActive }) => {
+      if (!isActive || !session) return
+      setBillingRefreshKey((k) => k + 1)
+      void refreshGate()
+    }).then((h) => {
+      handle = h
+    })
+    return () => {
+      void handle?.remove()
+    }
+  }, [session, refreshGate])
 
   const handleSignOut = async () => {
     await supabase?.auth.signOut()
@@ -114,19 +162,75 @@ export default function App() {
         <Route path="/welcome" element={<Welcome />} />
         <Route path="/plans" element={<Plans />} />
         <Route path="/login" element={<Login supabase={supabase} />} />
+        <Route path="/signup" element={<SignUp supabase={supabase} />} />
+        <Route path="/forgot-password" element={<ForgotPassword supabase={supabase} />} />
         <Route path="*" element={<Navigate to="/welcome" replace />} />
+      </Routes>
+    )
+  }
+
+  if (gate === 'loading') {
+    return (
+      <div className="page" style={{ paddingTop: 48, textAlign: 'center' }}>
+        <div className="loading-spinner" />
+      </div>
+    )
+  }
+
+  if (gate === 'error') {
+    return (
+      <div className="page auth-page">
+        <div className="card">
+          <p className="error" style={{ wordBreak: 'break-word' }}>
+            {gateError || 'Something went wrong'}
+          </p>
+          <button type="button" className="btn" style={{ marginTop: 12, width: '100%' }} onClick={() => void refreshGate()}>
+            Retry
+          </button>
+          <button type="button" className="btn btn-outline" style={{ marginTop: 8, width: '100%' }} onClick={() => void handleSignOut()}>
+            Sign out
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (gate === 'trial') {
+    return (
+      <Routes>
+        <Route path="/trial/start" element={<TrialStart onComplete={refreshGate} />} />
+        <Route path="*" element={<Navigate to="/trial/start" replace />} />
+      </Routes>
+    )
+  }
+
+  if (gate === 'onboarding') {
+    return (
+      <Routes>
+        <Route
+          path="/onboarding"
+          element={<Onboarding onComplete={refreshGate} onNeedsTrial={() => setGate('trial')} />}
+        />
+        <Route path="/trial/start" element={<Navigate to="/onboarding" replace />} />
+        <Route path="*" element={<Navigate to="/onboarding" replace />} />
       </Routes>
     )
   }
 
   return (
     <Routes>
-      <Route path="/" element={<Dashboard onSignOut={handleSignOut} />} />
+      <Route path="/" element={<Dashboard onSignOut={handleSignOut} refreshKey={billingRefreshKey} />} />
       <Route path="/calls" element={<Calls />} />
+      <Route path="/calls/:id" element={<CallDetail />} />
       <Route path="/appointments" element={<Appointments />} />
-      <Route path="/billing" element={<Billing />} />
+      <Route path="/billing" element={<Billing refreshKey={billingRefreshKey} />} />
       <Route path="/settings" element={<Settings onSignOut={handleSignOut} />} />
+      <Route path="/settings/:section" element={<SettingsSection />} />
+      <Route path="/agency" element={<Agency />} />
       <Route path="/login" element={<Navigate to="/" replace />} />
+      <Route path="/signup" element={<Navigate to="/" replace />} />
+      <Route path="/trial/start" element={<Navigate to="/" replace />} />
+      <Route path="/onboarding" element={<Navigate to="/" replace />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )

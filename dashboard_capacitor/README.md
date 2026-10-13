@@ -1,24 +1,27 @@
 # CallGrabbr Mobile Dashboard
 
-Android mobile app for CallGrabbr businesses to monitor calls, appointments, and notifications on the go.
+Standalone Android app for CallGrabbr owners — same Supabase account and `/api/*` backend as the website.
 
 ## App Details
 
 - **App ID:** `com.me.adhd`
-- **Platform:** Android (via Capacitor)
+- **Platform:** Android (Capacitor 6)
 - **Framework:** React 18 + Vite + React Router
 
-## Features
+## Features (web parity)
 
-- **Dashboard:** Real-time stats, recent calls, trial status, and usage metrics
-- **Marketing:** Logged-out overview, trial CTA, and plan cards
-- **Billing:** Current plan/usage plus Stripe Checkout and Customer Portal (Play Billing Choice external links when eligible)
-- **Calls:** Searchable call history with emergency filtering
-- **Appointments:** View and manage scheduled appointments
-- **Settings:** Configure push notifications and app preferences
-- **Push Notifications:** FCM-based alerts for new calls, emergencies, and appointments
-- **Haptic Feedback:** Native touch feedback on interactions
-- **Pull-to-Refresh:** Update data with swipe gestures
+- **Auth:** In-app sign up, sign in, forgot password; Terms acceptance
+- **Activation:** Trial start + onboarding (industry, shop, service areas) without leaving the app
+- **Dashboard:** Stats, recent calls, trial status, forwarding acknowledge, referrals
+- **Calls:** Search, emergency filter, call detail (transcript, intake, recording, callback)
+- **Appointments:** List, create, cancel (plan-gated on API)
+- **Settings:** Full section hub (greeting, intake, availability, notifications, routing, CRM, etc.) synced via `GET/PATCH /api/settings`
+- **Billing:** Stripe Checkout + Customer Portal with Play Billing Choice / external links (`source: "android"`)
+- **Partner / agency:** Profile, invite link, Stripe Connect payouts (browser)
+- **Push:** FCM alerts with deep links
+- **Account:** Delete account (same API as web)
+
+Settings and user data sync automatically with callgrabbr.com — both clients read/write the same database.
 
 ## Setup
 
@@ -31,70 +34,63 @@ Android mobile app for CallGrabbr businesses to monitor calls, appointments, and
    Copy `.env.example` to `.env` and set:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
-   - `VITE_API_BASE_URL` (your web app API base URL)
+   - `VITE_API_BASE_URL` (production API, usually `https://www.callgrabbr.com`)
 
-3. **Build the web assets:**
+3. **Build and sync:**
    ```bash
    npm run build
-   ```
-
-4. **Sync to Android:**
-   ```bash
    npx cap sync android
-   ```
-
-5. **Open in Android Studio:**
-   ```bash
    npx cap open android
    ```
 
-## Development
+## Billing (Stripe + Play policy — no Play IAP)
 
-- **Dev server:** `npm run dev` (web preview only)
-- **Build:** `npm run build`
-- **Sync:** `npx cap sync android`
-- **Run on device:** Open in Android Studio and run
+CallGrabbr subscriptions are sold by **CallGrabbr through Stripe**, not as Google Play in-app products.
 
-## Push Notifications
+- Checkout / portal open via Play Billing Library 9.1 `launchExternalLink` when Billing Choice is available; otherwise the system browser.
+- In Play Console, keep **Billing Choice / external offers** enrolled for target countries (US, UK, EEA as applicable).
+- In-app copy discloses that Google Play is not the merchant of record.
+- After returning from checkout, the app refreshes billing summary on `appStateChange` (resume).
 
-The app registers for push notifications on login and saves the FCM token to the backend (`/api/push-token`). Notifications can include:
-- New call alerts
-- Emergency/urgent call flags
-- Appointment reminders
-- Custom deep links (via `data.route`)
-
-**Setup:** See [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) for `google-services.json` and Vercel `FIREBASE_SERVICE_ACCOUNT_JSON`.
+Do **not** add Play product SKUs or RevenueCat for this billing model.
 
 ## Architecture
 
-- **Authentication:** Supabase Auth (shared session with web app)
-- **API:** REST endpoints on the main web app (`nml-main`)
-- **State:** React hooks + local state (no Redux/Zustand needed for this scope)
-- **Styling:** Custom CSS with CSS variables for theming
-- **Native features:** Capacitor plugins for push, haptics, and app lifecycle
+```
+Capacitor WebView (React)
+  → Supabase Auth (Bearer token)
+  → nml-main /api/* (Prisma / Postgres)
+  → Stripe Checkout / Portal (external)
+```
 
-## API Endpoints Used
+- CORS / origins: `capacitor://localhost`, `https://localhost` (see `proxy.ts` on the web app)
+- Gate after login: `GET /api/activation` → trial start → onboarding → dashboard
 
-- `GET /api/public-pricing` - Marketing copy and plan catalog
-- `GET /api/dashboard` - Dashboard stats and recent calls
-- `GET /api/billing/summary` - Current plan, trial, and usage
-- `POST /api/checkout` - Stripe Checkout session (Android uses `source: "android"`)
-- `POST /api/billing/portal` - Stripe Customer Portal
-- `GET /api/calls` - Call history with pagination and search
-- `GET /api/appointments` - Upcoming and past appointments
-- `GET /api/settings` - User notification preferences
-- `PATCH /api/settings` - Update notification settings
-- `DELETE /api/appointments/:id` - Cancel an appointment
-- `POST /api/push-token` - Save FCM push token
+## API surface (mobile)
 
-## Billing (Stripe + Play policy)
+| Method | Path | Use |
+|--------|------|-----|
+| GET | `/api/activation` | Auth gate + onboarding prefill |
+| GET | `/api/dashboard` | Home stats / recent calls |
+| GET | `/api/calls`, `/api/calls/:id` | Call list + detail |
+| GET/PATCH | `/api/settings` | Full business settings |
+| GET/POST/DELETE | `/api/appointments` | Scheduling |
+| POST | `/api/trial/start`, `/api/onboarding` | Activation |
+| GET/POST | `/api/agency`, `/api/agency/connect` | Partner program |
+| POST | `/api/checkout`, `/api/billing/portal` | Stripe (`source: android`) |
+| DELETE | `/api/account/delete` | Account deletion |
+| POST | `/api/push-token` | FCM registration |
 
-CallGrabbr is billed by **CallGrabbr through Stripe**, not as a Google Play in-app product. Checkout and the customer portal open in the system browser. When the device is enrolled in Play **Billing Choice**, the app uses Play Billing Library 9.1 `launchExternalLink` and stores Play's external transaction token on the Stripe session.
+## QA checklist
 
-In Play Console, enroll the app in **Billing Choice / external web links** for US, UK, and EEA if Google treats the subscription as digital content. Until enrollment is approved, the app still opens Stripe checkout in the browser and discloses that Google Play is not the merchant of record.
+1. Fresh install → Sign up → Trial phone → Onboarding → Dashboard
+2. Edit a settings section on phone → confirm same values on web Settings
+3. Start Stripe checkout from Billing → complete in browser → resume app → plan updates
+4. Sign in with same email on web and app
+5. Push notification deep link to `/calls/:id`
+6. Create / cancel appointment (Pro+); expect 403 on Starter
 
 ## Notes
 
-- The app ID `com.me.adhd` is maintained for continuity with existing configuration
-- Push notification credentials must be configured in Firebase Console and linked to the Supabase project
-- Ensure the web API CORS settings allow requests from the mobile app domain (capacitor://localhost)
+- App ID `com.me.adhd` is kept for Play continuity
+- See [FIREBASE_SETUP.md](./FIREBASE_SETUP.md) for push credentials
