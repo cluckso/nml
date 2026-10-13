@@ -25,7 +25,6 @@ async function persistZapierKey(businessId: string, key: string) {
   await db.business.update({
     where: { id: businessId },
     data: {
-      zapierApiKeyHash: hash,
       settings: {
         ...settings,
         integrations: {
@@ -42,20 +41,13 @@ async function persistZapierKey(businessId: string, key: string) {
 export async function ensureZapierApiKey(businessId: string): Promise<{ key: string; isNew: boolean }> {
   const business = await db.business.findUnique({
     where: { id: businessId },
-    select: { settings: true, zapierApiKeyHash: true },
+    select: { settings: true },
   })
   if (!business) throw new Error("Business not found")
 
   const settings = (business.settings ?? {}) as Record<string, unknown>
   const integrations = (settings.integrations ?? {}) as Record<string, unknown>
-  if (business.zapierApiKeyHash || (integrations.zapierApiKeyHash && integrations.zapierApiKeyPrefix)) {
-    // Backfill column if only settings hash exists
-    if (!business.zapierApiKeyHash && typeof integrations.zapierApiKeyHash === "string") {
-      await db.business.update({
-        where: { id: businessId },
-        data: { zapierApiKeyHash: integrations.zapierApiKeyHash },
-      })
-    }
+  if (integrations.zapierApiKeyHash && integrations.zapierApiKeyPrefix) {
     return { key: "", isNew: false }
   }
 
@@ -74,15 +66,9 @@ export async function getBusinessIdFromZapierApiKey(apiKey: string): Promise<str
   if (!apiKey.startsWith(KEY_PREFIX)) return null
   const hash = hashApiKey(apiKey)
 
-  const byColumn = await db.business.findFirst({
-    where: { zapierApiKeyHash: hash },
-    select: { id: true },
-  })
-  if (byColumn) return byColumn.id
-
-  // Fallback for keys created before the indexed column existed
+  // Settings-only lookup until Business.zapierApiKeyHash is migrated in production.
   const businesses = await db.business.findMany({
-    where: { settings: { not: null }, zapierApiKeyHash: null },
+    where: { settings: { not: null } },
     select: { id: true, settings: true },
     take: 500,
   })
@@ -91,10 +77,6 @@ export async function getBusinessIdFromZapierApiKey(apiKey: string): Promise<str
     const settings = (b.settings ?? {}) as Record<string, unknown>
     const integrations = (settings.integrations ?? {}) as Record<string, unknown>
     if (integrations.zapierApiKeyHash === hash) {
-      await db.business.update({
-        where: { id: b.id },
-        data: { zapierApiKeyHash: hash },
-      }).catch(() => {})
       return b.id
     }
   }

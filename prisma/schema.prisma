@@ -153,8 +153,8 @@ model Business {
   agencyProfile      Agency?    @relation("AgencyOwner")
   agencyClient       AgencyClient?
   zapierHooks        ZapierHook[]
-  /// SHA-256 of Zapier API key for O(1) lookup (also mirrored in settings.integrations for UI).
-  zapierApiKeyHash   String?    @unique
+  // zapierApiKeyHash lives in settings.integrations until the production column is migrated.
+  // SQL to add later: prisma/sql/add_zapier_api_key_hash.sql
 
   @@index([primaryForwardingNumber])
   @@index([agencyId])

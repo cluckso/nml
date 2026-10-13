@@ -24,6 +24,16 @@ export async function GET(req: NextRequest) {
     const [business, recentCalls, stats, trial, monthlyLeads] = await Promise.all([
       db.business.findUnique({
         where: { id: user.businessId },
+        select: {
+          id: true,
+          name: true,
+          primaryForwardingNumber: true,
+          retellPhoneNumber: true,
+          retellAgentId: true,
+          onboardingComplete: true,
+          industry: true,
+          settings: true,
+        },
       }),
       db.call.findMany({
         where: { businessId: user.businessId },

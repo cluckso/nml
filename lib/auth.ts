@@ -6,56 +6,9 @@ import { UserRole, type Prisma } from "@prisma/client"
 import { redirect } from "next/navigation"
 import type { NextRequest } from "next/server"
 
-/**
- * Business fields needed on the auth user object.
- * Omits zapierApiKeyHash so auth still works if that column is not migrated yet.
- */
-const businessAuthSelect = {
-  id: true,
-  name: true,
-  industry: true,
-  primaryForwardingNumber: true,
-  retellPhoneNumber: true,
-  retellAgentId: true,
-  stripeCustomerId: true,
-  serviceAreas: true,
-  businessHours: true,
-  departments: true,
-  address: true,
-  city: true,
-  state: true,
-  zipCode: true,
-  onboardingComplete: true,
-  requiresManualSetup: true,
-  status: true,
-  testCallVerifiedAt: true,
-  crmWebhookUrl: true,
-  forwardToEmail: true,
-  afterHoursEmergencyPhone: true,
-  offersRoadsideService: true,
-  voiceSettings: true,
-  settings: true,
-  trialStartedAt: true,
-  trialEndsAt: true,
-  trialMinutesUsed: true,
-  planType: true,
-  stripeSubscriptionId: true,
-  subscriptionStatus: true,
-  currentPeriodStart: true,
-  currentPeriodEnd: true,
-  cancelAtPeriodEnd: true,
-  founderDealRedeemedAt: true,
-  referralCode: true,
-  referredByBusinessId: true,
-  agencyId: true,
-  createdAt: true,
-  updatedAt: true,
-} satisfies Prisma.BusinessSelect
-
+/** Include related business on auth user (full row is safe now that schema omits undeployed columns). */
 const userWithBusiness = {
-  include: {
-    business: { select: businessAuthSelect },
-  },
+  include: { business: true },
 } satisfies Prisma.UserDefaultArgs
 
 /** Resolve DB user from Supabase user (shared logic). */
