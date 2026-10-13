@@ -2,26 +2,78 @@ import { createClient } from "@/lib/supabase/server"
 import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/supabase/public-env"
 import { db } from "./db"
-import { UserRole } from "@prisma/client"
+import { UserRole, type Prisma } from "@prisma/client"
 import { redirect } from "next/navigation"
 import type { NextRequest } from "next/server"
+
+/**
+ * Business fields needed on the auth user object.
+ * Omits zapierApiKeyHash so auth still works if that column is not migrated yet.
+ */
+const businessAuthSelect = {
+  id: true,
+  name: true,
+  industry: true,
+  primaryForwardingNumber: true,
+  retellPhoneNumber: true,
+  retellAgentId: true,
+  stripeCustomerId: true,
+  serviceAreas: true,
+  businessHours: true,
+  departments: true,
+  address: true,
+  city: true,
+  state: true,
+  zipCode: true,
+  onboardingComplete: true,
+  requiresManualSetup: true,
+  status: true,
+  testCallVerifiedAt: true,
+  crmWebhookUrl: true,
+  forwardToEmail: true,
+  afterHoursEmergencyPhone: true,
+  offersRoadsideService: true,
+  voiceSettings: true,
+  settings: true,
+  trialStartedAt: true,
+  trialEndsAt: true,
+  trialMinutesUsed: true,
+  planType: true,
+  stripeSubscriptionId: true,
+  subscriptionStatus: true,
+  currentPeriodStart: true,
+  currentPeriodEnd: true,
+  cancelAtPeriodEnd: true,
+  founderDealRedeemedAt: true,
+  referralCode: true,
+  referredByBusinessId: true,
+  agencyId: true,
+  createdAt: true,
+  updatedAt: true,
+} satisfies Prisma.BusinessSelect
+
+const userWithBusiness = {
+  include: {
+    business: { select: businessAuthSelect },
+  },
+} satisfies Prisma.UserDefaultArgs
 
 /** Resolve DB user from Supabase user (shared logic). */
 async function getDbUserFromSupabaseUser(supabaseUserId: string, email: string | undefined) {
   let dbUser = await db.user.findUnique({
     where: { supabaseUserId },
-    include: { business: true },
+    ...userWithBusiness,
   })
   if (!dbUser && email) {
     const existingByEmail = await db.user.findUnique({
       where: { email },
-      include: { business: true },
+      ...userWithBusiness,
     })
     if (existingByEmail) {
       dbUser = await db.user.update({
         where: { id: existingByEmail.id },
         data: { supabaseUserId },
-        include: { business: true },
+        ...userWithBusiness,
       })
     }
   }
@@ -34,19 +86,19 @@ async function getDbUserFromSupabaseUser(supabaseUserId: string, email: string |
           role: UserRole.CUSTOMER,
           termsAcceptedAt: new Date(),
         },
-        include: { business: true },
+        ...userWithBusiness,
       })
     } catch (err: unknown) {
       if (err && typeof err === "object" && "code" in err && (err as { code: string }).code === "P2002" && email) {
         const existingByEmail = await db.user.findUnique({
           where: { email },
-          include: { business: true },
+          ...userWithBusiness,
         })
         if (existingByEmail) {
           dbUser = await db.user.update({
             where: { id: existingByEmail.id },
             data: { supabaseUserId },
-            include: { business: true },
+            ...userWithBusiness,
           })
         } else {
           throw err

@@ -95,22 +95,22 @@ export type ActivationStatus = {
   } | null
 }
 
-/** Prefer /api/activation; fall back to dashboard when that route is not deployed yet. */
+/** Prefer /api/activation; fall back to dashboard on any non-auth failure. */
 export async function getActivation(): Promise<ActivationStatus> {
-  const res = await request('api/activation')
-  if (res.status === 401) throw new ApiError('Unauthorized', 401)
-  if (res.ok) {
-    return res.json() as Promise<ActivationStatus>
-  }
-
-  // Production may not have /api/activation until the web app is redeployed
-  // (Next returns HTML 404). Also fall back when the body is clearly HTML.
-  const contentType = res.headers.get('content-type') || ''
-  if (res.status === 404 || contentType.includes('text/html')) {
+  try {
+    const res = await request('api/activation')
+    if (res.status === 401) throw new ApiError('Unauthorized', 401)
+    if (res.ok) {
+      return res.json() as Promise<ActivationStatus>
+    }
+    // 404 (not deployed), 500, or HTML — never block login behind activation alone
+    console.warn('[API] activation failed, falling back to dashboard', res.status)
+    return await getActivationFromDashboard()
+  } catch (e) {
+    if (e instanceof ApiError && e.statusCode === 401) throw e
+    console.warn('[API] activation error, falling back to dashboard', e)
     return getActivationFromDashboard()
   }
-
-  throw await parseError(res)
 }
 
 async function getActivationFromDashboard(): Promise<ActivationStatus> {

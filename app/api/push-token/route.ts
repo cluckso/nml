@@ -6,11 +6,11 @@ import { db } from "@/lib/db"
 export async function POST(req: NextRequest) {
   try {
     const user = await getAuthUserFromRequest(req)
-    if (!user?.businessId) {
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const body = await req.json()
+    const body = await req.json().catch(() => ({}))
     const token = typeof body.token === "string" ? body.token.trim() : ""
     const platform = typeof body.platform === "string" ? body.platform.trim() : "android"
 
@@ -26,6 +26,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Push token save error:", error)
-    return NextResponse.json({ error: "Failed to save token" }, { status: 500 })
+    // Non-fatal for the app — client already treats this as a warning
+    return NextResponse.json(
+      {
+        error: "Failed to save token",
+        detail: error instanceof Error ? error.message : undefined,
+      },
+      { status: 500 }
+    )
   }
 }

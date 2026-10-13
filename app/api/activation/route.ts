@@ -2,6 +2,18 @@ import { NextRequest, NextResponse } from "next/server"
 import { getAuthUserFromRequest } from "@/lib/auth"
 import { db } from "@/lib/db"
 
+function asHours(
+  value: unknown
+): { open: string; close: string; days: string[] } | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null
+  const obj = value as Record<string, unknown>
+  const open = typeof obj.open === "string" ? obj.open : null
+  const close = typeof obj.close === "string" ? obj.close : null
+  const days = Array.isArray(obj.days) ? obj.days.map(String) : null
+  if (!open || !close || !days) return null
+  return { open, close, days }
+}
+
 /**
  * GET /api/activation — mobile/web gate: business + onboarding status and prefill.
  */
@@ -45,12 +57,19 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    const ownerPhone = (user as { phoneNumber?: string | null }).phoneNumber ?? null
+    const ownerPhone =
+      typeof (user as { phoneNumber?: unknown }).phoneNumber === "string"
+        ? (user as { phoneNumber: string }).phoneNumber
+        : null
+    const userName =
+      typeof (user as { name?: unknown }).name === "string"
+        ? (user as { name: string }).name.trim()
+        : ""
     const nameTrimmed = business.name?.trim() || ""
     const prefillName =
       !nameTrimmed || nameTrimmed === "My Business"
         ? null
-        : user.name?.trim() && nameTrimmed.toLowerCase() === user.name.trim().toLowerCase()
+        : userName && nameTrimmed.toLowerCase() === userName.toLowerCase()
           ? null
           : nameTrimmed
 
@@ -60,22 +79,26 @@ export async function GET(req: NextRequest) {
         ? business.primaryForwardingNumber
         : null
 
+    const serviceAreas = Array.isArray(business.serviceAreas)
+      ? business.serviceAreas.filter((a): a is string => typeof a === "string")
+      : []
+
     return NextResponse.json({
       businessId: business.id,
       onboardingComplete: !!business.onboardingComplete,
       needsTrialStart: false,
       needsOnboarding: !business.onboardingComplete,
-      planType: business.planType,
+      planType: business.planType ?? null,
       prefill: {
-        industry: business.industry,
+        industry: business.industry ?? null,
         name: prefillName,
-        city: business.city,
-        serviceAreas: business.serviceAreas?.length
-          ? business.serviceAreas
+        city: business.city ?? null,
+        serviceAreas: serviceAreas.length
+          ? serviceAreas
           : business.city
             ? [business.city]
             : [],
-        businessHours: business.businessHours,
+        businessHours: asHours(business.businessHours),
         phoneNumber: phone,
         ownerPhone,
       },
