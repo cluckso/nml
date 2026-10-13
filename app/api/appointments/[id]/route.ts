@@ -27,7 +27,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     })
     if (!business || !isSectionAllowed("booking", getEffectivePlanType(business.planType))) {
       return NextResponse.json(
-        { error: `Booking requires the ${getPlanDisplayName(PlanType.PRO)} plan or higher` },
+        {
+          error: `Booking requires the ${getPlanDisplayName(PlanType.PRO)} plan or higher`,
+          upgradeRequired: true,
+          minPlan: PlanType.PRO,
+        },
         { status: 403 }
       )
     }

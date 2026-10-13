@@ -106,7 +106,7 @@ export function PurchaseSuccessClient(props: PurchaseSuccessClientProps) {
             <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 text-sm">
               <p className="font-medium mb-1">Next: add your business details</p>
               <p className="text-muted-foreground">
-                Industry, name, and hours — about 2 minutes. Then connect your assistant and forward your line.
+                Industry, name, and service area — under a minute. Then connect your assistant and forward your line.
               </p>
             </div>
           )}

@@ -8,12 +8,14 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { confirmEmailValueLine } from "@/lib/trial-marketing"
 import { getEmailConfirmRedirectUrl } from "@/lib/auth-redirect"
+import { getSafeRedirectPath } from "@/lib/safe-redirect"
 import { CheckCircle2, Loader2, Mail } from "lucide-react"
 import { BrandMark } from "@/components/brand/BrandMark"
 
 function ConfirmEmailContent() {
   const searchParams = useSearchParams()
   const email = searchParams.get("email") ?? ""
+  const nextPath = getSafeRedirectPath(searchParams.get("next")) ?? "/trial/start"
   const [resending, setResending] = useState(false)
   const [resendDone, setResendDone] = useState(false)
   const [resendError, setResendError] = useState<string | null>(null)
@@ -28,7 +30,7 @@ function ConfirmEmailContent() {
       type: "signup",
       email: email.trim(),
       options: {
-        emailRedirectTo: getEmailConfirmRedirectUrl(),
+        emailRedirectTo: getEmailConfirmRedirectUrl(nextPath),
       },
     })
     setResending(false)
@@ -38,6 +40,8 @@ function ConfirmEmailContent() {
       setResendDone(true)
     }
   }
+
+  const continueHref = `/sign-in?next=${encodeURIComponent(nextPath)}`
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
@@ -59,7 +63,7 @@ function ConfirmEmailContent() {
               <li>Open your email inbox{email ? ` for ${email}` : ""}.</li>
               <li>Find the message from CallGrabbr (subject: &quot;Confirm your signup&quot; or similar).</li>
               <li>Click the confirmation link in that email.</li>
-              <li>Sign in with your password — {confirmEmailValueLine()}</li>
+              <li>You&apos;ll continue setup automatically — {confirmEmailValueLine()}</li>
             </ol>
           </div>
 
@@ -103,10 +107,10 @@ function ConfirmEmailContent() {
 
           <div className="pt-4 border-t space-y-2">
             <p className="text-sm text-muted-foreground text-center">
-              Already confirmed? Sign in to continue.
+              Already confirmed? Continue setup.
             </p>
             <Button asChild className="w-full">
-              <Link href="/sign-in">Sign in</Link>
+              <Link href={continueHref}>Continue</Link>
             </Button>
           </div>
         </CardContent>

@@ -6,7 +6,6 @@ import "./globals.css"
 import { Providers } from "./providers"
 import { Nav } from "@/components/nav"
 import { SUPPORT_EMAIL } from "@/lib/site-contact"
-import { founderByline } from "@/lib/marketing/founder"
 import { VS_PAGE_LINKS } from "@/lib/marketing/comparisons"
 import { GOOGLE_PLAY_STORE_URL } from "@/lib/mobile-app"
 import { SITE_URL } from "@/lib/site-url"
@@ -241,16 +240,6 @@ rkp("init","PaccPmsytSiq");rkp("event","PAGE_VIEW");
                 </p>
               </div>
               <p className="text-center text-xs text-muted-foreground/80 mt-4">
-                {founderByline() ? (
-                  <>{founderByline()} · </>
-                ) : (
-                  <>
-                    <Link href="/about" className="hover:text-foreground">
-                      Why I built this
-                    </Link>
-                    {" · "}
-                  </>
-                )}
                 © {new Date().getFullYear()} CallGrabbr. Missed-call lead capture for local service businesses.
               </p>
             </div>

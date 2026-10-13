@@ -24,7 +24,7 @@ const STEPS = [
   },
   {
     title: "Create a Zap",
-    description: "In Zapier, use Webhooks by Zapier with our REST Hook endpoints. There is no CallGrabbr app in the Zapier directory yet.",
+    description: "In Zapier, use Webhooks by Zapier with our REST Hook endpoints (or the CallGrabbr app once the directory listing is live — see integrations/zapier/README.md).",
   },
   {
     title: "Choose the New Lead trigger",

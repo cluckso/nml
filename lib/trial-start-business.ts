@@ -55,13 +55,7 @@ export async function prepareBusinessForTrial(
 
   await releasePrimaryForwardingNumberFromOtherBusinesses(normalizedPhone, business?.id)
 
-  if (business?.primaryForwardingNumber?.startsWith("pending-")) {
-    await db.business.update({
-      where: { id: business.id },
-      data: { primaryForwardingNumber: normalizedPhone },
-    })
-    business = await db.business.findUnique({ where: { id: business.id } })
-  } else if (!business) {
+  if (!business) {
     business = await db.business.create({
       data: {
         name: input.contactName?.trim() || "My Business",
@@ -77,6 +71,16 @@ export async function prepareBusinessForTrial(
       where: { id: input.userId },
       data: { businessId: business.id },
     })
+  } else if (
+    business.primaryForwardingNumber?.startsWith("pending-") ||
+    !business.primaryForwardingNumber ||
+    business.primaryForwardingNumber !== normalizedPhone
+  ) {
+    await db.business.update({
+      where: { id: business.id },
+      data: { primaryForwardingNumber: normalizedPhone },
+    })
+    business = await db.business.findUnique({ where: { id: business.id } })
   }
 
   if (!business) {

@@ -1,5 +1,6 @@
 import { Business, Call } from "@prisma/client"
 import { Resend } from "resend"
+import { buildOutboundDemoSummarySms } from "@/lib/demo-outbound-call"
 import { sanitizeIssueDescription } from "@/lib/parse-lead-from-transcript"
 import twilio from "twilio"
 
@@ -422,6 +423,25 @@ export async function sendDemoResultSms(
     })
   } catch (error) {
     console.error("[Notifications] Demo result SMS error:", error)
+  }
+}
+
+/** Outbound demo: one SMS with Retell's call summary after we called the visitor. */
+export async function sendOutboundDemoSummarySms(toPhone: string, summary: string) {
+  if (!twilioClient || !process.env.TWILIO_PHONE_NUMBER) {
+    console.warn("[Notifications] Outbound demo SMS skipped: Twilio not configured")
+    return
+  }
+  try {
+    await twilioClient.messages.create({
+      body: buildOutboundDemoSummarySms(summary),
+      from: process.env.TWILIO_PHONE_NUMBER,
+      to: toPhone,
+    })
+    console.info("[Notifications] Outbound demo summary SMS sent", { to: toPhone })
+  } catch (error) {
+    console.error("[Notifications] Outbound demo summary SMS error:", error)
+    throw error
   }
 }
 

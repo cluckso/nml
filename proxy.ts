@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 import { getSupabaseAnonKey, getSupabaseUrl } from "@/lib/supabase/public-env"
+import { getSafeRedirectPath } from "@/lib/safe-redirect"
 
 /** Origins allowed for CORS (Capacitor app, local dev). API routes accept Bearer token from these. */
 const CORS_ORIGINS = ["https://localhost", "capacitor://localhost", "http://localhost", "http://localhost:3000"]
@@ -13,6 +14,42 @@ function corsHeaders(origin: string | null): Record<string, string> {
     "Access-Control-Allow-Headers": "Authorization, Content-Type, Accept",
     "Access-Control-Max-Age": "86400",
   }
+}
+
+/** Exact-match public paths (home only — do not use startsWith("/") ). */
+const PUBLIC_EXACT = new Set([
+  "/",
+  "/pricing",
+  "/sign-in",
+  "/sign-up",
+  "/confirm-email",
+  "/forgot-password",
+  "/reset-password",
+  "/privacy",
+  "/terms",
+  "/sms-terms",
+  "/about",
+  "/compare",
+  "/changelog",
+  "/integrations/zapier",
+  "/start",
+])
+
+/** Prefix public paths (marketing + docs). */
+const PUBLIC_PREFIXES = [
+  "/docs",
+  "/guides",
+  "/for/",
+  "/funnel/",
+  "/cls/",
+  "/integrations/",
+]
+
+function isPublicPath(pathname: string): boolean {
+  if (PUBLIC_EXACT.has(pathname)) return true
+  return PUBLIC_PREFIXES.some(
+    (prefix) => pathname === prefix.replace(/\/$/, "") || pathname.startsWith(prefix)
+  )
 }
 
 /** Set MAINTENANCE_MODE=true or 1 in env to show 503 for all traffic (webhooks and /api/health still work). */
@@ -98,25 +135,45 @@ export async function proxy(request: NextRequest) {
     // If Supabase fails (network, invalid config, etc.), continue without auth so the page can load
   }
 
-  // Public routes that don't require authentication
-  const publicRoutes = ["/", "/pricing", "/sign-in", "/sign-up", "/confirm-email", "/forgot-password", "/reset-password", "/api/", "/docs", "/privacy", "/terms"]
-  const isPublicRoute = publicRoutes.some((route) =>
-    request.nextUrl.pathname.startsWith(route)
-  )
+  const isPublicRoute = isPublicPath(path)
 
   // If user is not authenticated and trying to access protected route
   if (!user && !isPublicRoute) {
     const url = request.nextUrl.clone()
+    const returnTo = `${path}${request.nextUrl.search}`
     url.pathname = "/sign-in"
+    url.search = ""
+    if (returnTo && returnTo !== "/") {
+      url.searchParams.set("next", returnTo)
+    }
     const res = NextResponse.redirect(url)
     supabaseResponse.cookies.getAll().forEach((c) => res.cookies.set(c.name, c.value, c))
     return res
   }
 
-  // If user is authenticated and trying to access auth pages, redirect to dashboard
-  if (user && (request.nextUrl.pathname === "/sign-in" || request.nextUrl.pathname === "/sign-up" || request.nextUrl.pathname === "/confirm-email" || request.nextUrl.pathname === "/forgot-password")) {
+  // Bounce signed-in users off sign-in/sign-up only (not forgot/reset/confirm).
+  // Allow confirm-code exchange to proceed when ?code= is present.
+  const hasConfirmCode = !!request.nextUrl.searchParams.get("code")
+  if (
+    user &&
+    (path === "/sign-in" || path === "/sign-up") &&
+    !hasConfirmCode
+  ) {
     const url = request.nextUrl.clone()
-    url.pathname = "/dashboard"
+    const next = getSafeRedirectPath(request.nextUrl.searchParams.get("next"))
+    if (next) {
+      try {
+        const dest = new URL(next, request.nextUrl.origin)
+        url.pathname = dest.pathname
+        url.search = dest.search
+      } catch {
+        url.pathname = "/dashboard"
+        url.search = ""
+      }
+    } else {
+      url.pathname = "/dashboard"
+      url.search = ""
+    }
     const res = NextResponse.redirect(url)
     supabaseResponse.cookies.getAll().forEach((c) => res.cookies.set(c.name, c.value, c))
     return res

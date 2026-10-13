@@ -33,7 +33,13 @@ import {
   DashboardStatCard,
 } from "@/components/dashboard/DashboardShell"
 
-export default async function DashboardPage() {
+type DashboardPageProps = {
+  searchParams: Promise<{ setup?: string }>
+}
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const params = await searchParams
+  const provisioningFailed = params.setup === "provisioning_failed"
   const user = await requireAuth()
 
   if (!user.businessId) {
@@ -183,6 +189,16 @@ export default async function DashboardPage() {
         >
           <DashboardNav />
         </DashboardPageHeader>
+
+        {provisioningFailed && (
+          <div
+            className="mb-8 rounded-lg border border-amber-500/50 bg-amber-500/10 p-4 text-sm text-amber-900 dark:text-amber-100"
+            role="alert"
+          >
+            Your business details were saved, but we couldn&apos;t connect a call assistant yet. Use{" "}
+            <span className="font-medium">Get number</span> on the setup card below, or try again from Settings.
+          </div>
+        )}
 
         {usageNudge && (
           <div className="mb-8">

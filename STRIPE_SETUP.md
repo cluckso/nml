@@ -137,10 +137,18 @@ Use **test** keys and **test** price IDs while developing; switch to **live** wh
    - `checkout.session.completed`
    - `customer.subscription.updated`
    - `customer.subscription.deleted`
-   - `invoice.payment_succeeded` (optional, for your own logic)
+   - `invoice.payment_succeeded` (agency partner commissions + transfers)
    - `invoice.payment_failed`
+   - `account.updated` (Stripe Connect Express payout status for partners)
 
 4. Copy the **Signing secret** (starts with `whsec_`) → set as `STRIPE_WEBHOOK_SECRET`.
+
+### Stripe Connect (partner payouts)
+
+1. Enable **Connect** in the Stripe Dashboard (Settings → Connect).
+2. Use **Express** accounts for agencies; platform remains merchant of record on client subscriptions.
+3. Commissions are recorded on `invoice.payment_succeeded` and transferred to the partner’s Connect account when `payouts_enabled` is true (`/agency` → Set up payouts).
+4. Without Connect configured, commissions stay `PENDING` in the partner ledger.
 
 5. For **local testing**, use Stripe CLI:
    ```bash

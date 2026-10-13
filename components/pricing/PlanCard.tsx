@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Check, Loader2 } from "lucide-react"
 import { PRICING_TIERS_BY_KEY, formatCostPerCapturedCall } from "@/lib/pricing-catalog"
 import { formatIncludedUsagePrimary } from "@/lib/plan-usage"
-import { moneyBackGuaranteeLabel } from "@/lib/trial-marketing"
+import { moneyBackPaidOnlyLine } from "@/lib/trial-marketing"
 import type { BillingInterval } from "@/lib/stripe-billing"
 
 export function PlanCard({
@@ -121,9 +121,9 @@ export function PlanCard({
           </div>
         )}
         {showMoneyBack && (
-          <p className="text-xs text-primary font-medium">{moneyBackGuaranteeLabel()}</p>
+          <p className="text-xs text-primary font-medium">{moneyBackPaidOnlyLine()}</p>
         )}
-        <p className="text-xs text-muted-foreground">No setup fee</p>
+        <p className="text-xs text-muted-foreground">No setup fee · call counts are estimates</p>
       </CardHeader>
       <CardContent className="flex flex-col flex-1 pt-0">
         <ul className="space-y-2.5 mb-6 flex-1">

@@ -3,7 +3,7 @@ import { db } from "./db"
 import { PlanType, SubscriptionStatus } from "@prisma/client"
 import { getIncludedMinutes, getOverageMinutes, TRIAL_DAYS } from "./plans"
 import { convertReferralOnSubscription } from "@/lib/referrals"
-import { processAgencyCommissionOnSubscription } from "@/lib/agency"
+import { processAgencyCommissionOnInvoice } from "@/lib/agency"
 import { maybeSendUsageSoftAlert } from "@/lib/usage-soft-alert"
 import { trackHeyCatchBusinessOutcome } from "@/lib/heycatch-server"
 import {
@@ -645,11 +645,7 @@ export async function handleStripeWebhook(event: Stripe.Event) {
         } catch (err) {
           console.error("Referral conversion error:", err)
         }
-        try {
-          await processAgencyCommissionOnSubscription(businessId)
-        } catch (err) {
-          console.error("Agency commission error:", err)
-        }
+        // Agency commissions are recorded on invoice.payment_succeeded (first + renewals).
         await trackHeyCatchBusinessOutcome({
           businessId,
           event: "subscription_started",
@@ -696,7 +692,46 @@ export async function handleStripeWebhook(event: Stripe.Event) {
     }
 
     case "invoice.payment_succeeded": {
-      // Handle successful payment
+      const invoice = event.data.object as Stripe.Invoice
+      const subscriptionId =
+        typeof invoice.subscription === "string"
+          ? invoice.subscription
+          : invoice.subscription?.id ?? null
+      if (subscriptionId && invoice.id) {
+        const business = await db.business.findFirst({
+          where: { stripeSubscriptionId: subscriptionId },
+          select: { id: true },
+        })
+        if (business) {
+          const periodStart = invoice.period_start
+            ? new Date(invoice.period_start * 1000)
+            : new Date()
+          const periodEnd = invoice.period_end
+            ? new Date(invoice.period_end * 1000)
+            : new Date()
+          try {
+            await processAgencyCommissionOnInvoice(
+              business.id,
+              invoice.id,
+              periodStart,
+              periodEnd
+            )
+          } catch (err) {
+            console.error("Agency commission on invoice error:", err)
+          }
+        }
+      }
+      break
+    }
+
+    case "account.updated": {
+      const account = event.data.object as Stripe.Account
+      if (account.id) {
+        await db.agency.updateMany({
+          where: { stripeConnectAccountId: account.id },
+          data: { payoutsEnabled: !!account.payouts_enabled },
+        })
+      }
       break
     }
 

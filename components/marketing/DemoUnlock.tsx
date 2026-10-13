@@ -66,7 +66,7 @@ export function DemoUnlock({ className = "" }: DemoUnlockProps) {
       const res = await fetch("/api/demo/unlock", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, businessType }),
+        body: JSON.stringify({ name, phone, businessType, consent }),
       })
 
       if (!res.ok) {
@@ -90,10 +90,10 @@ export function DemoUnlock({ className = "" }: DemoUnlockProps) {
         <div className="mx-auto h-16 w-16 rounded-full bg-primary/20 flex items-center justify-center mb-4">
           <Phone className="h-8 w-8 text-primary" />
         </div>
-        <CardTitle className="text-2xl">Try a demo call</CardTitle>
+        <CardTitle className="text-2xl">Hear the 60-second phone demo</CardTitle>
         <p className="text-muted-foreground mt-2">
-          Hear how we capture a lead when you can&apos;t answer — call now. Optionally get a text with
-          the lead summary after.
+          A short sample of how we capture a lead when you can&apos;t answer — not a sales call. No
+          signup required. Optionally get a text with the lead summary after.
         </p>
       </CardHeader>
       <CardContent className="text-center space-y-6">

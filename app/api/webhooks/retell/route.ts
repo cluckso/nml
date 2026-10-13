@@ -8,6 +8,7 @@ import {
   sendSMSNotification,
   sendSMSToCaller,
   sendDemoResultSms,
+  sendOutboundDemoSummarySms,
   sendMissedCallTextBack,
   forwardToCrm,
   type StructuredIntake,
@@ -36,6 +37,11 @@ import {
 import { auditCallTranscript } from "@/lib/audit-call-transcript"
 import { fireZapierLeadHook } from "@/lib/zapier"
 import { captureRouteError } from "@/lib/capture-error"
+import {
+  isOutboundDemoCall,
+  resolveDemoResultSmsPhone,
+  type DemoCallMetadata,
+} from "@/lib/demo-outbound-call"
 import {
   canAnswerSignupInbound,
   isDemoInboundCall,
@@ -349,9 +355,7 @@ interface RetellCallWebhookEvent {
     start_timestamp?: number
     end_timestamp?: number
     transcript?: string
-    metadata?: {
-      client_id?: string
-      forwarded_from_number?: string
+    metadata?: DemoCallMetadata & {
       capacity_mode?: string
       capacity_over_limit?: string
     }
@@ -427,11 +431,13 @@ async function handleDemoCallCompletion(event: RetellCallWebhookEvent, callId: s
     transcript: typeof transcriptStr === "string" ? transcriptStr : undefined,
   })
 
-  const callerPhone = event.call?.from_number
-    ? normalizeE164(event.call.from_number) ?? event.call.from_number
-    : structuredIntake.phone
-      ? normalizeE164(structuredIntake.phone) ?? structuredIntake.phone
-      : null
+  const demoNumber = process.env.RETELL_FROM_NUMBER || process.env.NEXT_PUBLIC_DEMO_NUMBER
+  const callerPhone = resolveDemoResultSmsPhone({
+    fromNumber: event.call?.from_number,
+    toNumber: event.call?.to_number,
+    metadata: event.call?.metadata,
+    demoNumber,
+  })
 
   const hasInfo = hasActionableInfo(structuredIntake, {
     duration: 0,
@@ -439,6 +445,20 @@ async function handleDemoCallCompletion(event: RetellCallWebhookEvent, callId: s
   })
   if (!callerPhone) {
     console.info("[Notifications] Demo result skipped: no caller phone", { callId })
+    return
+  }
+
+  if (isOutboundDemoCall(event.call?.metadata)) {
+    const outboundSummary =
+      (typeof summary === "string" && summary.trim()) ||
+      (typeof analysis.call_summary === "string" && analysis.call_summary.trim()) ||
+      ""
+    try {
+      await sendOutboundDemoSummarySms(callerPhone, outboundSummary)
+      console.info("[Notifications] Outbound demo summary sent", { callId, to: callerPhone })
+    } catch (error) {
+      console.error("Outbound demo result SMS error:", error)
+    }
     return
   }
 
@@ -917,15 +937,7 @@ async function handleCallCompletion(event: RetellCallWebhookEvent) {
         call,
         structuredIntake as any
       )
-      // Also send to Zapier if configured
-      const zapierUrl = callSettings.crm.zapierWebhookUrl
-      if (zapierUrl) {
-        await fetch(zapierUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ business: { id: business.id, name: business.name }, call, intake: structuredIntake }),
-        }).catch((e) => console.error("Zapier webhook error:", e))
-      }
+      // Legacy Catch Hook URL is fired once via fireZapierLeadHook (standardized payload) below.
     }
   } catch (error) {
     console.error("CRM forward error:", error)

@@ -17,6 +17,9 @@ const URGENCY_CLASS: Record<SmsPreviewLead["urgency"], string> = {
 export function SMSPreview({ className = "", lead = DEFAULT_SMS_PREVIEW }: SMSPreviewProps) {
   return (
     <div className={`max-w-sm mx-auto ${className}`}>
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground text-center mb-3">
+        Illustrative example — not a real customer lead
+      </p>
       <div className="relative rounded-[2.5rem] border-4 border-foreground/20 bg-background p-2 shadow-2xl">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-foreground/20 rounded-b-xl" />
 

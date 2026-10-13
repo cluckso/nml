@@ -1,10 +1,11 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Building2, Copy, Check, Users, Phone, DollarSign, TrendingUp } from "lucide-react"
+import { Building2, Copy, Check, Users, Phone, DollarSign, TrendingUp, Banknote } from "lucide-react"
 import Link from "next/link"
 
 interface AgencyData {
@@ -13,6 +14,8 @@ interface AgencyData {
   inviteCode: string
   inviteLink: string
   commissionPercent: number
+  stripeConnectAccountId: string | null
+  payoutsEnabled: boolean
   clients: Array<{
     id: string
     name: string
@@ -22,6 +25,15 @@ interface AgencyData {
     status: string
     commissionCentsTotal: number
     joinedAt: string
+  }>
+  recentCommissions: Array<{
+    id: string
+    businessId: string
+    amountCents: number
+    periodStart: string
+    periodEnd: string
+    payoutStatus: string
+    createdAt: string
   }>
   stats: {
     totalClients: number
@@ -34,12 +46,15 @@ interface AgencyData {
 }
 
 export function AgencyDashboardClient() {
+  const searchParams = useSearchParams()
   const [agency, setAgency] = useState<AgencyData | null>(null)
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
+  const [connecting, setConnecting] = useState(false)
   const [agencyName, setAgencyName] = useState("")
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [connectMessage, setConnectMessage] = useState<string | null>(null)
 
   const load = () => {
     setLoading(true)
@@ -53,6 +68,31 @@ export function AgencyDashboardClient() {
   useEffect(() => {
     load()
   }, [])
+
+  useEffect(() => {
+    const connect = searchParams.get("connect")
+    if (!connect) return
+    if (connect === "return" || connect === "refresh") {
+      setConnectMessage(
+        connect === "return"
+          ? "Checking payout setup…"
+          : "Payout setup was interrupted — you can resume below."
+      )
+      fetch("/api/agency/connect")
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.payoutsEnabled) {
+            setConnectMessage("Payouts are enabled. Commissions transfer after each paid invoice.")
+          } else if (data.connected) {
+            setConnectMessage("Stripe account linked — finish verification if payouts are still pending.")
+          }
+          load()
+        })
+        .catch(() => {
+          setConnectMessage("Could not refresh payout status. Try again from Set up payouts.")
+        })
+    }
+  }, [searchParams])
 
   const createAgency = async () => {
     if (!agencyName.trim()) return
@@ -71,6 +111,24 @@ export function AgencyDashboardClient() {
       setError(e instanceof Error ? e.message : "Failed to create agency")
     } finally {
       setCreating(false)
+    }
+  }
+
+  const startConnect = async () => {
+    setConnecting(true)
+    setError(null)
+    try {
+      const res = await fetch("/api/agency/connect", { method: "POST" })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? "Failed to start payout setup")
+      if (data.url) {
+        window.location.href = data.url
+        return
+      }
+      throw new Error("No onboarding URL returned")
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to start payout setup")
+      setConnecting(false)
     }
   }
 
@@ -131,6 +189,41 @@ export function AgencyDashboardClient() {
         </Link>
       </div>
 
+      {error && <p className="text-sm text-destructive">{error}</p>}
+      {connectMessage && (
+        <p className="text-sm text-primary rounded-md bg-primary/10 px-3 py-2">{connectMessage}</p>
+      )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Banknote className="h-5 w-5" />
+            Payouts
+          </CardTitle>
+          <CardDescription>
+            Connect a Stripe Express account to receive commission transfers after each paid client invoice.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {agency.payoutsEnabled ? (
+            <p className="text-sm text-primary font-medium">Payouts enabled</p>
+          ) : agency.stripeConnectAccountId ? (
+            <p className="text-sm text-muted-foreground">
+              Stripe account linked — finish verification to enable transfers. Commissions stay pending until then.
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              Payouts coming — set up Stripe to receive automatic transfers. Until then, commissions are tracked in your ledger.
+            </p>
+          )}
+          {!agency.payoutsEnabled && (
+            <Button onClick={startConnect} disabled={connecting}>
+              {connecting ? "Opening Stripe…" : agency.stripeConnectAccountId ? "Resume payout setup" : "Set up payouts"}
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="pt-5">
@@ -189,6 +282,39 @@ export function AgencyDashboardClient() {
             </Button>
           </div>
           <p className="text-xs text-muted-foreground mt-2">Code: {agency.inviteCode}</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Recent commissions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {!agency.recentCommissions?.length ? (
+            <p className="text-muted-foreground text-sm text-center py-6">
+              No commissions yet. They appear after a referred client&apos;s invoice is paid.
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {agency.recentCommissions.map((c) => (
+                <div
+                  key={c.id}
+                  className="flex flex-wrap items-center justify-between gap-2 border-b pb-3 last:border-0"
+                >
+                  <div>
+                    <p className="font-medium">${(c.amountCents / 100).toFixed(2)}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(c.periodStart).toLocaleDateString()} –{" "}
+                      {new Date(c.periodEnd).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                    {c.payoutStatus.toLowerCase()}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 

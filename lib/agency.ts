@@ -1,5 +1,5 @@
 import { db } from "./db"
-import { AgencyClientStatus, PlanType } from "@prisma/client"
+import { AgencyClientStatus, AgencyCommissionPayoutStatus, PlanType } from "@prisma/client"
 import { MONTHLY_PRICES } from "./plans"
 import { randomBytes } from "crypto"
 
@@ -169,8 +169,16 @@ export async function recordAgencyCommission(
   amountCents: number,
   periodStart: Date,
   periodEnd: Date,
-  stripeInvoiceId?: string
+  stripeInvoiceId?: string,
+  payoutStatus: AgencyCommissionPayoutStatus = AgencyCommissionPayoutStatus.PENDING
 ) {
+  if (stripeInvoiceId) {
+    const existing = await db.agencyCommission.findUnique({
+      where: { stripeInvoiceId },
+    })
+    if (existing) return existing
+  }
+
   const commission = await db.agencyCommission.create({
     data: {
       agencyId,
@@ -179,6 +187,7 @@ export async function recordAgencyCommission(
       periodStart,
       periodEnd,
       stripeInvoiceId: stripeInvoiceId ?? null,
+      payoutStatus,
     },
   })
 
@@ -190,6 +199,10 @@ export async function recordAgencyCommission(
   return commission
 }
 
+/**
+ * Prefer invoice.payment_succeeded for first + renewals (idempotent via stripeInvoiceId).
+ * Kept for rare paths where an invoice id is not available.
+ */
 export async function processAgencyCommissionOnSubscription(businessId: string) {
   const client = await db.agencyClient.findUnique({
     where: { businessId },
@@ -205,5 +218,151 @@ export async function processAgencyCommissionOnSubscription(businessId: string) 
   const periodStart = new Date(now.getFullYear(), now.getMonth(), 1)
   const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0)
 
-  return recordAgencyCommission(client.agencyId, businessId, commissionCents, periodStart, periodEnd)
+  return recordAgencyCommission(
+    client.agencyId,
+    businessId,
+    commissionCents,
+    periodStart,
+    periodEnd,
+    undefined,
+    AgencyCommissionPayoutStatus.SKIPPED
+  )
+}
+
+/** Create/record commission from a paid Stripe invoice and transfer when Connect is ready. */
+export async function processAgencyCommissionOnInvoice(
+  businessId: string,
+  stripeInvoiceId: string,
+  periodStart: Date,
+  periodEnd: Date
+) {
+  const client = await db.agencyClient.findUnique({
+    where: { businessId },
+    include: {
+      agency: true,
+      business: { select: { planType: true } },
+    },
+  })
+  if (!client || !client.business.planType) return null
+
+  const monthlyCents = (MONTHLY_PRICES[client.business.planType] ?? 0) * 100
+  const commissionCents = Math.round(monthlyCents * client.agency.commissionRate)
+  if (commissionCents <= 0) return null
+
+  let commission = await recordAgencyCommission(
+    client.agencyId,
+    businessId,
+    commissionCents,
+    periodStart,
+    periodEnd,
+    stripeInvoiceId,
+    AgencyCommissionPayoutStatus.PENDING
+  )
+
+  // Already transferred on a prior webhook delivery
+  if (commission.payoutStatus === AgencyCommissionPayoutStatus.TRANSFERRED) {
+    return commission
+  }
+
+  const { stripe } = await import("./stripe")
+  const connectId = client.agency.stripeConnectAccountId
+  if (!stripe || !connectId || !client.agency.payoutsEnabled) {
+    await db.agencyCommission.update({
+      where: { id: commission.id },
+      data: { payoutStatus: AgencyCommissionPayoutStatus.PENDING },
+    })
+    return commission
+  }
+
+  try {
+    const transfer = await stripe.transfers.create(
+      {
+        amount: commissionCents,
+        currency: "usd",
+        destination: connectId,
+        transfer_group: stripeInvoiceId,
+        metadata: {
+          agencyId: client.agencyId,
+          businessId,
+          commissionId: commission.id,
+        },
+      },
+      { idempotencyKey: `agency_commission_${stripeInvoiceId}` }
+    )
+    commission = await db.agencyCommission.update({
+      where: { id: commission.id },
+      data: {
+        payoutStatus: AgencyCommissionPayoutStatus.TRANSFERRED,
+        stripeTransferId: transfer.id,
+      },
+    })
+  } catch (err) {
+    console.error("Agency commission transfer failed:", err)
+    commission = await db.agencyCommission.update({
+      where: { id: commission.id },
+      data: { payoutStatus: AgencyCommissionPayoutStatus.FAILED },
+    })
+  }
+
+  return commission
+}
+
+export async function createAgencyConnectOnboardingLink(
+  agencyId: string,
+  returnUrl: string,
+  refreshUrl: string,
+  ownerEmail?: string | null
+) {
+  const { stripe } = await import("./stripe")
+  if (!stripe) {
+    throw new Error("Stripe is not configured")
+  }
+
+  const agency = await db.agency.findUnique({ where: { id: agencyId } })
+  if (!agency) throw new Error("Agency not found")
+
+  let accountId = agency.stripeConnectAccountId
+  if (!accountId) {
+    const account = await stripe.accounts.create({
+      type: "express",
+      country: "US",
+      email: ownerEmail || undefined,
+      capabilities: {
+        transfers: { requested: true },
+      },
+      business_profile: {
+        product_description: "CallGrabbr partner commission payouts",
+      },
+      metadata: { agencyId },
+    })
+    accountId = account.id
+    await db.agency.update({
+      where: { id: agencyId },
+      data: { stripeConnectAccountId: accountId },
+    })
+  }
+
+  const link = await stripe.accountLinks.create({
+    account: accountId,
+    refresh_url: refreshUrl,
+    return_url: returnUrl,
+    type: "account_onboarding",
+  })
+
+  return { url: link.url, accountId }
+}
+
+export async function syncAgencyConnectStatus(agencyId: string) {
+  const { stripe } = await import("./stripe")
+  if (!stripe) return null
+  const agency = await db.agency.findUnique({ where: { id: agencyId } })
+  if (!agency?.stripeConnectAccountId) return agency
+
+  const account = await stripe.accounts.retrieve(agency.stripeConnectAccountId)
+  const payoutsEnabled = !!account.payouts_enabled
+
+  return db.agency.update({
+    where: { id: agencyId },
+    data: { payoutsEnabled },
+  })
 }

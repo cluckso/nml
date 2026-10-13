@@ -1,7 +1,12 @@
-import { FREE_TRIAL_MINUTES, TRIAL_DAYS, ANNUAL_FREE_MONTHS } from "./plans"
+import { FREE_TRIAL_MINUTES, TRIAL_DAYS, ANNUAL_FREE_MONTHS, MONTHLY_PRICES } from "./plans"
+import { PlanType } from "@prisma/client"
+import { PLAN_BASIC, PLAN_GROWTH } from "./plan-labels"
 
 /** Paid subscribers: full refund within this window (marketing / support policy). */
 export const MONEY_BACK_GUARANTEE_DAYS = 30
+
+/** Anchor for carrier forwarding steps on Help & FAQ. */
+export const CARRIER_SETUP_HREF = "/docs/faq#call-forwarding"
 
 export function trialDaysLabel(): string {
   return `${TRIAL_DAYS}-day`
@@ -11,8 +16,26 @@ export function trialHeadlineLabel(): string {
   return `${TRIAL_DAYS}-day free trial`
 }
 
+/** Canonical short limit — use everywhere the cap is named. */
+export function trialLimitsLine(): string {
+  return `${TRIAL_DAYS} days or ${FREE_TRIAL_MINUTES} call minutes — whichever comes first`
+}
+
+/**
+ * Full disclosure beside every trial CTA (audit: consistent trial limit).
+ * Prefer this over partial “14 days / no card” lines on public surfaces.
+ */
+export function trialDisclosureLine(): string {
+  return `${trialLimitsLine()}. No card required. One trial per business number.`
+}
+
+/** What happens when the trial hits a limit — pair with trialDisclosureLine. */
+export function trialWhatHappensAtLimitLine(): string {
+  return `When either limit hits, answering pauses until you choose a paid plan. Most one-truck shops continue on ${PLAN_BASIC} at $${MONTHLY_PRICES[PlanType.STARTER]}/month.`
+}
+
 export function trialSummaryShort(): string {
-  return `${TRIAL_DAYS}-day free trial · No card required`
+  return `${trialLimitsLine()} · No card required`
 }
 
 export function trialSummaryWithMinutes(): string {
@@ -20,11 +43,36 @@ export function trialSummaryWithMinutes(): string {
 }
 
 export function trialWithNoCardSentence(): string {
-  return `Start with a ${TRIAL_DAYS}-day free trial. No credit card required.`
+  return `Start with a ${TRIAL_DAYS}-day free trial (${trialLimitsLine()}). No credit card required.`
 }
 
 export function trialCtaLabel(): string {
-  return `Start free ${TRIAL_DAYS}-day trial`
+  return `Start the ${TRIAL_DAYS}-day trial`
+}
+
+/** Phone demo CTA — distinguishes sample from a sales call. */
+export function phoneDemoCtaLabel(): string {
+  return "Hear the 60-second phone demo"
+}
+
+/** Compact price anchor next to homepage trial CTAs. */
+export function plansFromAnchorLabel(): string {
+  return `Plans from $${MONTHLY_PRICES[PlanType.STARTER]}/month`
+}
+
+/** One-truck setup reassurance near trial CTAs. */
+export function setupReassuranceLine(): string {
+  return "Keep your number; your phone rings first, then unanswered calls forward."
+}
+
+/** Concise Basic vs Growth fit for the trial path. */
+export function basicVsGrowthFitLine(): string {
+  return `${PLAN_BASIC} = missed & after-hours lead insurance. ${PLAN_GROWTH} = every-call front-desk coverage.`
+}
+
+/** Money-back applies to paid subscriptions only — clarify near trial CTAs. */
+export function moneyBackPaidOnlyLine(): string {
+  return `${moneyBackGuaranteeLabel()} on paid subscriptions, not the free trial.`
 }
 
 export function trialOnboardingHint(): string {
@@ -44,9 +92,9 @@ export function trialActivationGoal(): string {
 /** Onboarding welcome subtitle for trial users. */
 export function onboardingWelcomeSubtitle(hasPlan: boolean): string {
   if (hasPlan) {
-    return "You're subscribed — add your business details so we know how to capture each job."
+    return "You're subscribed — pick your trade, shop name, and service area so we know how to capture each job."
   }
-  return `${TRIAL_DAYS}-day trial · ${FREE_TRIAL_MINUTES} call minutes (${trialLimitsLine()}) · About 5 minutes to go live.`
+  return `${TRIAL_DAYS}-day trial · ${FREE_TRIAL_MINUTES} call minutes (${trialLimitsLine()}). Setup takes under a minute.`
 }
 
 /** Shown after onboarding completes — pushes user to dashboard setup. */
@@ -63,11 +111,11 @@ export function trialBillingCardLabel(): string {
 }
 
 export function siteMetaDescription(): string {
-  return `AI answering service for HVAC and plumbing. We grab missed-call leads and text you in seconds. ${trialDaysLabel()} free trial, no card.`
+  return `AI answering service for HVAC and plumbing. We grab missed-call leads and text you in seconds. ${trialLimitsLine()}. No card required.`
 }
 
 export function heroGuaranteeLine(): string {
-  return `${trialDaysLabel()} free trial. No card required. ${moneyBackGuaranteeLabel()}. Cancel anytime.`
+  return `${trialDisclosureLine()} ${moneyBackPaidOnlyLine()} Cancel anytime.`
 }
 
 export function authMetaDescription(): string {
@@ -75,31 +123,26 @@ export function authMetaDescription(): string {
 }
 
 export function trialStartMetaDescription(): string {
-  return `Start a 14-day CallGrabbr trial with 40 real call minutes. No card required. One trial per business phone number.`
+  return `Start a ${TRIAL_DAYS}-day CallGrabbr trial with ${FREE_TRIAL_MINUTES} real call minutes. No card required. One trial per business phone number.`
 }
 
 export function pricingSchemaTrialDescription(): string {
-  return `${TRIAL_DAYS}-day free trial · Plans from $99/mo · one captured job pays for months`
+  return `${TRIAL_DAYS}-day free trial · Plans from $${MONTHLY_PRICES[PlanType.STARTER]}/mo · one captured job pays for months`
 }
 
 /** Short value prop for auth, trial, pricing, and hero. */
 export function trialConversionLine(): string {
-  return `Forward your line for ${TRIAL_DAYS} days with ${FREE_TRIAL_MINUTES} real call minutes. Your phone rings first — set a delay so we only pick up when you can't answer, or have us answer every call if you prefer. If it doesn't capture a lead you'd have lost, don't pay.`
+  return `Forward your line for ${TRIAL_DAYS} days with ${FREE_TRIAL_MINUTES} real call minutes (${trialLimitsLine()}). Your phone rings first — set a delay so we only pick up when you can't answer, or have us answer every call if you prefer. If it doesn't capture a lead you'd have lost, don't pay.`
 }
 
-/** Clarifies trial ends when either limit hits — use on trial start and onboarding. */
-export function trialLimitsLine(): string {
-  return `${TRIAL_DAYS} days or ${FREE_TRIAL_MINUTES} call minutes — whichever comes first`
-}
-
-/** Hero / trust strip — outcome only, no pricing. */
+/** Hero / trust strip — includes minute cap for consistent expectations. */
 export function trialTrustLine(): string {
-  return `${trialDaysLabel()} free trial · No card required · Cancel anytime`
+  return `${trialLimitsLine()} · No card required · Cancel anytime`
 }
 
 /** Primary nav and signup CTA — consistent highest-intent language. */
 export function trialNavCtaLabel(): string {
-  return "Start free trial"
+  return trialCtaLabel()
 }
 
 /** Loss-framed upgrade CTA — use instead of leading with price. */
@@ -124,7 +167,7 @@ export function signupPageTitle(): string {
 
 /** Sign-up page subtitle. */
 export function signupPageDescription(): string {
-  return `Create your account in under a minute. ${trialLimitsLine()}. No credit card required.`
+  return `Create your account in under a minute. ${trialDisclosureLine()} ${trialWhatHappensAtLimitLine()}`
 }
 
 /** Sign-in page for returning users who may not have finished setup. */
@@ -139,11 +182,11 @@ export function onboardingCompleteCelebration(): string {
 
 /** Email confirmation — restate value while they wait. */
 export function confirmEmailValueLine(): string {
-  return `After you sign in, you'll get ${FREE_TRIAL_MINUTES} minutes of real call coverage to test with your own line — no card required.`
+  return `After you sign in, you'll get ${FREE_TRIAL_MINUTES} minutes of real call coverage to test with your own line (${trialLimitsLine()}) — no card required.`
 }
 
 export function funnelTrialFeatureLabel(): string {
-  return `No setup fee · ${TRIAL_DAYS}-day trial`
+  return `No setup fee · ${trialLimitsLine()}`
 }
 
 export function defaultFunnelTrialCta(): { type: "trial"; label: string } {

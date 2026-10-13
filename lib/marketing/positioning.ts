@@ -23,7 +23,7 @@ export const HERO_SUB =
   "Missed-call lead capture for HVAC, plumbing, electrical, and auto — we grab the job and text it to you in seconds."
 
 /** Primary CTA — trial (pair with trialNavCtaLabel / trialCtaLabel). */
-export const PRIMARY_CTA = "Start free trial"
+export const PRIMARY_CTA = "Start the 14-day trial"
 
 /** Loss-framed secondary CTA. */
 export const LOSS_CTA = "See what you're losing"

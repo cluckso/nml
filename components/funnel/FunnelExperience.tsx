@@ -145,7 +145,7 @@ export function FunnelExperience({ config, metaPrefill }: FunnelExperienceProps)
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <Button size="lg" asChild onClick={() => trackFunnelConversion(config.slug, "trial")}>
                     <Link href={trialHref}>
-                      Start free trial — no card
+                      Start the 14-day trial — no card
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>

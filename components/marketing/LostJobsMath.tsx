@@ -28,8 +28,11 @@ export function LostJobsMath() {
         </p>
 
         <div className="max-w-3xl mx-auto rounded-xl border border-border/60 bg-card/50 p-6 sm:p-8 mb-10">
+          <p className="text-sm font-semibold text-foreground text-center mb-1">
+            Illustrative scenario — not a guaranteed or typical CallGrabbr customer result
+          </p>
           <p className="text-sm font-medium text-muted-foreground text-center mb-4">
-            Typical industry rates (not CallGrabbr first-party data)
+            Uses typical industry hang-up rates (not CallGrabbr first-party data)
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center mb-6">
             <div>
@@ -44,28 +47,32 @@ export function LostJobsMath() {
               <p className="text-3xl font-bold text-foreground">
                 ${AVG_JOB_VALUE_LOW}–${AVG_JOB_VALUE_HIGH}
               </p>
-              <p className="text-sm text-muted-foreground mt-1">typical trade job value</p>
+              <p className="text-sm text-muted-foreground mt-1">example trade job value</p>
             </div>
           </div>
           <p className="text-center text-lg font-semibold text-foreground">
-            That&apos;s roughly{" "}
-            <span className="text-primary">${monthlyAtRisk.toLocaleString()}+/month</span> walking
+            In this example, roughly{" "}
+            <span className="text-primary">${monthlyAtRisk.toLocaleString()}+/month</span> could walk
             out the door — before you ever see a voicemail.
           </p>
           <p className="text-center text-sm text-muted-foreground mt-3">
-            Example: {missedPerDay} missed/day × 80% hang-up × ~${midJob} job × ~22 workdays.
-            Your numbers may differ — {formatJobValuePromptLine()}
+            Assumptions next to the result: {missedPerDay} missed/day × 80% hang-up × ~${midJob} job
+            × ~22 workdays. Your numbers may differ — {formatJobValuePromptLine()}
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto mb-8">
           <div className="rounded-lg border border-border/50 bg-muted/30 p-4 text-center">
-            <p className="text-sm text-muted-foreground mb-1">Voicemail capture rate</p>
+            <p className="text-sm text-muted-foreground mb-1">
+              Industry voicemail capture (not CallGrabbr data)
+            </p>
             <p className="text-2xl font-bold text-muted-foreground">{VOICEMAIL_CAPTURE_RATE}</p>
           </div>
-          <div className="rounded-lg border border-primary/40 bg-primary/5 p-4 text-center">
-            <p className="text-sm text-muted-foreground mb-1">Typical answered-call capture</p>
-            <p className="text-2xl font-bold text-primary">{TYPICAL_CAPTURE_RATE}</p>
+          <div className="rounded-lg border border-border/50 bg-muted/30 p-4 text-center">
+            <p className="text-sm text-muted-foreground mb-1">
+              Industry answered-call capture (not CallGrabbr data)
+            </p>
+            <p className="text-2xl font-bold text-foreground">{TYPICAL_CAPTURE_RATE}</p>
           </div>
         </div>
 

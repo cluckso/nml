@@ -8,72 +8,73 @@ import { X } from "lucide-react"
 import { SmsConsentCheckbox } from "@/components/consent/SmsConsentCheckbox"
 import { PhoneInputWithCountry } from "@/components/ui/phone-input-with-country"
 
-const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"] as const
+/** Default hours applied silently so the agent has availability without a form. */
+export const DEFAULT_ONBOARDING_HOURS = {
+  open: "09:00",
+  close: "17:00",
+  days: ["monday", "tuesday", "wednesday", "thursday", "friday"],
+} as const
 
 interface BusinessInfo {
   name: string
-  address: string
-  city: string
-  state: string
-  zipCode: string
+  address?: string
+  city?: string
+  state?: string
+  zipCode?: string
   serviceAreas: string[]
   phoneNumber?: string
   ownerPhone?: string
   smsConsent?: boolean
   businessHours?: { open: string; close: string; days: string[] }
-  departments?: string[]
-  crmWebhookUrl?: string
-  forwardToEmail?: string
-  afterHoursEmergencyPhone?: string
 }
 
 interface BusinessInfoFormProps {
   initialData?: Partial<BusinessInfo>
   onSubmit: (data: BusinessInfo) => void
-  onBack?: () => void
-  /** Plan type from subscription — only show Pro/Local Plus fields when relevant */
-  planType?: "STARTER" | "PRO" | "LOCAL_PLUS" | "ELITE" | null
   /** Disable submit (e.g. while saving) to prevent double-submit */
   disabled?: boolean
-  /** When true, helper text references the CallGrabbr forwarding number shown above */
-  intakeNumberShown?: boolean
 }
 
 export function BusinessInfoForm({
   initialData,
   onSubmit,
-  onBack,
-  planType = null,
   disabled = false,
-  intakeNumberShown = false,
 }: BusinessInfoFormProps) {
-  const showProFeatures = planType === "PRO" || planType === "LOCAL_PLUS" || planType === "ELITE"
-  const showLocalPlusFeatures = false
-  const showAfterHoursEmergency = planType === "PRO"
+  const hadTrialPhone = !!(initialData?.phoneNumber?.trim())
   const [formData, setFormData] = useState<BusinessInfo>({
     name: initialData?.name || "",
-    address: initialData?.address || "",
-    city: initialData?.city || "",
-    state: initialData?.state || "",
-    zipCode: initialData?.zipCode || "",
     serviceAreas:
-      initialData?.serviceAreas?.length ? initialData.serviceAreas : initialData?.city ? [initialData.city] : [],
+      initialData?.serviceAreas?.length
+        ? initialData.serviceAreas
+        : initialData?.city
+          ? [initialData.city]
+          : [],
     phoneNumber: initialData?.phoneNumber || "",
     ownerPhone: initialData?.ownerPhone || "",
     smsConsent: initialData?.smsConsent ?? false,
-    businessHours: initialData?.businessHours || { open: "09:00", close: "17:00", days: ["monday", "tuesday", "wednesday", "thursday", "friday"] },
-    departments: initialData?.departments || [],
-    crmWebhookUrl: initialData?.crmWebhookUrl || "",
-    forwardToEmail: initialData?.forwardToEmail || "",
-    afterHoursEmergencyPhone: initialData?.afterHoursEmergencyPhone || "",
+    businessHours: initialData?.businessHours || { ...DEFAULT_ONBOARDING_HOURS, days: [...DEFAULT_ONBOARDING_HOURS.days] },
   })
   const [serviceAreaInput, setServiceAreaInput] = useState("")
-  const [sameAsBusinessPhone, setSameAsBusinessPhone] = useState(false)
+  const [sameAsBusinessPhone, setSameAsBusinessPhone] = useState(hadTrialPhone)
+  const [phoneLocked, setPhoneLocked] = useState(hadTrialPhone)
+  const [emptyAreaError, setEmptyAreaError] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (disabled || !formData.serviceAreas.length) return
-    const data = { ...formData }
+    if (disabled) return
+    if (!formData.serviceAreas.length) {
+      setEmptyAreaError(true)
+      return
+    }
+    setEmptyAreaError(false)
+    const data: BusinessInfo = {
+      ...formData,
+      businessHours: formData.businessHours ?? {
+        open: DEFAULT_ONBOARDING_HOURS.open,
+        close: DEFAULT_ONBOARDING_HOURS.close,
+        days: [...DEFAULT_ONBOARDING_HOURS.days],
+      },
+    }
     if (sameAsBusinessPhone && formData.phoneNumber?.trim()) {
       data.ownerPhone = formData.phoneNumber
     }
@@ -83,7 +84,14 @@ export function BusinessInfoForm({
   const addServiceArea = () => {
     const value = serviceAreaInput.trim()
     if (!value) return
-    const toAdd = [...new Set(value.split(",").map((s) => s.replace(/\s+/g, " ").trim()).filter(Boolean))]
+    const toAdd = [
+      ...new Set(
+        value
+          .split(",")
+          .map((s) => s.replace(/\s+/g, " ").trim())
+          .filter(Boolean)
+      ),
+    ]
     const existingLower = new Set(formData.serviceAreas.map((a) => a.toLowerCase()))
     const newAreas = toAdd.filter((a) => !existingLower.has(a.toLowerCase()))
     if (newAreas.length === 0) {
@@ -92,13 +100,13 @@ export function BusinessInfoForm({
     }
     setFormData({ ...formData, serviceAreas: [...formData.serviceAreas, ...newAreas] })
     setServiceAreaInput("")
+    setEmptyAreaError(false)
   }
 
   const removeServiceArea = (index: number) => {
-    setFormData({
-      ...formData,
-      serviceAreas: formData.serviceAreas.filter((_, i) => i !== index),
-    })
+    const next = formData.serviceAreas.filter((_, i) => i !== index)
+    setFormData({ ...formData, serviceAreas: next })
+    if (next.length === 0) setEmptyAreaError(true)
   }
 
   return (
@@ -111,107 +119,6 @@ export function BusinessInfoForm({
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           required
           placeholder="Plumbers R' Us"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="address">Street Address *</Label>
-        <Input
-          id="address"
-          value={formData.address}
-          onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-          required
-          placeholder="123 Main St"
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="city">City *</Label>
-          <Input
-            id="city"
-            value={formData.city}
-            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-            required
-            placeholder="Platteville"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="state">State *</Label>
-          <Input
-            id="state"
-            value={formData.state}
-            onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-            required
-            placeholder="WI"
-            maxLength={2}
-          />
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="zipCode">ZIP Code *</Label>
-        <Input
-          id="zipCode"
-          value={formData.zipCode}
-          onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })}
-          required
-          placeholder="53818"
-          maxLength={10}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="phoneNumber">Your business phone number *</Label>
-        <Input
-          id="phoneNumber"
-          type="tel"
-          value={formData.phoneNumber || ""}
-          onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-          required
-          placeholder="(608) 555-1234"
-        />
-        <p className="text-xs text-muted-foreground">
-          {intakeNumberShown
-            ? "The number customers call today — not the CallGrabbr forwarding number shown above. One trial per business number."
-            : "The number customers call today. You'll forward this line to CallGrabbr after setup. One trial per business number."}
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="ownerPhone">SMS reports contact number</Label>
-        {formData.phoneNumber?.trim() && (
-          <label className="flex items-center gap-2 text-sm mb-2">
-            <input
-              type="checkbox"
-              checked={sameAsBusinessPhone}
-              onChange={(e) => {
-                const checked = e.target.checked
-                setSameAsBusinessPhone(checked)
-                setFormData({ ...formData, ownerPhone: checked ? formData.phoneNumber || "" : formData.ownerPhone || "" })
-              }}
-              className="rounded"
-            />
-            Same as business number
-          </label>
-        )}
-        <PhoneInputWithCountry
-          id="ownerPhone"
-          value={sameAsBusinessPhone ? (formData.phoneNumber || "") : (formData.ownerPhone || "")}
-          onChange={(v) => setFormData({ ...formData, ownerPhone: v })}
-          placeholder="(415) 555-9999"
-          aria-label="SMS reports contact number"
-          disabled={sameAsBusinessPhone}
-        />
-        <p className="text-xs text-muted-foreground">
-          Where to receive SMS call summaries. Your personal or business phone. Changeable later in Settings → Notifications.
-        </p>
-        <p className="text-xs font-medium text-foreground mt-2">SMS alerts (one-time agreement)</p>
-        <SmsConsentCheckbox
-          checked={formData.smsConsent ?? false}
-          onChange={(checked) => setFormData({ ...formData, smsConsent: checked })}
-          businessName={formData.name || "CallGrabbr"}
         />
       </div>
 
@@ -250,104 +157,86 @@ export function BusinessInfoForm({
             Add
           </Button>
         </div>
-        {formData.serviceAreas.length === 0 && (
+        {emptyAreaError && formData.serviceAreas.length === 0 && (
           <p className="text-sm text-destructive">Add at least one city or town you serve.</p>
         )}
       </div>
 
-      <div className="rounded-lg border p-4 space-y-4">
-        <h3 className="font-medium">Business hours</h3>
-        <p className="text-sm text-muted-foreground">When you're open. Outside these hours, callers hear we're closed and can leave info.</p>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Open</Label>
-            <Input
-              type="time"
-              value={formData.businessHours?.open || "09:00"}
-              onChange={(e) => setFormData({
-                ...formData,
-                businessHours: { ...formData.businessHours!, open: e.target.value, close: formData.businessHours?.close || "17:00", days: formData.businessHours?.days || [] },
-              })}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label>Close</Label>
-            <Input
-              type="time"
-              value={formData.businessHours?.close || "17:00"}
-              onChange={(e) => setFormData({
-                ...formData,
-                businessHours: { ...formData.businessHours!, open: formData.businessHours?.open || "09:00", close: e.target.value, days: formData.businessHours?.days || [] },
-              })}
-            />
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {DAYS.map((day) => (
-            <label key={day} className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={formData.businessHours?.days?.includes(day) ?? false}
-                onChange={(e) => {
-                  const days = formData.businessHours?.days || []
-                  const next = e.target.checked ? [...days, day] : days.filter((d) => d !== day)
-                  setFormData({ ...formData, businessHours: { ...formData.businessHours!, open: formData.businessHours?.open || "09:00", close: formData.businessHours?.close || "17:00", days: next } })
-                }}
-              />
-              <span className="capitalize">{day.slice(0, 3)}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      {showProFeatures && (
-        <div className="space-y-4 rounded-lg border border-border bg-muted/30 p-4">
-          <h3 className="font-medium">Included in your plan</h3>
-          <div className="space-y-2">
-            <Label htmlFor="crmWebhookUrl">CRM webhook URL (optional)</Label>
-            <Input
-              id="crmWebhookUrl"
-              type="url"
-              value={formData.crmWebhookUrl || ""}
-              onChange={(e) => setFormData({ ...formData, crmWebhookUrl: e.target.value })}
-              placeholder="https://..."
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="forwardToEmail">Forward leads to email (optional)</Label>
-            <Input
-              id="forwardToEmail"
-              type="email"
-              value={formData.forwardToEmail || ""}
-              onChange={(e) => setFormData({ ...formData, forwardToEmail: e.target.value })}
-              placeholder="crm@company.com"
-            />
-          </div>
-          {showAfterHoursEmergency && (
-            <div className="space-y-2">
-              <Label htmlFor="afterHoursEmergencyPhone">After-hours emergency phone (Pro)</Label>
-              <Input
-                id="afterHoursEmergencyPhone"
-                type="tel"
-                value={formData.afterHoursEmergencyPhone || ""}
-                onChange={(e) => setFormData({ ...formData, afterHoursEmergencyPhone: e.target.value })}
-                placeholder="+16085551234"
-              />
-            </div>
+      <div className="space-y-2">
+        <div className="flex items-center justify-between gap-2">
+          <Label htmlFor="phoneNumber">
+            {phoneLocked ? "Business phone (from trial)" : "Your business phone number *"}
+          </Label>
+          {phoneLocked && (
+            <button
+              type="button"
+              className="text-xs text-primary hover:underline"
+              onClick={() => setPhoneLocked(false)}
+            >
+              Change
+            </button>
           )}
         </div>
-      )}
-
-      <div className="flex gap-4">
-        {onBack && (
-          <Button type="button" variant="outline" onClick={onBack}>
-            Back
-          </Button>
-        )}
-        <Button type="submit" className="flex-1" disabled={disabled}>
-          {disabled ? "Saving…" : "Continue"}
-        </Button>
+        <Input
+          id="phoneNumber"
+          type="tel"
+          value={formData.phoneNumber || ""}
+          onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+          required
+          readOnly={phoneLocked}
+          disabled={phoneLocked}
+          placeholder="(608) 555-1234"
+          className={phoneLocked ? "bg-muted/50" : undefined}
+        />
+        <p className="text-xs text-muted-foreground">
+          {phoneLocked
+            ? "Confirmed at trial start. Change only if you need a different business line."
+            : "The number customers call today. You'll forward this line to CallGrabbr after setup. One trial per business number."}
+        </p>
       </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="ownerPhone">SMS reports contact number</Label>
+        {formData.phoneNumber?.trim() && (
+          <label className="flex items-center gap-2 text-sm mb-2">
+            <input
+              type="checkbox"
+              checked={sameAsBusinessPhone}
+              onChange={(e) => {
+                const checked = e.target.checked
+                setSameAsBusinessPhone(checked)
+                setFormData({
+                  ...formData,
+                  ownerPhone: checked ? formData.phoneNumber || "" : formData.ownerPhone || "",
+                })
+              }}
+              className="rounded"
+            />
+            Same as business number
+          </label>
+        )}
+        <PhoneInputWithCountry
+          id="ownerPhone"
+          value={sameAsBusinessPhone ? formData.phoneNumber || "" : formData.ownerPhone || ""}
+          onChange={(v) => setFormData({ ...formData, ownerPhone: v })}
+          placeholder="(415) 555-9999"
+          aria-label="SMS reports contact number"
+          disabled={sameAsBusinessPhone}
+        />
+        <p className="text-xs text-muted-foreground">
+          Where to receive SMS call summaries. Changeable later in Settings → Notifications.
+        </p>
+        <p className="text-xs font-medium text-foreground mt-2">SMS alerts (one-time agreement)</p>
+        <SmsConsentCheckbox
+          checked={formData.smsConsent ?? false}
+          onChange={(checked) => setFormData({ ...formData, smsConsent: checked })}
+          businessName={formData.name || "CallGrabbr"}
+        />
+      </div>
+
+      <Button type="submit" className="w-full" disabled={disabled}>
+        {disabled ? "Saving…" : "Finish setup"}
+      </Button>
     </form>
   )
 }

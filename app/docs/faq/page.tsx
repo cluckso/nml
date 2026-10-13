@@ -347,7 +347,7 @@ export default function DocsFaqPage() {
         </div>
       </div>
 
-      <Card className="mb-10">
+      <Card id="call-forwarding" className="mb-10 scroll-mt-24">
         <CardHeader>
           <CardTitle>Forward your business line to CallGrabbr</CardTitle>
           <CardDescription>

@@ -23,7 +23,7 @@ export const PRODUCT_FAQ: FaqItem[] = [
   },
   {
     question: "How does the free trial work?",
-    answer: `You get a ${TRIAL_DAYS}-day free trial with ${FREE_TRIAL_MINUTES} included call minutes. No credit card is required to start. One trial per business phone number.`,
+    answer: `You get ${TRIAL_DAYS} days or ${FREE_TRIAL_MINUTES} real call minutes — whichever comes first. No credit card is required to start. One trial per business phone number. When either limit hits, answering pauses until you choose a paid plan (most one-truck shops continue on ${PLAN_BASIC} at $${MONTHLY_PRICES[PlanType.STARTER]}/month). The 30-day money-back guarantee applies to paid subscriptions, not the free trial.`,
   },
   {
     question: "What information does CallGrabbr capture from callers?",
@@ -47,7 +47,7 @@ export const PRODUCT_FAQ: FaqItem[] = [
   },
   {
     question: "How much does CallGrabbr cost after the trial?",
-    answer: `${PLAN_BASIC} is $${MONTHLY_PRICES[PlanType.STARTER]}/month (~${basicCalls} captured calls) for missed and after-hours lead insurance. ${PLAN_GROWTH} is $${MONTHLY_PRICES[PlanType.PRO]}/month (~${growthCalls} calls) for shops that want most inbound calls captured. ${PLAN_PLATINUM} is $${MONTHLY_PRICES[PlanType.ELITE]}/month (~${platinumCalls} calls) for busy multi-crew operations. Estimates assume ~3 minutes per call. Additional usage is $0.22/min. ${formatJobValuePromptLine()} Capture one you'd have lost and the plan often pays for itself for months.`,
+    answer: `${PLAN_BASIC} is $${MONTHLY_PRICES[PlanType.STARTER]}/month (~${basicCalls} captured calls estimate) for missed and after-hours lead insurance. ${PLAN_GROWTH} is $${MONTHLY_PRICES[PlanType.PRO]}/month (~${growthCalls} calls estimate) for shops that want most inbound calls captured. ${PLAN_PLATINUM} is $${MONTHLY_PRICES[PlanType.ELITE]}/month (~${platinumCalls} calls estimate) for busy multi-crew operations. Call counts are estimates at ~3 minutes per call — not guaranteed lead volume. Additional usage is $0.22/min. ${formatJobValuePromptLine()} Capture one you'd have lost and the plan often pays for itself for months.`,
   },
   {
     question: "Which plan should I choose?",

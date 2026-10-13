@@ -15,8 +15,14 @@ import {
   PRICING_TIERS,
 } from "@/lib/pricing-catalog"
 import { PLAN_BASIC, PLAN_GROWTH } from "@/lib/plan-labels"
-import { FREE_TRIAL_MINUTES } from "@/lib/plans"
-import { moneyBackGuaranteeLabel, trialConversionLine } from "@/lib/trial-marketing"
+import {
+  basicVsGrowthFitLine,
+  moneyBackGuaranteeLabel,
+  moneyBackPaidOnlyLine,
+  trialConversionLine,
+  trialDisclosureLine,
+  trialWhatHappensAtLimitLine,
+} from "@/lib/trial-marketing"
 import { DEFAULT_OG_IMAGE, SEO_KEYWORDS } from "@/lib/seo"
 import { ROSIE_PRICE_OBJECTION } from "@/lib/marketing/positioning"
 import { CompareUsLinks } from "@/components/marketing/CompareUsLinks"
@@ -35,7 +41,7 @@ import type { BillingInterval } from "@/lib/stripe-billing"
 
 const PRICING_TITLE = "Pricing - AI Answering Service for Trades | CallGrabbr"
 const PRICING_DESCRIPTION =
-  "AI answering service pricing for HVAC, plumbing, and trades. Plans from $99/mo. 14-day free trial. 30-day money-back guarantee."
+  "AI answering service pricing for HVAC, plumbing, and trades. Plans from $99/mo. 14 days or 40 call minutes free trial. 30-day money-back on paid plans."
 
 export const metadata: Metadata = {
   title: PRICING_TITLE,
@@ -78,16 +84,22 @@ function PricingTrialBox({
     <div className="max-w-2xl mx-auto mb-14 p-8 rounded-xl border border-primary/20 bg-primary/5 text-center">
       <h2 className="text-2xl font-bold tracking-tight mb-3">Try it with real calls first</h2>
       <p className="text-muted-foreground mb-3 leading-relaxed">{trialConversionLine()}</p>
+      <p className="text-sm font-medium text-foreground mb-2 leading-relaxed">
+        {trialDisclosureLine()}
+      </p>
+      <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
+        {trialWhatHappensAtLimitLine()}
+      </p>
       <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
-        Includes {FREE_TRIAL_MINUTES} call minutes — one trial per business number. Ready to go live?{" "}
+        {basicVsGrowthFitLine()} Included call counts are estimates (~3 min/call), not guaranteed
+        leads. Ready to go live?{" "}
         <Link
           href={pricingUrl({ intent: "paid", plan: PlanType.STARTER })}
           className="text-primary underline"
         >
           Subscribe with {moneyBackGuaranteeLabel()}
         </Link>
-        . <strong>{PLAN_BASIC}</strong> is lead insurance for missed &amp; after-hours jobs.{" "}
-        <strong>{PLAN_GROWTH}</strong> is the most popular pick when you want full front-desk coverage.
+        . {moneyBackPaidOnlyLine()}
       </p>
       <PricingTrialCta isLoggedIn={isLoggedIn} />
       <p className="text-xs text-muted-foreground mt-4">Payments securely processed by Stripe.</p>
@@ -194,8 +206,14 @@ export default async function PricingPage({
           {formatJobRoiLine()}
         </p>
         <p className="mt-4 text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
-          {formatVsHumanLine()} · Overage {formatOverageRate()} beyond included calls · ~3 min avg per
-          call
+          {formatVsHumanLine()} · Overage {formatOverageRate()} beyond included minutes · call counts
+          are estimates (~3 min avg), not guaranteed leads
+        </p>
+        <p className="mt-3 text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
+          Best fit: <strong className="font-medium text-foreground/90">{PLAN_BASIC}</strong> for
+          missed &amp; after-hours lead insurance ·{" "}
+          <strong className="font-medium text-foreground/90">{PLAN_GROWTH}</strong> when you want
+          every-call coverage. Minutes included are listed on each plan card.
         </p>
         <Suspense fallback={null}>
           <PricingHeroAuthHints />

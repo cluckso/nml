@@ -2,9 +2,24 @@ import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { redirect } from "next/navigation"
 import { OnboardingClient } from "./OnboardingClient"
-import { getOnboardingIntakeNumbers } from "@/lib/intake-routing"
 
 export const dynamic = "force-dynamic"
+
+/** Placeholder names set at trial/checkout — blank so the owner types the real shop name. */
+function resolvePrefillName(
+  name: string | null | undefined,
+  userName?: string | null
+): string | undefined {
+  const trimmed = name?.trim()
+  if (!trimmed || trimmed === "My Business") return undefined
+  if (userName?.trim() && trimmed.toLowerCase() === userName.trim().toLowerCase()) return undefined
+  return trimmed
+}
+
+function resolvePrefillPhone(phone: string | null | undefined): string | undefined {
+  if (!phone?.trim() || phone.startsWith("pending-")) return undefined
+  return phone
+}
 
 /** Plan-first: user has subscription from checkout. Load business + plan for plan-aware form. */
 export default async function OnboardingPage() {
@@ -20,31 +35,30 @@ export default async function OnboardingPage() {
     redirect("/trial/start")
   }
 
+  if (business.onboardingComplete) {
+    redirect("/dashboard")
+  }
+
   const planType = business.planType ?? null
-  const intakeNumbers = getOnboardingIntakeNumbers()
   const ownerPhone = (user as { phoneNumber?: string | null }).phoneNumber ?? undefined
   const initialBusiness = {
-    name: business.name,
-    address: business.address ?? undefined,
+    name: resolvePrefillName(business.name, user.name),
     city: business.city ?? undefined,
-    state: business.state ?? undefined,
-    zipCode: business.zipCode ?? undefined,
-    serviceAreas: business.serviceAreas?.length ? business.serviceAreas : business.city ? [business.city] : undefined,
+    serviceAreas: business.serviceAreas?.length
+      ? business.serviceAreas
+      : business.city
+        ? [business.city]
+        : undefined,
     businessHours: business.businessHours as { open: string; close: string; days: string[] } | null,
-    departments: business.departments,
-    phoneNumber: business.primaryForwardingNumber ?? undefined,
+    phoneNumber: resolvePrefillPhone(business.primaryForwardingNumber),
     ownerPhone,
-    crmWebhookUrl: business.crmWebhookUrl ?? undefined,
-    forwardToEmail: business.forwardToEmail ?? undefined,
-    afterHoursEmergencyPhone: business.afterHoursEmergencyPhone ?? undefined,
   }
 
   return (
     <OnboardingClient
       planType={planType}
-      initialIndustry={business?.industry ?? null}
+      initialIndustry={business.industry ?? null}
       initialBusiness={initialBusiness}
-      intakeNumbers={intakeNumbers}
     />
   )
 }

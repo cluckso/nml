@@ -38,7 +38,7 @@ export function TrialActivationChecklist({
       id: "onboarding",
       label: "Add your business details",
       done: onboardingComplete,
-      hint: onboardingComplete ? null : "Industry, name, and hours — takes about 2 minutes.",
+      hint: onboardingComplete ? null : "Industry, name, and service area — under a minute.",
     },
     {
       id: "connect",

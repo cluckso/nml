@@ -23,8 +23,8 @@ CallGrabbr offers a **20% recurring revenue share** to marketing agencies who re
 | Item | Details |
 |------|---------|
 | Commission | 20% recurring revenue share |
-| Payment | Monthly, via Stripe or PayPal |
-| Tracking | Unique referral link or coupon code |
+| Payment | Automatic Stripe Connect transfers after each paid invoice (ledger until Connect is set up) |
+| Tracking | Unique partner invite link (`/sign-up?agency=CODE`) |
 | Minimum | No minimum referrals required |
 | Contract | No long-term commitment |
 | Support | Dedicated partner contact |
@@ -32,10 +32,10 @@ CallGrabbr offers a **20% recurring revenue share** to marketing agencies who re
 ### What you get:
 - 20% of every monthly payment from referred clients
 - Recurring as long as the client stays subscribed
-- Access to co-branded landing pages (coming soon)
-- Partner dashboard to track referrals (coming soon)
+- Partner dashboard at `/agency` — clients, commission ledger, and payout setup
 - Early access to new features
 - Priority support for your clients
+- Access to co-branded landing pages (coming soon)
 
 ### What we provide:
 - 14-day free trial for all referrals

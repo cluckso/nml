@@ -25,6 +25,13 @@ enum AgencyClientStatus {
   CHURNED
 }
 
+enum AgencyCommissionPayoutStatus {
+  PENDING
+  TRANSFERRED
+  FAILED
+  SKIPPED
+}
+
 enum Industry {
   HVAC
   PLUMBING
@@ -146,6 +153,8 @@ model Business {
   agencyProfile      Agency?    @relation("AgencyOwner")
   agencyClient       AgencyClient?
   zapierHooks        ZapierHook[]
+  /// SHA-256 of Zapier API key for O(1) lookup (also mirrored in settings.integrations for UI).
+  zapierApiKeyHash   String?    @unique
 
   @@index([primaryForwardingNumber])
   @@index([agencyId])
@@ -222,14 +231,16 @@ model Appointment {
 }
 
 model Agency {
-  id             String         @id @default(cuid())
-  name           String
-  ownerBusinessId String        @unique
-  ownerBusiness  Business       @relation("AgencyOwner", fields: [ownerBusinessId], references: [id], onDelete: Cascade)
-  inviteCode     String         @unique
-  commissionRate Float          @default(0.20)
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  id                      String         @id @default(cuid())
+  name                    String
+  ownerBusinessId         String         @unique
+  ownerBusiness           Business       @relation("AgencyOwner", fields: [ownerBusinessId], references: [id], onDelete: Cascade)
+  inviteCode              String         @unique
+  commissionRate          Float          @default(0.20)
+  stripeConnectAccountId  String?        @unique
+  payoutsEnabled          Boolean        @default(false)
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
 
   clients        AgencyClient[]
   clientBusinesses Business[]   @relation("AgencyClients")
@@ -254,18 +265,21 @@ model AgencyClient {
 }
 
 model AgencyCommission {
-  id              String   @id @default(cuid())
-  agencyId        String
-  agency          Agency   @relation(fields: [agencyId], references: [id], onDelete: Cascade)
-  businessId      String
-  amountCents     Int
-  periodStart     DateTime
-  periodEnd       DateTime
-  stripeInvoiceId String?
-  createdAt       DateTime @default(now())
+  id               String                        @id @default(cuid())
+  agencyId         String
+  agency           Agency                        @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  businessId       String
+  amountCents      Int
+  periodStart      DateTime
+  periodEnd        DateTime
+  stripeInvoiceId  String?                       @unique
+  stripeTransferId String?
+  payoutStatus     AgencyCommissionPayoutStatus  @default(PENDING)
+  createdAt        DateTime                      @default(now())
 
   @@index([agencyId])
   @@index([businessId])
+  @@index([payoutStatus])
 }
 
 model ZapierHook {

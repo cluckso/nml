@@ -44,8 +44,15 @@ export async function POST(req: NextRequest) {
     const serviceAreas = Array.isArray(businessInfo.serviceAreas)
       ? businessInfo.serviceAreas.map((s: string) => String(s).trim()).filter(Boolean)
       : businessInfo.city
-        ? [businessInfo.city]
+        ? [String(businessInfo.city).trim()].filter(Boolean)
         : []
+
+    if (serviceAreas.length === 0) {
+      return NextResponse.json(
+        { error: "Add at least one service area (city or town you serve)." },
+        { status: 400 }
+      )
+    }
 
     const industryTyped = industry as Industry
     const requiresManualSetup = isComplexSetup({
@@ -53,14 +60,39 @@ export async function POST(req: NextRequest) {
       serviceAreas,
     })
 
-    const businessHours = businessInfo.businessHours
-      ? {
-          open: businessInfo.businessHours.open,
-          close: businessInfo.businessHours.close,
-          days: Array.isArray(businessInfo.businessHours.days) ? businessInfo.businessHours.days : [],
-        }
-      : undefined
+    const DEFAULT_HOURS = {
+      open: "09:00",
+      close: "17:00",
+      days: ["monday", "tuesday", "wednesday", "thursday", "friday"],
+    }
+    const businessHours =
+      businessInfo.businessHours?.open &&
+      businessInfo.businessHours?.close &&
+      Array.isArray(businessInfo.businessHours.days) &&
+      businessInfo.businessHours.days.length > 0
+        ? {
+            open: String(businessInfo.businessHours.open),
+            close: String(businessInfo.businessHours.close),
+            days: businessInfo.businessHours.days.map((d: string) => String(d)),
+          }
+        : DEFAULT_HOURS
     const departments = Array.isArray(businessInfo.departments) ? businessInfo.departments : []
+    const address =
+      typeof businessInfo.address === "string" && businessInfo.address.trim()
+        ? businessInfo.address.trim()
+        : null
+    const city =
+      typeof businessInfo.city === "string" && businessInfo.city.trim()
+        ? businessInfo.city.trim()
+        : serviceAreas[0] ?? null
+    const state =
+      typeof businessInfo.state === "string" && businessInfo.state.trim()
+        ? businessInfo.state.trim()
+        : null
+    const zipCode =
+      typeof businessInfo.zipCode === "string" && businessInfo.zipCode.trim()
+        ? businessInfo.zipCode.trim()
+        : null
     const primaryForwardingNumberNormalized = normalizeE164(businessInfo.phoneNumber ?? businessInfo.primaryForwardingNumber)
     if (!primaryForwardingNumberNormalized) {
       return NextResponse.json(
@@ -71,7 +103,7 @@ export async function POST(req: NextRequest) {
     const intakeNumbers = getConfiguredIntakeNumbersE164()
     if (intakeNumbers.length && intakeNumbers.includes(primaryForwardingNumberNormalized)) {
       return NextResponse.json(
-        { error: "Enter your business phone number — the line customers call — not the CallGrabbr forwarding number shown in onboarding." },
+        { error: "Enter your business phone number — the line customers call — not a CallGrabbr forwarding number." },
         { status: 400 }
       )
     }
@@ -90,11 +122,11 @@ export async function POST(req: NextRequest) {
         name: businessName,
         industry: industryTyped,
         primaryForwardingNumber: primaryForwardingNumberNormalized,
-        address: businessInfo.address,
-        city: businessInfo.city,
-        state: businessInfo.state,
-        zipCode: businessInfo.zipCode,
-        businessHours: businessHours ?? undefined,
+        address,
+        city,
+        state,
+        zipCode,
+        businessHours,
         departments,
         serviceAreas,
         crmWebhookUrl: businessInfo.crmWebhookUrl || undefined,
@@ -110,12 +142,12 @@ export async function POST(req: NextRequest) {
       update: {
         name: businessName,
         industry: industryTyped,
-        address: businessInfo.address,
-        city: businessInfo.city,
-        state: businessInfo.state,
-        zipCode: businessInfo.zipCode,
+        ...(address !== null ? { address } : {}),
+        city,
+        ...(state !== null ? { state } : {}),
+        ...(zipCode !== null ? { zipCode } : {}),
         primaryForwardingNumber: primaryForwardingNumberNormalized,
-        businessHours: businessHours ?? undefined,
+        businessHours,
         departments,
         serviceAreas,
         crmWebhookUrl: businessInfo.crmWebhookUrl || undefined,

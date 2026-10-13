@@ -12,7 +12,12 @@ import { validateEmail, validatePasswordSignUp } from "@/lib/utils"
 import { loadFunnelTrialContext } from "@/lib/funnel/funnel-trial-bridge"
 import { getEmailConfirmRedirectUrl } from "@/lib/auth-redirect"
 import { TERMS_ACCEPTED_STORAGE_KEY } from "@/lib/user-legal"
-import { trialCtaLabel, signupPageTitle, signupPageDescription } from "@/lib/trial-marketing"
+import {
+  trialCtaLabel,
+  signupPageTitle,
+  signupPageDescription,
+  moneyBackPaidOnlyLine,
+} from "@/lib/trial-marketing"
 import { LegalConsentCheckbox } from "@/components/legal/LegalConsentCheckbox"
 import { BrandMark } from "@/components/brand/BrandMark"
 
@@ -78,7 +83,13 @@ export function SignUpForm({ initialNext, initialRef, initialAgency }: SignUpFor
     }
 
     setLoading(true)
-    const emailRedirectTo = getEmailConfirmRedirectUrl()
+    let storedNext: string | null = initialNext
+    try {
+      storedNext = sessionStorage.getItem(AUTH_NEXT_KEY) ?? initialNext
+    } catch {
+      // ignore
+    }
+    const emailRedirectTo = getEmailConfirmRedirectUrl(storedNext)
     const supabase = createClient()
 
     const { data, error } = await supabase.auth.signUp({
@@ -121,7 +132,9 @@ export function SignUpForm({ initialNext, initialRef, initialAgency }: SignUpFor
         )
         analytics.trackEvent("signup_completed")
       }
-      router.push(`/confirm-email?email=${encodeURIComponent(emailResult.email)}`)
+      const confirmParams = new URLSearchParams({ email: emailResult.email })
+      if (storedNext) confirmParams.set("next", storedNext)
+      router.push(`/confirm-email?${confirmParams.toString()}`)
     }
   }
 
@@ -134,6 +147,7 @@ export function SignUpForm({ initialNext, initialRef, initialAgency }: SignUpFor
           <CardDescription>
             {signupPageDescription()}
           </CardDescription>
+          <p className="text-xs text-muted-foreground pt-2">{moneyBackPaidOnlyLine()}</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignUp} className="space-y-4" method="post">
@@ -186,12 +200,11 @@ export function SignUpForm({ initialNext, initialRef, initialAgency }: SignUpFor
           </form>
           <p className="mt-4 text-center text-sm text-muted-foreground">
             Already have an account?{" "}
-            <a href="/sign-in" className="text-primary hover:underline">
+            <a
+              href={`/sign-in?next=${encodeURIComponent(initialNext || "/trial/start")}`}
+              className="text-primary hover:underline"
+            >
               Sign in
-            </a>
-            {" "}·{" "}
-            <a href="/sign-up?next=%2Ftrial%2Fstart" className="text-primary hover:underline">
-              Start free trial
             </a>
           </p>
           <p className="mt-2 text-center text-xs text-muted-foreground">

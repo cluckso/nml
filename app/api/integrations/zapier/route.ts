@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getAuthUserFromRequest } from "@/lib/auth"
-import { ensureZapierApiKey } from "@/lib/zapier"
+import { ensureZapierApiKey, regenerateZapierApiKey } from "@/lib/zapier"
 import { db } from "@/lib/db"
 
 /** GET /api/integrations/zapier — Zapier connection status for dashboard */
@@ -39,37 +39,9 @@ export async function POST(req: NextRequest) {
 
   const { key, isNew } = await ensureZapierApiKey(user.businessId)
   if (!isNew) {
-    const rotated = await regenerateKey(user.businessId)
+    const rotated = await regenerateZapierApiKey(user.businessId)
     return NextResponse.json({ success: true, apiKey: rotated, rotated: true })
   }
 
   return NextResponse.json({ success: true, apiKey: key, rotated: false })
-}
-
-async function regenerateKey(businessId: string) {
-  const { generateZapierApiKey, hashApiKey } = await import("@/lib/zapier")
-  const business = await db.business.findUnique({
-    where: { id: businessId },
-    select: { settings: true },
-  })
-  const settings = (business?.settings ?? {}) as Record<string, unknown>
-  const integrations = (settings.integrations ?? {}) as Record<string, unknown>
-  const key = generateZapierApiKey()
-
-  await db.business.update({
-    where: { id: businessId },
-    data: {
-      settings: {
-        ...settings,
-        integrations: {
-          ...integrations,
-          zapierApiKeyHash: hashApiKey(key),
-          zapierApiKeyPrefix: key.slice(0, 12),
-          zapierConnectedAt: new Date().toISOString(),
-        },
-      },
-    },
-  })
-
-  return key
 }

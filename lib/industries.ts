@@ -10,20 +10,17 @@ export const INDUSTRIES = [
   { value: Industry.GENERIC, label: "Other", description: "Other service business — uses the default service number" },
 ] as const
 
+/**
+ * True only for explicitly flagged complex setups (multi-location / custom scripts).
+ * Multi-area service territories are self-serve — do not dead-end onboarding.
+ */
 export function isComplexSetup(data: {
   industry?: Industry
   serviceAreas?: string[]
   customScript?: boolean
   multiLocation?: boolean
 }): boolean {
-  // Multi-location requires manual setup
   if (data.multiLocation) return true
-  
-  // Custom scripts require manual setup
   if (data.customScript) return true
-  
-  // Multiple service areas might need review
-  if (data.serviceAreas && data.serviceAreas.length > 3) return true
-  
   return false
 }

@@ -31,6 +31,8 @@ export async function GET(req: NextRequest) {
       inviteLink: getAgencyInviteLink(agency.inviteCode),
       commissionRate: agency.commissionRate,
       commissionPercent: Math.round(agency.commissionRate * 100),
+      stripeConnectAccountId: agency.stripeConnectAccountId,
+      payoutsEnabled: agency.payoutsEnabled,
       clients: agency.clients.map((c) => ({
         id: c.id,
         businessId: c.businessId,
@@ -48,6 +50,7 @@ export async function GET(req: NextRequest) {
         amountCents: c.amountCents,
         periodStart: c.periodStart,
         periodEnd: c.periodEnd,
+        payoutStatus: c.payoutStatus,
         createdAt: c.createdAt,
       })),
       stats,

@@ -22,7 +22,11 @@ export async function GET(req: NextRequest) {
     if (!business) return NextResponse.json({ error: "Business not found" }, { status: 404 })
     if (!isSectionAllowed("booking", getEffectivePlanType(business.planType))) {
       return NextResponse.json(
-        { error: `Booking requires the ${getPlanDisplayName(PlanType.PRO)} plan or higher` },
+        {
+          error: `Booking requires the ${getPlanDisplayName(PlanType.PRO)} plan or higher`,
+          upgradeRequired: true,
+          minPlan: PlanType.PRO,
+        },
         { status: 403 }
       )
     }

@@ -41,16 +41,23 @@ Fires when a call ends with captured caller name, phone, or issue description.
 }
 ```
 
-## Marketplace Submission
+REST Hook subscriptions and the legacy Catch Hook URL in Settings both receive **this same payload** (once per lead).
 
-1. Create a Zapier Platform account at https://developer.zapier.com
-2. Import `app-definition.json` as the starting point
-3. Set `BASE_URL` to `https://callgrabbr.com`
-4. Submit for review with:
+## Marketplace Submission Checklist
+
+External work (developer.zapier.com) — cannot be automated from this repo:
+
+1. [ ] Create a Zapier Platform account at https://developer.zapier.com
+2. [ ] Import [`app-definition.json`](./app-definition.json) as the starting point
+3. [ ] Set `BASE_URL` to `https://callgrabbr.com` (or staging URL for testing)
+4. [ ] Verify auth test: GET `/api/integrations/zapier/hooks` with Bearer API key
+5. [ ] Verify subscribe/unsubscribe against a test Zap
+6. [ ] Submit for review with:
    - App name: CallGrabbr
    - Category: Phone & SMS
    - Description: AI phone answering for contractors — send captured leads to any app
+7. [ ] After listing is live, update [`app/integrations/zapier/page.tsx`](../../app/integrations/zapier/page.tsx) to remove the “no directory app yet” disclaimer and link the public Zapier app URL
 
 ## Legacy Webhook
 
-Users can also paste a Zapier Catch Hook URL directly in Settings → CRM → Zapier webhook URL.
+Users can also paste a Zapier Catch Hook URL directly in Settings → CRM → Zapier webhook URL. It receives the standardized `new_lead` payload above (not a separate call dump).

@@ -15,11 +15,28 @@ import { validateEmail, validatePasswordSignIn } from "@/lib/utils"
 import { loadFunnelTrialContext } from "@/lib/funnel/funnel-trial-bridge"
 import { signInPageDescription, trialNavCtaLabel } from "@/lib/trial-marketing"
 import { getSafeRedirectPath } from "@/lib/safe-redirect"
+import { resolvePostAuthRedirect } from "@/lib/auth-redirect"
 import { getRememberMePreference, setRememberMePreference } from "@/lib/auth-session"
 import { Checkbox } from "@/components/ui/checkbox"
 import { BrandMark } from "@/components/brand/BrandMark"
 
 const AUTH_NEXT_KEY = "callgrabbr_auth_next"
+
+function readStoredNext(): string | null {
+  try {
+    return getSafeRedirectPath(sessionStorage.getItem(AUTH_NEXT_KEY))
+  } catch {
+    return null
+  }
+}
+
+function clearStoredNext() {
+  try {
+    sessionStorage.removeItem(AUTH_NEXT_KEY)
+  } catch {
+    // ignore
+  }
+}
 
 function SignInContent() {
   const [email, setEmail] = useState("")
@@ -76,6 +93,14 @@ function SignInContent() {
       analytics.trackEvent("signup_completed")
     }
 
+    function continueAfterConfirm() {
+      const dest = resolvePostAuthRedirect(searchParams.get("next"), readStoredNext(), "/trial/start")
+      clearStoredNext()
+      router.replace(dest)
+      router.refresh()
+      setCheckingEmailConfirm(false)
+    }
+
     async function handleEmailConfirm() {
       const authClient = createClient()
       const { error: exchangeError } = await authClient.auth.exchangeCodeForSession(code!)
@@ -83,15 +108,12 @@ function SignInContent() {
 
       if (exchangeError) {
         // Code may already be consumed by a prior attempt in the same navigation (Strict Mode).
-        // If we already have a session briefly, still treat as confirmed.
+        // If we already have a session, stay signed in and continue setup.
         const { data } = await authClient.auth.getSession()
         if (data.session) {
           await identifyConfirmedSignup(authClient)
-          await authClient.auth.signOut()
           if (cancelled) return
-          router.replace("/sign-in?message=email-confirmed")
-          router.refresh()
-          setCheckingEmailConfirm(false)
+          continueAfterConfirm()
           return
         }
         setError(
@@ -104,13 +126,10 @@ function SignInContent() {
       }
 
       await identifyConfirmedSignup(authClient)
-      await authClient.auth.signOut()
       if (cancelled) return
 
       setError(null)
-      router.replace("/sign-in?message=email-confirmed")
-      router.refresh()
-      setCheckingEmailConfirm(false)
+      continueAfterConfirm()
     }
 
     void handleEmailConfirm()
@@ -158,15 +177,13 @@ function SignInContent() {
       if (data.user) {
         analytics.setIdentity(data.user.id, { email: data.user.email ?? emailResult.email })
       }
-      let next: string | null = null
-      try {
-        next = getSafeRedirectPath(sessionStorage.getItem(AUTH_NEXT_KEY))
-        sessionStorage.removeItem(AUTH_NEXT_KEY)
-      } catch {
-        // ignore
-      }
-      if (!next) next = getSafeRedirectPath(searchParams.get("next"))
-      router.push(next ?? "/dashboard")
+      const next = resolvePostAuthRedirect(
+        searchParams.get("next"),
+        readStoredNext(),
+        "/dashboard"
+      )
+      clearStoredNext()
+      router.push(next)
       router.refresh()
     }
   }
@@ -202,7 +219,7 @@ function SignInContent() {
           <form onSubmit={handleSignIn} className="space-y-4">
             {emailConfirmed && (
               <div className="bg-primary/10 text-primary text-sm p-3 rounded-md">
-                Your email is confirmed. Sign in with your password to continue.
+                Email confirmed — continuing setup…
               </div>
             )}
             {message && message !== "email-confirmed" && (

@@ -14,12 +14,15 @@ import {
   loadFunnelTrialContext,
   type FunnelTrialContext,
 } from "@/lib/funnel/funnel-trial-bridge"
-import { FREE_TRIAL_MINUTES, TRIAL_DAYS } from "@/lib/plans"
+import { TRIAL_DAYS } from "@/lib/plans"
 import {
   trialDaysLabel,
   trialConversionLine,
+  trialDisclosureLine,
   trialLimitsLine,
+  trialWhatHappensAtLimitLine,
   moneyBackGuaranteeLabel,
+  moneyBackPaidOnlyLine,
   trialActivationGoal,
 } from "@/lib/trial-marketing"
 import { pricingUrl } from "@/lib/monetization-urls"
@@ -152,15 +155,21 @@ export function TrialStartClient() {
             ) : fromFunnel ? (
               <>
                 Confirm your business phone to start your {trialDaysLabel()} trial
-                {funnelCtx?.displayName ? ` for ${funnelCtx.displayName.toLowerCase()}` : ""}. Includes {FREE_TRIAL_MINUTES} call minutes. One trial per business number.
+                {funnelCtx?.displayName ? ` for ${funnelCtx.displayName.toLowerCase()}` : ""}.{" "}
+                {trialDisclosureLine()}
               </>
             ) : (
               <>
-                {trialConversionLine()} Add your business phone to start capturing missed-call leads.
-                Trial ends after {trialLimitsLine()}. {trialActivationGoal()}
+                {trialConversionLine()} Add your business phone to start capturing missed-call leads.{" "}
+                {trialDisclosureLine()} {trialWhatHappensAtLimitLine()} {trialActivationGoal()}
               </>
             )}
           </CardDescription>
+          {!cardMode && (
+            <p className="text-xs text-muted-foreground px-6 pb-2">
+              {moneyBackPaidOnlyLine()}
+            </p>
+          )}
         </CardHeader>
         <CardContent>
           {fromFunnel && funnelCtx?.contactEmail && (
@@ -218,7 +227,7 @@ export function TrialStartClient() {
                 ? "Starting…"
                 : cardMode
                   ? "Continue to secure checkout"
-                  : "Start free trial"}
+                  : `Start the ${TRIAL_DAYS}-day trial`}
             </Button>
             {cardMode ? (
               <p className="text-xs text-muted-foreground text-center flex items-center justify-center gap-1">
@@ -227,8 +236,8 @@ export function TrialStartClient() {
               </p>
             ) : (
               <p className="text-xs text-muted-foreground text-center">
-                No payment until you choose a plan. Forward your line and capture a real lead before
-                you decide.
+                Trial ends after {trialLimitsLine()}. No payment until you choose a plan. Forward your
+                line and capture a real lead before you decide.
               </p>
             )}
           </form>

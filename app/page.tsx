@@ -39,7 +39,17 @@ import {
 import { JsonLd } from "@/components/seo/JsonLd"
 import { softwareApplicationJsonLd } from "@/lib/structured-data"
 import { homePageMetadata } from "@/lib/seo"
-import { trialHeadlineLabel, trialWithNoCardSentence, trialNavCtaLabel, moneyBackGuaranteeLabel } from "@/lib/trial-marketing"
+import {
+  basicVsGrowthFitLine,
+  moneyBackGuaranteeLabel,
+  moneyBackPaidOnlyLine,
+  plansFromAnchorLabel,
+  trialDisclosureLine,
+  trialHeadlineLabel,
+  trialNavCtaLabel,
+  trialWhatHappensAtLimitLine,
+  trialWithNoCardSentence,
+} from "@/lib/trial-marketing"
 
 export const metadata: Metadata = homePageMetadata()
 
@@ -121,48 +131,48 @@ export default function HomePage() {
       <section className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center mb-3">How it works</h2>
         <p className="text-center text-muted-foreground mb-10 max-w-xl mx-auto">
-          Live in about five minutes. Four steps from signup to your first captured lead.
+          Most shops finish setup the same day. Forwarding takes a few minutes with your carrier.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
           <div className="flex flex-col items-center text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary mb-4">
-              <PhoneForwarded className="h-7 w-7" />
-            </div>
-            <h3 className="font-semibold text-lg mb-2">1. Connect your number</h3>
-            <p className="text-muted-foreground text-sm">
-              Forward your business line — or use a new one. Keep the number customers already know.
-            </p>
-          </div>
-          <div className="flex flex-col items-center text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary mb-4">
               <Zap className="h-7 w-7" />
             </div>
-            <h3 className="font-semibold text-lg mb-2">2. Pick your trade</h3>
+            <h3 className="font-semibold text-lg mb-2">1. Sign up</h3>
             <p className="text-muted-foreground text-sm">
-              HVAC, plumbing, electrical, handyman, auto, or childcare — so callers get asked the questions that help you quote.
-            </p>
-          </div>
-          <div className="flex flex-col items-center text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary mb-4">
-              <MessageSquare className="h-7 w-7" />
-            </div>
-            <h3 className="font-semibold text-lg mb-2">3. We grab the job</h3>
-            <p className="text-muted-foreground text-sm">
-              We pick up when you can&apos;t, run trade-tuned intake, and capture the details you need to sell the call back.
+              Create your account and start the free trial — no card required.
             </p>
           </div>
           <div className="flex flex-col items-center text-center">
             <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary mb-4">
               <LayoutDashboard className="h-7 w-7" />
             </div>
-            <h3 className="font-semibold text-lg mb-2">4. You get the lead</h3>
+            <h3 className="font-semibold text-lg mb-2">2. Add your business</h3>
             <p className="text-muted-foreground text-sm">
-              SMS and email with name, phone, job, and urgency — plus text-back confirmation on every plan. Follow-up texts and CRM webhook on {GROWTH_AND_PLATINUM_LABEL} for ServiceTitan, Housecall Pro, or Jobber.
+              Enter your business phone and trade so we tune intake for HVAC, plumbing, auto, and more.
+            </p>
+          </div>
+          <div className="flex flex-col items-center text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary mb-4">
+              <PhoneForwarded className="h-7 w-7" />
+            </div>
+            <h3 className="font-semibold text-lg mb-2">3. Get your forwarding number</h3>
+            <p className="text-muted-foreground text-sm">
+              We provision your AI line. Keep the number customers already know — you&apos;ll forward to ours.
+            </p>
+          </div>
+          <div className="flex flex-col items-center text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/15 text-primary mb-4">
+              <MessageSquare className="h-7 w-7" />
+            </div>
+            <h3 className="font-semibold text-lg mb-2">4. Forward &amp; catch leads</h3>
+            <p className="text-muted-foreground text-sm">
+              Set call forwarding at your carrier. We answer when you can&apos;t and text you the lead — name, phone, job, and urgency.
             </p>
           </div>
         </div>
         <p className="text-center mt-8">
-          <Link href="/docs/faq" className="text-sm font-medium text-primary hover:underline">
+          <Link href="/docs/faq#call-forwarding" className="text-sm font-medium text-primary hover:underline">
             See setup guide by carrier →
           </Link>
         </p>
@@ -176,8 +186,11 @@ export default function HomePage() {
           <h2 className="text-3xl font-bold tracking-tight text-center mb-3">
             Lead insurance first. Full front desk when you&apos;re ready.
           </h2>
-          <p className="text-center text-muted-foreground mb-10 max-w-xl mx-auto leading-relaxed">
+          <p className="text-center text-muted-foreground mb-4 max-w-xl mx-auto leading-relaxed">
             Basic covers overflow and nights/weekends. Growth is the full front desk when you want every inbound call captured.
+          </p>
+          <p className="text-center text-sm text-muted-foreground mb-10 max-w-xl mx-auto">
+            {basicVsGrowthFitLine()} Call counts on each plan are estimates (~3 min/call), not guaranteed lead volume.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {PRICING_TIERS.map((tier) => (
@@ -212,10 +225,13 @@ export default function HomePage() {
             ))}
           </div>
           <div className="text-center mt-10">
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-muted-foreground mb-2">
               {trialWithNoCardSentence()}
             </p>
-            <Link href="/pricing">
+            <p className="text-sm text-muted-foreground mb-4">
+              {trialDisclosureLine()}
+            </p>
+            <Link href="/sign-up?next=%2Ftrial%2Fstart">
               <Button size="lg" className="gap-2">
                 {trialNavCtaLabel()}
                 <ArrowRight className="h-4 w-4" aria-hidden />
@@ -223,7 +239,7 @@ export default function HomePage() {
             </Link>
             <p className="text-sm text-muted-foreground mt-4">
               <Link href="/pricing" className="text-primary hover:underline">
-                Compare plans &amp; pricing →
+                {plansFromAnchorLabel()} · compare plans →
               </Link>
             </p>
           </div>
@@ -370,7 +386,7 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                About five minutes. Sign up, add your business phone, and set call forwarding. Carrier steps are in Help.
+                Most shops finish the same day: sign up, add your business phone, get your forwarding number, then set call forwarding (a few minutes with your carrier). Steps are in Help.
               </p>
             </CardContent>
           </Card>
@@ -438,7 +454,7 @@ export default function HomePage() {
                 <Clock className="h-6 w-6 text-primary" />
               </div>
               <p className="font-medium">{trialHeadlineLabel()}</p>
-              <p className="text-sm text-muted-foreground">Test with real calls</p>
+              <p className="text-sm text-muted-foreground">{trialDisclosureLine()}</p>
             </div>
             <div className="flex flex-col items-center p-4">
               <div className="h-12 w-12 rounded-full bg-primary/15 flex items-center justify-center mb-3">
@@ -453,7 +469,7 @@ export default function HomePage() {
               </div>
               <p className="font-medium">{moneyBackGuaranteeLabel()}</p>
               <p className="text-sm text-muted-foreground">
-                On paid subscriptions.{" "}
+                {moneyBackPaidOnlyLine()}{" "}
                 <Link href="/terms" className="text-primary hover:underline">
                   Terms
                 </Link>
@@ -488,23 +504,29 @@ export default function HomePage() {
           <p className="text-lg opacity-90 max-w-2xl mx-auto mb-8">
             We grab the job when you can&apos;t and text you the lead — usually within seconds.
           </p>
+          <p className="text-sm opacity-90 max-w-2xl mx-auto mb-4">
+            {trialDisclosureLine()}
+          </p>
+          <p className="text-sm opacity-80 max-w-2xl mx-auto mb-6">
+            {trialWhatHappensAtLimitLine()} {moneyBackPaidOnlyLine()}
+          </p>
           <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
-            <span className="opacity-90">{trialHeadlineLabel()}</span>
-            <span className="opacity-60">·</span>
-            <span className="opacity-90">No card required</span>
-            <span className="opacity-60">·</span>
-            <span className="opacity-90">{moneyBackGuaranteeLabel()}</span>
+            <span className="opacity-90">{plansFromAnchorLabel()}</span>
             <span className="opacity-60">·</span>
             <span className="opacity-90">Cancel anytime</span>
           </div>
           <Link href="/sign-up?next=%2Ftrial%2Fstart">
             <Button size="lg" variant="secondary" className="gap-2 bg-white text-primary hover:bg-white/90 shadow-lg min-h-[48px] px-8">
-              Start your free trial
+              {trialNavCtaLabel()}
               <ArrowRight className="h-5 w-5" aria-hidden />
             </Button>
           </Link>
           <p className="text-sm opacity-80 mt-6">
-            Setup in about five minutes. Use your existing business number.
+            Most shops finish setup the same day. Keep your number; your phone rings first, then
+            unanswered calls forward.{" "}
+            <Link href="/pricing" className="underline underline-offset-2 opacity-100">
+              Compare plans
+            </Link>
           </p>
         </div>
       </SectionBackdrop>

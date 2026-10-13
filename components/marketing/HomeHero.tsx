@@ -2,7 +2,17 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
 import { MARKETING_IMAGES, MARKETING_IMAGE_ALT } from "@/lib/marketing-images"
-import { heroGuaranteeLine, moneyBackGuaranteeLabel, trialDaysLabel, trialNavCtaLabel } from "@/lib/trial-marketing"
+import {
+  CARRIER_SETUP_HREF,
+  basicVsGrowthFitLine,
+  heroGuaranteeLine,
+  moneyBackPaidOnlyLine,
+  phoneDemoCtaLabel,
+  plansFromAnchorLabel,
+  setupReassuranceLine,
+  trialDisclosureLine,
+  trialNavCtaLabel,
+} from "@/lib/trial-marketing"
 import {
   HERO_CATEGORY_LINE,
   HERO_SUB,
@@ -14,11 +24,8 @@ import {
 import { getDemoNumberDisplay, getDemoNumberTel } from "@/lib/demo-line"
 import {
   ArrowRight,
-  Clock,
-  CreditCard,
   Phone,
   PhoneOff,
-  Shield,
 } from "lucide-react"
 import { BrandMark } from "@/components/brand/BrandMark"
 
@@ -55,11 +62,10 @@ export function HomeHero() {
         {HERO_SUB}
       </p>
       <p className="text-sm text-muted-foreground mb-8 max-w-xl mx-auto">
-        Typical voicemail capture: {VOICEMAIL_CAPTURE_RATE}. When the call gets answered:{" "}
-        {TYPICAL_CAPTURE_RATE}{" "}
-        <span className="text-muted-foreground/80">(industry rates, not first-party stats)</span>.
+        Typical industry rates (not CallGrabbr first-party data): voicemail capture{" "}
+        {VOICEMAIL_CAPTURE_RATE}; answered-call capture {TYPICAL_CAPTURE_RATE}.
       </p>
-      <div className="flex flex-wrap gap-4 justify-center mb-5">
+      <div className="flex flex-wrap gap-4 justify-center mb-4">
         <Link href="/sign-up?next=%2Ftrial%2Fstart" className="min-h-[44px] flex items-center">
           <Button
             size="lg"
@@ -69,16 +75,6 @@ export function HomeHero() {
             <ArrowRight className="h-5 w-5" aria-hidden />
           </Button>
         </Link>
-        <a href={`tel:${getDemoNumberTel()}`} className="min-h-[44px] flex items-center">
-          <Button
-            size="lg"
-            variant="outline"
-            className="gap-2 border-2 border-primary/40 bg-background/50 backdrop-blur-sm hover:bg-background/70 min-h-[44px]"
-          >
-            <Phone className="h-5 w-5" aria-hidden />
-            Call the demo
-          </Button>
-        </a>
         <Link href="#lost-jobs" className="min-h-[44px] flex items-center">
           <Button
             size="lg"
@@ -89,15 +85,42 @@ export function HomeHero() {
           </Button>
         </Link>
       </div>
+      <p className="text-sm text-muted-foreground mb-4">
+        <a href={`tel:${getDemoNumberTel()}`} className="inline-flex items-center gap-1.5 text-primary/90 hover:text-primary hover:underline">
+          <Phone className="h-4 w-4" aria-hidden />
+          {phoneDemoCtaLabel()}
+        </a>
+      </p>
+      <p className="text-sm text-muted-foreground mb-2 max-w-xl mx-auto">
+        {trialDisclosureLine()}
+      </p>
+      <p className="text-sm text-muted-foreground mb-4 max-w-xl mx-auto">
+        <Link href="/pricing" className="text-primary/90 hover:text-primary hover:underline">
+          {plansFromAnchorLabel()} · compare plans
+        </Link>
+      </p>
+      <p className="text-sm text-muted-foreground mb-2 max-w-xl mx-auto">
+        {setupReassuranceLine()}{" "}
+        <Link href={CARRIER_SETUP_HREF} className="text-primary/90 hover:text-primary hover:underline">
+          Carrier setup guide
+        </Link>
+      </p>
+      <p className="text-sm text-muted-foreground mb-6 max-w-xl mx-auto">
+        {basicVsGrowthFitLine()}
+      </p>
       <a
         href={`tel:${getDemoNumberTel()}`}
         className="mb-6 inline-flex flex-col items-center rounded-2xl border border-primary/40 bg-background/70 px-6 py-4 backdrop-blur-sm hover:border-primary/70 hover:bg-background/80"
       >
-        <span className="text-xs uppercase tracking-wide text-muted-foreground">Hear a live demo</span>
+        <span className="text-xs uppercase tracking-wide text-muted-foreground">
+          {phoneDemoCtaLabel()}
+        </span>
         <span className="text-2xl sm:text-3xl font-bold tracking-wide text-primary">
           {getDemoNumberDisplay()}
         </span>
-        <span className="text-xs text-muted-foreground mt-1">Tap to call · 60-second sample · no signup</span>
+        <span className="text-xs text-muted-foreground mt-1">
+          Tap to call · 60-second sample · no signup · not a sales call
+        </span>
       </a>
       <p className="text-sm text-muted-foreground mb-6 max-w-xl mx-auto">
         {heroGuaranteeLine()}{" "}
@@ -110,30 +133,15 @@ export function HomeHero() {
         </Link>
         {" · "}
         <Link href="#demo" className="text-primary/90 hover:text-primary hover:underline">
-          Try a demo call
+          {phoneDemoCtaLabel()}
         </Link>
       </p>
-      <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-sm text-muted-foreground mb-6">
-        <span className="inline-flex items-center gap-2">
-          <Clock className="h-4 w-4 text-primary/80" aria-hidden />
-          {trialDaysLabel()} free trial
-        </span>
-        <span className="inline-flex items-center gap-2">
-          <CreditCard className="h-4 w-4 text-primary/80" aria-hidden />
-          No card required
-        </span>
-        <span className="inline-flex items-center gap-2">
-          <Shield className="h-4 w-4 text-primary/80" aria-hidden />
-          {moneyBackGuaranteeLabel()}
-        </span>
-        <span className="inline-flex items-center gap-2">
-          <Shield className="h-4 w-4 text-primary/80" aria-hidden />
-          Cancel anytime
-        </span>
-      </div>
+      <p className="text-xs text-muted-foreground mb-6 max-w-xl mx-auto">
+        {moneyBackPaidOnlyLine()}
+      </p>
       <p className="text-sm text-muted-foreground max-w-xl mx-auto">
-        Built for HVAC, plumbing, electrical, and auto repair. Most callers won&apos;t
-        leave a message — we catch the jobs voicemail loses.
+        Built for HVAC, plumbing, electrical, and auto repair — including one-truck shops. Most
+        callers won&apos;t leave a message — we catch the jobs voicemail loses.
       </p>
       <p className="text-xs text-muted-foreground mt-3">Payments securely processed by Stripe.</p>
     </SectionBackdrop>

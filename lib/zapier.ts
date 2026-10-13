@@ -11,7 +11,7 @@ export function hashApiKey(key: string): string {
   return createHash("sha256").update(key).digest("hex")
 }
 
-export async function ensureZapierApiKey(businessId: string): Promise<{ key: string; isNew: boolean }> {
+async function persistZapierKey(businessId: string, key: string) {
   const business = await db.business.findUnique({
     where: { id: businessId },
     select: { settings: true },
@@ -20,35 +20,69 @@ export async function ensureZapierApiKey(businessId: string): Promise<{ key: str
 
   const settings = (business.settings ?? {}) as Record<string, unknown>
   const integrations = (settings.integrations ?? {}) as Record<string, unknown>
-  if (integrations.zapierApiKeyHash && integrations.zapierApiKeyPrefix) {
+  const hash = hashApiKey(key)
+
+  await db.business.update({
+    where: { id: businessId },
+    data: {
+      zapierApiKeyHash: hash,
+      settings: {
+        ...settings,
+        integrations: {
+          ...integrations,
+          zapierApiKeyHash: hash,
+          zapierApiKeyPrefix: key.slice(0, 12),
+          zapierConnectedAt: new Date().toISOString(),
+        },
+      },
+    },
+  })
+}
+
+export async function ensureZapierApiKey(businessId: string): Promise<{ key: string; isNew: boolean }> {
+  const business = await db.business.findUnique({
+    where: { id: businessId },
+    select: { settings: true, zapierApiKeyHash: true },
+  })
+  if (!business) throw new Error("Business not found")
+
+  const settings = (business.settings ?? {}) as Record<string, unknown>
+  const integrations = (settings.integrations ?? {}) as Record<string, unknown>
+  if (business.zapierApiKeyHash || (integrations.zapierApiKeyHash && integrations.zapierApiKeyPrefix)) {
+    // Backfill column if only settings hash exists
+    if (!business.zapierApiKeyHash && typeof integrations.zapierApiKeyHash === "string") {
+      await db.business.update({
+        where: { id: businessId },
+        data: { zapierApiKeyHash: integrations.zapierApiKeyHash },
+      })
+    }
     return { key: "", isNew: false }
   }
 
   const key = generateZapierApiKey()
-  const updatedSettings = {
-    ...settings,
-    integrations: {
-      ...integrations,
-      zapierApiKeyHash: hashApiKey(key),
-      zapierApiKeyPrefix: key.slice(0, 12),
-      zapierConnectedAt: new Date().toISOString(),
-    },
-  }
-
-  await db.business.update({
-    where: { id: businessId },
-    data: { settings: updatedSettings },
-  })
-
+  await persistZapierKey(businessId, key)
   return { key, isNew: true }
+}
+
+export async function regenerateZapierApiKey(businessId: string): Promise<string> {
+  const key = generateZapierApiKey()
+  await persistZapierKey(businessId, key)
+  return key
 }
 
 export async function getBusinessIdFromZapierApiKey(apiKey: string): Promise<string | null> {
   if (!apiKey.startsWith(KEY_PREFIX)) return null
   const hash = hashApiKey(apiKey)
 
+  const byColumn = await db.business.findFirst({
+    where: { zapierApiKeyHash: hash },
+    select: { id: true },
+  })
+  if (byColumn) return byColumn.id
+
+  // Fallback for keys created before the indexed column existed
   const businesses = await db.business.findMany({
-    where: { settings: { not: null } },
+    where: { settings: { not: null }, zapierApiKeyHash: null },
     select: { id: true, settings: true },
     take: 500,
   })
@@ -56,7 +90,13 @@ export async function getBusinessIdFromZapierApiKey(apiKey: string): Promise<str
   for (const b of businesses) {
     const settings = (b.settings ?? {}) as Record<string, unknown>
     const integrations = (settings.integrations ?? {}) as Record<string, unknown>
-    if (integrations.zapierApiKeyHash === hash) return b.id
+    if (integrations.zapierApiKeyHash === hash) {
+      await db.business.update({
+        where: { id: b.id },
+        data: { zapierApiKeyHash: hash },
+      }).catch(() => {})
+      return b.id
+    }
   }
   return null
 }
@@ -93,6 +133,9 @@ export async function fireZapierHooks(
   )
 }
 
+/**
+ * Fire REST hooks + optional legacy Catch Hook URL once with the standardized payload.
+ */
 export async function fireZapierLeadHook(
   businessId: string,
   businessName: string,
