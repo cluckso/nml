@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import Script from "next/script"
 import { Inter } from "next/font/google"
+import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { Providers } from "./providers"
 import { Nav } from "@/components/nav"
@@ -256,6 +257,7 @@ rkp("init","PaccPmsytSiq");rkp("event","PAGE_VIEW");
             </div>
           </footer>
         </Providers>
+        <Analytics />
       </body>
     </html>
   )
