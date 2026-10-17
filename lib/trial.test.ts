@@ -1,5 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest"
-import { getTrialStatus, checkTrialEligibility, isMultiTrialPhone } from "./trial"
+import {
+  getTrialStatus,
+  checkTrialEligibility,
+  isMultiTrialPhone,
+  trialDaysRemaining,
+} from "./trial"
 import { FREE_TRIAL_MINUTES } from "./plans"
 
 vi.mock("./db", () => ({
@@ -30,10 +35,12 @@ describe("getTrialStatus", () => {
   })
 
   it("returns trial status when business has no subscription and trial fields", async () => {
+    const now = Date.now()
     vi.mocked(db.business.findUnique).mockResolvedValue({
       id: "b1",
       trialMinutesUsed: 10,
-      trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      trialStartedAt: new Date(now - 24 * 60 * 60 * 1000),
+      trialEndsAt: new Date(now + 7 * 24 * 60 * 60 * 1000 + 60 * 60 * 1000),
       subscriptionStatus: null,
     } as any)
     const result = await getTrialStatus("b1")
@@ -41,13 +48,28 @@ describe("getTrialStatus", () => {
     expect(result.minutesUsed).toBe(10)
     expect(result.minutesRemaining).toBe(FREE_TRIAL_MINUTES - 10)
     expect(result.isExhausted).toBe(false)
-    expect(result.daysRemaining).toBeGreaterThanOrEqual(6)
+    expect(result.daysRemaining).toBe(7)
+  })
+
+  it("is not on trial when there is no subscription and no trial clock", async () => {
+    vi.mocked(db.business.findUnique).mockResolvedValue({
+      id: "b0",
+      trialMinutesUsed: 0,
+      trialStartedAt: null,
+      trialEndsAt: null,
+      subscriptionStatus: null,
+    } as any)
+    const result = await getTrialStatus("b0")
+    expect(result.isOnTrial).toBe(false)
+    expect(result.isExhausted).toBe(false)
+    expect(result.isExpired).toBe(false)
   })
 
   it("marks exhausted when trialMinutesUsed >= FREE_TRIAL_MINUTES", async () => {
     vi.mocked(db.business.findUnique).mockResolvedValue({
       id: "b2",
       trialMinutesUsed: 50,
+      trialStartedAt: new Date(),
       trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       subscription: null,
     } as any)
@@ -62,6 +84,7 @@ describe("getTrialStatus", () => {
     vi.mocked(db.business.findUnique).mockResolvedValue({
       id: "b3",
       trialMinutesUsed: 5,
+      trialStartedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
       trialEndsAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
       subscriptionStatus: null,
     } as any)
@@ -75,6 +98,7 @@ describe("getTrialStatus", () => {
     vi.mocked(db.business.findUnique).mockResolvedValue({
       id: "b4",
       trialMinutesUsed: null,
+      trialStartedAt: new Date(),
       trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       subscription: null,
     } as any)
@@ -93,6 +117,19 @@ describe("getTrialStatus", () => {
     } as any)
     const result = await getTrialStatus("b5")
     expect(result.isOnTrial).toBe(false)
+  })
+})
+
+describe("trialDaysRemaining", () => {
+  it("uses floor so just under N days does not round up", () => {
+    const now = new Date("2026-01-01T12:00:00Z")
+    const ends = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000 - 60 * 60 * 1000)
+    expect(trialDaysRemaining(ends, now)).toBe(13)
+  })
+
+  it("returns 0 when expired", () => {
+    const now = new Date("2026-01-15T12:00:00Z")
+    expect(trialDaysRemaining(new Date("2026-01-01T12:00:00Z"), now)).toBe(0)
   })
 })
 

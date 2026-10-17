@@ -89,17 +89,22 @@ export async function prepareBusinessForTrial(
 
   const now = new Date()
   const trialEndsAt = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000)
+  // Never reset an existing trial clock or minutes — re-running start must not extend the window.
+  const shouldStartInternalTrial =
+    !input.skipInternalTrial &&
+    business.trialStartedAt == null &&
+    business.trialEndsAt == null
   await db.business.update({
     where: { id: business.id },
     data: {
       status: ClientStatus.ACTIVE,
-      ...(input.skipInternalTrial
-        ? {}
-        : {
+      ...(shouldStartInternalTrial
+        ? {
             trialStartedAt: now,
             trialEndsAt,
-            trialMinutesUsed: 0,
-          }),
+            trialMinutesUsed: business.trialMinutesUsed ?? 0,
+          }
+        : {}),
       ...(business.industry === Industry.GENERIC && resolvedIndustry !== Industry.GENERIC
         ? { industry: resolvedIndustry }
         : {}),

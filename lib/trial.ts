@@ -13,17 +13,26 @@ export type TrialStatus = {
   daysRemaining: number
 }
 
+const MS_PER_DAY = 24 * 60 * 60 * 1000
+
+/**
+ * Full calendar days left until trialEndsAt (floor).
+ * Just under N days shows N-1; expired or missing end → 0.
+ */
+export function trialDaysRemaining(trialEndsAt: Date | null, now: Date = new Date()): number {
+  if (!trialEndsAt || now >= trialEndsAt) return 0
+  return Math.floor((trialEndsAt.getTime() - now.getTime()) / MS_PER_DAY)
+}
+
 /**
  * Returns trial status for a business. Uses trialMinutesUsed and trialEndsAt;
  * trial minutes are only incremented when trialStartedAt is set (webhook).
+ * isOnTrial requires an actual trial clock — not merely “no subscription”.
  */
 export async function getTrialStatus(businessId: string): Promise<TrialStatus> {
   const business = await db.business.findUnique({
     where: { id: businessId },
   })
-
-  const hasActiveSubscription = isSubscriptionActive(business)
-  const isOnTrial = !hasActiveSubscription
 
   const now = new Date()
 
@@ -39,15 +48,17 @@ export async function getTrialStatus(businessId: string): Promise<TrialStatus> {
     }
   }
 
+  const hasActiveSubscription = isSubscriptionActive(business)
+  const trialEndsAt = business.trialEndsAt ?? null
+  const hasTrialClock =
+    business.trialStartedAt != null || trialEndsAt != null
+  const isOnTrial = !hasActiveSubscription && hasTrialClock
+
   const minutesUsed = business.trialMinutesUsed ?? 0
   const minutesRemaining = Math.max(0, FREE_TRIAL_MINUTES - minutesUsed)
   const isExhausted = isOnTrial && minutesRemaining <= 0
-  const trialEndsAt = business.trialEndsAt ?? null
   const isExpired = isOnTrial && trialEndsAt != null && now > trialEndsAt
-  const daysRemaining =
-    trialEndsAt && now < trialEndsAt
-      ? Math.max(0, Math.ceil((trialEndsAt.getTime() - now.getTime()) / (24 * 60 * 60 * 1000)))
-      : 0
+  const daysRemaining = trialDaysRemaining(trialEndsAt, now)
 
   return {
     isOnTrial,

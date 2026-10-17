@@ -3,14 +3,10 @@ import {
   AVG_JOB_VALUE_LOW,
   formatJobValuePromptLine,
 } from "@/lib/pricing-catalog"
-import {
-  TYPICAL_CAPTURE_RATE,
-  VOICEMAIL_CAPTURE_RATE,
-} from "@/lib/marketing/positioning"
 
 /**
  * Cost-of-inaction math for the homepage.
- * Uses typical industry hang-up / capture rates — not first-party CallGrabbr stats.
+ * Uses typical industry hang-up rates — not first-party CallGrabbr stats.
  */
 export function LostJobsMath() {
   const missedPerDay = 3
@@ -59,21 +55,6 @@ export function LostJobsMath() {
             Assumptions next to the result: {missedPerDay} missed/day × 80% hang-up × ~${midJob} job
             × ~22 workdays. Your numbers may differ — {formatJobValuePromptLine()}
           </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto mb-8">
-          <div className="rounded-lg border border-border/50 bg-muted/30 p-4 text-center">
-            <p className="text-sm text-muted-foreground mb-1">
-              Industry voicemail capture (not CallGrabbr data)
-            </p>
-            <p className="text-2xl font-bold text-muted-foreground">{VOICEMAIL_CAPTURE_RATE}</p>
-          </div>
-          <div className="rounded-lg border border-border/50 bg-muted/30 p-4 text-center">
-            <p className="text-sm text-muted-foreground mb-1">
-              Industry answered-call capture (not CallGrabbr data)
-            </p>
-            <p className="text-2xl font-bold text-foreground">{TYPICAL_CAPTURE_RATE}</p>
-          </div>
         </div>
 
         <ul className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto list-none text-center">

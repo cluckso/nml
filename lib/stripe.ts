@@ -572,23 +572,36 @@ export async function handleStripeWebhook(event: Stripe.Event) {
       const businessId = session.metadata?.businessId as string | undefined
       const planType = session.metadata?.planType as PlanType | undefined
 
-      // Trial flow: setup mode (card on file, no plan) — start trial window
+      // Trial flow: setup mode (card on file, no plan) — start trial window once
       if (businessId && session.mode === "setup" && !planType) {
-        const now = new Date()
-        const trialEndsAt = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000)
-        await db.business.update({
+        const existing = await db.business.findUnique({
           where: { id: businessId },
-          data: {
-            trialStartedAt: now,
-            trialEndsAt,
-            status: "ACTIVE",
-          },
+          select: { trialStartedAt: true, trialEndsAt: true },
         })
-        await trackHeyCatchBusinessOutcome({
-          businessId,
-          event: "trial_started",
-          plan: "trial",
-        })
+        const alreadyStarted =
+          existing?.trialStartedAt != null || existing?.trialEndsAt != null
+        if (!alreadyStarted) {
+          const now = new Date()
+          const trialEndsAt = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000)
+          await db.business.update({
+            where: { id: businessId },
+            data: {
+              trialStartedAt: now,
+              trialEndsAt,
+              status: "ACTIVE",
+            },
+          })
+          await trackHeyCatchBusinessOutcome({
+            businessId,
+            event: "trial_started",
+            plan: "trial",
+          })
+        } else {
+          await db.business.update({
+            where: { id: businessId },
+            data: { status: "ACTIVE" },
+          })
+        }
         break
       }
 

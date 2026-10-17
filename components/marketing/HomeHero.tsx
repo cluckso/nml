@@ -18,8 +18,6 @@ import {
   HERO_SUB,
   HANGUP_RATE_LABEL,
   LOSS_CTA,
-  TYPICAL_CAPTURE_RATE,
-  VOICEMAIL_CAPTURE_RATE,
 } from "@/lib/marketing/positioning"
 import { getDemoNumberDisplay, getDemoNumberTel } from "@/lib/demo-line"
 import {
@@ -58,12 +56,8 @@ export function HomeHero() {
         You&apos;re on a job. The phone rings. You can&apos;t pick up. They hang up —
         and call the next guy on the list.
       </p>
-      <p className="text-xl sm:text-2xl font-semibold text-foreground/95 mb-4 max-w-2xl mx-auto">
+      <p className="text-xl sm:text-2xl font-semibold text-foreground/95 mb-8 max-w-2xl mx-auto">
         {HERO_SUB}
-      </p>
-      <p className="text-sm text-muted-foreground mb-8 max-w-xl mx-auto">
-        Typical industry rates (not CallGrabbr first-party data): voicemail capture{" "}
-        {VOICEMAIL_CAPTURE_RATE}; answered-call capture {TYPICAL_CAPTURE_RATE}.
       </p>
       <div className="flex flex-wrap gap-4 justify-center mb-4">
         <Link href="/sign-up?next=%2Ftrial%2Fstart" className="min-h-[44px] flex items-center">

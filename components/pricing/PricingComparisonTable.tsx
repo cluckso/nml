@@ -54,12 +54,6 @@ const ROWS: ComparisonRow[] = [
     human: "Delayed",
   },
   {
-    label: `Industry capture rate*`,
-    voicemail: "5–15%*",
-    callgrabbr: "Industry range when answered* — not CallGrabbr data",
-    human: "80–95%*",
-  },
-  {
     label: `Included volume (estimate)`,
     voicemail: "Unlimited rings to nowhere",
     callgrabbr: `~${basicCalls} calls/mo estimate`,
@@ -91,8 +85,7 @@ export function PricingComparisonTable({ className = "" }: { className?: string 
           CallGrabbr is missed-call lead capture — {perCall} at {PLAN_BASIC} lead insurance.
         </p>
         <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
-          *Capture rates are typical industry figures for voicemail vs. answered calls — not CallGrabbr
-          first-party results. Included call counts are estimates (~3 min/call), not guaranteed leads.
+          Included call counts are estimates (~3 min/call), not guaranteed leads.
         </p>
       </div>
 
@@ -162,8 +155,7 @@ export function PricingComparisonTable({ className = "" }: { className?: string 
         </table>
       </div>
       <p className="md:hidden text-xs text-muted-foreground mt-4 text-center leading-relaxed">
-        *Capture rates are typical industry figures — not CallGrabbr first-party results. Call counts
-        are estimates, not guaranteed leads.
+        Call counts are estimates, not guaranteed leads.
       </p>
     </div>
   )

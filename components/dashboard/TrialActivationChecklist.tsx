@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
 import { CheckCircle2, Circle, Phone, PhoneForwarded, Rocket } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -11,7 +10,7 @@ type TrialActivationChecklistProps = {
   onboardingComplete: boolean
   hasAgent: boolean
   hasForwardingNumber: boolean
-  /** True when a completed call or test verification landed (or owner acknowledged forwarding). */
+  /** True when a completed call or test verification landed. */
   forwardingReady: boolean
   hasCalls: boolean
   isEnded: boolean
@@ -25,13 +24,10 @@ export function TrialActivationChecklist({
   hasCalls,
   isEnded,
 }: TrialActivationChecklistProps) {
-  const [acknowledged, setAcknowledged] = useState(false)
-  const [acking, setAcking] = useState(false)
-
   if (isEnded) return null
 
   const hasNumber = hasForwardingNumber || hasAgent
-  const forwardDone = forwardingReady || acknowledged || hasCalls
+  const forwardDone = forwardingReady || hasCalls
 
   const steps = [
     {
@@ -54,7 +50,7 @@ export function TrialActivationChecklist({
       done: hasNumber && forwardDone,
       hint:
         hasNumber && !forwardDone
-          ? "Set call forwarding at your carrier to the number on your dashboard, then confirm below or place a test call."
+          ? "Set call forwarding at your carrier to the number on your dashboard, then place a test call."
           : null,
     },
     {
@@ -71,18 +67,6 @@ export function TrialActivationChecklist({
   if (allDone) return null
 
   const nextStep = steps.find((s) => !s.done)
-
-  async function acknowledgeForwarding() {
-    setAcking(true)
-    try {
-      const res = await fetch("/api/business/acknowledge-forwarding", { method: "POST" })
-      if (res.ok) {
-        setAcknowledged(true)
-      }
-    } finally {
-      setAcking(false)
-    }
-  }
 
   return (
     <Card className="mb-8 border-amber-500/25 bg-amber-500/5">
@@ -129,17 +113,12 @@ export function TrialActivationChecklist({
               </Button>
             )}
             {hasNumber && !forwardDone && (
-              <>
-                <Button size="sm" onClick={acknowledgeForwarding} disabled={acking}>
-                  {acking ? "Saving…" : "I've set up forwarding"}
-                </Button>
-                <Button size="sm" variant="outline" asChild>
-                  <a href="#setup">
-                    <PhoneForwarded className="h-4 w-4 mr-2" />
-                    See forwarding steps
-                  </a>
-                </Button>
-              </>
+              <Button size="sm" variant="outline" asChild>
+                <a href="#setup">
+                  <PhoneForwarded className="h-4 w-4 mr-2" />
+                  See forwarding steps
+                </a>
+              </Button>
             )}
           </div>
         )}
