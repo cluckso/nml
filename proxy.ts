@@ -11,7 +11,7 @@ function corsHeaders(origin: string | null): Record<string, string> {
   return {
     "Access-Control-Allow-Origin": allowOrigin,
     "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Authorization, Content-Type, Accept",
+    "Access-Control-Allow-Headers": "Authorization, Content-Type, Accept, X-API-Key",
     "Access-Control-Max-Age": "86400",
   }
 }
@@ -29,16 +29,20 @@ const PUBLIC_EXACT = new Set([
   "/terms",
   "/sms-terms",
   "/about",
+  "/blog",
   "/compare",
   "/changelog",
   "/integrations/zapier",
   "/start",
+  "/sitemap.xml",
+  "/robots.txt",
 ])
 
 /** Prefix public paths (marketing + docs). */
 const PUBLIC_PREFIXES = [
   "/docs",
   "/guides",
+  "/blog/",
   "/for/",
   "/funnel/",
   "/cls/",
@@ -64,7 +68,10 @@ export async function proxy(request: NextRequest) {
   const maintenance = process.env.MAINTENANCE_MODE === "true" || process.env.MAINTENANCE_MODE === "1"
   if (maintenance) {
     const path = request.nextUrl.pathname
-    const allow = path.startsWith("/api/webhooks") || path === "/api/health"
+    const allow =
+      path.startsWith("/api/webhooks") ||
+      path === "/api/health" ||
+      path === "/api/articles-webhook"
     if (!allow) {
       return new NextResponse(MAINTENANCE_HTML, {
         status: 503,

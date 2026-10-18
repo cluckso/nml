@@ -8,6 +8,7 @@ import {
   GUIDE_AUTHOR_NAME,
 } from "@/lib/guides/authorship"
 import { FOUNDER, WHY_I_BUILT_THIS } from "@/lib/marketing/founder"
+import { FounderAttestation } from "@/components/marketing/FounderAttestation"
 import { breadcrumbJsonLd, personAuthorJsonLd, webPageJsonLd } from "@/lib/structured-data"
 
 const TITLE = "Steven Steinhoff — CallGrabbr guides"
@@ -59,6 +60,7 @@ export default function AuthorPage() {
         {paragraphs.map((p) => (
           <p key={p.slice(0, 24)}>{p}</p>
         ))}
+        <FounderAttestation />
       </div>
       <h2 className="text-2xl font-bold mb-4">Guides</h2>
       <ul className="space-y-2 text-sm mb-10">

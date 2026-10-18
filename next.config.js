@@ -12,9 +12,11 @@ const nextConfig = {
     ],
   },
   experimental: {
+    // GrandRanker article webhooks send full HTML bodies (up to ~10 MB).
     serverActions: {
-      bodySizeLimit: "2mb",
+      bodySizeLimit: "10mb",
     },
+    proxyClientMaxBodySize: "10mb",
   },
   // CORS for /api/* so Capacitor app (origin https://localhost or capacitor://localhost) can call API with Bearer token
   async headers() {
@@ -49,7 +51,10 @@ const nextConfig = {
         headers: [
           { key: "Access-Control-Allow-Origin", value: "*" },
           { key: "Access-Control-Allow-Methods", value: "GET, POST, PATCH, DELETE, OPTIONS" },
-          { key: "Access-Control-Allow-Headers", value: "Authorization, Content-Type, Accept" },
+          {
+            key: "Access-Control-Allow-Headers",
+            value: "Authorization, Content-Type, Accept, X-API-Key",
+          },
         ],
       },
     ]

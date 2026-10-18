@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
 import { FOUNDER, WHY_I_BUILT_THIS } from "@/lib/marketing/founder"
+import { FounderAttestation } from "@/components/marketing/FounderAttestation"
 import { DEFAULT_OG_IMAGE, SEO_KEYWORDS } from "@/lib/seo"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data"
@@ -73,6 +74,7 @@ export default function AboutPage() {
         {paragraphs.map((p) => (
           <p key={p.slice(0, 24)}>{p}</p>
         ))}
+        <FounderAttestation />
       </div>
 
       <div className="rounded-xl border border-border/60 bg-card/40 p-6 text-center">

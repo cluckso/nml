@@ -193,6 +193,9 @@ rkp("init","PaccPmsytSiq");rkp("event","PAGE_VIEW");
                 <Link href="/guides" className="hover:text-foreground font-medium">
                   Guides
                 </Link>
+                <Link href="/blog" className="hover:text-foreground font-medium">
+                  Blog
+                </Link>
                 <Link href="/compare" className="hover:text-foreground font-medium">
                   Compare
                 </Link>

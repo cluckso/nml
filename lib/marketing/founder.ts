@@ -4,6 +4,7 @@
 export const FOUNDER = {
   name: "Steven Steinhoff",
   photoSrc: "/marketing/founder.jpg",
+  signatureSrc: "/marketing/founder-signature.png",
   title: "Service Business Expert",
 } as const
 

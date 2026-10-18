@@ -28,6 +28,9 @@ yarn-error.log*
 .env*.local
 .env
 .env.vercel-check
+.env.vercel.tmp
+.env.vercel.dev
+.env.vercel*
 **/firebase-service-account.json
 dashboard_capacitor/.env.production
 scripts/marketing-section-sources/
