@@ -1,27 +1,9 @@
-import { TESTIMONIAL_REQUEST_EMAIL, CUSTOMER_STORIES } from "@/lib/marketing/social-proof"
+import { CUSTOMER_STORIES } from "@/lib/marketing/social-proof"
 import { Card, CardContent } from "@/components/ui/card"
 
+/** Named customer quotes only — renders nothing until real stories exist. */
 export function TestimonialWall() {
-  if (CUSTOMER_STORIES.length === 0) {
-    return (
-      <section className="container mx-auto px-4 py-16" aria-labelledby="customer-stories-heading">
-        <h2 id="customer-stories-heading" className="text-3xl font-bold text-center mb-3">
-          Stories from shops
-        </h2>
-        <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-6 leading-relaxed">
-          We do not publish made-up reviews. This wall is ready for named quotes with first name,
-          trade or town, photo, and what job got captured — once real customers send them.
-        </p>
-        <p className="text-center text-sm text-muted-foreground">
-          Use CallGrabbr and want to be named? Email{" "}
-          <a href={`mailto:${TESTIMONIAL_REQUEST_EMAIL}`} className="text-primary hover:underline">
-            {TESTIMONIAL_REQUEST_EMAIL}
-          </a>
-          .
-        </p>
-      </section>
-    )
-  }
+  if (CUSTOMER_STORIES.length === 0) return null
 
   return (
     <section className="container mx-auto px-4 py-16" aria-labelledby="customer-stories-heading">

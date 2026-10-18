@@ -11,8 +11,6 @@ import { LostJobsMath } from "@/components/marketing/LostJobsMath"
 import { IndustryPhotoCards } from "@/components/marketing/IndustryPhotoCards"
 import { JtbdOutcomes } from "@/components/marketing/JtbdOutcomes"
 import { BeforeAfterCall } from "@/components/marketing/BeforeAfterCall"
-import { TestimonialWall } from "@/components/marketing/TestimonialWall"
-import { ReviewSignals } from "@/components/marketing/ReviewSignals"
 import { CompareUsLinks } from "@/components/marketing/CompareUsLinks"
 import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
 import { TrustStrip } from "@/components/marketing/TrustStrip"
@@ -420,9 +418,6 @@ export default function HomePage() {
           </Link>
         </p>
       </section>
-
-      <TestimonialWall />
-      <ReviewSignals />
 
       {/* Cost of inaction */}
       <section className="bg-muted/30 py-16 border-y border-border/50">
