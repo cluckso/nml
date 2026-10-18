@@ -1,6 +1,60 @@
 import { db } from "@/lib/db"
 import type { Article, Prisma } from "@prisma/client"
 
+let articlesTableReady: Promise<void> | null = null
+
+/**
+ * Ensure the GrandRanker `articles` table exists (pooler-safe DDL).
+ * Vercel builds cannot reach Supabase direct :5432, so we create at runtime.
+ */
+export async function ensureArticlesTable(): Promise<void> {
+  if (!articlesTableReady) {
+    articlesTableReady = (async () => {
+      await db.$executeRawUnsafe(`
+        CREATE TABLE IF NOT EXISTS "articles" (
+          "id" TEXT NOT NULL,
+          "external_id" TEXT NOT NULL,
+          "title" TEXT,
+          "slug" TEXT,
+          "content_html" TEXT,
+          "content_markdown" TEXT,
+          "meta_title" TEXT,
+          "meta_description" TEXT,
+          "subtitle" TEXT,
+          "category" TEXT,
+          "author_name" TEXT,
+          "image_url" TEXT,
+          "read_time" TEXT,
+          "word_count" INTEGER,
+          "tags" JSONB,
+          "faqs" JSONB,
+          "json_ld_schema" JSONB,
+          "language_code" TEXT,
+          "published_at" TIMESTAMP(3),
+          "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+          CONSTRAINT "articles_pkey" PRIMARY KEY ("id")
+        )
+      `)
+      await db.$executeRawUnsafe(
+        `CREATE UNIQUE INDEX IF NOT EXISTS "articles_external_id_key" ON "articles"("external_id")`
+      )
+      await db.$executeRawUnsafe(
+        `CREATE UNIQUE INDEX IF NOT EXISTS "articles_slug_key" ON "articles"("slug")`
+      )
+      await db.$executeRawUnsafe(
+        `CREATE INDEX IF NOT EXISTS "articles_published_at_idx" ON "articles"("published_at")`
+      )
+      await db.$executeRawUnsafe(
+        `CREATE INDEX IF NOT EXISTS "articles_updated_at_idx" ON "articles"("updated_at")`
+      )
+    })().catch((err) => {
+      articlesTableReady = null
+      throw err
+    })
+  }
+  await articlesTableReady
+}
+
 export type ArticleListItem = Pick<
   Article,
   | "id"
@@ -18,6 +72,7 @@ export type ArticleListItem = Pick<
 
 /** Newest articles first (published_at, then updated_at). */
 export async function listArticles(): Promise<ArticleListItem[]> {
+  await ensureArticlesTable()
   return db.article.findMany({
     orderBy: [{ publishedAt: "desc" }, { updatedAt: "desc" }],
     select: {
@@ -37,12 +92,14 @@ export async function listArticles(): Promise<ArticleListItem[]> {
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
+  await ensureArticlesTable()
   return db.article.findUnique({ where: { slug } })
 }
 
 export async function listArticleSitemapEntries(): Promise<
   { slug: string; updatedAt: Date }[]
 > {
+  await ensureArticlesTable()
   const rows = await db.article.findMany({
     where: { slug: { not: null } },
     select: { slug: true, updatedAt: true },
@@ -153,6 +210,7 @@ function toPrismaData(data: ArticleWriteData): Prisma.ArticleUncheckedCreateInpu
 }
 
 export async function upsertArticlesFromPayload(articles: unknown): Promise<number> {
+  await ensureArticlesTable()
   if (!Array.isArray(articles)) return 0
   let count = 0
   for (const raw of articles) {
@@ -190,6 +248,7 @@ export async function upsertArticlesFromPayload(articles: unknown): Promise<numb
 }
 
 export async function deleteArticleByExternalId(externalId: string): Promise<boolean> {
+  await ensureArticlesTable()
   const id = externalId.trim()
   if (!id) return false
   try {
