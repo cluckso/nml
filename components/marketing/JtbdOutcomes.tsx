@@ -6,7 +6,7 @@ const JOBS = [
     body: "Every missed call can feed your competitor instead of your family. When the phone gets answered, that job stays on your board.",
   },
   {
-    title: "You become the contractor who actually picks up — the one homeowners recommend",
+    title: "You become the contractor who actually picks up — the one customers recommend",
     body: "People remember the shop that answered. That is how you get the next referral, not from a voicemail they never left.",
   },
   {

@@ -511,6 +511,106 @@ const GUIDES: Guide[] = [
     ],
   },
   {
+    slug: "callgrabbr-vs-broccoli",
+    title: "CallGrabbr vs Broccoli AI for trade shops",
+    description:
+      "CallGrabbr vs Broccoli AI: published $99/mo missed-call lead capture for one-truck shops, versus an enterprise AI CSR platform built for ServiceTitan.",
+    eyebrow: "Comparison guide",
+    headline: "CallGrabbr vs Broccoli AI",
+    intro:
+      "Broccoli AI (broccoli.com) is a YC-backed AI platform for home-service companies — inbound CSRs that book into ServiceTitan, outbound follow-up agents, QA coaching, and multi-location rollout. CallGrabbr is missed-call lead capture for shops that need the job details in a text when they can't pick up. Same industry. Very different buyers.",
+    sections: [
+      {
+        heading: "Different products for different shop sizes",
+        paragraphs: [
+          "Broccoli markets to growing and enterprise home-service brands: multi-truck operators, ServiceTitan or Housecall Pro shops, PE-backed groups, and teams that want an AI workforce (CSR, receptionist, sales follow-up, membership renewal, QA). Their site leads with booked jobs synced to ServiceTitan and agents that fill the dispatch board.",
+          `CallGrabbr fits one-truck and growing trade shops whose pain is simpler: you miss the ring, the customer dials the next number, and the job walks. We forward your existing line, run trade-tuned intake, and text you name, phone, address, job, and urgency — usually in seconds. ${PLAN_BASIC} starts at $${basic.price}/mo with a published price and a ${trialDaysLabel()} free trial (no card).`,
+        ],
+      },
+      {
+        heading: "Pricing and how you buy",
+        paragraphs: [
+          "Broccoli does not publish self-serve pricing on broccoli.com. Third-party roundups in 2025–2026 commonly cite entry plans around $950/month for about 1,000 minutes (with per-minute overage), higher tiers near $1,950/month, outbound as an add-on, and multi-month terms with auto-renew. Treat those figures as indicative — confirm with their sales team. Buying is sales-led: contact, pilot, implementation partner.",
+          `CallGrabbr publishes plans: ${PLAN_BASIC} $${basic.price}/mo · ${PLAN_GROWTH} $${growth.price}/mo · ${PLAN_PLATINUM} $${platinum.price}/mo. ${trialSummaryShort()}. Month-to-month after you subscribe; cancel from billing. ${formatJobValuePromptLine()} One recovered job often covers months of ${PLAN_BASIC}.`,
+        ],
+      },
+      {
+        heading: "What each product actually does on a call",
+        paragraphs: [
+          "Broccoli's inbound AI CSR is built to book the appointment into your FSM (ServiceTitan / Housecall Pro), apply after-hours and emergency rules, and optionally hand work to a suite of outbound agents (open estimates, memberships, happy calls, board fill). That is an operations platform, not a missed-call SMS product.",
+          "CallGrabbr is narrower on purpose: capture the lead when you can't answer, text it to you so you call back and close it yourself. Growth and Platinum add more minutes, appointments, follow-ups, and CRM webhooks — still without requiring a six-figure FSM stack or a sales demo to start.",
+        ],
+        bullets: [
+          "Broccoli: book into ServiceTitan, multi-agent suite, enterprise rollout, sales-led pricing",
+          "CallGrabbr: trade intake → SMS/email lead, keep your number, self-serve from $99/mo",
+          "Both: home services / trades focus — not general small-business receptionists",
+        ],
+      },
+      {
+        heading: "When to choose CallGrabbr",
+        paragraphs: [
+          "Choose CallGrabbr if you are a one-truck or small crew shop, you want a published price and a same-day trial, and your goal is stopping missed and after-hours jobs from walking — not replacing your entire CSR team with an AI platform.",
+          "Look at Broccoli if you already run ServiceTitan or Housecall Pro at scale, you need AI that books and dispatches inside that system, you want outbound follow-up and QA coaching, and you have budget and time for a sales-led implementation (often reported well above CallGrabbr's Platinum plan).",
+        ],
+      },
+      {
+        heading: "Bottom line",
+        paragraphs: [
+          "Broccoli competes with Avoca, ServiceTitan's own AI agents, and other enterprise home-services AI stacks. CallGrabbr competes with Rosie, OnCrew, and voicemail for the one-truck owner who loses jobs on the ladder.",
+          "If a demo quote from Broccoli lands near $1,000/mo and you mainly need overflow capture, start CallGrabbr's free trial first — prove one captured lead before you buy a platform.",
+        ],
+      },
+    ],
+    comparison: {
+      competitorName: "Broccoli AI",
+      rows: [
+        { label: "Best fit", callgrabbr: "One-truck & growing shops", competitor: "Multi-truck / ST–HCP operations" },
+        { label: "Entry price", callgrabbr: `$${basic.price}/mo published`, competitor: "Sales quote (often ~$950+/mo reported)" },
+        { label: "Primary outcome", callgrabbr: "SMS/email job lead", competitor: "Booked job in ServiceTitan" },
+        { label: "Buy path", callgrabbr: "Self-serve trial", competitor: "Sales + implementation" },
+        { label: "Contract", callgrabbr: "Month-to-month after trial", competitor: "Often multi-month (reported)" },
+        { label: "Trial", callgrabbr: `${trialDaysLabel()} · no card`, competitor: "Pilot via sales" },
+      ],
+    },
+    showPricingSnippet: true,
+    showDemo: true,
+    faq: [
+      {
+        question: "Is CallGrabbr a Broccoli alternative?",
+        answer:
+          "For solo and small trade shops that need missed-call lead capture at a published price, yes. Broccoli is a fuller AI operations platform aimed at larger ServiceTitan / Housecall Pro businesses — different scope and budget.",
+      },
+      {
+        question: "Does CallGrabbr book into ServiceTitan like Broccoli?",
+        answer:
+          "Growth and Platinum can send captured leads to ServiceTitan, Housecall Pro, Jobber, or Zapier via webhook or email. Broccoli's inbound CSR is built to book and sync deeply inside ServiceTitan as a core workflow — that depth is part of why it prices and sells like enterprise software.",
+      },
+      {
+        question: "How much does Broccoli AI cost?",
+        answer:
+          "Broccoli does not list public self-serve pricing. Third-party sources in 2025–2026 often cite roughly $950–$1,950/month plus per-minute overages and longer terms. Confirm with Broccoli. CallGrabbr starts at $99/month with a free trial and no card.",
+      },
+      {
+        question: "How do I start CallGrabbr?",
+        answer: `Start a ${trialDaysLabel()} free trial with no card, add your business phone, and attach your line with our setup guide. Most shops finish in minutes.`,
+      },
+    ],
+    relatedLinks: [
+      { label: "CallGrabbr vs Rosie", href: "/guides/callgrabbr-vs-rosie" },
+      { label: "CallGrabbr vs OnCrew", href: "/guides/callgrabbr-vs-oncrew" },
+      { label: "Missed-call lead capture vs AI answering", href: "/guides/missed-call-lead-capture-vs-ai-answering" },
+      { label: "Full comparison hub", href: "/compare" },
+      { label: "Pricing", href: "/pricing" },
+    ],
+    keywords: [
+      "CallGrabbr vs Broccoli",
+      "Broccoli AI alternative",
+      "Broccoli AI pricing",
+      "ServiceTitan AI answering vs CallGrabbr",
+      "missed call lead capture contractors",
+    ],
+  },
+  {
     slug: "best-ai-answering-for-plumbing-2026",
     title: "Plumbing missed-call capture, 2026",
     description:

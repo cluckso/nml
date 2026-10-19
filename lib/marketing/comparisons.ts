@@ -32,6 +32,14 @@ export const VS_PAGE_LINKS = [
       "On-crew dispatch tools vs dedicated missed-call lead recovery for trades.",
     eyebrow: "Field service",
   },
+  {
+    href: "/guides/callgrabbr-vs-broccoli",
+    title: "CallGrabbr vs Broccoli AI",
+    shortLabel: "Broccoli",
+    description:
+      "Enterprise AI CSR platforms for ServiceTitan shops vs simple missed-call lead capture from $99/mo.",
+    eyebrow: "Enterprise home services AI",
+  },
 ] as const
 
 export const CATEGORY_COMPARE_LINK = {

@@ -20,7 +20,7 @@ export function LostJobsMath() {
         <h2 className="text-3xl font-bold text-center mb-4">The jobs you never knew you lost</h2>
         <p className="text-center text-muted-foreground max-w-2xl mx-auto mb-8">
           You finish the install. Check your phone. Three missed calls — and no voicemails.
-          Those homeowners already booked someone who answered.
+          Those customers already booked someone who answered.
         </p>
 
         <div className="max-w-3xl mx-auto rounded-xl border border-border/60 bg-card/50 p-6 sm:p-8 mb-10">
