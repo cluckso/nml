@@ -81,10 +81,18 @@ export default async function TrialStartPage() {
     />
   )
 
+  const headTags = (
+    <>
+      <link rel="canonical" href={siteUrl(TRIAL_PATH)} />
+      <meta property="og:url" content={siteUrl(TRIAL_PATH)} />
+      {jsonLd}
+    </>
+  )
+
   if (!user) {
     return (
       <>
-        {jsonLd}
+        {headTags}
         <TrialStartGate />
       </>
     )
@@ -93,7 +101,7 @@ export default async function TrialStartPage() {
   if (!user.businessId) {
     return (
       <Suspense fallback={<div className="container mx-auto max-w-md py-12 text-center text-muted-foreground">Loading…</div>}>
-        {jsonLd}
+        {headTags}
         <TrialStartClient />
       </Suspense>
     )

@@ -10,9 +10,10 @@ import {
 } from "@/lib/meta-lead-routing"
 
 export const metadata: Metadata = {
-  title: "Get Started | CallGrabbr",
-  description: `Choose your trade to see your missed-call estimate — ${CATEGORY_NAME} that texts you the lead in seconds.`,
-  robots: { index: false, follow: true },
+  title: "Get Started with CallGrabbr — choose your trade now",
+  description: `Choose your trade to see your missed-call estimate — ${CATEGORY_NAME} that texts you the lead in seconds. HVAC, plumbing, electrical, auto, and handyman shops start free.`,
+  alternates: { canonical: "/start" },
+  robots: { index: true, follow: true },
 }
 
 type PageProps = {

@@ -4,7 +4,7 @@ import { authDocumentTitle, authMetaDescription } from "@/lib/trial-marketing"
 export const metadata: Metadata = {
   title: authDocumentTitle(),
   description: authMetaDescription(),
-  robots: { index: false, follow: true },
+  robots: { index: true, follow: true },
 }
 
 export default function AuthLayout({

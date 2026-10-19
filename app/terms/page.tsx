@@ -2,10 +2,15 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { LEGAL_LAST_UPDATED, SUPPORT_EMAIL } from "@/lib/site-contact"
 
+const TERMS_TITLE = "CallGrabbr Terms of Service for accounts and billing"
+const TERMS_DESCRIPTION =
+  "CallGrabbr Terms cover accounts, billing and overage, SMS alerts, acceptable use, data rights, liability limits, and how to cancel or contact support."
+
 export const metadata: Metadata = {
-  title: "Terms of Service - CallGrabbr",
-  description: "Terms of service for CallGrabbr.",
+  title: TERMS_TITLE,
+  description: TERMS_DESCRIPTION,
   alternates: { canonical: "/terms" },
+  robots: { index: true, follow: true },
 }
 
 export default function TermsPage() {
@@ -53,9 +58,15 @@ export default function TermsPage() {
 
         <section>
           <h2 className="text-xl font-semibold text-foreground mb-2">5. Acceptable Use</h2>
-          <p>
-            You agree not to use the Service: (a) for any illegal purpose or in violation of any laws; (b) to transmit harmful, offensive, or fraudulent content; (c) to interfere with or overload our systems or other users; (d) to resell or sublicense the Service without our written consent; or (e) in any way that could harm our reputation or the Service. We may suspend or terminate accounts that violate these Terms.
-          </p>
+          <p className="mb-2">You agree not to use the Service for any of the following:</p>
+          <ul className="list-disc pl-6 space-y-1">
+            <li>Illegal purposes or violations of applicable law</li>
+            <li>Transmitting harmful, offensive, or fraudulent content</li>
+            <li>Interfering with or overloading our systems or other users</li>
+            <li>Reselling or sublicensing the Service without our written consent</li>
+            <li>Any use that could harm our reputation or the Service</li>
+          </ul>
+          <p className="mt-2">We may suspend or terminate accounts that violate these Terms.</p>
         </section>
 
         <section>
@@ -63,18 +74,24 @@ export default function TermsPage() {
           <p className="mb-2">
             By opting in to SMS notifications during account signup, trial registration, or onboarding, you consent to receive automated text messages from CallGrabbr at the phone number you provided. Messages may include call notifications, lead alerts, account updates, and trial/billing reminders.
           </p>
-          <p className="mt-2">
-            <strong className="text-foreground">Frequency:</strong> Message frequency varies based on call volume and account activity.
-          </p>
-          <p className="mt-2">
-            <strong className="text-foreground">Costs:</strong> Message and data rates may apply. Check with your carrier.
-          </p>
-          <p className="mt-2">
-            <strong className="text-foreground">Opt-out:</strong> Reply <strong>STOP</strong> to any SMS from us to stop receiving messages. You will receive a one-time confirmation. You may re-enroll from your account settings at any time.
-          </p>
-          <p className="mt-2">
-            <strong className="text-foreground">Help:</strong> Reply <strong>HELP</strong> to any SMS from us for assistance, or contact us at the email provided on our website.
-          </p>
+          <ul className="list-disc pl-6 space-y-1 mt-2">
+            <li>
+              <strong className="text-foreground">Frequency:</strong> Varies based on call volume and
+              account activity
+            </li>
+            <li>
+              <strong className="text-foreground">Costs:</strong> Message and data rates may apply —
+              check with your carrier
+            </li>
+            <li>
+              <strong className="text-foreground">Opt-out:</strong> Reply <strong>STOP</strong> to any
+              SMS from us; you get a one-time confirmation and can re-enroll in settings
+            </li>
+            <li>
+              <strong className="text-foreground">Help:</strong> Reply <strong>HELP</strong> or email
+              the address on our website
+            </li>
+          </ul>
           <p className="mt-2">
             Your consent to receive SMS is not required to purchase any service. Carriers are not liable for delayed or undelivered messages.
           </p>
