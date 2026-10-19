@@ -1,9 +1,10 @@
 import type { Metadata } from "next"
-import { authMetaDescription } from "@/lib/trial-marketing"
+import { authDocumentTitle, authMetaDescription } from "@/lib/trial-marketing"
 
 export const metadata: Metadata = {
-  title: "Account - CallGrabbr",
+  title: authDocumentTitle(),
   description: authMetaDescription(),
+  robots: { index: false, follow: true },
 }
 
 export default function AuthLayout({

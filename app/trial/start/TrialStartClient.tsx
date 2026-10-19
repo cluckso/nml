@@ -8,7 +8,7 @@ import { trackStartTrial, trackCardTrialStart } from "@/lib/analytics"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card"
 import {
   clearFunnelTrialContext,
   loadFunnelTrialContext,
@@ -137,13 +137,13 @@ export function TrialStartClient() {
     <div className="container mx-auto max-w-md py-12">
       <Card>
         <CardHeader>
-          <CardTitle>
+          <h1 className="text-2xl font-semibold leading-none tracking-tight">
             {cardMode
               ? "Start free trial — card on file"
               : fromFunnel && firstName
                 ? `Almost there, ${firstName}!`
                 : "Start your free trial — no card required"}
-          </CardTitle>
+          </h1>
           <CardDescription>
             {cardMode ? (
               <>

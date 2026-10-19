@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { SITE_URL } from "@/lib/site-url"
 import { siteMetaDescription } from "@/lib/trial-marketing"
 
 /** Shared SEO keywords — lead with missed-call lead capture; legacy answering terms secondary. */
@@ -35,6 +36,7 @@ export function homePageMetadata(): Metadata {
     openGraph: {
       title,
       description,
+      url: SITE_URL,
       type: "website",
       images: [DEFAULT_OG_IMAGE],
     },

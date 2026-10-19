@@ -35,7 +35,8 @@ import {
 } from "lucide-react"
 
 import { JsonLd } from "@/components/seo/JsonLd"
-import { softwareApplicationJsonLd } from "@/lib/structured-data"
+import { PRODUCT_FAQ } from "@/lib/faq-data"
+import { faqPageJsonLd, softwareApplicationJsonLd } from "@/lib/structured-data"
 import { homePageMetadata } from "@/lib/seo"
 import {
   basicVsGrowthFitLine,
@@ -53,7 +54,7 @@ export const metadata: Metadata = homePageMetadata()
 export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen">
-      <JsonLd data={softwareApplicationJsonLd()} />
+      <JsonLd data={[softwareApplicationJsonLd(), faqPageJsonLd(PRODUCT_FAQ.slice(0, 8))]} />
       <HomeHero />
       <TrustStrip />
 

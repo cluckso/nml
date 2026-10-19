@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card"
 import { validateEmail, validatePasswordSignUp } from "@/lib/utils"
 import { loadFunnelTrialContext } from "@/lib/funnel/funnel-trial-bridge"
 import { getEmailConfirmRedirectUrl } from "@/lib/auth-redirect"
@@ -143,10 +143,16 @@ export function SignUpForm({ initialNext, initialRef, initialAgency }: SignUpFor
       <Card className="w-full max-w-md">
         <CardHeader>
           <BrandMark className="mb-4" />
-          <CardTitle>{signupPageTitle()}</CardTitle>
+          <h1 className="text-2xl font-semibold leading-none tracking-tight">{signupPageTitle()}</h1>
           <CardDescription>
             {signupPageDescription()}
           </CardDescription>
+          <h2 className="text-sm font-semibold pt-3">Why shops start here</h2>
+          <ul className="text-xs text-muted-foreground list-disc pl-4 space-y-1">
+            <li>Missed-call leads by text in seconds</li>
+            <li>Keep your existing business number</li>
+            <li>No card required for the free trial</li>
+          </ul>
           <p className="text-xs text-muted-foreground pt-2">{moneyBackGuaranteeLabel()}</p>
         </CardHeader>
         <CardContent>

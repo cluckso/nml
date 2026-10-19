@@ -9,7 +9,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card"
 import { Loader2 } from "lucide-react"
 import { validateEmail, validatePasswordSignIn } from "@/lib/utils"
 import { loadFunnelTrialContext } from "@/lib/funnel/funnel-trial-bridge"
@@ -212,8 +212,14 @@ function SignInContent() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <BrandMark className="mb-4" />
-          <CardTitle>Sign In</CardTitle>
+          <h1 className="text-2xl font-semibold leading-none tracking-tight">Sign in to CallGrabbr</h1>
           <CardDescription>{signInPageDescription()}</CardDescription>
+          <h2 className="text-sm font-semibold pt-3">After you sign in</h2>
+          <ul className="text-xs text-muted-foreground list-disc pl-4 space-y-1">
+            <li>Finish setup and call forwarding</li>
+            <li>Review captured leads and callbacks</li>
+            <li>Manage billing and plan settings</li>
+          </ul>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignIn} className="space-y-4">

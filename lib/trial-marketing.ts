@@ -119,11 +119,16 @@ export function heroGuaranteeLine(): string {
 }
 
 export function authMetaDescription(): string {
-  return `Sign in or sign up for CallGrabbr. Start your ${TRIAL_DAYS}-day free trial with no card required.`
+  return `Sign in or create your CallGrabbr account to start a ${TRIAL_DAYS}-day free trial. Capture missed-call leads for HVAC, plumbing, and local shops — no card required.`
+}
+
+/** Auth layout document title — keep 50–60 chars for SEO audits. */
+export function authDocumentTitle(): string {
+  return "Sign in or create your CallGrabbr account to continue"
 }
 
 export function trialStartMetaDescription(): string {
-  return `Start a ${TRIAL_DAYS}-day CallGrabbr trial with ${FREE_TRIAL_MINUTES} real call minutes. No card required. One trial per business phone number.`
+  return `Start a ${TRIAL_DAYS}-day CallGrabbr trial with ${FREE_TRIAL_MINUTES} real call minutes. Capture missed HVAC and plumbing leads by text. No card required. One trial per business phone.`
 }
 
 export function pricingSchemaTrialDescription(): string {
