@@ -30,7 +30,7 @@ const ROWS: ComparisonRow[] = [
     human: true,
   },
   {
-    label: "Missed-only / lead-insurance plan",
+    label: "Ring your phone first, then catch what you miss",
     voicemail: false,
     callgrabbr: true,
     human: "Rarely",

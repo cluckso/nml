@@ -36,8 +36,8 @@ ${forLines}
 
 ## Pricing (USD)
 
-- Basic $99/mo — missed and after-hours lead insurance, ~100 calls/mo
-- Growth $159/mo — growing crew, text-back confirmation and follow-up, CRM webhook
+- Basic $99/mo — lead insurance to start, ~100 calls/mo
+- Growth $159/mo — more minutes, appointments, follow-up, CRM webhook
 - Platinum $279/mo — multi-crew, high volume
 - Trial: 14 days or 40 call minutes, whichever comes first; no card; one trial per business number
 - 30-day money-back guarantee on paid plans

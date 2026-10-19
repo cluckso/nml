@@ -132,12 +132,11 @@ export default function ChangelogPage() {
           money-back guarantee. Canceling stops the next bill.
         </p>
         <p>
-          Basic covers overflow: missed calls, nights, and weekends. It includes trade-tuned intake
-          and text-back confirmation to callers on captured leads. Growth adds 24/7 capture on every
-          ring, appointments, emergency handling, follow-up texts, and CRM email or a webhook into
-          ServiceTitan, Housecall Pro, Jobber, or Zapier. Platinum adds a branded voice,
-          multi-department routing, after-hours emergency routing, weekly reports, and priority
-          support.
+          Basic includes trade-tuned intake and text-back confirmation to callers on captured leads.
+          Growth adds more included minutes, appointments, emergency handling, follow-up texts, and
+          CRM email or a webhook into ServiceTitan, Housecall Pro, Jobber, or Zapier. Platinum adds
+          a branded voice, multi-department routing, after-hours emergency routing, weekly reports,
+          and priority support.
         </p>
         <p>
           Dedicated intake questions exist for HVAC, plumbing, electrical, auto repair, handyman, and
@@ -166,8 +165,7 @@ export default function ChangelogPage() {
         <p>
           Voicemail is free and keeps about 5–15 percent of callers. A human answering service starts
           at $235 a month and often adds a fee for nights. Basic at $99 is a fraction of that cost.
-          Growth at $159 and Platinum at $279 are priced for shops that want full front-desk coverage
-          and multi-crew volume.
+          Growth at $159 and Platinum at $279 add more minutes and tools as volume grows.
         </p>
         <p>
           The September 15 note added the about page, the llms.txt file, four comparison guides, the

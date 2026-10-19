@@ -38,6 +38,6 @@ export const CATEGORY_COMPARE_LINK = {
   href: "/guides/missed-call-lead-capture-vs-ai-answering",
   title: "Missed-call lead capture vs AI answering",
   description:
-    "Why we sell job recovery — not a generic front desk — and how to choose the right category.",
+    "Why we sell job recovery for trades — and how to choose the right category.",
   eyebrow: "Category guide",
 } as const

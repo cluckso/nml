@@ -32,14 +32,14 @@ export const LOSS_CTA = "See what you're losing"
 export const CAPTURE_CTA = "Capture your next missed lead free"
 
 /** Basic SKU frame — hero plan. */
-export const BASIC_FRAME = "Lead insurance (overflow + nights/weekends)"
+export const BASIC_FRAME = "Lead insurance for local trades"
 
-export const BASIC_BADGE = "Lead insurance"
+export const BASIC_BADGE = "Best to start"
 
-/** Growth / Platinum when the shop wants every ring. */
-export const GROWTH_FRAME = "Full front desk when you're ready"
+/** Growth / Platinum when volume and tools grow. */
+export const GROWTH_FRAME = "More minutes and tools as you grow"
 
-export const PLATINUM_FRAME = "Full front desk for busy multi-crew shops"
+export const PLATINUM_FRAME = "High volume for busy multi-crew shops"
 
 /**
  * Price objection vs cheaper AI answering tools (e.g. Rosie ~$49).

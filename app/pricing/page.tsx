@@ -206,10 +206,9 @@ export default async function PricingPage({
           {trialTrustLine()}
         </p>
         <p className="mt-3 text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
-          Best fit: <strong className="font-medium text-foreground/90">{PLAN_BASIC}</strong> for
-          missed &amp; after-hours lead insurance ·{" "}
-          <strong className="font-medium text-foreground/90">{PLAN_GROWTH}</strong> when you want
-          every-call coverage. Minutes included are listed on each plan card.
+          Start on <strong className="font-medium text-foreground/90">{PLAN_BASIC}</strong> · move
+          up to <strong className="font-medium text-foreground/90">{PLAN_GROWTH}</strong> for more
+          minutes, appointments, and CRM delivery. Included minutes are on each plan card.
         </p>
         <Suspense fallback={null}>
           <PricingHeroAuthHints />

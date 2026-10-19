@@ -65,9 +65,9 @@ export function setupReassuranceLine(): string {
   return "Keep your number; your phone rings first, then unanswered calls forward."
 }
 
-/** Concise Basic vs Growth fit for the trial path. */
+/** Concise Basic vs Growth fit for the trial path — by volume/features, not use-case limits. */
 export function basicVsGrowthFitLine(): string {
-  return `${PLAN_BASIC} = missed & after-hours lead insurance. ${PLAN_GROWTH} = every-call front-desk coverage.`
+  return `${PLAN_BASIC} to start. ${PLAN_GROWTH} when you need more minutes, appointments, and CRM delivery.`
 }
 
 /** Money-back applies to paid subscriptions — keep short; avoid stacking near every CTA. */

@@ -47,11 +47,11 @@ export const PRODUCT_FAQ: FaqItem[] = [
   },
   {
     question: "How much does CallGrabbr cost after the trial?",
-    answer: `${PLAN_BASIC} is $${MONTHLY_PRICES[PlanType.STARTER]}/month (~${basicCalls} captured calls) for missed and after-hours lead insurance. ${PLAN_GROWTH} is $${MONTHLY_PRICES[PlanType.PRO]}/month (~${growthCalls} calls) for shops that want most inbound calls captured. ${PLAN_PLATINUM} is $${MONTHLY_PRICES[PlanType.ELITE]}/month (~${platinumCalls} calls) for busy multi-crew operations. Additional usage is $0.22/min. ${formatJobValuePromptLine()} Capture one you'd have lost and the plan pays for itself for months.`,
+    answer: `${PLAN_BASIC} is $${MONTHLY_PRICES[PlanType.STARTER]}/month (~${basicCalls} captured calls). ${PLAN_GROWTH} is $${MONTHLY_PRICES[PlanType.PRO]}/month (~${growthCalls} calls) with more minutes, appointments, and CRM delivery. ${PLAN_PLATINUM} is $${MONTHLY_PRICES[PlanType.ELITE]}/month (~${platinumCalls} calls) for busy multi-crew operations. Additional usage is $0.22/min. ${formatJobValuePromptLine()} Capture one you'd have lost and the plan pays for itself for months.`,
   },
   {
     question: "Which plan should I choose?",
-    answer: `Start with ${PLAN_BASIC} lead insurance if you're a one-truck shop and mainly need missed and after-hours jobs captured while you're on a job. Choose ${PLAN_GROWTH} when you want full front-desk coverage on most inbound calls. ${PLAN_PLATINUM} fits busy shops with multiple crews or departments. Upgrade anytime as volume grows.`,
+    answer: `Start with ${PLAN_BASIC} if you're a one-truck shop. Choose ${PLAN_GROWTH} when you need more included minutes, appointments, and CRM delivery. ${PLAN_PLATINUM} fits busy shops with multiple crews or departments. Upgrade anytime as volume grows.`,
   },
   {
     question: "Is CallGrabbr worth $99/month?",

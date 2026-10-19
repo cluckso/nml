@@ -34,10 +34,11 @@ describe("trial disclosure copy", () => {
     expect(phoneDemoCtaLabel()).toMatch(/60-second phone demo/)
   })
 
-  it("anchors plan price and Basic vs Growth fit", () => {
+  it("anchors plan price and Basic vs Growth fit by volume/features", () => {
     expect(plansFromAnchorLabel()).toBe(`Plans from $${MONTHLY_PRICES[PlanType.STARTER]}/month`)
-    expect(basicVsGrowthFitLine()).toMatch(/missed & after-hours/)
-    expect(basicVsGrowthFitLine()).toMatch(/every-call/)
+    expect(basicVsGrowthFitLine()).toMatch(/to start/)
+    expect(basicVsGrowthFitLine()).toMatch(/more minutes/)
+    expect(basicVsGrowthFitLine()).not.toMatch(/every-call|after-hours lead insurance/)
   })
 
   it("states money-back on paid plans without hedging the trial", () => {

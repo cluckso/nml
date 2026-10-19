@@ -126,7 +126,7 @@ export default function HomePage() {
       <section className="container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center mb-3">How it works</h2>
         <p className="text-center text-muted-foreground mb-10 max-w-xl mx-auto">
-          Most shops finish setup the same day. Forwarding takes a few minutes with your carrier.
+          Setup takes minutes — sign up, enter some details, attach your phone using our setup guide.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-5xl mx-auto">
           <div className="flex flex-col items-center text-center">
@@ -153,7 +153,7 @@ export default function HomePage() {
             </div>
             <h3 className="font-semibold text-lg mb-2">3. Get your forwarding number</h3>
             <p className="text-muted-foreground text-sm">
-              We provision your AI line. Keep the number customers already know — you&apos;ll forward to ours.
+              Keep the number customers already know. We give you a line to catch the calls you miss.
             </p>
           </div>
           <div className="flex flex-col items-center text-center">
@@ -179,10 +179,10 @@ export default function HomePage() {
       <section className="bg-muted/30 py-16 border-y border-border/50">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold tracking-tight text-center mb-3">
-            Lead insurance first. Full front desk when you&apos;re ready.
+            Plans that grow with your shop
           </h2>
           <p className="text-center text-muted-foreground mb-4 max-w-xl mx-auto leading-relaxed">
-            Basic covers overflow and nights/weekends. Growth is the full front desk when you want every inbound call captured.
+            Same product on every plan — more minutes and tools as your volume grows.
           </p>
           <p className="text-center text-sm text-muted-foreground mb-10 max-w-xl mx-auto">
             {basicVsGrowthFitLine()}
@@ -377,7 +377,8 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Most shops finish the same day: sign up, add your business phone, get your forwarding number, then set call forwarding (a few minutes with your carrier). Steps are in Help.
+                Setup takes minutes — sign up, enter some details, attach your phone using our setup
+                guide.
               </p>
             </CardContent>
           </Card>
@@ -503,7 +504,7 @@ export default function HomePage() {
             </Button>
           </Link>
           <p className="text-sm opacity-80 mt-6">
-            Most shops finish setup the same day.{" "}
+            Setup takes minutes.{" "}
             <Link href="/pricing" className="underline underline-offset-2 opacity-100">
               Compare plans
             </Link>

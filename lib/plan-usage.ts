@@ -159,7 +159,7 @@ export function getPlanUsageNudge(input: {
       show: true,
       severity: "info",
       title: "You're approaching your minute limit",
-      message: `${planName} fits missed and after-hours calls for most one-truck shops (≈${approxCallsPerMonth(minutesIncluded)} calls/mo). Answering every inbound call? ${upgradePlanName} is your 24/7 front desk with ${nextIncluded.toLocaleString()} min (≈${nextCalls} calls).`,
+      message: `${planName} includes ≈${approxCallsPerMonth(minutesIncluded)} calls/mo for most one-truck shops. Need more room? ${upgradePlanName} bumps you to ${nextIncluded.toLocaleString()} min (≈${nextCalls} calls) plus appointments and CRM delivery.`,
       upgradePlan,
       upgradePlanName,
       ctaLabel: `See ${upgradePlanName}`,

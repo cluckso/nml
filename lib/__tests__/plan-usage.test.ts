@@ -68,8 +68,8 @@ describe("getPlanUsageNudge", () => {
     })
     expect(nudge?.show).toBe(true)
     expect(nudge?.upgradePlan).toBe(PlanType.PRO)
-    expect(nudge?.message).toMatch(/missed and after-hours/i)
-    expect(nudge?.message).toMatch(/24\/7/i)
+    expect(nudge?.message).toMatch(/one-truck/i)
+    expect(nudge?.message).toMatch(/more room/i)
   })
 
   it("warns on overage with cost", () => {

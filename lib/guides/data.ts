@@ -36,7 +36,7 @@ const GUIDES: Guide[] = [
         heading: "Who each option is for",
         paragraphs: [
           "Ruby fits businesses that want a human voice on every call and can budget for live receptionist pricing — often starting around $235/month and climbing with volume.",
-          `CallGrabbr fits one-truck and growing trade shops that lose revenue when the phone rings during a service call or after hours. ${PLAN_BASIC} (${BASIC_FRAME}) covers missed and after-hours capture; ${PLAN_GROWTH} and ${PLAN_PLATINUM} when you want more inbound handled like a front desk.`,
+          `CallGrabbr fits one-truck and growing trade shops that lose revenue when the phone rings during a service call or after hours. ${PLAN_BASIC} (${BASIC_FRAME}) is the place to start; ${PLAN_GROWTH} and ${PLAN_PLATINUM} add more minutes and tools as volume grows.`,
         ],
       },
       {
@@ -356,7 +356,7 @@ const GUIDES: Guide[] = [
       {
         heading: "Where CallGrabbr focuses",
         paragraphs: [
-          `CallGrabbr is ${CATEGORY_NAME} for local service businesses — HVAC, plumbing, electrical, auto, and similar trades. ${PLAN_BASIC} covers the rings you miss; ${PLAN_GROWTH} and ${PLAN_PLATINUM} step up when you want most inbound handled like a front desk.`,
+          `CallGrabbr is ${CATEGORY_NAME} for local service businesses — HVAC, plumbing, electrical, auto, and similar trades. ${PLAN_BASIC} is the place to start; ${PLAN_GROWTH} and ${PLAN_PLATINUM} add more minutes and tools as volume grows.`,
           `${formatJobValuePromptLine()} Capture one you'd have lost and the plan often pays for itself for months.`,
         ],
         bullets: [
@@ -739,7 +739,7 @@ const GUIDES: Guide[] = [
       rows: [
         { label: "Captures job details for trades", callgrabbr: "Built in — issue, address, urgency", competitor: "Often generic transcripts" },
         { label: "SMS lead in seconds", callgrabbr: "Yes — text & email alerts", competitor: "Varies by product" },
-        { label: "Missed-only plan", callgrabbr: `${PLAN_BASIC} — ${BASIC_FRAME}`, competitor: "Usually full-time answering" },
+        { label: "Entry plan", callgrabbr: `${PLAN_BASIC} — ${BASIC_FRAME}`, competitor: "Usually full-time answering" },
         { label: "Pays for itself with 1 job", callgrabbr: "Yes — typical emergency ROI", competitor: "Depends on volume & intake" },
         { label: "Entry price", callgrabbr: `$${basic.price}/mo (${PLAN_BASIC})`, competitor: "e.g. Rosie ~$49/mo (answers phones)" },
       ],
@@ -758,7 +758,7 @@ const GUIDES: Guide[] = [
       },
       {
         question: "Can I use CallGrabbr only for missed calls?",
-        answer: `Yes. ${PLAN_BASIC} ($${basic.price}/mo) is ${BASIC_FRAME.toLowerCase()} — forward after hours or when unanswered, and keep daytime rings on your phone if you prefer.`,
+        answer: `Yes. On any plan you can ring your phone first and catch what you miss, or answer every inbound call — you choose in settings. ${PLAN_BASIC} ($${basic.price}/mo) is the place to start.`,
       },
     ],
     relatedLinks: [

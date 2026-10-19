@@ -11,7 +11,7 @@ const JOBS = [
   },
   {
     title: "You run a professional operation, even solo",
-    body: "Callers get a clear conversation and you get a texted lead. You look like a crew with a front desk — without hiring one.",
+    body: "Callers get a clear conversation and you get a texted lead — so you can call back and book the job.",
   },
 ] as const
 
