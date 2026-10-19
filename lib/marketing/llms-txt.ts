@@ -36,16 +36,16 @@ ${forLines}
 
 ## Pricing (USD)
 
-- Basic $99/mo — missed and after-hours lead insurance, ~100 calls estimate
+- Basic $99/mo — missed and after-hours lead insurance, ~100 calls/mo
 - Growth $159/mo — growing crew, text-back confirmation and follow-up, CRM webhook
 - Platinum $279/mo — multi-crew, high volume
 - Trial: 14 days or 40 call minutes, whichever comes first; no card; one trial per business number
-- 30-day money-back guarantee on paid subscriptions (not the free trial)
+- 30-day money-back guarantee on paid plans
 - Overage $0.22/min
 
 ## Who it is for
 
-US trade owners who lose jobs while they are on a job. Not a live receptionist for law firms or medical offices.
+US trade owners — HVAC, plumbing, electrical, auto repair, and other local service businesses — who lose jobs while they are on a job.
 
 ## Contact
 

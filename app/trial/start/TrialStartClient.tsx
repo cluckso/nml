@@ -20,10 +20,7 @@ import {
   trialConversionLine,
   trialDisclosureLine,
   trialLimitsLine,
-  trialWhatHappensAtLimitLine,
   moneyBackGuaranteeLabel,
-  moneyBackPaidOnlyLine,
-  trialActivationGoal,
 } from "@/lib/trial-marketing"
 import { pricingUrl } from "@/lib/monetization-urls"
 import { PLAN_BASIC, PLAN_GROWTH } from "@/lib/plan-labels"
@@ -161,13 +158,13 @@ export function TrialStartClient() {
             ) : (
               <>
                 {trialConversionLine()} Add your business phone to start capturing missed-call leads.{" "}
-                {trialDisclosureLine()} {trialWhatHappensAtLimitLine()} {trialActivationGoal()}
+                {trialDisclosureLine()}
               </>
             )}
           </CardDescription>
           {!cardMode && (
             <p className="text-xs text-muted-foreground px-6 pb-2">
-              {moneyBackPaidOnlyLine()}
+              {moneyBackGuaranteeLabel()}
             </p>
           )}
         </CardHeader>

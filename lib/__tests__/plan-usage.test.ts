@@ -25,16 +25,16 @@ describe("approxCallsPerMonth", () => {
 })
 
 describe("formatIncludedUsageLabel", () => {
-  it("leads with approximate calls for marketing and labels them as estimates", () => {
-    expect(formatIncludedUsageLabel(300)).toMatch(/~100 captured calls\/mo estimate \(300 min included/)
-    expect(formatIncludedUsageLabel(300)).toMatch(/not guaranteed leads/)
+  it("leads with approximate calls for marketing", () => {
+    expect(formatIncludedUsageLabel(300)).toMatch(/~100 captured calls\/mo \(300 min included/)
+    expect(formatIncludedUsageLabel(300)).not.toMatch(/not guaranteed/)
   })
 })
 
 describe("formatIncludedUsageShort", () => {
   it("shows call volume and avg duration without a dollar sign", () => {
     expect(formatIncludedUsageShort(300)).toBe(
-      `~100 calls/mo estimate · about ${TYPICAL_INTAKE_CALL_MINUTES} min each`
+      `~100 calls/mo · about ${TYPICAL_INTAKE_CALL_MINUTES} min each`
     )
     expect(formatIncludedUsageShort(300)).not.toMatch(/\$\d+ min/)
   })

@@ -92,8 +92,8 @@ export function DemoUnlock({ className = "" }: DemoUnlockProps) {
         </div>
         <CardTitle className="text-2xl">Hear the 60-second phone demo</CardTitle>
         <p className="text-muted-foreground mt-2">
-          A short sample of how we capture a lead when you can&apos;t answer — not a sales call. No
-          signup required. Optionally get a text with the lead summary after.
+          Hear how we capture a lead when you can&apos;t answer. No signup required. Optionally get a
+          text with the lead summary after.
         </p>
       </CardHeader>
       <CardContent className="text-center space-y-6">

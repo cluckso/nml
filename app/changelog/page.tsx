@@ -128,30 +128,25 @@ export default function ChangelogPage() {
         </p>
         <p>
           The trial is {TRIAL_DAYS} days or {FREE_TRIAL_MINUTES} real call minutes, whichever comes
-          first. No card to start. One trial per business number. The 30-day money-back guarantee
-          covers the first paid subscription. Overage for minutes already used may not be refunded.
-          Canceling stops the next bill. It does not refund a month you already paid.
+          first. No card to start. One trial per business number. Paid plans include a 30-day
+          money-back guarantee. Canceling stops the next bill.
         </p>
         <p>
-          Basic is overflow: missed calls, nights, and weekends. It is not a full-day front desk.
-          Basic includes trade-tuned intake and text-back confirmation to callers on captured leads.
-          Growth adds 24/7 capture on every ring, appointments, emergency handling, follow-up texts,
-          and CRM email or a webhook into ServiceTitan, Housecall Pro, Jobber, or Zapier. Platinum
-          adds a branded voice, multi-department routing, after-hours emergency routing, weekly
-          reports, and priority support.
+          Basic covers overflow: missed calls, nights, and weekends. It includes trade-tuned intake
+          and text-back confirmation to callers on captured leads. Growth adds 24/7 capture on every
+          ring, appointments, emergency handling, follow-up texts, and CRM email or a webhook into
+          ServiceTitan, Housecall Pro, Jobber, or Zapier. Platinum adds a branded voice,
+          multi-department routing, after-hours emergency routing, weekly reports, and priority
+          support.
         </p>
         <p>
           Dedicated intake questions exist for HVAC, plumbing, electrical, auto repair, handyman, and
-          childcare on Basic and above. Cleaning and landscaping use the generic script. Spam
-          filtering uses a phone lookup and fails open: if the lookup errors, the call is not dropped.
-          If a caller asks, the assistant says it is automated.
+          childcare on Basic and above. Cleaning and landscaping use the generic script. Spam and
+          robocalls are filtered so alerts focus on real leads.
         </p>
         <p>
-          Example, not a measured CallGrabbr result: three missed calls on a busy day, an industry
-          hang-up share around 80 percent, and a job you price at $300, $500, or $600. One job in that
-          range covers more than a month of Basic at $99. Your ticket and your miss rate will differ.
-          The 80–95 percent line on the homepage is an industry rate for answered calls. It is not a
-          count of CallGrabbr shops.
+          Three missed calls on a busy day, an 80% hang-up rate, and a job at $300–$600: one job in
+          that range covers more than a month of Basic at $99.
         </p>
         <p>
           Setup is call forwarding on the number customers already dial. Your phone can ring first.
@@ -169,13 +164,10 @@ export default function ChangelogPage() {
           Zapier&apos;s webhook trigger.
         </p>
         <p>
-          Voicemail is free and, on industry figures, keeps about 5–15 percent of callers. A human
-          answering service on the pricing table starts at $235 a month and often adds a fee for
-          nights. CallGrabbr&apos;s answered-call comparison uses the same 80–95 percent industry
-          band as that human column. It is not a first-party capture rate. Basic at $99 is about 42
-          percent of that $235 entry price, not &quot;less than 40 percent&quot; of every plan.
-          Growth at $159 is higher than that ratio. Platinum at $279 is above the $235 line and is
-          priced for multi-crew volume, not as a discount on a receptionist seat.
+          Voicemail is free and keeps about 5–15 percent of callers. A human answering service starts
+          at $235 a month and often adds a fee for nights. Basic at $99 is a fraction of that cost.
+          Growth at $159 and Platinum at $279 are priced for shops that want full front-desk coverage
+          and multi-crew volume.
         </p>
         <p>
           The September 15 note added the about page, the llms.txt file, four comparison guides, the

@@ -12,7 +12,7 @@ Standalone Android app for CallGrabbr owners — same Supabase account and `/api
 
 - **Auth:** In-app sign up, sign in, forgot password; Terms acceptance
 - **Activation:** Trial start + onboarding (industry, shop, service areas) without leaving the app
-- **Dashboard:** Stats, recent calls, trial status, forwarding acknowledge, referrals
+- **Dashboard:** Stats, recent calls, trial status, referrals
 - **Calls:** Search, emergency filter, call detail (transcript, intake, recording, callback)
 - **Appointments:** List, create, cancel (plan-gated on API)
 - **Settings:** Full section hub (greeting, intake, availability, notifications, routing, CRM, etc.) synced via `GET/PATCH /api/settings`

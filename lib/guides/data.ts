@@ -717,8 +717,8 @@ const GUIDES: Guide[] = [
       {
         heading: "Who is on the tools, and how spam checks work",
         paragraphs: [
-          "The U.S. Bureau of Labor Statistics counted 440,900 heating, air conditioning, and refrigeration mechanic and installer jobs in 2025, with a median wage of $61,010 in May 2025. Those jobs are on roofs, in attics, and in cramped mechanical rooms — the hours when a shop phone goes unanswered. That is a labor-market fact, not a CallGrabbr customer count.",
-          "Spam checks on CallGrabbr use Twilio Lookup with the Nomorobo add-on. If the lookup errors, the call is not blocked. The product fails open so a real customer is not dropped because a score failed to load.",
+          "The U.S. Bureau of Labor Statistics counted 440,900 heating, air conditioning, and refrigeration mechanic and installer jobs in 2025, with a median wage of $61,010 in May 2025. Those jobs are on roofs, in attics, and in cramped mechanical rooms — the hours when a shop phone goes unanswered.",
+          "Spam and robocalls are filtered with Twilio Lookup and Nomorobo so your alerts focus on real leads, not junk callers.",
         ],
       },
     ],

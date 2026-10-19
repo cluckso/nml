@@ -16,7 +16,7 @@ import {
   trialCtaLabel,
   signupPageTitle,
   signupPageDescription,
-  moneyBackPaidOnlyLine,
+  moneyBackGuaranteeLabel,
 } from "@/lib/trial-marketing"
 import { LegalConsentCheckbox } from "@/components/legal/LegalConsentCheckbox"
 import { BrandMark } from "@/components/brand/BrandMark"
@@ -147,7 +147,7 @@ export function SignUpForm({ initialNext, initialRef, initialAgency }: SignUpFor
           <CardDescription>
             {signupPageDescription()}
           </CardDescription>
-          <p className="text-xs text-muted-foreground pt-2">{moneyBackPaidOnlyLine()}</p>
+          <p className="text-xs text-muted-foreground pt-2">{moneyBackGuaranteeLabel()}</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignUp} className="space-y-4" method="post">

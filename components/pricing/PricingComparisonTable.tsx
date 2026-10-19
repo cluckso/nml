@@ -54,9 +54,9 @@ const ROWS: ComparisonRow[] = [
     human: "Delayed",
   },
   {
-    label: `Included volume (estimate)`,
+    label: "Included volume",
     voicemail: "Unlimited rings to nowhere",
-    callgrabbr: `~${basicCalls} calls/mo estimate`,
+    callgrabbr: `~${basicCalls} calls/mo`,
     human: "~50–75 min/mo",
   },
 ]
@@ -83,9 +83,6 @@ export function PricingComparisonTable({ className = "" }: { className?: string 
         <p className="text-muted-foreground leading-relaxed">
           Most shops compare us to voicemail (free, but most callers hang up) or a human answering service ($235+/mo).
           CallGrabbr is missed-call lead capture — {perCall} at {PLAN_BASIC} lead insurance.
-        </p>
-        <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
-          Included call counts are estimates (~3 min/call), not guaranteed leads.
         </p>
       </div>
 
@@ -154,9 +151,6 @@ export function PricingComparisonTable({ className = "" }: { className?: string 
           </tbody>
         </table>
       </div>
-      <p className="md:hidden text-xs text-muted-foreground mt-4 text-center leading-relaxed">
-        Call counts are estimates, not guaranteed leads.
-      </p>
     </div>
   )
 }

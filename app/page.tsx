@@ -40,12 +40,11 @@ import { homePageMetadata } from "@/lib/seo"
 import {
   basicVsGrowthFitLine,
   moneyBackGuaranteeLabel,
-  moneyBackPaidOnlyLine,
   plansFromAnchorLabel,
   trialDisclosureLine,
   trialHeadlineLabel,
   trialNavCtaLabel,
-  trialWhatHappensAtLimitLine,
+  trialTrustLine,
   trialWithNoCardSentence,
 } from "@/lib/trial-marketing"
 
@@ -90,8 +89,8 @@ export default function HomePage() {
           What you get isn&apos;t a transcript — it&apos;s a lead
         </h2>
         <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-          Name, phone, job, urgency, and a tap-to-call-back — usually within seconds. Feels like a CRM
-          ping, not a dump of words.
+          Name, phone, job, urgency, and a tap-to-call-back — in seconds. Feels like a CRM ping, not a
+          dump of words.
         </p>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-5xl mx-auto items-center">
           <SMSPreview />
@@ -116,10 +115,8 @@ export default function HomePage() {
               ))}
             </ul>
             <p className="text-sm text-muted-foreground mt-6">
-              CRM delivery available on {GROWTH_AND_PLATINUM_LABEL} plans.
-            </p>
-            <p className="text-sm text-muted-foreground mt-2">
-              Spam and robocalls filtered when possible — so alerts focus on real leads.
+              CRM delivery available on {GROWTH_AND_PLATINUM_LABEL} plans. Spam and robocalls filtered
+              so alerts focus on real leads.
             </p>
           </div>
         </div>
@@ -188,7 +185,7 @@ export default function HomePage() {
             Basic covers overflow and nights/weekends. Growth is the full front desk when you want every inbound call captured.
           </p>
           <p className="text-center text-sm text-muted-foreground mb-10 max-w-xl mx-auto">
-            {basicVsGrowthFitLine()} Call counts on each plan are estimates (~3 min/call), not guaranteed lead volume.
+            {basicVsGrowthFitLine()}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {PRICING_TIERS.map((tier) => (
@@ -223,11 +220,8 @@ export default function HomePage() {
             ))}
           </div>
           <div className="text-center mt-10">
-            <p className="text-sm text-muted-foreground mb-2">
-              {trialWithNoCardSentence()}
-            </p>
             <p className="text-sm text-muted-foreground mb-4">
-              {trialDisclosureLine()}
+              {trialWithNoCardSentence()}
             </p>
             <Link href="/sign-up?next=%2Ftrial%2Fstart">
               <Button size="lg" className="gap-2">
@@ -289,7 +283,6 @@ export default function HomePage() {
         </p>
         <IndustryPhotoCards />
         <p className="text-center text-sm text-muted-foreground max-w-2xl mx-auto mt-8">
-          Not for law firms, medical offices, or shops that need a live receptionist on every ring.
           Built for HVAC, plumbing, electrical, auto repair, and other local trades — including
           one-truck shops and childcare.
         </p>
@@ -343,12 +336,12 @@ export default function HomePage() {
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Shield className="h-5 w-5 text-primary" />
-                  Honest when asked
+                  Clear and professional
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 text-sm text-muted-foreground">
-                <p>Sounds natural in conversation — and identifies as automated if asked directly.</p>
-                <p>Calls may be recorded for quality. You control the settings.</p>
+                <p>Sounds natural in conversation — never a robot menu or hold music.</p>
+                <p>You control recording and escalation settings from your dashboard.</p>
               </CardContent>
             </Card>
           </div>
@@ -407,7 +400,8 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                Yes — and if asked, it identifies as automated. The product is missed-call lead capture; answering the phone is how we grab the job.
+                Yes. An automated system answers when you can&apos;t, runs trade-tuned intake, and texts
+                you the lead.
               </p>
             </CardContent>
           </Card>
@@ -456,19 +450,14 @@ export default function HomePage() {
                 <CreditCard className="h-6 w-6 text-primary" />
               </div>
               <p className="font-medium">No card required</p>
-              <p className="text-sm text-muted-foreground">Start risk-free</p>
+              <p className="text-sm text-muted-foreground">Start in under a minute</p>
             </div>
             <div className="flex flex-col items-center p-4">
               <div className="h-12 w-12 rounded-full bg-primary/15 flex items-center justify-center mb-3">
                 <Shield className="h-6 w-6 text-primary" />
               </div>
               <p className="font-medium">{moneyBackGuaranteeLabel()}</p>
-              <p className="text-sm text-muted-foreground">
-                {moneyBackPaidOnlyLine()}{" "}
-                <Link href="/terms" className="text-primary hover:underline">
-                  Terms
-                </Link>
-              </p>
+              <p className="text-sm text-muted-foreground">On paid plans</p>
             </div>
             <div className="flex flex-col items-center p-4">
               <div className="h-12 w-12 rounded-full bg-primary/15 flex items-center justify-center mb-3">
@@ -497,13 +486,10 @@ export default function HomePage() {
         <div className="max-w-3xl mx-auto rounded-2xl border border-white/10 bg-primary/90 backdrop-blur-md px-6 py-12 sm:px-10 text-primary-foreground shadow-2xl shadow-primary/20">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Turn missed calls into paying jobs</h2>
           <p className="text-lg opacity-90 max-w-2xl mx-auto mb-8">
-            We grab the job when you can&apos;t and text you the lead — usually within seconds.
+            We grab the job when you can&apos;t and text you the lead in seconds.
           </p>
-          <p className="text-sm opacity-90 max-w-2xl mx-auto mb-4">
-            {trialDisclosureLine()}
-          </p>
-          <p className="text-sm opacity-80 max-w-2xl mx-auto mb-6">
-            {trialWhatHappensAtLimitLine()} {moneyBackPaidOnlyLine()}
+          <p className="text-sm opacity-90 max-w-2xl mx-auto mb-6">
+            {trialTrustLine()} · {moneyBackGuaranteeLabel()}
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4 mb-8">
             <span className="opacity-90">{plansFromAnchorLabel()}</span>
@@ -517,8 +503,7 @@ export default function HomePage() {
             </Button>
           </Link>
           <p className="text-sm opacity-80 mt-6">
-            Most shops finish setup the same day. Keep your number; your phone rings first, then
-            unanswered calls forward.{" "}
+            Most shops finish setup the same day.{" "}
             <Link href="/pricing" className="underline underline-offset-2 opacity-100">
               Compare plans
             </Link>

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { acknowledgeForwarding, getDashboard, getReferrals, ApiError } from '../lib/api'
+import { getDashboard, getReferrals, ApiError } from '../lib/api'
 import { formatPhoneForDisplay, resolveCallbackPhone } from '../lib/phone'
 import { CallBackButton } from '../components/CallBackButton'
 import { CallRecordingButton } from '../components/CallRecordingButton'
@@ -19,7 +19,6 @@ export default function Dashboard({ onSignOut, refreshKey = 0 }: DashboardProps)
       name?: string
       phoneNumber?: string
       retellPhoneNumber?: string | null
-      forwardingSetupComplete?: boolean
     }
     recentCalls?: Array<{
       id?: string
@@ -40,7 +39,6 @@ export default function Dashboard({ onSignOut, refreshKey = 0 }: DashboardProps)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
-  const [ackBusy, setAckBusy] = useState(false)
   const navigate = useNavigate()
 
   const load = useCallback(async (isRefresh = false) => {
@@ -75,18 +73,6 @@ export default function Dashboard({ onSignOut, refreshKey = 0 }: DashboardProps)
   useEffect(() => {
     void load()
   }, [load, refreshKey])
-
-  const markForwardingDone = async () => {
-    setAckBusy(true)
-    try {
-      await acknowledgeForwarding()
-      await load(true)
-    } catch (e) {
-      setError(e instanceof ApiError ? e.message : String(e))
-    } finally {
-      setAckBusy(false)
-    }
-  }
 
   const formatTime = (dateStr?: string) => {
     if (!dateStr) return ''
@@ -141,17 +127,6 @@ export default function Dashboard({ onSignOut, refreshKey = 0 }: DashboardProps)
                   <p style={{ fontSize: 14, marginBottom: 8 }}>
                     Forward to: <strong>{formatPhoneForDisplay(data.business.retellPhoneNumber)}</strong>
                   </p>
-                )}
-                {!data.business?.forwardingSetupComplete && (
-                  <button
-                    type="button"
-                    className="btn btn-outline"
-                    style={{ width: '100%', marginBottom: 8 }}
-                    disabled={ackBusy}
-                    onClick={() => void markForwardingDone()}
-                  >
-                    {ackBusy ? 'Saving…' : 'I set up forwarding'}
-                  </button>
                 )}
                 <button type="button" className="btn" style={{ width: '100%' }} onClick={() => navigate('/billing')}>
                   See plans &amp; billing

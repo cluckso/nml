@@ -4,14 +4,12 @@ import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
 import { MARKETING_IMAGES, MARKETING_IMAGE_ALT } from "@/lib/marketing-images"
 import {
   CARRIER_SETUP_HREF,
-  basicVsGrowthFitLine,
-  heroGuaranteeLine,
-  moneyBackPaidOnlyLine,
+  moneyBackGuaranteeLabel,
   phoneDemoCtaLabel,
   plansFromAnchorLabel,
   setupReassuranceLine,
-  trialDisclosureLine,
   trialNavCtaLabel,
+  trialTrustLine,
 } from "@/lib/trial-marketing"
 import {
   HERO_CATEGORY_LINE,
@@ -22,7 +20,6 @@ import {
 import { getDemoNumberDisplay, getDemoNumberTel } from "@/lib/demo-line"
 import {
   ArrowRight,
-  Phone,
   PhoneOff,
 } from "lucide-react"
 import { BrandMark } from "@/components/brand/BrandMark"
@@ -59,7 +56,7 @@ export function HomeHero() {
       <p className="text-xl sm:text-2xl font-semibold text-foreground/95 mb-8 max-w-2xl mx-auto">
         {HERO_SUB}
       </p>
-      <div className="flex flex-wrap gap-4 justify-center mb-4">
+      <div className="flex flex-wrap gap-4 justify-center mb-6">
         <Link href="/sign-up?next=%2Ftrial%2Fstart" className="min-h-[44px] flex items-center">
           <Button
             size="lg"
@@ -79,29 +76,6 @@ export function HomeHero() {
           </Button>
         </Link>
       </div>
-      <p className="text-sm text-muted-foreground mb-4">
-        <a href={`tel:${getDemoNumberTel()}`} className="inline-flex items-center gap-1.5 text-primary/90 hover:text-primary hover:underline">
-          <Phone className="h-4 w-4" aria-hidden />
-          {phoneDemoCtaLabel()}
-        </a>
-      </p>
-      <p className="text-sm text-muted-foreground mb-2 max-w-xl mx-auto">
-        {trialDisclosureLine()}
-      </p>
-      <p className="text-sm text-muted-foreground mb-4 max-w-xl mx-auto">
-        <Link href="/pricing" className="text-primary/90 hover:text-primary hover:underline">
-          {plansFromAnchorLabel()} · compare plans
-        </Link>
-      </p>
-      <p className="text-sm text-muted-foreground mb-2 max-w-xl mx-auto">
-        {setupReassuranceLine()}{" "}
-        <Link href={CARRIER_SETUP_HREF} className="text-primary/90 hover:text-primary hover:underline">
-          Carrier setup guide
-        </Link>
-      </p>
-      <p className="text-sm text-muted-foreground mb-6 max-w-xl mx-auto">
-        {basicVsGrowthFitLine()}
-      </p>
       <a
         href={`tel:${getDemoNumberTel()}`}
         className="mb-6 inline-flex flex-col items-center rounded-2xl border border-primary/40 bg-background/70 px-6 py-4 backdrop-blur-sm hover:border-primary/70 hover:bg-background/80"
@@ -113,31 +87,23 @@ export function HomeHero() {
           {getDemoNumberDisplay()}
         </span>
         <span className="text-xs text-muted-foreground mt-1">
-          Tap to call · 60-second sample · no signup · not a sales call
+          Tap to call · 60-second sample · no signup
         </span>
       </a>
-      <p className="text-sm text-muted-foreground mb-6 max-w-xl mx-auto">
-        {heroGuaranteeLine()}{" "}
-        <Link href="/terms" className="text-primary/90 hover:text-primary hover:underline">
-          Terms
-        </Link>
-        {" · "}
-        <Link href="/pricing" className="text-primary/90 hover:text-primary hover:underline">
-          See plans
-        </Link>
-        {" · "}
-        <Link href="#demo" className="text-primary/90 hover:text-primary hover:underline">
-          {phoneDemoCtaLabel()}
-        </Link>
+      <p className="text-sm text-muted-foreground mb-2 max-w-xl mx-auto">
+        {trialTrustLine()} · {moneyBackGuaranteeLabel()}
       </p>
-      <p className="text-xs text-muted-foreground mb-6 max-w-xl mx-auto">
-        {moneyBackPaidOnlyLine()}
+      <p className="text-sm text-muted-foreground mb-2 max-w-xl mx-auto">
+        {setupReassuranceLine()}{" "}
+        <Link href={CARRIER_SETUP_HREF} className="text-primary/90 hover:text-primary hover:underline">
+          Carrier setup guide
+        </Link>
       </p>
       <p className="text-sm text-muted-foreground max-w-xl mx-auto">
-        Built for HVAC, plumbing, electrical, and auto repair — including one-truck shops. Most
-        callers won&apos;t leave a message — we catch the jobs voicemail loses.
+        <Link href="/pricing" className="text-primary/90 hover:text-primary hover:underline">
+          {plansFromAnchorLabel()} · compare plans
+        </Link>
       </p>
-      <p className="text-xs text-muted-foreground mt-3">Payments securely processed by Stripe.</p>
     </SectionBackdrop>
   )
 }

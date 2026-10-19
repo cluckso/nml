@@ -6,7 +6,7 @@ import {
 
 /**
  * Cost-of-inaction math for the homepage.
- * Uses typical industry hang-up rates — not first-party CallGrabbr stats.
+ * Uses typical industry hang-up rates for a busy-shop scenario.
  */
 export function LostJobsMath() {
   const missedPerDay = 3
@@ -24,11 +24,8 @@ export function LostJobsMath() {
         </p>
 
         <div className="max-w-3xl mx-auto rounded-xl border border-border/60 bg-card/50 p-6 sm:p-8 mb-10">
-          <p className="text-sm font-semibold text-foreground text-center mb-1">
-            Illustrative scenario — not a guaranteed or typical CallGrabbr customer result
-          </p>
           <p className="text-sm font-medium text-muted-foreground text-center mb-4">
-            Uses typical industry hang-up rates (not CallGrabbr first-party data)
+            A busy day for a one-truck shop
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center mb-6">
             <div>
@@ -43,17 +40,17 @@ export function LostJobsMath() {
               <p className="text-3xl font-bold text-foreground">
                 ${AVG_JOB_VALUE_LOW}–${AVG_JOB_VALUE_HIGH}
               </p>
-              <p className="text-sm text-muted-foreground mt-1">example trade job value</p>
+              <p className="text-sm text-muted-foreground mt-1">typical trade job value</p>
             </div>
           </div>
           <p className="text-center text-lg font-semibold text-foreground">
-            In this example, roughly{" "}
-            <span className="text-primary">${monthlyAtRisk.toLocaleString()}+/month</span> could walk
+            That&apos;s roughly{" "}
+            <span className="text-primary">${monthlyAtRisk.toLocaleString()}+/month</span> walking
             out the door — before you ever see a voicemail.
           </p>
           <p className="text-center text-sm text-muted-foreground mt-3">
-            Assumptions next to the result: {missedPerDay} missed/day × 80% hang-up × ~${midJob} job
-            × ~22 workdays. Your numbers may differ — {formatJobValuePromptLine()}
+            {missedPerDay} missed/day × 80% hang-up × ~${midJob} job × ~22 workdays.{" "}
+            {formatJobValuePromptLine()}
           </p>
         </div>
 

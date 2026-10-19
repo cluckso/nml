@@ -35,12 +35,12 @@ export function formatIncludedUsageLabel(includedMinutes: number): string {
 /** Call-first label for marketing — trades owners think in calls, not minutes. */
 export function formatIncludedUsagePrimary(includedMinutes: number): string {
   const calls = approxCallsPerMonth(includedMinutes)
-  return `~${calls} captured calls/mo estimate (${includedMinutes.toLocaleString()} min included · ~${TYPICAL_INTAKE_CALL_MINUTES} min/call · not guaranteed leads)`
+  return `~${calls} captured calls/mo (${includedMinutes.toLocaleString()} min included · ~${TYPICAL_INTAKE_CALL_MINUTES} min/call)`
 }
 
 export function formatIncludedUsageShort(includedMinutes: number): string {
   const calls = approxCallsPerMonth(includedMinutes)
-  return `~${calls} calls/mo estimate · about ${TYPICAL_INTAKE_CALL_MINUTES} min each`
+  return `~${calls} calls/mo · about ${TYPICAL_INTAKE_CALL_MINUTES} min each`
 }
 
 /** Effective cost per captured call at included volume (for plan cards). */

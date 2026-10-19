@@ -20,7 +20,7 @@ export function JtbdOutcomes() {
     <section className="container mx-auto px-4 py-16">
       <h2 className="text-3xl font-bold text-center mb-3">What changes when every call gets answered</h2>
       <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-        Not a feature list. What it feels like when missed calls stop costing you jobs.
+        What it feels like when missed calls stop costing you jobs.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
         {JOBS.map((job) => (

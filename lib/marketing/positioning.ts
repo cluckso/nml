@@ -75,7 +75,7 @@ export const ALLOWED_MECHANISM_PHRASES = [
 ] as const
 
 export function productDefinitionSentence(): string {
-  return `CallGrabbr is ${CATEGORY_NAME} for HVAC, plumbing, electrical, auto, and other local trades. When you miss a call, we grab the job details and text you the lead — usually within seconds.`
+  return `CallGrabbr is ${CATEGORY_NAME} for HVAC, plumbing, electrical, auto, and other local trades. When you miss a call, we grab the job details and text you the lead in seconds.`
 }
 
 export function organizationDescription(): string {

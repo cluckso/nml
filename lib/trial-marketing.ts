@@ -70,9 +70,9 @@ export function basicVsGrowthFitLine(): string {
   return `${PLAN_BASIC} = missed & after-hours lead insurance. ${PLAN_GROWTH} = every-call front-desk coverage.`
 }
 
-/** Money-back applies to paid subscriptions only — clarify near trial CTAs. */
+/** Money-back applies to paid subscriptions — keep short; avoid stacking near every CTA. */
 export function moneyBackPaidOnlyLine(): string {
-  return `${moneyBackGuaranteeLabel()} on paid subscriptions, not the free trial.`
+  return `${moneyBackGuaranteeLabel()} on paid plans`
 }
 
 export function trialOnboardingHint(): string {
@@ -115,7 +115,7 @@ export function siteMetaDescription(): string {
 }
 
 export function heroGuaranteeLine(): string {
-  return `${trialDisclosureLine()} ${moneyBackPaidOnlyLine()} Cancel anytime.`
+  return `${trialTrustLine()} · ${moneyBackGuaranteeLabel()}`
 }
 
 export function authMetaDescription(): string {
@@ -132,7 +132,7 @@ export function pricingSchemaTrialDescription(): string {
 
 /** Short value prop for auth, trial, pricing, and hero. */
 export function trialConversionLine(): string {
-  return `Forward your line for ${TRIAL_DAYS} days with ${FREE_TRIAL_MINUTES} real call minutes (${trialLimitsLine()}). Your phone rings first — set a delay so we only pick up when you can't answer, or have us answer every call if you prefer. If it doesn't capture a lead you'd have lost, don't pay.`
+  return `Forward your line for ${TRIAL_DAYS} days with ${FREE_TRIAL_MINUTES} real call minutes. Your phone rings first — we pick up when you can't. Capture a lead you'd have lost, or don't pay.`
 }
 
 /** Hero / trust strip — includes minute cap for consistent expectations. */
@@ -167,7 +167,7 @@ export function signupPageTitle(): string {
 
 /** Sign-up page subtitle. */
 export function signupPageDescription(): string {
-  return `Create your account in under a minute. ${trialDisclosureLine()} ${trialWhatHappensAtLimitLine()}`
+  return `Create your account in under a minute. ${trialDisclosureLine()}`
 }
 
 /** Sign-in page for returning users who may not have finished setup. */

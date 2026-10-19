@@ -40,8 +40,8 @@ describe("trial disclosure copy", () => {
     expect(basicVsGrowthFitLine()).toMatch(/every-call/)
   })
 
-  it("clarifies money-back is for paid subscriptions only", () => {
-    expect(moneyBackPaidOnlyLine()).toMatch(/paid subscriptions/)
-    expect(moneyBackPaidOnlyLine()).toMatch(/not the free trial/)
+  it("states money-back on paid plans without hedging the trial", () => {
+    expect(moneyBackPaidOnlyLine()).toMatch(/paid plans/)
+    expect(moneyBackPaidOnlyLine()).not.toMatch(/not the free trial/)
   })
 })

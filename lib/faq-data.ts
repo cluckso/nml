@@ -23,12 +23,12 @@ export const PRODUCT_FAQ: FaqItem[] = [
   },
   {
     question: "How does the free trial work?",
-    answer: `You get ${TRIAL_DAYS} days or ${FREE_TRIAL_MINUTES} real call minutes — whichever comes first. No credit card is required to start. One trial per business phone number. When either limit hits, answering pauses until you choose a paid plan (most one-truck shops continue on ${PLAN_BASIC} at $${MONTHLY_PRICES[PlanType.STARTER]}/month). The 30-day money-back guarantee applies to paid subscriptions, not the free trial.`,
+    answer: `You get ${TRIAL_DAYS} days or ${FREE_TRIAL_MINUTES} real call minutes — whichever comes first. No credit card is required to start. One trial per business phone number. When either limit hits, answering pauses until you choose a paid plan (most one-truck shops continue on ${PLAN_BASIC} at $${MONTHLY_PRICES[PlanType.STARTER]}/month). Paid plans include a 30-day money-back guarantee.`,
   },
   {
     question: "What information does CallGrabbr capture from callers?",
     answer:
-      "Typical lead details include caller name, callback number, reason for the call, service address, vehicle info (for auto shops), urgency, and preferred appointment time—based on your industry and settings. Review and edit exactly what we capture in Settings → What we capture.",
+      "Caller name, callback number, reason for the call, service address, vehicle info (for auto shops), urgency, and preferred appointment time — based on your industry and settings. Review and edit exactly what we capture in Settings → What we capture.",
   },
   {
     question: "Which industries does CallGrabbr support?",
@@ -47,7 +47,7 @@ export const PRODUCT_FAQ: FaqItem[] = [
   },
   {
     question: "How much does CallGrabbr cost after the trial?",
-    answer: `${PLAN_BASIC} is $${MONTHLY_PRICES[PlanType.STARTER]}/month (~${basicCalls} captured calls estimate) for missed and after-hours lead insurance. ${PLAN_GROWTH} is $${MONTHLY_PRICES[PlanType.PRO]}/month (~${growthCalls} calls estimate) for shops that want most inbound calls captured. ${PLAN_PLATINUM} is $${MONTHLY_PRICES[PlanType.ELITE]}/month (~${platinumCalls} calls estimate) for busy multi-crew operations. Call counts are estimates at ~3 minutes per call — not guaranteed lead volume. Additional usage is $0.22/min. ${formatJobValuePromptLine()} Capture one you'd have lost and the plan often pays for itself for months.`,
+    answer: `${PLAN_BASIC} is $${MONTHLY_PRICES[PlanType.STARTER]}/month (~${basicCalls} captured calls) for missed and after-hours lead insurance. ${PLAN_GROWTH} is $${MONTHLY_PRICES[PlanType.PRO]}/month (~${growthCalls} calls) for shops that want most inbound calls captured. ${PLAN_PLATINUM} is $${MONTHLY_PRICES[PlanType.ELITE]}/month (~${platinumCalls} calls) for busy multi-crew operations. Additional usage is $0.22/min. ${formatJobValuePromptLine()} Capture one you'd have lost and the plan pays for itself for months.`,
   },
   {
     question: "Which plan should I choose?",
@@ -55,7 +55,7 @@ export const PRODUCT_FAQ: FaqItem[] = [
   },
   {
     question: "Is CallGrabbr worth $99/month?",
-    answer: `For most service businesses, yes — if it captures even one job you'd have lost to voicemail. ${formatJobValuePromptLine()} ${PLAN_BASIC} costs $${MONTHLY_PRICES[PlanType.STARTER]}/month (~$0.99 per captured call at included volume). That's far less than a human answering service ($${HUMAN_RECEPTIONIST_FROM_MONTHLY}+/month) and usually cheaper than one missed emergency call.`,
+    answer: `Yes — if it captures even one job you'd have lost to voicemail. ${formatJobValuePromptLine()} ${PLAN_BASIC} costs $${MONTHLY_PRICES[PlanType.STARTER]}/month (~$0.99 per captured call at included volume). That's far less than a human answering service ($${HUMAN_RECEPTIONIST_FROM_MONTHLY}+/month) and cheaper than one missed emergency call.`,
   },
   {
     question: "Does it work with ServiceTitan or Housecall Pro?",
@@ -69,6 +69,6 @@ export const PRODUCT_FAQ: FaqItem[] = [
   {
     question: "Is it AI?",
     answer:
-      "Yes — an automated system picks up when you can't, runs trade-tuned intake, and texts you the lead. It sounds natural in conversation and identifies as automated if a caller asks directly. Calls may be recorded for quality; you control those settings. The product is missed-call lead capture — answering the phone is the mechanism, not the category.",
+      "Yes. An automated system picks up when you can't, runs trade-tuned intake, and texts you the lead. You control recording and escalation settings from your dashboard.",
   },
 ]

@@ -289,13 +289,6 @@ export async function acceptTerms() {
   return res.json()
 }
 
-export async function acknowledgeForwarding() {
-  const res = await request('api/business/acknowledge-forwarding', { method: 'POST' })
-  if (res.status === 401) throw new ApiError('Unauthorized', 401)
-  if (!res.ok) throw await parseError(res)
-  return res.json()
-}
-
 export async function getReferrals() {
   const res = await request('api/referrals')
   if (res.status === 401) throw new ApiError('Unauthorized', 401)
