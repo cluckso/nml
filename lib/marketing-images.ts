@@ -2,6 +2,7 @@
 
 const section = (name: string) => `/marketing/sections/${name}.png`
 const industry = (slug: string) => `/marketing/industries/${slug}.png`
+const industryJpg = (slug: string) => `/marketing/industries/${slug}.jpg`
 
 /** Custom funnel hero art with marketing overlays (funnel pages only). */
 export const FUNNEL_HERO_IMAGES = {
@@ -30,21 +31,21 @@ export const MARKETING_IMAGE_ALT: Record<keyof typeof MARKETING_IMAGES, string> 
   teamTrust: "Professional service business team",
 }
 
-/** Satisfied professional portraits for homepage industry cards. */
+/** Satisfied professional portraits for homepage industry cards — distinct people per trade. */
 export const INDUSTRY_CARD_IMAGES: Record<string, string> = {
-  hvac: industry("hvac"),
-  plumbing: industry("plumbing"),
-  electrical: industry("electrical"),
-  "auto-repair": industry("auto-repair"),
-  handyman: industry("handyman"),
+  hvac: industryJpg("hvac"),
+  plumbing: industryJpg("plumbing"),
+  electrical: industryJpg("electrical"),
+  "auto-repair": industryJpg("auto-repair"),
+  handyman: industryJpg("handyman"),
   cleaning: industry("cleaning"),
   landscaping: industry("landscaping"),
-  childcare: MARKETING_IMAGES.teamTrust,
+  childcare: industryJpg("childcare"),
 }
 
 /** Default industry imagery (funnel heroes where available, else local portraits). */
 export const INDUSTRY_IMAGES: Record<string, string> = {
-  hvac: industry("hvac"),
+  hvac: industryJpg("hvac"),
   plumbing: FUNNEL_HERO_IMAGES.plumbing,
   electrical: FUNNEL_HERO_IMAGES.electrical,
   "auto-repair": FUNNEL_HERO_IMAGES["auto-repair"],
