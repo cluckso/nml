@@ -9,6 +9,7 @@ import { CallLog } from "@/components/calls/CallLog"
 import { SetupAICard } from "@/components/dashboard/SetupAICard"
 import { TrialCard } from "@/components/dashboard/TrialCard"
 import { TrialActivationChecklist } from "@/components/dashboard/TrialActivationChecklist"
+import { GreetingPreviewCard } from "@/components/dashboard/GreetingPreviewCard"
 import { FirstLeadUpgradeBanner } from "@/components/dashboard/FirstLeadUpgradeBanner"
 import { ROICard } from "@/components/dashboard/ROICard"
 import { ReferralCard } from "@/components/dashboard/ReferralCard"
@@ -210,7 +211,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
           <>
             <FirstLeadUpgradeBanner callCount={stats._count} />
             <TrialActivationChecklist
+              trialStarted={!!business?.trialStartedAt || trial.isOnTrial}
               onboardingComplete={!!business?.onboardingComplete}
+              greetingPreviewed={
+                !!mergeWithDefaults(business?.settings as Partial<BusinessSettings> | null).greeting
+                  .greetingPreviewedAt
+              }
               hasAgent={hasAgent}
               hasForwardingNumber={hasForwardingNumber}
               forwardingReady={
@@ -222,6 +228,13 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               }
               hasCalls={stats._count > 0}
               isEnded={trial.isExhausted || trial.isExpired}
+            />
+            <GreetingPreviewCard
+              alreadyPreviewed={
+                !!mergeWithDefaults(business?.settings as Partial<BusinessSettings> | null).greeting
+                  .greetingPreviewedAt
+              }
+              businessName={business?.name ?? "your shop"}
             />
           </>
         )}

@@ -90,7 +90,9 @@ function SignInContent() {
         { email: data.user.email ?? undefined },
         { signup_date: data.user.created_at }
       )
-      analytics.trackEvent("signup_completed")
+      analytics.trackEvent("confirmed_email")
+      // Ensure Prisma user exists, then enqueue first-visit re-engagement email.
+      void fetch("/api/user/first-visit-email", { method: "POST" }).catch(() => {})
     }
 
     function continueAfterConfirm() {

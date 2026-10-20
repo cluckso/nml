@@ -166,6 +166,15 @@ export function SettingsClient() {
   }, [])
 
   useEffect(() => {
+    if (activeTab !== "greeting" || loading) return
+    if (window.location.hash !== "#preview-greeting") return
+    const t = window.setTimeout(() => {
+      document.getElementById("preview-greeting")?.scrollIntoView({ behavior: "smooth", block: "center" })
+    }, 50)
+    return () => window.clearTimeout(t)
+  }, [activeTab, loading])
+
+  useEffect(() => {
     fetch("/api/settings")
       .then(async (r) => {
         const d = await r.json()
@@ -557,11 +566,29 @@ function Slider({ label, value, onChange, min = 0, max = 1, step = 0.1 }: { labe
   )
 }
 
-function playBrowserVoicePreview(text: string, rate: number) {
+function playBrowserVoicePreview(
+  text: string,
+  rate: number,
+  voiceGender?: "male" | "female" | null
+) {
   if (typeof window === "undefined" || !window.speechSynthesis) return false
   window.speechSynthesis.cancel()
   const utterance = new SpeechSynthesisUtterance(text)
   utterance.rate = Math.min(2, Math.max(0.5, rate))
+  const voices = window.speechSynthesis.getVoices()
+  if (voices.length > 0) {
+    const prefer =
+      voiceGender === "female"
+        ? /female|woman|zira|samantha|karen|moira|susan/i
+        : voiceGender === "male"
+          ? /male|man|david|mark|daniel|alex|fred/i
+          : null
+    const match =
+      (prefer ? voices.find((v) => prefer.test(v.name)) : null) ??
+      voices.find((v) => v.lang.startsWith("en")) ??
+      voices[0]
+    if (match) utterance.voice = match
+  }
   window.speechSynthesis.speak(utterance)
   return true
 }
@@ -632,16 +659,30 @@ function GreetingSection({
   const [d, setD] = useState(value)
   const [previewLoading, setPreviewLoading] = useState(false)
   const [previewError, setPreviewError] = useState<string | null>(null)
+  const [previewText, setPreviewText] = useState<string | null>(null)
+  const [previewSummary, setPreviewSummary] = useState<string | null>(null)
+  const [previewPlaying, setPreviewPlaying] = useState(false)
   const showPremiumToggle = planType === PlanType.PRO
   const premiumIncluded = planType != null && hasPremiumElevenLabsVoice(planType, true)
 
   const handlePreviewGreeting = async () => {
     setPreviewLoading(true)
     setPreviewError(null)
+    setPreviewPlaying(false)
     try {
       const data = await fetchVoicePreview({ greeting: d, mode: "greeting" })
-      const played = playBrowserVoicePreview(data.text, data.voiceSpeed)
-      if (!played) setPreviewError("Browser speech preview is not available on this device.")
+      setPreviewText(data.text)
+      setPreviewSummary(data.voiceSummary)
+      const played = playBrowserVoicePreview(data.text, data.voiceSpeed, d.voiceGender)
+      if (!played) {
+        setPreviewError("Browser speech preview is not available on this device. Live calls still use your Retell voice.")
+        return
+      }
+      setPreviewPlaying(true)
+      const previewedAt = new Date().toISOString()
+      setD({ ...d, greetingPreviewedAt: previewedAt })
+      // Persist activation milestone without a full settings save / Retell sync.
+      void fetch("/api/activation/greeting-previewed", { method: "POST" }).catch(() => {})
     } catch (e) {
       setPreviewError(e instanceof Error ? e.message : "Preview failed")
     } finally {
@@ -655,11 +696,26 @@ function GreetingSection({
         <CardDescription>How your call assistant introduces itself on calls.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2">
+        <div className="space-y-2" id="preview-greeting">
           <Label>Business name pronunciation <span className="text-muted-foreground font-normal">(optional)</span></Label>
           <Input placeholder="e.g. 'Mc-Gee Plumming'" value={d.businessNamePronunciation ?? ""} onChange={(e) => setD({ ...d, businessNamePronunciation: e.target.value || null })} />
           <p className="text-xs text-muted-foreground">Phonetic spelling so your assistant says your name correctly.</p>
           <VoicePreviewButton label="Preview pronunciation & greeting" loading={previewLoading} onClick={handlePreviewGreeting} />
+          <p className="text-xs text-muted-foreground">
+            Rough browser preview for speed — live callers hear your Retell voice
+            {premiumIncluded || d.premiumVoice ? " (including premium when enabled)" : ""}.
+          </p>
+          {previewText && (
+            <blockquote className="rounded-md border border-border/60 bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
+              “{previewText}”
+            </blockquote>
+          )}
+          {previewSummary && <p className="text-xs text-muted-foreground">{previewSummary}</p>}
+          {previewPlaying && !previewError && (
+            <p className="text-xs text-emerald-700 dark:text-emerald-400" role="status">
+              Playing preview…
+            </p>
+          )}
           {previewError && <p className="text-xs text-destructive">{previewError}</p>}
         </div>
         <div className="space-y-2">
@@ -1961,12 +2017,17 @@ function VoiceBrandSection({ value, onSave, saving }: { value: VoiceBrandSetting
   const [previewLoading, setPreviewLoading] = useState(false)
   const [previewError, setPreviewError] = useState<string | null>(null)
 
+  const [previewText, setPreviewText] = useState<string | null>(null)
+  const [previewSummary, setPreviewSummary] = useState<string | null>(null)
+
   const handlePreviewVoice = async () => {
     setPreviewLoading(true)
     setPreviewError(null)
     try {
       const data = await fetchVoicePreview({ voiceBrand: d, mode: "voice" })
-      const played = playBrowserVoicePreview(data.text, data.voiceSpeed)
+      setPreviewText(data.text)
+      setPreviewSummary(data.voiceSummary)
+      const played = playBrowserVoicePreview(data.text, data.voiceSpeed, null)
       if (!played) setPreviewError("Browser speech preview is not available on this device.")
     } catch (e) {
       setPreviewError(e instanceof Error ? e.message : "Preview failed")
@@ -1982,9 +2043,17 @@ function VoiceBrandSection({ value, onSave, saving }: { value: VoiceBrandSetting
         <CardDescription>Fine-tune voice and personality.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <VoicePreviewButton label="Preview voice tone" loading={previewLoading} onClick={handlePreviewVoice} />
-          {previewError && <p className="text-xs text-destructive">{previewError}</p>}
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <VoicePreviewButton label="Preview voice tone" loading={previewLoading} onClick={handlePreviewVoice} />
+            {previewError && <p className="text-xs text-destructive">{previewError}</p>}
+          </div>
+          {previewText && (
+            <blockquote className="rounded-md border border-border/60 bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
+              “{previewText}”
+            </blockquote>
+          )}
+          {previewSummary && <p className="text-xs text-muted-foreground">{previewSummary}</p>}
         </div>
         <Slider label="Speed" value={d.speed} onChange={(v) => setD({ ...d, speed: v })} />
         <Slider label="Warmth" value={d.warmth} onChange={(v) => setD({ ...d, warmth: v })} />

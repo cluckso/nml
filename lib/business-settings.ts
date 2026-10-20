@@ -78,6 +78,8 @@ export interface GreetingSettings {
   tone: "formal" | "friendly" | "direct"
   /** Mid Volume add-on: ElevenLabs premium voice (Elite always uses ElevenLabs regardless). */
   premiumVoice?: boolean
+  /** ISO timestamp when owner successfully played greeting preview (activation). */
+  greetingPreviewedAt?: string | null
 }
 
 /** Intake template selection — Pro+ */
@@ -222,6 +224,7 @@ export const DEFAULT_SETTINGS: BusinessSettings = {
     voiceStyle: null,
     tone: "friendly",
     premiumVoice: false,
+    greetingPreviewedAt: null,
   },
   intakeFields: DEFAULT_INTAKE_FIELDS,
   availability: {
