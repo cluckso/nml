@@ -274,6 +274,7 @@ const GUIDES: Guide[] = [
           `Live receptionist services (e.g. Ruby-style) often start around $${HUMAN_RECEPTIONIST_FROM_MONTHLY}/month and climb with minutes.`,
           "Hybrid AI + live receptionist platforms (e.g. Smith.ai-style) commonly land roughly $95–$300+/month depending on human backup and volume.",
           `Entry receptionist tools may advertise near $49/mo. CallGrabbr ${PLAN_BASIC} is $${basic.price}/mo for missed and after-hours capture — with ${PLAN_GROWTH} at $${growth.price}/mo and ${PLAN_PLATINUM} at $${platinum.price}/mo when you need more coverage.`,
+          "Price tags alone mislead: compare what you get per dollar — trade-style intake, how fast the lead hits your phone, and whether you pay for rings you already answer during the day.",
         ],
       },
       {
@@ -281,6 +282,7 @@ const GUIDES: Guide[] = [
         paragraphs: [
           `${formatJobValuePromptLine()} For HVAC, plumbing, and similar trades, that one after-hours job can cover months of CallGrabbr.`,
           "Voicemail is free until it isn't — most emergency callers hang up and dial the next number on the list.",
+          "Weekend no-heat, holiday burst pipes, and late-night lockouts are when homeowners are least patient. If your shop only answers 8–5, those jobs go to whoever picks up first — often a competitor with after-hours coverage.",
         ],
       },
       {
@@ -289,6 +291,7 @@ const GUIDES: Guide[] = [
           `${PLAN_BASIC}: you're on jobs all day and mainly need evenings, weekends, and the rings you miss.`,
           `${PLAN_GROWTH}: you want most inbound handled so the shop phone never goes to voicemail during busy hours.`,
           `${PLAN_PLATINUM}: multi-crew or high volume where dropped calls are expensive every day.`,
+          "Start with the smallest plan that covers when you actually lose work. You can upgrade later; paying for always-on coverage when you only miss after-hours rings is how shops overspend.",
         ],
         bullets: [
           `CallGrabbr ${PLAN_BASIC}: $${basic.price}/mo`,
@@ -301,6 +304,7 @@ const GUIDES: Guide[] = [
         heading: "DIY vs lead capture",
         paragraphs: [
           "Forwarding to a personal cell after hours is free but burns your evenings and still drops calls when you're unavailable. A lead capture layer exists so the caller gets intake instead of a busy signal or voicemail.",
+          "Family dinner, church, or a second job on the truck: you cannot be the after-hours line forever. Capture the name, phone, address, and urgency in a text you can return when you are free — without putting every emergency on your personal phone.",
         ],
       },
     ],
@@ -319,6 +323,11 @@ const GUIDES: Guide[] = [
         question: "Can I only forward after hours?",
         answer:
           "Yes. Most carriers let you forward only when unanswered or on a schedule. Forward after hours to CallGrabbr and keep daytime rings on your phone if you prefer.",
+      },
+      {
+        question: "What should I compare besides monthly price?",
+        answer:
+          "Look at lead delivery speed, whether intake asks for address and urgency, overage rates after included minutes, and whether you can keep daytime calls on your phone. The cheapest plan that still loses jobs is the expensive one.",
       },
     ],
     relatedLinks: [
