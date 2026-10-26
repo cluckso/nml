@@ -17,7 +17,7 @@ export const HERO_H1 = "Stop Losing Jobs to Missed Calls"
 
 /** First 8–12 words of the hero — names category + ICP (audit D1.1 / D2.1). */
 export const HERO_CATEGORY_LINE =
-  "AI answering service for HVAC, plumbing, electrical, and auto shops"
+  "Missed-call lead capture for HVAC, plumbing, electrical, and auto shops"
 
 export const HERO_SUB =
   "Missed-call lead capture for HVAC, plumbing, electrical, and auto — we grab the job and text it to you in seconds."

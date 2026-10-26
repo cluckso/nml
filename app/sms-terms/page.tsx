@@ -3,6 +3,7 @@ import Link from "next/link"
 import { PublicSmsOptInForm } from "@/components/consent/PublicSmsOptInForm"
 import { LEGAL_LAST_UPDATED } from "@/lib/site-contact"
 import { JsonLd } from "@/components/seo/JsonLd"
+import { DEFAULT_OG_IMAGE } from "@/lib/seo"
 import { webPageJsonLd } from "@/lib/structured-data"
 
 const SMS_TITLE = "SMS Opt-In & Messaging Terms - CallGrabbr"
@@ -13,6 +14,18 @@ export const metadata: Metadata = {
   title: SMS_TITLE,
   description: SMS_DESCRIPTION,
   alternates: { canonical: "/sms-terms" },
+  openGraph: {
+    title: SMS_TITLE,
+    description: SMS_DESCRIPTION,
+    type: "website",
+    images: [DEFAULT_OG_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SMS_TITLE,
+    description: SMS_DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE.url],
+  },
 }
 
 /**

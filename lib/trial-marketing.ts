@@ -111,7 +111,7 @@ export function trialBillingCardLabel(): string {
 }
 
 export function siteMetaDescription(): string {
-  return `AI answering service for HVAC and plumbing. We grab missed-call leads and text you in seconds. ${trialLimitsLine()}. No card required.`
+  return `Missed-call lead capture for HVAC and plumbing. We grab jobs you can't answer and text you in seconds. ${TRIAL_DAYS}-day or ${FREE_TRIAL_MINUTES}-min trial. No card.`
 }
 
 export function heroGuaranteeLine(): string {

@@ -9,6 +9,7 @@ import {
 } from "@/lib/guides/authorship"
 import { FOUNDER, WHY_I_BUILT_THIS } from "@/lib/marketing/founder"
 import { FounderAttestation } from "@/components/marketing/FounderAttestation"
+import { DEFAULT_OG_IMAGE } from "@/lib/seo"
 import { breadcrumbJsonLd, personAuthorJsonLd, webPageJsonLd } from "@/lib/structured-data"
 
 const TITLE = "Steven Steinhoff — CallGrabbr guides"
@@ -19,6 +20,18 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   alternates: { canonical: AUTHOR_PATH },
+  openGraph: {
+    title: TITLE,
+    description: DESCRIPTION,
+    type: "profile",
+    images: [DEFAULT_OG_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE.url],
+  },
 }
 
 export default function AuthorPage() {

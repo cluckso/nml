@@ -5,27 +5,30 @@ import { Button } from "@/components/ui/button"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { GUIDE_TRIAL_HREF, getAllGuides } from "@/lib/guides"
 import { CATEGORY_NAME } from "@/lib/marketing/positioning"
-import { DEFAULT_OG_IMAGE, SEO_KEYWORDS } from "@/lib/seo"
+import { DEFAULT_OG_IMAGE } from "@/lib/seo"
+import { keywordsForPath } from "@/lib/seo-keywords"
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data"
 import { trialNavCtaLabel, trialSummaryShort } from "@/lib/trial-marketing"
 
+const GUIDES_TITLE = "Contractor Missed-Call Guides | CallGrabbr"
+const GUIDES_DESCRIPTION =
+  "Comparisons and buyer guides for HVAC and plumbing shops: missed-call lead capture, vs Ruby, Smith.ai, Rosie, OnCrew, and after-hours cost."
+
 export const metadata: Metadata = {
-  title: "Guides for Contractors | CallGrabbr",
-  description:
-    "Comparisons and buyer guides for HVAC and plumbing shops: missed-call lead capture, vs Ruby, Smith.ai, Rosie, OnCrew, and after-hours cost.",
-  keywords: [...SEO_KEYWORDS, "CallGrabbr guides", "missed call lead capture comparison"],
+  title: GUIDES_TITLE,
+  description: GUIDES_DESCRIPTION,
+  keywords: keywordsForPath("/guides"),
   alternates: { canonical: "/guides" },
   openGraph: {
-    title: "Guides for Contractors | CallGrabbr",
-    description:
-      "Contractor guides: missed-call lead capture, plumbing and HVAC buyers, and comparisons vs Ruby, Smith.ai, Rosie, and OnCrew.",
+    title: GUIDES_TITLE,
+    description: GUIDES_DESCRIPTION,
     type: "website",
     images: [DEFAULT_OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Guides for Contractors | CallGrabbr",
-    description: "Nine contractor guides: lead capture comparisons, buyer guides, and after-hours cost.",
+    title: GUIDES_TITLE,
+    description: GUIDES_DESCRIPTION,
     images: [DEFAULT_OG_IMAGE.url],
   },
 }
@@ -52,7 +55,9 @@ export default function GuidesIndexPage() {
 
       <section className="container mx-auto px-4 py-16 md:py-20">
         <div className="max-w-3xl mx-auto text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">Guides for contractors</h1>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+            Contractor missed-call guides
+          </h1>
           <p className="text-lg text-muted-foreground mb-8">
             Straight comparisons and cost guides for shops that can&apos;t afford missed after-hours jobs —{" "}
             {CATEGORY_NAME} vs receptionist software, not another voicemail box.{" "}

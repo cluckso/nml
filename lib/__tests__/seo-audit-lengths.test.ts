@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest"
 import { getAllGuides } from "@/lib/guides"
 import { guideLimitsPlainText } from "@/lib/guides/limits-copy"
 import { getIndustryLandingBySlug } from "@/lib/industry-data"
-import { guideDocumentTitle, industryPageMetadata } from "@/lib/seo"
+import { HERO_H1 } from "@/lib/marketing/positioning"
+import { guideDocumentTitle, homePageMetadata, industryPageMetadata } from "@/lib/seo"
+import { siteMetaDescription } from "@/lib/trial-marketing"
 
 function words(text: string): number {
   return text.split(/\s+/).filter(Boolean).length
@@ -59,6 +61,59 @@ describe("audit title and description lengths", () => {
       expect(String(meta.description).length, `${slug} description`).toBeGreaterThanOrEqual(110)
       expect(String(meta.description).length, `${slug} description`).toBeLessThanOrEqual(160)
     }
+  })
+
+  it("keeps hub titles 30-60, descriptions 110-160, and home H1 aligned", () => {
+    const hubs: { name: string; title: string; description: string }[] = [
+      {
+        name: "home",
+        title: String(homePageMetadata().title),
+        description: siteMetaDescription(),
+      },
+      {
+        name: "pricing",
+        title: "Missed-Call Lead Capture Pricing | CallGrabbr",
+        description:
+          "Basic $99, Growth $189, Platinum $279. Missed-call lead capture for HVAC and trades. 14-day or 40-min free trial. 30-day money-back.",
+      },
+      {
+        name: "faq",
+        title: "Missed-Call Lead Capture FAQ | CallGrabbr",
+        description:
+          "Missed-call and after-hours lead capture FAQ for HVAC and plumbing. Call forwarding for AT&T, Verizon, T-Mobile. Pricing, trial, and setup.",
+      },
+      {
+        name: "compare",
+        title: "Compare CallGrabbr vs AI Answering & Receptionists",
+        description:
+          "Side-by-side missed-call lead capture vs Ruby, Rosie, Smith.ai, OnCrew, Broccoli, and live receptionists for HVAC and plumbing shops.",
+      },
+      {
+        name: "about",
+        title: "About CallGrabbr — Why I built this",
+        description:
+          "Why CallGrabbr exists: missed-call lead capture for HVAC, plumbing, and local trades — grab the job when you can't answer and text it in seconds.",
+      },
+      {
+        name: "guides",
+        title: "Contractor Missed-Call Guides | CallGrabbr",
+        description:
+          "Comparisons and buyer guides for HVAC and plumbing shops: missed-call lead capture, vs Ruby, Smith.ai, Rosie, OnCrew, and after-hours cost.",
+      },
+      {
+        name: "blog",
+        title: "Missed-Call Lead Capture Blog | CallGrabbr",
+        description:
+          "Practical notes on missed-call lead capture for HVAC, plumbing, and local trades — after-hours answering, forwarding, and speed-to-lead tips.",
+      },
+    ]
+    for (const hub of hubs) {
+      expect(hub.title.length, `${hub.name} title`).toBeGreaterThanOrEqual(30)
+      expect(hub.title.length, `${hub.name} title`).toBeLessThanOrEqual(60)
+      expect(hub.description.length, `${hub.name} description`).toBeGreaterThanOrEqual(110)
+      expect(hub.description.length, `${hub.name} description`).toBeLessThanOrEqual(160)
+    }
+    expect(String(homePageMetadata().title)).toContain(HERO_H1)
   })
 
   it("gives each flagged guide at least 800 words", () => {

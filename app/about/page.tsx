@@ -13,7 +13,7 @@ import { trialNavCtaLabel } from "@/lib/trial-marketing"
 
 const TITLE = "About CallGrabbr — Why I built this"
 const DESCRIPTION =
-  "Why CallGrabbr exists: an AI answering service that captures missed-call leads for HVAC, plumbing, and other local trades."
+  "Why CallGrabbr exists: missed-call lead capture for HVAC, plumbing, and local trades — grab the job when you can't answer and text it in seconds."
 
 export const metadata: Metadata = {
   title: TITLE,

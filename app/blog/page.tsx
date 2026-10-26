@@ -8,7 +8,7 @@ import { keywordsForPath } from "@/lib/seo-keywords"
 
 export const revalidate = 3600
 
-const TITLE = "Blog | CallGrabbr"
+const TITLE = "Missed-Call Lead Capture Blog | CallGrabbr"
 const DESCRIPTION =
   "Practical notes on missed-call lead capture for HVAC, plumbing, and local trades — after-hours answering, forwarding, and speed-to-lead tips."
 

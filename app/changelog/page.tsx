@@ -15,6 +15,15 @@ const DESCRIPTION =
 const ENTRIES = [
   {
     date: "2026-10-26",
+    title: "SEO titles, crawl verify, and monitoring",
+    items: [
+      "Hub titles/descriptions and home copy lead with missed-call lead capture; guides/blog H1 and meta aligned.",
+      "robots.txt disallows /subscribe/; crawl-config tests lock sitemap must-include and private-path blocklist.",
+      "docs/SEO_MONITORING.md + lib/seo-monitoring.ts for Search Console, GA4, and weekly checks.",
+    ],
+  },
+  {
+    date: "2026-10-26",
     title: "SEO keyword map, schema, and linking pass",
     items: [
       "Durable search-intent map in lib/seo-keywords.ts; industry meta titles/descriptions filled in.",

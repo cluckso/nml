@@ -9,6 +9,10 @@ import { Nav } from "@/components/nav"
 import { SUPPORT_EMAIL } from "@/lib/site-contact"
 import { VS_PAGE_LINKS } from "@/lib/marketing/comparisons"
 import { GOOGLE_PLAY_STORE_URL } from "@/lib/mobile-app"
+import {
+  GA4_MEASUREMENT_ID,
+  googleSiteVerificationToken,
+} from "@/lib/seo-monitoring"
 import { SITE_URL } from "@/lib/site-url"
 import { siteMetaDescription } from "@/lib/trial-marketing"
 import { JsonLd } from "@/components/seo/JsonLd"
@@ -16,14 +20,13 @@ import { organizationJsonLd, webSiteJsonLd } from "@/lib/structured-data"
 
 const inter = Inter({ subsets: ["latin"], display: "swap" })
 
-const googleSiteVerification =
-  process.env.GOOGLE_SITE_VERIFICATION || "vbp7kMaN9FYqtyLddH0hqILwUGQLAq6l8XbER6JwCJ0"
+const googleSiteVerification = googleSiteVerificationToken()
 
 // Google Tag Manager — set NEXT_PUBLIC_GTM_ID in your host env (e.g. GTM-XXXXXXX).
 const gtmId = process.env.NEXT_PUBLIC_GTM_ID?.trim()
 
 /** Google Analytics (gtag.js) — measurement ID for all pages. */
-const GA_MEASUREMENT_ID = "G-F7EPPRSNR1"
+const GA_MEASUREMENT_ID = GA4_MEASUREMENT_ID
 
 /** Spotify Ads Manager pixel — PAGE_VIEW on load. */
 const SPOTIFY_PIXEL_KEY = "8b593790e34b49699d8e5caa3c54f20d"
