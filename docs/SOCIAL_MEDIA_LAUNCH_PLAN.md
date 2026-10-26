@@ -201,9 +201,9 @@ https://www.callgrabbr.com
 What does it cost to never miss a lead?
 
 CallGrabbr:
-• Solo — $99/mo (300 min)
-• Team — $159/mo (800 min)
-• Pro — $279/mo (1,500 min)
+• Basic — $99/mo (250 min)
+• Growth — $189/mo (500 min)
+• Platinum — $279/mo (1,200 min)
 
 No setup fee. No contract. Cancel anytime.
 14-day free trial — no credit card to start.

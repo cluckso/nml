@@ -1,9 +1,13 @@
 import type { FaqItem } from "@/lib/structured-data"
 import { PLAN_BASIC, PLAN_GROWTH, PLAN_PLATINUM } from "@/lib/plan-labels"
 import { MONTHLY_PRICES, getIncludedMinutes, TRIAL_DAYS, FREE_TRIAL_MINUTES } from "@/lib/plans"
-import { approxCallsPerMonth } from "@/lib/plan-usage"
+import { approxCallsPerMonth, formatCostPerCapturedCall } from "@/lib/plan-usage"
 import { PlanType } from "@prisma/client"
-import { formatJobValuePromptLine, HUMAN_RECEPTIONIST_FROM_MONTHLY } from "@/lib/pricing-catalog"
+import {
+  formatJobValuePromptLine,
+  formatOverageRate,
+  HUMAN_RECEPTIONIST_FROM_MONTHLY,
+} from "@/lib/pricing-catalog"
 import { productDefinitionSentence } from "@/lib/marketing/positioning"
 
 const basicCalls = approxCallsPerMonth(getIncludedMinutes(PlanType.STARTER))
@@ -47,15 +51,15 @@ export const PRODUCT_FAQ: FaqItem[] = [
   },
   {
     question: "How much does CallGrabbr cost after the trial?",
-    answer: `${PLAN_BASIC} is $${MONTHLY_PRICES[PlanType.STARTER]}/month (~${basicCalls} captured calls). ${PLAN_GROWTH} is $${MONTHLY_PRICES[PlanType.PRO]}/month (~${growthCalls} calls) with more minutes, appointments, and CRM delivery. ${PLAN_PLATINUM} is $${MONTHLY_PRICES[PlanType.ELITE]}/month (~${platinumCalls} calls) for busy multi-crew operations. Additional usage is $0.22/min. ${formatJobValuePromptLine()} Capture one you'd have lost and the plan pays for itself for months.`,
+    answer: `${PLAN_BASIC} is $${MONTHLY_PRICES[PlanType.STARTER]}/month (~${basicCalls} captured calls). ${PLAN_GROWTH} is $${MONTHLY_PRICES[PlanType.PRO]}/month (~${growthCalls} calls) with appointments, follow-ups, and CRM delivery. ${PLAN_PLATINUM} is $${MONTHLY_PRICES[PlanType.ELITE]}/month (~${platinumCalls} calls) for busy multi-crew operations. Additional usage is ${formatOverageRate()}. ${formatJobValuePromptLine()} Capture one you'd have lost and the plan pays for itself for months.`,
   },
   {
     question: "Which plan should I choose?",
-    answer: `Start with ${PLAN_BASIC} if you're a one-truck shop. Choose ${PLAN_GROWTH} when you need more included minutes, appointments, and CRM delivery. ${PLAN_PLATINUM} fits busy shops with multiple crews or departments. Upgrade anytime as volume grows.`,
+    answer: `Start with ${PLAN_BASIC} if you're a one-truck shop. Choose ${PLAN_GROWTH} when you need appointments, CRM delivery, and more included minutes. ${PLAN_PLATINUM} fits busy shops with multiple crews or departments. Upgrade anytime as volume grows.`,
   },
   {
     question: "Is CallGrabbr worth $99/month?",
-    answer: `Yes — if it captures even one job you'd have lost to voicemail. ${formatJobValuePromptLine()} ${PLAN_BASIC} costs $${MONTHLY_PRICES[PlanType.STARTER]}/month (~$0.99 per captured call at included volume). That's far less than a human answering service ($${HUMAN_RECEPTIONIST_FROM_MONTHLY}+/month) and cheaper than one missed emergency call.`,
+    answer: `Yes — if it captures even one job you'd have lost to voicemail. ${formatJobValuePromptLine()} ${PLAN_BASIC} costs $${MONTHLY_PRICES[PlanType.STARTER]}/month (${formatCostPerCapturedCall(MONTHLY_PRICES[PlanType.STARTER], getIncludedMinutes(PlanType.STARTER))} at included volume). That's far less than a human answering service ($${HUMAN_RECEPTIONIST_FROM_MONTHLY}+/month) and cheaper than one missed emergency call.`,
   },
   {
     question: "Does it work with ServiceTitan or Housecall Pro?",

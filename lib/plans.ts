@@ -12,10 +12,10 @@ function isEliteTier(planType: PlanType | null | undefined): boolean {
 
 /** Included call minutes per plan per month */
 export const INCLUDED_MINUTES: Record<PlanType, number> = {
-  [PlanType.STARTER]: 300,
-  [PlanType.PRO]: 800,
-  [PlanType.LOCAL_PLUS]: 1500,
-  [PlanType.ELITE]: 1500,
+  [PlanType.STARTER]: 250,
+  [PlanType.PRO]: 500,
+  [PlanType.LOCAL_PLUS]: 1200,
+  [PlanType.ELITE]: 1200,
 }
 
 /** One-time setup fee per plan (USD) — no setup fees */
@@ -32,10 +32,10 @@ export const FREE_TRIAL_MINUTES = 40
 /** Free trial: validity window in days (trial ends at TRIAL_DAYS or trial minute cap, whichever comes first) */
 export const TRIAL_DAYS = 14
 
-/** Monthly price per plan (USD) — Basic $99, Growth $159, Platinum $279 */
+/** Monthly price per plan (USD) — Basic $99, Growth $189, Platinum $279 */
 export const MONTHLY_PRICES: Record<PlanType, number> = {
   [PlanType.STARTER]: 99,
-  [PlanType.PRO]: 159,
+  [PlanType.PRO]: 189,
   [PlanType.LOCAL_PLUS]: 279,
   [PlanType.ELITE]: 279,
 }
@@ -52,7 +52,7 @@ export function getMonthlyPrice(planType: PlanType): number {
 }
 
 /** Overage rate per minute (USD) */
-export const OVERAGE_RATE_PER_MIN = 0.22
+export const OVERAGE_RATE_PER_MIN = 0.29
 
 /** Max call duration (seconds) we accept from webhooks; longer calls are clamped to prevent abuse. */
 export const MAX_CALL_DURATION_SECONDS = 24 * 60 * 60 // 24 hours

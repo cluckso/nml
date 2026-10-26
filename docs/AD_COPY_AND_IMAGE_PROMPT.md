@@ -1,12 +1,12 @@
 # CallGrabbr — Ad Copy & Ad Image Generation Prompt
 
-> **Keep in sync with the live site** (`app/page.tsx`, `lib/pricing-catalog.ts`). Pricing: Basic $99 / Growth $159 / Platinum $279. Trial: 14 days, 40 minutes, no card. Lead fields are captured when callers share them — do not promise every field on every call.
+> **Keep in sync with the live site** (`app/page.tsx`, `lib/pricing-catalog.ts`). Pricing: Basic $99 / Growth $189 / Platinum $279. Trial: 14 days, 40 minutes, no card. Lead fields are captured when callers share them — do not promise every field on every call.
 
 ## Product summary (for reference)
 - **What:** Missed-call lead capture for forwarded business lines — grab the job when you can't answer; text/email summary in seconds.
 - **Who:** Local service businesses (HVAC, plumbing, electrician, auto repair, handyman).
 - **Trial:** 14-day free trial, 40 included minutes; ~5-minute setup; no card required to start.
-- **Plans:** Basic $99 (300 min), Growth $159 (800 min), Platinum $279 (1,500 min). Overage $0.22/min.
+- **Plans:** Basic $99 (250 min), Growth $189 (500 min), Platinum $279 (1,200 min). Overage $0.29/min.
 - **Category:** Lead recovery — not a generic AI receptionist. Angles: *"Your competitors answer. You get the voicemail."* / *"80% of callers hang up. We don't let them."*
 
 ---

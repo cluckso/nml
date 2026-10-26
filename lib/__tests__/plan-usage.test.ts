@@ -15,8 +15,8 @@ import { INCLUDED_MINUTES } from "../plans"
 describe("approxCallsPerMonth", () => {
   it("uses typical intake length", () => {
     expect(approxCallsPerMonth(300)).toBe(100)
-    expect(approxCallsPerMonth(800)).toBe(266)
-    expect(approxCallsPerMonth(1500)).toBe(500)
+    expect(approxCallsPerMonth(500)).toBe(166)
+    expect(approxCallsPerMonth(1200)).toBe(400)
   })
 
   it("respects custom avg length", () => {
@@ -26,7 +26,7 @@ describe("approxCallsPerMonth", () => {
 
 describe("formatIncludedUsageLabel", () => {
   it("leads with approximate calls for marketing", () => {
-    expect(formatIncludedUsageLabel(300)).toMatch(/~100 captured calls\/mo \(300 min included/)
+    expect(formatIncludedUsageLabel(250)).toMatch(/~83 captured calls\/mo \(250 min included/)
     expect(formatIncludedUsageLabel(300)).not.toMatch(/not guaranteed/)
   })
 })
@@ -49,20 +49,22 @@ describe("isUsageNudgeThreshold", () => {
 })
 
 describe("getCheaperUpgradePlan", () => {
-  it("suggests Mid when Solo overage exceeds Mid price", () => {
-    expect(getCheaperUpgradePlan(PlanType.STARTER, 600)).toBe(PlanType.PRO)
+  it("does not suggest Growth for Basic overage (same $/min; Growth is features-led)", () => {
+    // With $99/250 + $0.29 vs $189/500 + $0.29, Basic stays cheaper at any usage.
+    expect(getCheaperUpgradePlan(PlanType.STARTER, 600)).toBeNull()
+    expect(getCheaperUpgradePlan(PlanType.STARTER, 1200)).toBeNull()
   })
 
-  it("returns null when Solo is still cheaper", () => {
-    expect(getCheaperUpgradePlan(PlanType.STARTER, 350)).toBeNull()
+  it("returns null at light Basic usage", () => {
+    expect(getCheaperUpgradePlan(PlanType.STARTER, 200)).toBeNull()
   })
 })
 
 describe("getPlanUsageNudge", () => {
-  it("nudges Solo users toward Mid at 80%", () => {
+  it("nudges Basic users toward Growth at 80%", () => {
     const nudge = getPlanUsageNudge({
       planType: PlanType.STARTER,
-      minutesUsed: 250,
+      minutesUsed: 200,
       minutesIncluded: INCLUDED_MINUTES[PlanType.STARTER],
       isOnTrial: false,
     })
@@ -99,7 +101,7 @@ describe("getPlanUsageNudge", () => {
       getPlanUsageNudge({
         planType: PlanType.STARTER,
         minutesUsed: 100,
-        minutesIncluded: 300,
+        minutesIncluded: INCLUDED_MINUTES[PlanType.STARTER],
         isOnTrial: false,
       })
     ).toBeNull()

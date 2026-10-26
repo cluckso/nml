@@ -26,20 +26,20 @@ describe("Usage display values (TrialCard, Billing)", () => {
   })
 
   it("billing: paid plan minutesUsed and overage match UI formula", () => {
-    const minutesUsed = 350
+    const minutesUsed = 300
     const planType = PlanType.STARTER
     const minutesIncluded = getIncludedMinutes(planType)
     const overageMinutes = Math.max(0, minutesUsed - minutesIncluded)
-    expect(minutesIncluded).toBe(300)
+    expect(minutesIncluded).toBe(250)
     expect(overageMinutes).toBe(50)
     // UI overage cost
     const overageCost = overageMinutes * OVERAGE_RATE_PER_MIN
-    expect(overageCost).toBe(11)
+    expect(overageCost).toBeCloseTo(14.5)
   })
 
   it("billing: usage bar width percent is 0–100", () => {
-    const minutesUsed = 150
-    const minutesIncluded = 300
+    const minutesUsed = 125
+    const minutesIncluded = 250
     const percent = minutesIncluded > 0 ? (minutesUsed / minutesIncluded) * 100 : 0
     expect(percent).toBe(50)
     expect(Math.min(100, percent)).toBe(50)

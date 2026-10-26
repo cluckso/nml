@@ -37,6 +37,6 @@ Forward your business line to the CallGrabbr number (via your carrier or Retell)
 
 - **Incoming calls** to your forwarded line are answered by your call assistant (business name, hours, intake).
 - **You get** call summaries by email and/or SMS (based on settings). **Calls** in the app show transcripts, lead tags, etc.
-- **Billing** tracks minutes and overage ($0.22/min after included minutes). **Weekly reports** (Pro) by email.
+- **Billing** tracks minutes and overage ($0.29/min after included minutes). **Weekly reports** (Platinum) by email.
 
 **Flow:** Sign up → free trial or plan → onboarding (plan-based fields, one phone setup) → dashboard → **Connect to my call assistant** → forward your line to the number shown.

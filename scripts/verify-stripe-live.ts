@@ -20,10 +20,10 @@ const priceVars = [
 /** Documented live IDs from STRIPE_SETUP.md — used when env vars are unset locally. */
 const DOC_LIVE_PRICE_IDS: Record<(typeof priceVars)[number], string> = {
   STRIPE_PRICE_STARTER: "price_1SvQxbDcWEGGVqRpfuSnJfLy",
-  STRIPE_PRICE_PRO: "price_1TmpyODcWEGGVqRpMX75b7oD",
+  STRIPE_PRICE_PRO: "price_1UUf4wDcWEGGVqRpFl2wti3i",
   STRIPE_PRICE_LOCAL_PLUS: "price_1TmpyODcWEGGVqRpHlavDS9m",
   STRIPE_PRICE_ELITE: "price_1TmpyODcWEGGVqRpHlavDS9m",
-  STRIPE_USAGE_PRICE_ID: "price_1Tmpz2DcWEGGVqRpcG3uI6MG",
+  STRIPE_USAGE_PRICE_ID: "price_1UUf51DcWEGGVqRpwVWRffzg",
 }
 
 const REQUIRED_WEBHOOK_EVENTS = [

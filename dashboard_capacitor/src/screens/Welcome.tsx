@@ -13,7 +13,7 @@ const FALLBACK: PublicPricing = {
     trialSummary: '14-day free trial · 40 call minutes · No card',
   },
   trial: { days: 14, minutes: 40, noCardRequired: true },
-  overageRatePerMin: 0.22,
+  overageRatePerMin: 0.29,
   billing: {
     processor: 'stripe',
     merchantOfRecord: 'CallGrabbr',

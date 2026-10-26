@@ -1,6 +1,8 @@
 import {
   formatJobValuePromptLine,
+  formatOverageRate,
   HUMAN_RECEPTIONIST_FROM_MONTHLY,
+  OVERAGE_RATE_PER_MIN,
   PRICING_TIERS_BY_KEY,
 } from "@/lib/pricing-catalog"
 import { PLAN_BASIC, PLAN_GROWTH, PLAN_PLATINUM } from "@/lib/plan-labels"
@@ -69,9 +71,11 @@ const GUIDES: Guide[] = [
     comparison: {
       competitorName: "Ruby",
       rows: [
-        { label: "Starting price (typical)", callgrabbr: `$${basic.price}/mo (${PLAN_BASIC})`, competitor: `~$${HUMAN_RECEPTIONIST_FROM_MONTHLY}+/mo` },
+        { label: "Starting price (typical)", callgrabbr: `$${basic.price}/mo · ${basic.includedMinutes} min (${PLAN_BASIC})`, competitor: `~$${HUMAN_RECEPTIONIST_FROM_MONTHLY}+/mo · small minute packs` },
+        { label: "Mid / busy shops", callgrabbr: `$${growth.price}–$${platinum.price}/mo`, competitor: "Scales with live minutes" },
         { label: "Category", callgrabbr: CATEGORY_NAME, competitor: "Live receptionist service" },
         { label: "Built for trades intake", callgrabbr: "Yes — service, address, urgency", competitor: "Message-taking (configurable)" },
+        { label: "Overage", callgrabbr: formatOverageRate(), competitor: "Minute packs / plan upgrades" },
         { label: "Lead alerts", callgrabbr: "SMS & email in seconds", competitor: "Depends on plan / setup" },
         { label: "Trial", callgrabbr: `${trialDaysLabel()} free · no card`, competitor: "Varies" },
       ],
@@ -151,9 +155,11 @@ const GUIDES: Guide[] = [
     comparison: {
       competitorName: "Smith.ai",
       rows: [
-        { label: "Typical monthly range", callgrabbr: `$${basic.price}–$${platinum.price}`, competitor: "~$95–$300+" },
+        { label: "Typical monthly range", callgrabbr: `$${basic.price}–$${platinum.price}/mo`, competitor: "~$95–$300+" },
+        { label: "Entry package", callgrabbr: `${PLAN_BASIC} $${basic.price} · ${basic.includedMinutes} min`, competitor: "AI or hybrid call bundles" },
         { label: "Category", callgrabbr: CATEGORY_NAME, competitor: "Broad SMB receptionist platform" },
         { label: "Live agents", callgrabbr: "Lead capture first", competitor: "AI + hybrid live options" },
+        { label: "Overage", callgrabbr: formatOverageRate(), competitor: "Per-call / plan (varies)" },
         { label: "Lead delivery", callgrabbr: "Instant SMS & email", competitor: "Varies by plan" },
         { label: "Trial", callgrabbr: `${trialDaysLabel()} free · no card`, competitor: "Varies" },
       ],
@@ -262,7 +268,7 @@ const GUIDES: Guide[] = [
   {
     slug: "after-hours-answering-cost-for-contractors",
     title: "After-hours lead capture cost, 2026",
-    description: `What contractors pay for after-hours lead capture: CallGrabbr from $${basic.price}/mo, human answering from $${HUMAN_RECEPTIONIST_FROM_MONTHLY}/mo, overage $0.22/min.`,
+    description: `What contractors pay for after-hours lead capture: CallGrabbr from $${basic.price}/mo, human answering from $${HUMAN_RECEPTIONIST_FROM_MONTHLY}/mo, overage $${OVERAGE_RATE_PER_MIN.toFixed(2)}/min.`,
     eyebrow: "Cost guide",
     headline: "After-hours lead capture cost for contractors",
     intro:
@@ -372,13 +378,15 @@ const GUIDES: Guide[] = [
           "Trade-style intake: issue, address, urgency",
           "Lead alerts by SMS and email in seconds",
           `${trialSummaryShort()}`,
-          `Clear tiers: ${PLAN_BASIC} $${basic.price}/mo · ${PLAN_GROWTH} $${growth.price}/mo · ${PLAN_PLATINUM} $${platinum.price}/mo`,
+          `Clear tiers: ${PLAN_BASIC} $${basic.price}/mo (${basic.includedMinutes} min) · ${PLAN_GROWTH} $${growth.price}/mo (${growth.includedMinutes} min) · ${PLAN_PLATINUM} $${platinum.price}/mo (${platinum.includedMinutes.toLocaleString()} min)`,
+          `Overage ${formatOverageRate()} after included minutes — with usage alerts before you blow past the cap`,
         ],
       },
       {
         heading: "How to evaluate Rosie (or any peer receptionist tool)",
         paragraphs: [
           ROSIE_PRICE_OBJECTION,
+          `Rosie's public entry is about $49/mo for ~250 minutes, with mid tiers around $149/1,000 min that auto-upgrade when you run out — not a published per-minute overage. CallGrabbr keeps ${PLAN_BASIC} at $${basic.price}/mo for ${basic.includedMinutes} minutes (same ballpark minute band, trade job-ticket product) and ${PLAN_GROWTH} at $${growth.price}/mo for ${growth.includedMinutes} minutes when you need appointments and CRM — not a race to out-minute Rosie's Scale plan.`,
           "Run the same mystery shop on both: forward a test line, call as a panicked homeowner, and check whether the summary includes address and urgency — not just a name and number.",
           "Compare monthly cost at your real volume, after-hours coverage, and how fast the lead hits your phone. Prefer the tool that feels like a job ticket, not a generic voicemail transcript.",
         ],
@@ -395,10 +403,13 @@ const GUIDES: Guide[] = [
       competitorName: "Rosie",
       rows: [
         { label: "Category", callgrabbr: CATEGORY_NAME, competitor: "AI phone receptionist (general SMB)" },
-        { label: "Entry price", callgrabbr: `$${basic.price}/mo (${PLAN_BASIC})`, competitor: "~$49/mo (answers phones)" },
+        { label: "Entry plan", callgrabbr: `$${basic.price}/mo · ${basic.includedMinutes} min (${PLAN_BASIC})`, competitor: "~$49/mo · ~250 min" },
+        { label: "Mid plan", callgrabbr: `$${growth.price}/mo · ${growth.includedMinutes} min (${PLAN_GROWTH})`, competitor: "~$149/mo · ~1,000 min" },
+        { label: "High plan", callgrabbr: `$${platinum.price}/mo · ${platinum.includedMinutes.toLocaleString()} min`, competitor: "~$299/mo · ~2,000 min" },
+        { label: "Past included", callgrabbr: formatOverageRate(), competitor: "Auto-upgrade to next plan" },
         { label: "Trade intake", callgrabbr: "Built for service jobs", competitor: "Varies by setup" },
-        { label: "Lead delivery", callgrabbr: "SMS & email in seconds", competitor: "Varies by product" },
-        { label: "Trial", callgrabbr: `${trialDaysLabel()} free · no card`, competitor: "Varies" },
+        { label: "Lead delivery", callgrabbr: "SMS & email job ticket", competitor: "Summaries / transcripts" },
+        { label: "Trial", callgrabbr: `${trialDaysLabel()} free · no card`, competitor: "~7 days (typical)" },
       ],
     },
     showPricingSnippet: true,
@@ -461,7 +472,7 @@ const GUIDES: Guide[] = [
         heading: "How to evaluate OnCrew fairly",
         paragraphs: [
           "Look at how they handle after-hours emergencies, what lands in your pocket after a call, and total monthly cost at your volume — not just the entry price.",
-          "If OnCrew's workflow, CRM hooks, or packaging fit your operation better after a live test, use that. CallGrabbr wins when you want simple contractor pricing and fast lead texts without a heavy platform.",
+          `If OnCrew's workflow, CRM hooks, or packaging fit your operation better after a live test, use that. OnCrew bills in call bundles (about $49/100 calls, $0.99 overage). CallGrabbr bills in minutes — ${PLAN_BASIC} $${basic.price}/${basic.includedMinutes} min, ${PLAN_GROWTH} $${growth.price}/${growth.includedMinutes} min, overage ${formatOverageRate()} — which favors longer emergency intake. CallGrabbr wins when you want simple contractor pricing and fast lead texts without a heavy platform.`,
         ],
         bullets: [
           "Mystery-shop both with the same emergency script",
@@ -480,11 +491,14 @@ const GUIDES: Guide[] = [
     comparison: {
       competitorName: "OnCrew",
       rows: [
-        { label: "Built for", callgrabbr: "Local service / trades", competitor: "Home-service operations (varies)" },
-        { label: "CallGrabbr entry", callgrabbr: `$${basic.price}/mo missed & after-hours`, competitor: "Check current public pricing" },
-        { label: "Lead alerts", callgrabbr: "SMS & email in seconds", competitor: "Varies by setup" },
+        { label: "Built for", callgrabbr: "Local service / trades", competitor: "Home-service contractors" },
+        { label: "Entry plan", callgrabbr: `$${basic.price}/mo · ${basic.includedMinutes} min`, competitor: "~$49/mo · 100 calls" },
+        { label: "Mid plan", callgrabbr: `$${growth.price}/mo · ${growth.includedMinutes} min (${PLAN_GROWTH})`, competitor: "~$149/mo · 400 calls" },
+        { label: "High plan", callgrabbr: `$${platinum.price}/mo · ${platinum.includedMinutes.toLocaleString()} min`, competitor: "~$349/mo · 1,000 calls" },
+        { label: "Past included", callgrabbr: formatOverageRate(), competitor: "~$0.99 per extra call" },
+        { label: "Lead alerts", callgrabbr: "SMS & email job ticket", competitor: "SMS/email triage alerts" },
         { label: "Number change required?", callgrabbr: "No — forward your line", competitor: "Depends on product" },
-        { label: "Trial", callgrabbr: `${trialDaysLabel()} free · no card`, competitor: "Varies" },
+        { label: "Trial", callgrabbr: `${trialDaysLabel()} free · no card`, competitor: "14 days · no card (typical)" },
       ],
     },
     showPricingSnippet: true,
@@ -574,7 +588,8 @@ const GUIDES: Guide[] = [
       competitorName: "Broccoli AI",
       rows: [
         { label: "Best fit", callgrabbr: "One-truck & growing shops", competitor: "Multi-truck / ST–HCP operations" },
-        { label: "Entry price", callgrabbr: `$${basic.price}/mo published`, competitor: "Sales quote (often ~$950+/mo reported)" },
+        { label: "Entry price", callgrabbr: `$${basic.price}/mo · ${basic.includedMinutes} min published`, competitor: "Sales quote (often ~$950+/mo reported)" },
+        { label: "Published tiers", callgrabbr: `$${basic.price} / $${growth.price} / $${platinum.price}`, competitor: "Custom quote" },
         { label: "Primary outcome", callgrabbr: "SMS/email job lead", competitor: "Booked job in ServiceTitan" },
         { label: "Buy path", callgrabbr: "Self-serve trial", competitor: "Sales + implementation" },
         { label: "Contract", callgrabbr: "Month-to-month after trial", competitor: "Often multi-month (reported)" },
@@ -848,9 +863,11 @@ const GUIDES: Guide[] = [
       rows: [
         { label: "Captures job details for trades", callgrabbr: "Built in — issue, address, urgency", competitor: "Often generic transcripts" },
         { label: "SMS lead in seconds", callgrabbr: "Yes — text & email alerts", competitor: "Varies by product" },
-        { label: "Entry plan", callgrabbr: `${PLAN_BASIC} — ${BASIC_FRAME}`, competitor: "Usually full-time answering" },
+        { label: "Entry plan", callgrabbr: `${PLAN_BASIC} $${basic.price} · ${basic.includedMinutes} min — ${BASIC_FRAME}`, competitor: "Usually full-time answering" },
+        { label: "Growth / busy shops", callgrabbr: `${PLAN_GROWTH} $${growth.price} · ${growth.includedMinutes} min`, competitor: "Higher receptionist tiers" },
         { label: "Pays for itself with 1 job", callgrabbr: "Yes — typical emergency ROI", competitor: "Depends on volume & intake" },
         { label: "Entry price", callgrabbr: `$${basic.price}/mo (${PLAN_BASIC})`, competitor: "e.g. Rosie ~$49/mo (answers phones)" },
+        { label: "Overage", callgrabbr: formatOverageRate(), competitor: "Varies (auto-upgrade or per-call)" },
       ],
     },
     showPricingSnippet: true,

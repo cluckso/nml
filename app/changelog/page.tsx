@@ -14,6 +14,16 @@ const DESCRIPTION =
 
 const ENTRIES = [
   {
+    date: "2026-10-25",
+    title: "Pricing package for margin and adoption",
+    items: [
+      "Basic stays $99 with 250 included minutes (was 300); default “best to start” plan.",
+      "Growth is $189 with 500 included minutes (was $159 / 800) — sold for appointments and CRM, not raw minutes.",
+      "Platinum stays $279 with 1,200 included minutes (was 1,500).",
+      "Overage is $0.29/min (was $0.22). Stripe live prices updated; vs-Rosie / OnCrew / Ruby / Smith / Broccoli tables refreshed.",
+    ],
+  },
+  {
     date: "2026-09-30",
     title: "Guide dates, author, and sitemap lastmod",
     items: [
@@ -165,7 +175,7 @@ export default function ChangelogPage() {
         <p>
           Voicemail is free and keeps about 5–15 percent of callers. A human answering service starts
           at $235 a month and often adds a fee for nights. Basic at $99 is a fraction of that cost.
-          Growth at $159 and Platinum at $279 add more minutes and tools as volume grows.
+          Growth at $189 and Platinum at $279 add appointments, CRM, and more minutes as volume grows.
         </p>
         <p>
           The September 15 note added the about page, the llms.txt file, four comparison guides, the

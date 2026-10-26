@@ -36,12 +36,12 @@ ${forLines}
 
 ## Pricing (USD)
 
-- Basic $99/mo — lead insurance to start, ~100 calls/mo
-- Growth $159/mo — more minutes, appointments, follow-up, CRM webhook
-- Platinum $279/mo — multi-crew, high volume
+- Basic $99/mo — lead insurance to start, 250 min (~83 calls/mo)
+- Growth $189/mo — 500 min, appointments, follow-up, CRM webhook
+- Platinum $279/mo — 1,200 min, multi-crew, high volume
 - Trial: 14 days or 40 call minutes, whichever comes first; no card; one trial per business number
 - 30-day money-back guarantee on paid plans
-- Overage $0.22/min
+- Overage $0.29/min
 
 ## Who it is for
 

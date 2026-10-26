@@ -26,28 +26,32 @@ export const RECEPTIONIST_HANDBOOK_CONFIG = {
   default_personality: false,
 } as const
 
-/** Cartesia platform voices (~$0.015/min) — standard tier for Solo Owner and Mid Volume default. */
+/** Cartesia platform voices (~$0.015/min) — Basic and Growth default (lower COGS). */
 export const STANDARD_CARTESIA_FEMALE_VOICE_ID = "cartesia-Emily"
 export const STANDARD_CARTESIA_MALE_VOICE_ID = "cartesia-Nico"
 
-/** Standard-tier voice (Cartesia TTS). Default for Solo Owner and Mid Volume without premium add-on. */
+/** Soft call caps by plan — keeps Basic lead-insurance calls short; Growth/Platinum allow longer intake. */
+export const BASIC_MAX_CALL_DURATION_MS = 5 * 60 * 1000
+export const STANDARD_MAX_CALL_DURATION_MS = 7 * 60 * 1000
+
+/** Standard-tier voice (Cartesia TTS). Default for Basic and Growth without premium add-on. */
 export const STANDARD_RETELL_VOICE = {
   voice_id: STANDARD_CARTESIA_FEMALE_VOICE_ID,
   voice_temperature: 0.9,
   voice_speed: 0.92,
   volume: 1.0,
   interruption_sensitivity: 0.68,
-  max_call_duration_ms: 7 * 60 * 1000,
+  max_call_duration_ms: STANDARD_MAX_CALL_DURATION_MS,
 } as const
 
-/** Premium ElevenLabs voice — Elite always; Mid Volume when premiumVoice enabled. */
+/** Premium ElevenLabs voice — Platinum always; Growth when premiumVoice enabled. */
 export const DEFAULT_RETELL_VOICE = {
   voice_id: "11labs-Chloe",
   voice_temperature: 0.92,
   voice_speed: 0.9,
   volume: 1.0,
   interruption_sensitivity: 0.68,
-  max_call_duration_ms: 7 * 60 * 1000,
+  max_call_duration_ms: STANDARD_MAX_CALL_DURATION_MS,
 } as const
 
 export type RetellVoiceConfig = {
@@ -59,7 +63,12 @@ export type RetellVoiceConfig = {
   max_call_duration_ms: number
 }
 
-/** Pick voice engine by plan: Cartesia for Starter and Pro default; ElevenLabs for Elite or Pro + premiumVoice. */
+/**
+ * Pick voice engine by plan:
+ * - Basic: Cartesia + 5 min cap (recommended COGS profile)
+ * - Growth: Cartesia by default; ElevenLabs when premiumVoice
+ * - Platinum: ElevenLabs
+ */
 export function getRetellVoiceConfig(
   planType: PlanType | null | undefined,
   voiceGender?: string | null,
@@ -67,13 +76,15 @@ export function getRetellVoiceConfig(
 ): RetellVoiceConfig {
   const effective = getEffectivePlanType(planType)
   const useElevenLabs = hasPremiumElevenLabsVoice(effective, premiumVoice)
+  const max_call_duration_ms =
+    effective === PlanType.STARTER ? BASIC_MAX_CALL_DURATION_MS : STANDARD_MAX_CALL_DURATION_MS
   if (!useElevenLabs) {
     const voice_id =
       voiceGender === "male" ? STANDARD_CARTESIA_MALE_VOICE_ID : STANDARD_CARTESIA_FEMALE_VOICE_ID
-    return { ...STANDARD_RETELL_VOICE, voice_id }
+    return { ...STANDARD_RETELL_VOICE, voice_id, max_call_duration_ms }
   }
   const voice_id = voiceGender === "male" ? "11labs-Ethan" : "11labs-Chloe"
-  return { ...DEFAULT_RETELL_VOICE, voice_id }
+  return { ...DEFAULT_RETELL_VOICE, voice_id, max_call_duration_ms }
 }
 
 /** Base fields merged into every create-agent / update-agent payload for receptionist agents. */

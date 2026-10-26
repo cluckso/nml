@@ -49,7 +49,7 @@ export const STRIPE_PRODUCTS = {
   ELITE: process.env.STRIPE_PRODUCT_ELITE || "prod_elite",
 }
 
-// Metered usage price ID for overages ($0.22/min in app; create matching price in Stripe)
+// Metered usage price ID for overages ($0.29/min in app; create matching price in Stripe)
 export const STRIPE_USAGE_PRICE_ID = process.env.STRIPE_USAGE_PRICE_ID || "price_usage"
 
 /** Cached event_name from the live overage price's Billing Meter (populated on first usage report). */

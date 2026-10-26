@@ -32,9 +32,10 @@ describe("hasPremiumElevenLabsVoice", () => {
 })
 
 describe("getRetellVoiceConfig", () => {
-  it("uses Cartesia for Starter", () => {
+  it("uses Cartesia for Starter with a 5-minute call cap", () => {
     const config = getRetellVoiceConfig(PlanType.STARTER)
     expect(config.voice_id).toBe(STANDARD_CARTESIA_FEMALE_VOICE_ID)
+    expect(config.max_call_duration_ms).toBe(5 * 60 * 1000)
   })
 
   it("uses Cartesia male voice when gender is male on Starter", () => {

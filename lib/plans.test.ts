@@ -59,23 +59,23 @@ describe("toBillableMinutes", () => {
 
 describe("getIncludedMinutes", () => {
   it("returns plan included minutes", () => {
-    expect(getIncludedMinutes(PlanType.STARTER)).toBe(300)
-    expect(getIncludedMinutes(PlanType.PRO)).toBe(800)
-    expect(getIncludedMinutes(PlanType.LOCAL_PLUS)).toBe(1500)
-    expect(getIncludedMinutes(PlanType.ELITE)).toBe(1500)
+    expect(getIncludedMinutes(PlanType.STARTER)).toBe(250)
+    expect(getIncludedMinutes(PlanType.PRO)).toBe(500)
+    expect(getIncludedMinutes(PlanType.LOCAL_PLUS)).toBe(1200)
+    expect(getIncludedMinutes(PlanType.ELITE)).toBe(1200)
   })
 })
 
 describe("getOverageMinutes", () => {
   it("returns 0 when used <= included", () => {
     expect(getOverageMinutes(PlanType.STARTER, 0)).toBe(0)
-    expect(getOverageMinutes(PlanType.STARTER, 300)).toBe(0)
-    expect(getOverageMinutes(PlanType.PRO, 800)).toBe(0)
+    expect(getOverageMinutes(PlanType.STARTER, 250)).toBe(0)
+    expect(getOverageMinutes(PlanType.PRO, 500)).toBe(0)
   })
 
   it("returns used - included when over", () => {
-    expect(getOverageMinutes(PlanType.STARTER, 400)).toBe(100)
-    expect(getOverageMinutes(PlanType.PRO, 900)).toBe(100)
+    expect(getOverageMinutes(PlanType.STARTER, 400)).toBe(150)
+    expect(getOverageMinutes(PlanType.PRO, 600)).toBe(100)
   })
 })
 

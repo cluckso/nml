@@ -6,6 +6,12 @@
  * using the template global prompt and flow nodes that reference {{business_name}},
  * {{tone}}, {{question_depth}}, etc. (filled per call from the inbound webhook).
  *
+ * Plan-aware runtime (not baked into these templates — applied per call / per business):
+ * - Basic ($99 / 250 min): Cartesia voice, 5 min call cap
+ * - Growth ($189 / 500 min): Cartesia by default; appointments/CRM prompts via webhook vars
+ * - Platinum ($279 / 1,200 min): ElevenLabs voice; multi-dept / branded scripting via settings
+ * See lib/retell-agent-template.ts getRetellVoiceConfig + lib/plans.ts.
+ *
  * After running, add the printed env vars to .env or Vercel.
  */
 

@@ -55,7 +55,7 @@ export const PRICING_TIERS: PricingTier[] = [
     price: MONTHLY_PRICES[PlanType.STARTER],
     includedMinutes: INCLUDED_MINUTES[PlanType.STARTER],
     badge: BASIC_BADGE,
-    popular: false,
+    popular: true,
     subtitle: "One-truck shops · best to start",
     usageNote: "Same product — included minutes sized for most one-truck shops",
     features: [
@@ -76,10 +76,10 @@ export const PRICING_TIERS: PricingTier[] = [
       "More minutes and tools for growing crews — appointments, follow-ups, and CRM delivery so leads land where you already work.",
     price: MONTHLY_PRICES[PlanType.PRO],
     includedMinutes: INCLUDED_MINUTES[PlanType.PRO],
-    badge: "Most popular",
-    popular: true,
-    subtitle: "Growing crew · more included minutes",
-    usageNote: "More included minutes plus appointments and CRM delivery",
+    badge: "Growing shops",
+    popular: false,
+    subtitle: "Growing crew · appointments & CRM",
+    usageNote: "Appointments, follow-ups, and CRM — plus more included minutes",
     features: [
       "Everything in Basic",
       "More included call minutes",

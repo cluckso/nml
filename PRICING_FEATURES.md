@@ -1,77 +1,34 @@
-# CallGrabbr — Pricing Overview
+# CallGrabbr plan features
 
-Simple, usage-based pricing built for service businesses.
-No setup fees. No contracts. Cancel anytime.
-Overage on all plans: $0.22/min after included minutes.
+Overage on all plans: $0.29/min after included minutes.
 
----
+## Basic — $99/month
 
-## Free Trial (All Plans)
-
-- **7-day free trial** (40 included minutes)
-- No card required to start
-- One trial per business phone number
+- Lead insurance (missed & after-hours)
+- 250 minutes / month
+- $0.29/min overage
+- Trade-tuned intake scripts
+- Spam filtering
+- Lead alerts by email & SMS
+- Caller text-back confirmation
 - No setup fee
-- No overage during trial
-- Service pauses when minutes are used or when trial ends
-- Upgrade to any plan to continue
 
-Designed so businesses can test real calls—not demos.
+## Growth — $189/month
 
----
+- Everything in Basic
+- 500 minutes / month
+- Appointment & emergency handling
+- Follow-up texts to callers
+- CRM email forwarding / webhook
+- Lead tagging and priority rules
+- $0.29/min overage
 
-## Solo — $99/month
+## Platinum — $279/month
 
-*Best for solo operators & small shops*
-
-**Includes:**
-- 300 minutes / month
-- $0.22/min overage
-- Self-serve only
-- 24/7 call answering
-- Caller name, phone, and reason captured
-- Call summaries by email & SMS
-
-**Setup:** 100% self-serve onboarding · No setup fee
-
----
-
-## Team — $159/month
-
-*Best for growing service businesses*
-
-**Includes:**
-- 800 minutes / month
-- Industry-optimized call flows
-- Appointment + emergency logic
-- $0.22/min overage
-- Service-specific intake flows
-- Email and CRM forwarding
-
-**Setup:** Automated onboarding using industry templates · No setup fee
-
----
-
-## Pro — $279/month
-
-*Built for high-volume, multi-department trades*
-
-**Includes:**
-- 1,500 minutes / month
+- Everything in Growth
+- 1,200 minutes / month
+- Branded voice and scripting
 - Multi-department routing
-- Premium branded voice + reporting
-- $0.22/min overage
-- After-hours emergency handling
-- Weekly usage & lead reports
-
-**Setup:** Automated department creation and voice tuning · No setup fee
-
----
-
-## Why This Pricing Works
-
-- Minute-based trial ensures fairness and real value delivery
-- No setup fees reduce friction and increase conversion
-- Industry-optimized Team flows feel "custom" without custom labor
-- Clear upgrade ladder based on call volume and complexity
-- Consistent overage rate keeps pricing transparent
+- Weekly usage and lead reports
+- Priority support
+- $0.29/min overage

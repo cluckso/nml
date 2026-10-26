@@ -171,30 +171,30 @@ const screens = {
     <div class="page">
       <div class="card">
         <div class="section-title">Growth</div>
-        <p style="font-size:14px;color:var(--text-muted)">$159/mo · 800 min included</p>
+        <p style="font-size:14px;color:var(--text-muted)">$189/mo · 500 min included</p>
         <span class="badge success" style="margin-top:8px">Active subscription</span>
       </div>
       <div class="card">
         <div class="section-title">Usage this month</div>
         <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:4px">
-          <span>612 min used</span><span style="color:var(--text-muted)">800 included</span>
+          <span>312 min used</span><span style="color:var(--text-muted)">500 included</span>
         </div>
         <div class="progress-bar"><div class="progress-fill" style="width:76%"></div></div>
-        <p style="font-size:13px;color:var(--text-muted)">Overage: $0.22/min after included minutes</p>
+        <p style="font-size:13px;color:var(--text-muted)">Overage: $0.29/min after included minutes</p>
       </div>
       <div class="card">
         <div class="section-title">Plan options</div>
         <div style="padding:10px 0;border-bottom:1px solid var(--border)">
           <div style="font-weight:600">Basic — $99/mo</div>
-          <div style="font-size:13px;color:var(--text-muted)">300 min · missed & after-hours</div>
+          <div style="font-size:13px;color:var(--text-muted)">250 min · missed & after-hours</div>
         </div>
         <div style="padding:10px 0;border-bottom:1px solid var(--border);background:rgba(59,130,246,0.08);margin:0 -16px;padding-left:16px;padding-right:16px">
-          <div style="font-weight:600;color:var(--primary)">Growth — $159/mo ✓</div>
-          <div style="font-size:13px;color:var(--text-muted)">800 min · 24/7 answering</div>
+          <div style="font-weight:600;color:var(--primary)">Growth — $189/mo ✓</div>
+          <div style="font-size:13px;color:var(--text-muted)">500 min · appointments & CRM</div>
         </div>
         <div style="padding:10px 0">
           <div style="font-weight:600">Platinum — $279/mo</div>
-          <div style="font-size:13px;color:var(--text-muted)">1,500 min · multi-crew routing</div>
+          <div style="font-size:13px;color:var(--text-muted)">1,200 min · multi-crew routing</div>
         </div>
         <button class="btn btn-outline" style="margin-top:12px">Switch plan</button>
       </div>
