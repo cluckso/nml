@@ -17,7 +17,7 @@
     },
     {
       "path": "/api/cron/first-visit-email",
-      "schedule": "*/20 * * * *"
+      "schedule": "0 11 * * *"
     }
   ]
 }
