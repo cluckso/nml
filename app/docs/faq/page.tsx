@@ -13,10 +13,9 @@ import { JsonLd } from "@/components/seo/JsonLd"
 import { PRODUCT_FAQ } from "@/lib/faq-data"
 import { breadcrumbJsonLd, faqPageJsonLd, webPageJsonLd } from "@/lib/structured-data"
 import { DEFAULT_OG_IMAGE, SEO_KEYWORDS } from "@/lib/seo"
+import { SEO_HUBS } from "@/lib/seo-hubs"
 
-const FAQ_TITLE = "Missed-Call Lead Capture FAQ | CallGrabbr"
-const FAQ_DESCRIPTION =
-  "Missed-call and after-hours lead capture FAQ for HVAC and plumbing. Call forwarding for AT&T, Verizon, T-Mobile. Pricing, trial, and setup."
+const { title: FAQ_TITLE, description: FAQ_DESCRIPTION } = SEO_HUBS.faq
 
 export const metadata: Metadata = {
   title: FAQ_TITLE,
@@ -325,7 +324,7 @@ export default function DocsFaqPage() {
         ]}
       />
       <div className="mb-10">
-        <h1 className="text-3xl font-bold mb-2">Help & FAQ</h1>
+        <h1 className="text-3xl font-bold mb-2">{SEO_HUBS.faq.heading}</h1>
         <p className="text-muted-foreground">
           Common questions about CallGrabbr, plus carrier-specific call forwarding steps.
         </p>

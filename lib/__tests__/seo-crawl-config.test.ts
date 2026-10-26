@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 import robots from "@/app/robots"
+import { GET as getSitemap } from "@/app/sitemap.xml/route"
 import { getPublicPaths } from "@/lib/public-sitemap"
 import {
   SITEMAP_BLOCKLIST_PREFIXES,
@@ -10,6 +11,10 @@ import {
   GA4_MEASUREMENT_ID,
 } from "@/lib/seo-monitoring"
 import { SITE_URL } from "@/lib/site-url"
+
+vi.mock("@/lib/articles", () => ({
+  listArticleSitemapEntries: vi.fn(async () => []),
+}))
 
 describe("SEO crawl config (KAN-12)", () => {
   it("uses www canonical URLs for monitoring endpoints", () => {
@@ -43,20 +48,48 @@ describe("SEO crawl config (KAN-12)", () => {
     }
   })
 
-  it("robots.txt disallows private prefixes and points at the www sitemap", () => {
+  it("robots.txt permits public crawling, disallows private prefixes, and points at the www sitemap", () => {
     const config = robots()
-    const disallow = Array.isArray(config.rules)
-      ? config.rules.flatMap((rule) =>
-          Array.isArray(rule.disallow) ? rule.disallow : rule.disallow ? [rule.disallow] : []
-        )
-      : Array.isArray(config.rules.disallow)
-        ? config.rules.disallow
-        : config.rules.disallow
-          ? [config.rules.disallow]
-          : []
+    const rules = Array.isArray(config.rules) ? config.rules : [config.rules]
+    const disallow = rules.flatMap((rule) =>
+      Array.isArray(rule.disallow) ? rule.disallow : rule.disallow ? [rule.disallow] : []
+    )
+    expect(rules).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ userAgent: "*", allow: "/" }),
+      ])
+    )
     for (const blocked of SITEMAP_BLOCKLIST_PREFIXES) {
       expect(disallow, blocked).toContain(blocked)
     }
     expect(config.sitemap).toBe(SITEMAP_URL)
+  })
+
+  it("serves an XML sitemap containing public URLs and no private paths", async () => {
+    const response = await getSitemap()
+    const body = await response.text()
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get("content-type")).toContain("application/xml")
+    expect(body).toContain('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
+    expect(body).toContain("</urlset>")
+
+    for (const required of SITEMAP_MUST_INCLUDE) {
+      expect(body).toContain(`<loc>${SITE_URL}${required}</loc>`)
+    }
+
+    const urls = [...body.matchAll(/<loc>(.*?)<\/loc>/g)].map((match) => match[1])
+    expect(urls.length).toBeGreaterThan(0)
+    for (const url of urls) {
+      expect(url === SITE_URL || url.startsWith(`${SITE_URL}/`), url).toBe(true)
+      const path = url.replace(SITE_URL, "")
+      for (const blocked of SITEMAP_BLOCKLIST_PREFIXES) {
+        if (blocked.endsWith("/")) {
+          expect(path.startsWith(blocked) || path === blocked.slice(0, -1), url).toBe(false)
+        } else {
+          expect(path === blocked || path.startsWith(`${blocked}/`), url).toBe(false)
+        }
+      }
+    }
   })
 })

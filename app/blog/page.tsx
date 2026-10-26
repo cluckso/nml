@@ -5,12 +5,11 @@ import { JsonLd } from "@/components/seo/JsonLd"
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data"
 import { DEFAULT_OG_IMAGE } from "@/lib/seo"
 import { keywordsForPath } from "@/lib/seo-keywords"
+import { SEO_HUBS } from "@/lib/seo-hubs"
 
 export const revalidate = 3600
 
-const TITLE = "Missed-Call Lead Capture Blog | CallGrabbr"
-const DESCRIPTION =
-  "Practical notes on missed-call lead capture for HVAC, plumbing, and local trades — after-hours answering, forwarding, and speed-to-lead tips."
+const { title: TITLE, description: DESCRIPTION } = SEO_HUBS.blog
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -62,7 +61,7 @@ export default async function BlogIndexPage() {
       />
 
       <p className="text-sm font-medium text-primary mb-3">Blog</p>
-      <h1 className="text-4xl font-bold tracking-tight mb-4">CallGrabbr blog</h1>
+      <h1 className="text-4xl font-bold tracking-tight mb-4">{SEO_HUBS.blog.heading}</h1>
       <p className="text-muted-foreground mb-10 leading-relaxed">{DESCRIPTION}</p>
 
       {published.length === 0 ? (

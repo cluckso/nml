@@ -28,6 +28,7 @@ import Link from "next/link"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { PRODUCT_FAQ } from "@/lib/faq-data"
 import { keywordsForPath } from "@/lib/seo-keywords"
+import { SEO_HUBS } from "@/lib/seo-hubs"
 import {
   breadcrumbJsonLd,
   faqPageJsonLd,
@@ -44,9 +45,7 @@ import {
 } from "@/lib/pricing-query"
 import type { BillingInterval } from "@/lib/stripe-billing"
 
-const PRICING_TITLE = "Missed-Call Lead Capture Pricing | CallGrabbr"
-const PRICING_DESCRIPTION =
-  "Basic $99, Growth $189, Platinum $279. Missed-call lead capture for HVAC and trades. 14-day or 40-min free trial. 30-day money-back."
+const { title: PRICING_TITLE, description: PRICING_DESCRIPTION } = SEO_HUBS.pricing
 
 export const metadata: Metadata = {
   title: PRICING_TITLE,
@@ -210,7 +209,7 @@ export default async function PricingPage({
         contentClassName="container mx-auto px-4 text-center"
       >
         <h1 className="text-4xl font-bold tracking-tight mb-4 max-w-3xl mx-auto">
-          One captured job pays for months
+          {SEO_HUBS.pricing.heading}
         </h1>
         <p className="text-lg text-foreground/90 max-w-2xl mx-auto leading-relaxed mb-2">
           You&apos;re not buying software — you&apos;re buying back the jobs that walk while you&apos;re

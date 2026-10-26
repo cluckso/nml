@@ -12,12 +12,11 @@ import { breadcrumbJsonLd, faqPageJsonLd, webPageJsonLd } from "@/lib/structured
 import { GUIDE_TRIAL_HREF } from "@/lib/guides"
 import { trialNavCtaLabel, trialSummaryShort } from "@/lib/trial-marketing"
 import { CATEGORY_COMPARE_LINK, VS_PAGE_LINKS } from "@/lib/marketing/comparisons"
+import { SEO_HUBS } from "@/lib/seo-hubs"
 
 const COMPARISONS = [...VS_PAGE_LINKS, CATEGORY_COMPARE_LINK]
 
-const COMPARE_TITLE = "Compare CallGrabbr vs AI Answering & Receptionists"
-const COMPARE_DESCRIPTION =
-  "Side-by-side missed-call lead capture vs Ruby, Rosie, Smith.ai, OnCrew, Broccoli, and live receptionists for HVAC and plumbing shops."
+const { title: COMPARE_TITLE, description: COMPARE_DESCRIPTION } = SEO_HUBS.compare
 
 export const metadata: Metadata = {
   title: COMPARE_TITLE,
@@ -64,7 +63,7 @@ export default function ComparePage() {
             <Scale className="h-7 w-7 text-primary" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-            Compare CallGrabbr
+            {SEO_HUBS.compare.heading}
           </h1>
           <p className="text-lg text-muted-foreground mb-4">
             {HERO_H1}. We are {CATEGORY_NAME} — not a generic AI receptionist. Use these guides to

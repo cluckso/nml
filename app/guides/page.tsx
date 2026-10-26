@@ -9,10 +9,9 @@ import { DEFAULT_OG_IMAGE } from "@/lib/seo"
 import { keywordsForPath } from "@/lib/seo-keywords"
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data"
 import { trialNavCtaLabel, trialSummaryShort } from "@/lib/trial-marketing"
+import { SEO_HUBS } from "@/lib/seo-hubs"
 
-const GUIDES_TITLE = "Contractor Missed-Call Guides | CallGrabbr"
-const GUIDES_DESCRIPTION =
-  "Comparisons and buyer guides for HVAC and plumbing shops: missed-call lead capture, vs Ruby, Smith.ai, Rosie, OnCrew, and after-hours cost."
+const { title: GUIDES_TITLE, description: GUIDES_DESCRIPTION } = SEO_HUBS.guides
 
 export const metadata: Metadata = {
   title: GUIDES_TITLE,
@@ -56,7 +55,7 @@ export default function GuidesIndexPage() {
       <section className="container mx-auto px-4 py-16 md:py-20">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-            Contractor missed-call guides
+            {SEO_HUBS.guides.heading}
           </h1>
           <p className="text-lg text-muted-foreground mb-8">
             Straight comparisons and cost guides for shops that can&apos;t afford missed after-hours jobs —{" "}

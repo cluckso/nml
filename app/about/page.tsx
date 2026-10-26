@@ -10,10 +10,9 @@ import { breadcrumbJsonLd, faqPageJsonLd, webPageJsonLd } from "@/lib/structured
 import { SUPPORT_EMAIL } from "@/lib/site-contact"
 import { Button } from "@/components/ui/button"
 import { trialNavCtaLabel } from "@/lib/trial-marketing"
+import { SEO_HUBS } from "@/lib/seo-hubs"
 
-const TITLE = "About CallGrabbr — Why I built this"
-const DESCRIPTION =
-  "Why CallGrabbr exists: missed-call lead capture for HVAC, plumbing, and local trades — grab the job when you can't answer and text it in seconds."
+const { title: TITLE, description: DESCRIPTION } = SEO_HUBS.about
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -55,7 +54,7 @@ export default function AboutPage() {
       />
 
       <p className="text-sm font-medium text-primary mb-3">About</p>
-      <h1 className="text-4xl font-bold tracking-tight mb-8">Why I built this</h1>
+      <h1 className="text-4xl font-bold tracking-tight mb-8">{SEO_HUBS.about.heading}</h1>
 
       <div className="flex flex-col sm:flex-row gap-6 items-start mb-10">
         <Image
