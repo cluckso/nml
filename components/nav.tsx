@@ -110,6 +110,7 @@ export function Nav() {
 
   const marketingLinks: NavLink[] = [
     ...(!user ? [{ href: "/#demo", label: "Demo" }] : []),
+    { href: "/for/hvac", label: "Industries" },
     { href: "/guides", label: "Guides" },
     { href: "/compare", label: "Compare" },
     { href: "/blog", label: "Blog" },

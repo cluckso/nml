@@ -12,8 +12,9 @@ import { SMSPreview } from "@/components/marketing/SMSPreview"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { funnelTrialFeatureLabel, trialSummaryShort, trialNavCtaLabel, trialConversionLine } from "@/lib/trial-marketing"
 import { formatJobValuePromptLine } from "@/lib/pricing-catalog"
+import { PRODUCT_FAQ } from "@/lib/faq-data"
 import { industryPageMetadata } from "@/lib/seo"
-import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data"
+import { breadcrumbJsonLd, faqPageJsonLd, webPageJsonLd } from "@/lib/structured-data"
 
 type PageProps = { params: Promise<{ industry: string }> }
 
@@ -56,6 +57,7 @@ export default async function IndustryLandingPage({ params }: PageProps) {
             { name: "Home", path: "/" },
             { name: data.name, path: pagePath },
           ]),
+          faqPageJsonLd(PRODUCT_FAQ.slice(0, 5)),
         ]}
       />
       <section className="container mx-auto px-4 py-16 md:py-24">
@@ -179,6 +181,24 @@ export default async function IndustryLandingPage({ params }: PageProps) {
           </div>
         </section>
       )}
+
+      <nav
+        aria-label="Explore CallGrabbr"
+        className="container mx-auto px-4 pb-8 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-muted-foreground"
+      >
+        <Link href="/pricing" className="hover:text-primary underline-offset-2 hover:underline">
+          Pricing
+        </Link>
+        <Link href="/compare" className="hover:text-primary underline-offset-2 hover:underline">
+          Compare
+        </Link>
+        <Link href="/guides" className="hover:text-primary underline-offset-2 hover:underline">
+          Guides
+        </Link>
+        <Link href="/docs/faq" className="hover:text-primary underline-offset-2 hover:underline">
+          Help &amp; FAQ
+        </Link>
+      </nav>
 
       <section className="container mx-auto px-4 py-16 text-center">
         <h2 className="text-2xl font-bold mb-2">Ready to stop losing {data.name.toLowerCase()} jobs?</h2>

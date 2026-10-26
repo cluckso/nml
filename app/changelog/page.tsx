@@ -14,6 +14,15 @@ const DESCRIPTION =
 
 const ENTRIES = [
   {
+    date: "2026-10-26",
+    title: "SEO keyword map, schema, and linking pass",
+    items: [
+      "Durable search-intent map in lib/seo-keywords.ts; industry meta titles/descriptions filled in.",
+      "FAQ + breadcrumb JSON-LD on pricing, home, about, compare, and industry pages; dashboard/admin/onboarding noindex.",
+      "Footer and nav industry links; guide relatedLinks denser; blog ISR + fuller meta; next/image on social-proof avatars.",
+    ],
+  },
+  {
     date: "2026-10-25",
     title: "SEO crawl fixes and discovery",
     items: [

@@ -184,7 +184,9 @@ const GUIDES: Guide[] = [
     relatedLinks: [
       { label: "CallGrabbr vs Ruby", href: "/guides/callgrabbr-vs-ruby" },
       { label: "After-hours lead capture cost", href: "/guides/after-hours-answering-cost-for-contractors" },
+      { label: "After-hours lead capture for HVAC", href: "/guides/best-ai-answering-for-hvac-2026" },
       { label: "Missed-call lead capture vs AI answering", href: "/guides/missed-call-lead-capture-vs-ai-answering" },
+      { label: "Full comparison hub", href: "/compare" },
       { label: "Plumbing landing page", href: "/for/plumbing" },
       { label: "Pricing", href: "/pricing" },
     ],
@@ -435,6 +437,8 @@ const GUIDES: Guide[] = [
       { label: "CallGrabbr vs Ruby", href: "/guides/callgrabbr-vs-ruby" },
       { label: "Missed-call lead capture vs AI answering", href: "/guides/missed-call-lead-capture-vs-ai-answering" },
       { label: "Lead capture vs live receptionist", href: "/guides/ai-vs-live-answering-for-contractors" },
+      { label: "Full comparison hub", href: "/compare" },
+      { label: "HVAC landing page", href: "/for/hvac" },
       { label: "Pricing", href: "/pricing" },
     ],
     keywords: [
@@ -624,6 +628,7 @@ const GUIDES: Guide[] = [
       { label: "CallGrabbr vs OnCrew", href: "/guides/callgrabbr-vs-oncrew" },
       { label: "Missed-call lead capture vs AI answering", href: "/guides/missed-call-lead-capture-vs-ai-answering" },
       { label: "Full comparison hub", href: "/compare" },
+      { label: "HVAC landing page", href: "/for/hvac" },
       { label: "Pricing", href: "/pricing" },
     ],
     keywords: [
@@ -785,6 +790,7 @@ const GUIDES: Guide[] = [
       { label: "After-hours lead capture cost", href: "/guides/after-hours-answering-cost-for-contractors" },
       { label: "After-hours lead capture for plumbing", href: "/guides/best-ai-answering-for-plumbing-2026" },
       { label: "After-hours lead capture for HVAC", href: "/guides/best-ai-answering-for-hvac-2026" },
+      { label: "HVAC landing page", href: "/for/hvac" },
       { label: "Pricing", href: "/pricing" },
     ],
     keywords: [
@@ -892,6 +898,7 @@ const GUIDES: Guide[] = [
       { label: "CallGrabbr vs Ruby", href: "/guides/callgrabbr-vs-ruby" },
       { label: "Lead capture vs live receptionist", href: "/guides/ai-vs-live-answering-for-contractors" },
       { label: "Full comparison hub", href: "/compare" },
+      { label: "Plumbing landing page", href: "/for/plumbing" },
       { label: "Pricing", href: "/pricing" },
     ],
     keywords: [

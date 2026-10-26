@@ -33,29 +33,32 @@ describe("audit title and description lengths", () => {
     }
   })
 
-  it("keeps landscaping title and plumbing description in range", () => {
-    const landscaping = getIndustryLandingBySlug("landscaping")!
-    const plumbing = getIndustryLandingBySlug("plumbing")!
-    const landMeta = industryPageMetadata({
-      headline: landscaping.headline,
-      subheadline: landscaping.subheadline,
-      slug: "landscaping",
-      industryName: landscaping.name,
-      metaTitle: landscaping.metaTitle,
-      metaDescription: landscaping.metaDescription,
-    })
-    const plumbMeta = industryPageMetadata({
-      headline: plumbing.headline,
-      subheadline: plumbing.subheadline,
-      slug: "plumbing",
-      industryName: plumbing.name,
-      metaTitle: plumbing.metaTitle,
-      metaDescription: plumbing.metaDescription,
-    })
-    expect(String(landMeta.title).length).toBeGreaterThanOrEqual(30)
-    expect(String(landMeta.title).length).toBeLessThanOrEqual(60)
-    expect(String(plumbMeta.description).length).toBeGreaterThanOrEqual(110)
-    expect(String(plumbMeta.description).length).toBeLessThanOrEqual(160)
+  it("keeps industry meta titles 30-60 and descriptions 110-160", () => {
+    const slugs = [
+      "hvac",
+      "plumbing",
+      "electrical",
+      "auto-repair",
+      "handyman",
+      "childcare",
+      "cleaning",
+      "landscaping",
+    ]
+    for (const slug of slugs) {
+      const landing = getIndustryLandingBySlug(slug)!
+      const meta = industryPageMetadata({
+        headline: landing.headline,
+        subheadline: landing.subheadline,
+        slug,
+        industryName: landing.name,
+        metaTitle: landing.metaTitle,
+        metaDescription: landing.metaDescription,
+      })
+      expect(String(meta.title).length, `${slug} title`).toBeGreaterThanOrEqual(30)
+      expect(String(meta.title).length, `${slug} title`).toBeLessThanOrEqual(60)
+      expect(String(meta.description).length, `${slug} description`).toBeGreaterThanOrEqual(110)
+      expect(String(meta.description).length, `${slug} description`).toBeLessThanOrEqual(160)
+    }
   })
 
   it("gives each flagged guide at least 800 words", () => {

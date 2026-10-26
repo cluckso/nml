@@ -1,3 +1,4 @@
+import Image from "next/image"
 import { CUSTOMER_STORIES } from "@/lib/marketing/social-proof"
 import { Card, CardContent } from "@/components/ui/card"
 
@@ -22,10 +23,12 @@ export function TestimonialWall() {
               )}
               <div className="flex items-center gap-3">
                 {story.photoSrc ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={story.photoSrc}
                     alt=""
+                    width={40}
+                    height={40}
+                    sizes="40px"
                     className="h-10 w-10 rounded-full object-cover"
                   />
                 ) : (

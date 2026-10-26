@@ -1,3 +1,4 @@
+import Image from "next/image"
 import {
   customerCountLabel,
   CUSTOMER_COUNT,
@@ -21,11 +22,13 @@ export function CustomerCountBadge() {
           const story = photoStories[i]
           if (story?.photoSrc) {
             return (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 key={story.name + i}
                 src={story.photoSrc}
                 alt=""
+                width={32}
+                height={32}
+                sizes="32px"
                 className="h-8 w-8 rounded-full border-2 border-background object-cover"
               />
             )

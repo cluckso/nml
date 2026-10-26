@@ -1,9 +1,14 @@
+import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { requireAuth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { PersistTermsConsent } from "@/components/legal/PersistTermsConsent"
 
 export const dynamic = "force-dynamic"
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 
 /** Dashboard: require business + onboarding. Trial (no subscription) or paid both allowed. */
 export default async function DashboardLayout({

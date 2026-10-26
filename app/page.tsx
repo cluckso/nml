@@ -36,12 +36,18 @@ import {
 
 import { JsonLd } from "@/components/seo/JsonLd"
 import { PRODUCT_FAQ } from "@/lib/faq-data"
-import { faqPageJsonLd, softwareApplicationJsonLd } from "@/lib/structured-data"
+import {
+  breadcrumbJsonLd,
+  faqPageJsonLd,
+  softwareApplicationJsonLd,
+  webPageJsonLd,
+} from "@/lib/structured-data"
 import { homePageMetadata } from "@/lib/seo"
 import {
   basicVsGrowthFitLine,
   moneyBackGuaranteeLabel,
   plansFromAnchorLabel,
+  siteMetaDescription,
   trialDisclosureLine,
   trialHeadlineLabel,
   trialNavCtaLabel,
@@ -54,9 +60,37 @@ export const metadata: Metadata = homePageMetadata()
 export default function HomePage() {
   return (
     <div className="flex flex-col min-h-screen">
-      <JsonLd data={[softwareApplicationJsonLd(), faqPageJsonLd(PRODUCT_FAQ.slice(0, 8))]} />
+      <JsonLd
+        data={[
+          softwareApplicationJsonLd(),
+          webPageJsonLd({
+            name: "CallGrabbr - Stop Losing Jobs to Missed Calls",
+            description: siteMetaDescription(),
+            path: "/",
+          }),
+          breadcrumbJsonLd([{ name: "Home", path: "/" }]),
+          faqPageJsonLd(PRODUCT_FAQ.slice(0, 8)),
+        ]}
+      />
       <HomeHero />
       <TrustStrip />
+      <nav
+        aria-label="Popular resources"
+        className="container mx-auto px-4 py-4 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-muted-foreground"
+      >
+        <Link href="/guides" className="hover:text-primary underline-offset-2 hover:underline">
+          Guides
+        </Link>
+        <Link href="/docs/faq" className="hover:text-primary underline-offset-2 hover:underline">
+          Help &amp; FAQ
+        </Link>
+        <Link href="/pricing" className="hover:text-primary underline-offset-2 hover:underline">
+          Pricing
+        </Link>
+        <Link href="/compare" className="hover:text-primary underline-offset-2 hover:underline">
+          Compare
+        </Link>
+      </nav>
 
       <section id="demo" className="bg-muted/30 py-16 border-y border-border/50">
         <div className="container mx-auto px-4">

@@ -3,29 +3,32 @@ import Link from "next/link"
 import { listArticles } from "@/lib/articles"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data"
-import { SEO_KEYWORDS } from "@/lib/seo"
+import { DEFAULT_OG_IMAGE } from "@/lib/seo"
+import { keywordsForPath } from "@/lib/seo-keywords"
 
-export const dynamic = "force-dynamic"
+export const revalidate = 3600
 
 const TITLE = "Blog | CallGrabbr"
 const DESCRIPTION =
-  "Practical guides and notes on missed-call lead capture for contractors and local service businesses."
+  "Practical notes on missed-call lead capture for HVAC, plumbing, and local trades — after-hours answering, forwarding, and speed-to-lead tips."
 
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
-  keywords: [...SEO_KEYWORDS, "CallGrabbr blog"],
+  keywords: keywordsForPath("/blog"),
   alternates: { canonical: "/blog" },
   openGraph: {
     title: TITLE,
     description: DESCRIPTION,
     type: "website",
     url: "/blog",
+    images: [DEFAULT_OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
     title: TITLE,
     description: DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE.url],
   },
 }
 

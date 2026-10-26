@@ -21,12 +21,19 @@ import {
   trialDisclosureLine,
   trialTrustLine,
 } from "@/lib/trial-marketing"
-import { DEFAULT_OG_IMAGE, SEO_KEYWORDS } from "@/lib/seo"
+import { DEFAULT_OG_IMAGE } from "@/lib/seo"
 import { ROSIE_PRICE_OBJECTION } from "@/lib/marketing/positioning"
 import { CompareUsLinks } from "@/components/marketing/CompareUsLinks"
 import Link from "next/link"
 import { JsonLd } from "@/components/seo/JsonLd"
-import { softwareApplicationJsonLd, webPageJsonLd } from "@/lib/structured-data"
+import { PRODUCT_FAQ } from "@/lib/faq-data"
+import { keywordsForPath } from "@/lib/seo-keywords"
+import {
+  breadcrumbJsonLd,
+  faqPageJsonLd,
+  softwareApplicationJsonLd,
+  webPageJsonLd,
+} from "@/lib/structured-data"
 import { pricingUrl } from "@/lib/monetization-urls"
 import { PlanType } from "@prisma/client"
 import {
@@ -44,7 +51,11 @@ const PRICING_DESCRIPTION =
 export const metadata: Metadata = {
   title: PRICING_TITLE,
   description: PRICING_DESCRIPTION,
-  keywords: [...SEO_KEYWORDS, "AI answering service pricing", "CallGrabbr pricing", "HVAC answering service"],
+  keywords: [
+    ...keywordsForPath("/pricing"),
+    "AI answering service pricing",
+    "CallGrabbr pricing",
+  ],
   alternates: { canonical: "/pricing" },
   openGraph: {
     title: PRICING_TITLE,
@@ -179,7 +190,14 @@ export default async function PricingPage({
             description: PRICING_DESCRIPTION,
             path: "/pricing",
           }),
+          breadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Pricing", path: "/pricing" },
+          ]),
           softwareApplicationJsonLd(),
+          faqPageJsonLd(PRODUCT_FAQ.filter((item) =>
+            /cost|plan|worth|trial|cancel|ServiceTitan/i.test(item.question)
+          )),
         ]}
       />
       <SectionBackdrop
@@ -228,6 +246,39 @@ export default async function PricingPage({
         <PricingComparisonTable className="mb-16" />
 
         <CompareUsLinks className="mb-16" />
+
+        <section className="mb-16 max-w-3xl mx-auto" aria-labelledby="pricing-faq-heading">
+          <h2 id="pricing-faq-heading" className="text-2xl font-bold tracking-tight text-center mb-6">
+            Pricing FAQ
+          </h2>
+          <div className="space-y-2">
+            {PRODUCT_FAQ.filter((item) =>
+              /cost|plan|worth|trial|cancel|ServiceTitan/i.test(item.question)
+            ).map((item) => (
+              <details
+                key={item.question}
+                className="group rounded-lg border bg-card text-card-foreground shadow-sm"
+              >
+                <summary className="cursor-pointer list-none px-4 py-3 font-medium flex items-center justify-between gap-3">
+                  <span>{item.question}</span>
+                  <span className="text-muted-foreground text-sm group-open:rotate-180 transition-transform">
+                    ▼
+                  </span>
+                </summary>
+                <p className="px-4 pb-4 text-sm text-muted-foreground leading-relaxed">
+                  {item.answer}
+                </p>
+              </details>
+            ))}
+          </div>
+          <p className="text-center text-sm text-muted-foreground mt-4">
+            More setup help in the{" "}
+            <Link href="/docs/faq" className="text-primary underline underline-offset-2">
+              Help &amp; FAQ
+            </Link>
+            .
+          </p>
+        </section>
 
         <AudioExamples />
 

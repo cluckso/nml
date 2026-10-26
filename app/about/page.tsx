@@ -5,7 +5,8 @@ import { FOUNDER, WHY_I_BUILT_THIS } from "@/lib/marketing/founder"
 import { FounderAttestation } from "@/components/marketing/FounderAttestation"
 import { DEFAULT_OG_IMAGE, SEO_KEYWORDS } from "@/lib/seo"
 import { JsonLd } from "@/components/seo/JsonLd"
-import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data"
+import { PRODUCT_FAQ } from "@/lib/faq-data"
+import { breadcrumbJsonLd, faqPageJsonLd, webPageJsonLd } from "@/lib/structured-data"
 import { SUPPORT_EMAIL } from "@/lib/site-contact"
 import { Button } from "@/components/ui/button"
 import { trialNavCtaLabel } from "@/lib/trial-marketing"
@@ -49,6 +50,7 @@ export default function AboutPage() {
             { name: "Home", path: "/" },
             { name: "About", path: "/about" },
           ]),
+          faqPageJsonLd(PRODUCT_FAQ.slice(0, 3)),
         ]}
       />
 
@@ -62,6 +64,7 @@ export default function AboutPage() {
           width={288}
           height={288}
           className="h-36 w-36 rounded-xl object-cover object-top border border-border/60"
+          sizes="144px"
           priority
         />
         <div className="space-y-1">
@@ -76,6 +79,45 @@ export default function AboutPage() {
         ))}
         <FounderAttestation />
       </div>
+
+      <section className="mb-12" aria-labelledby="about-faq-heading">
+        <h2 id="about-faq-heading" className="text-xl font-semibold mb-4">
+          Quick answers
+        </h2>
+        <div className="space-y-2">
+          {PRODUCT_FAQ.slice(0, 3).map((item) => (
+            <details
+              key={item.question}
+              className="group rounded-lg border bg-card text-card-foreground shadow-sm"
+            >
+              <summary className="cursor-pointer list-none px-4 py-3 font-medium">
+                {item.question}
+              </summary>
+              <p className="px-4 pb-4 text-sm text-muted-foreground leading-relaxed">
+                {item.answer}
+              </p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <nav
+        aria-label="Related pages"
+        className="mb-10 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground"
+      >
+        <Link href="/guides" className="hover:text-primary underline-offset-2 hover:underline">
+          Guides
+        </Link>
+        <Link href="/compare" className="hover:text-primary underline-offset-2 hover:underline">
+          Compare
+        </Link>
+        <Link href="/pricing" className="hover:text-primary underline-offset-2 hover:underline">
+          Pricing
+        </Link>
+        <Link href="/for/hvac" className="hover:text-primary underline-offset-2 hover:underline">
+          HVAC
+        </Link>
+      </nav>
 
       <div className="rounded-xl border border-border/60 bg-card/40 p-6 text-center">
         <p className="text-sm text-muted-foreground mb-4">

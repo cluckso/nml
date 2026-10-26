@@ -215,7 +215,16 @@ rkp("init","PaccPmsytSiq");rkp("event","PAGE_VIEW");
                   Android app
                 </a>
                 <Link href="/for/hvac" className="hover:text-foreground font-medium">
-                  See how it works
+                  HVAC
+                </Link>
+                <Link href="/for/plumbing" className="hover:text-foreground font-medium">
+                  Plumbing
+                </Link>
+                <Link href="/for/electrical" className="hover:text-foreground font-medium">
+                  Electrical
+                </Link>
+                <Link href="/integrations/zapier" className="hover:text-foreground font-medium">
+                  Zapier
                 </Link>
                 <Link href="/privacy" className="hover:text-foreground">
                   Privacy Policy

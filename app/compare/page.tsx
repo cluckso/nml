@@ -5,35 +5,35 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { CATEGORY_NAME, FOOTER_TAGLINE, HERO_H1 } from "@/lib/marketing/positioning"
-import { DEFAULT_OG_IMAGE, SEO_KEYWORDS } from "@/lib/seo"
-import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data"
+import { DEFAULT_OG_IMAGE } from "@/lib/seo"
+import { PRODUCT_FAQ } from "@/lib/faq-data"
+import { keywordsForPath } from "@/lib/seo-keywords"
+import { breadcrumbJsonLd, faqPageJsonLd, webPageJsonLd } from "@/lib/structured-data"
 import { GUIDE_TRIAL_HREF } from "@/lib/guides"
 import { trialNavCtaLabel, trialSummaryShort } from "@/lib/trial-marketing"
 import { CATEGORY_COMPARE_LINK, VS_PAGE_LINKS } from "@/lib/marketing/comparisons"
 
 const COMPARISONS = [...VS_PAGE_LINKS, CATEGORY_COMPARE_LINK]
 
+const COMPARE_TITLE = "Compare CallGrabbr vs AI Answering & Receptionists"
+const COMPARE_DESCRIPTION =
+  "Side-by-side missed-call lead capture vs Ruby, Rosie, Smith.ai, OnCrew, Broccoli, and live receptionists for HVAC and plumbing shops."
+
 export const metadata: Metadata = {
-  title: "Compare CallGrabbr vs AI Answering & Receptionists",
-  description: `${FOOTER_TAGLINE} See how CallGrabbr compares to Ruby, Rosie, Smith.ai, OnCrew, and generic AI answering for contractors.`,
-  keywords: [
-    ...SEO_KEYWORDS,
-    "CallGrabbr comparison",
-    "missed call lead capture",
-    "AI answering service alternative",
-    "contractor answering comparison",
-  ],
+  title: COMPARE_TITLE,
+  description: COMPARE_DESCRIPTION,
+  keywords: keywordsForPath("/compare"),
   alternates: { canonical: "/compare" },
   openGraph: {
-    title: "Compare CallGrabbr vs AI Answering & Receptionists",
-    description: FOOTER_TAGLINE,
+    title: COMPARE_TITLE,
+    description: COMPARE_DESCRIPTION,
     type: "website",
     images: [DEFAULT_OG_IMAGE],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Compare CallGrabbr vs AI Answering & Receptionists",
-    description: FOOTER_TAGLINE,
+    title: COMPARE_TITLE,
+    description: COMPARE_DESCRIPTION,
     images: [DEFAULT_OG_IMAGE.url],
   },
 }
@@ -45,13 +45,16 @@ export default function ComparePage() {
         data={[
           webPageJsonLd({
             name: "Compare CallGrabbr",
-            description: `How CallGrabbr ${CATEGORY_NAME} compares to AI answering services and live receptionists.`,
+            description: COMPARE_DESCRIPTION,
             path: "/compare",
           }),
           breadcrumbJsonLd([
             { name: "Home", path: "/" },
             { name: "Compare", path: "/compare" },
           ]),
+          faqPageJsonLd(
+            PRODUCT_FAQ.filter((item) => /What is CallGrabbr|worth|plan should/i.test(item.question))
+          ),
         ]}
       />
 
@@ -106,13 +109,23 @@ export default function ComparePage() {
           ))}
         </ul>
 
-        <p className="max-w-3xl mx-auto mt-10 text-center text-sm text-muted-foreground">
-          More buyer guides on{" "}
-          <Link href="/guides" className="text-primary font-medium hover:underline">
-            all contractor guides
+        <nav
+          aria-label="Related pages"
+          className="max-w-3xl mx-auto mt-10 flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-muted-foreground"
+        >
+          <Link href="/for/hvac" className="hover:text-primary underline-offset-2 hover:underline">
+            HVAC
           </Link>
-          .
-        </p>
+          <Link href="/for/plumbing" className="hover:text-primary underline-offset-2 hover:underline">
+            Plumbing
+          </Link>
+          <Link href="/pricing" className="hover:text-primary underline-offset-2 hover:underline">
+            Pricing
+          </Link>
+          <Link href="/guides" className="hover:text-primary underline-offset-2 hover:underline">
+            All guides
+          </Link>
+        </nav>
       </section>
     </div>
   )

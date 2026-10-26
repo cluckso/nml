@@ -53,6 +53,9 @@ const LANDING_PAGES: IndustryLandingData[] = [
     industry: Industry.HVAC,
     name: "HVAC",
     headline: "Stop Losing HVAC Jobs to Missed Calls",
+    metaTitle: "HVAC missed-call lead capture | CallGrabbr",
+    metaDescription:
+      "HVAC missed-call lead capture: grab no-heat and no-AC jobs when techs can't answer, then text the shop the address and urgency in seconds.",
     subheadline:
       "When the AC goes out or the furnace dies, homeowners call the next contractor. CallGrabbr grabs the job when you can't and texts you the details in seconds.",
     sceneHook:
@@ -83,10 +86,11 @@ const LANDING_PAGES: IndustryLandingData[] = [
     industry: Industry.PLUMBING,
     name: "Plumbing",
     headline: "Capture More Plumbing Leads — Even at 2 AM",
-    subheadline:
-      "Burst pipes and clogged drains can't wait. We grab the job when you can't answer, flag emergencies, and text you the lead before the caller dials your competitor.",
+    metaTitle: "Plumbing missed-call lead capture | CallGrabbr",
     metaDescription:
       "Burst-pipe and clog calls: CallGrabbr grabs the address and urgency and texts the plumber when the shop cannot pick up.",
+    subheadline:
+      "Burst pipes and clogged drains can't wait. We grab the job when you can't answer, flag emergencies, and text you the lead before the caller dials your competitor.",
     sceneHook:
       "It's 2 AM. A homeowner has water running under the sink. They call you, hang up when you don't answer, and dial the next plumber — while you're asleep.",
     averageJobValue: 380,
@@ -115,6 +119,9 @@ const LANDING_PAGES: IndustryLandingData[] = [
     industry: Industry.ELECTRICIAN,
     name: "Electrical",
     headline: "Never Miss an Electrical Service Call Again",
+    metaTitle: "Electrical missed-call lead capture | CallGrabbr",
+    metaDescription:
+      "Electrical missed-call lead capture for sparking outlets and outages — grab address, safety flags, and callback info when you're on a ladder.",
     subheadline:
       "Power outages, panel upgrades, and sparking outlets need fast response. CallGrabbr captures every detail so you can quote and schedule faster.",
     sceneHook:
@@ -136,6 +143,8 @@ const LANDING_PAGES: IndustryLandingData[] = [
       { label: "CallGrabbr vs Rosie", href: "/guides/callgrabbr-vs-rosie" },
       { label: "Missed-call lead capture vs live receptionist", href: "/guides/ai-vs-live-answering-for-contractors" },
       { label: "After-hours lead capture cost", href: "/guides/after-hours-answering-cost-for-contractors" },
+      { label: "Compare answering tools", href: "/compare" },
+      { label: "Pricing", href: "/pricing" },
     ],
   },
   {
@@ -143,6 +152,9 @@ const LANDING_PAGES: IndustryLandingData[] = [
     industry: Industry.AUTO_REPAIR,
     name: "Auto Repair",
     headline: "Book More Auto Repair Jobs From Missed Calls",
+    metaTitle: "Auto repair missed-call lead capture | CallGrabbr",
+    metaDescription:
+      "Auto repair missed-call lead capture: grab year, make, model, and symptoms while techs are under the hood — then text the shop the RO lead.",
     subheadline:
       "Capture year, make, model, and symptoms when callers share them. CallGrabbr handles intake while your techs are under the hood.",
     sceneHook:
@@ -164,6 +176,8 @@ const LANDING_PAGES: IndustryLandingData[] = [
       { label: "CallGrabbr vs Rosie", href: "/guides/callgrabbr-vs-rosie" },
       { label: "Missed-call lead capture vs live receptionist", href: "/guides/ai-vs-live-answering-for-contractors" },
       { label: "After-hours lead capture cost", href: "/guides/after-hours-answering-cost-for-contractors" },
+      { label: "Compare answering tools", href: "/compare" },
+      { label: "Pricing", href: "/pricing" },
     ],
   },
   {
@@ -171,6 +185,9 @@ const LANDING_PAGES: IndustryLandingData[] = [
     industry: Industry.HANDYMAN,
     name: "Handyman",
     headline: "Turn Handyman Calls Into Booked Jobs",
+    metaTitle: "Handyman missed-call lead capture | CallGrabbr",
+    metaDescription:
+      "Handyman missed-call lead capture for solo operators — grab scope, address, and urgency while you're on a ladder, then text you the quote lead.",
     subheadline:
       "From drywall to deck repairs, callers want fast answers. We grab the scope, address, and urgency — and text you the lead so you can follow up with a quote.",
     sceneHook:
@@ -192,6 +209,8 @@ const LANDING_PAGES: IndustryLandingData[] = [
       { label: "CallGrabbr vs Rosie", href: "/guides/callgrabbr-vs-rosie" },
       { label: "Missed-call lead capture vs live receptionist", href: "/guides/ai-vs-live-answering-for-contractors" },
       { label: "After-hours lead capture cost", href: "/guides/after-hours-answering-cost-for-contractors" },
+      { label: "Compare answering tools", href: "/compare" },
+      { label: "Pricing", href: "/pricing" },
     ],
   },
   {
@@ -199,6 +218,9 @@ const LANDING_PAGES: IndustryLandingData[] = [
     industry: Industry.CHILDCARE,
     name: "Childcare",
     headline: "Answer Parent Inquiries — Even During Drop-Off",
+    metaTitle: "Childcare missed-call lead capture | CallGrabbr",
+    metaDescription:
+      "Childcare missed-call lead capture for tour and enrollment calls — grab parent info during drop-off so the next center does not win the family.",
     subheadline:
       "Tour requests and enrollment calls need a warm, professional first impression. CallGrabbr captures parent info and schedules tours while you focus on the kids.",
     sceneHook:
@@ -226,6 +248,9 @@ const LANDING_PAGES: IndustryLandingData[] = [
     slug: "cleaning",
     name: "Cleaning",
     headline: "Book More Cleaning Clients From Missed Calls",
+    metaTitle: "Cleaning missed-call lead capture | CallGrabbr",
+    metaDescription:
+      "Cleaning missed-call lead capture for residential and commercial quotes — grab square footage, frequency, and address while crews are on-site.",
     subheadline:
       "Residential and commercial cleaning leads need fast follow-up. Capture square footage, frequency, and address when callers provide them.",
     sceneHook:

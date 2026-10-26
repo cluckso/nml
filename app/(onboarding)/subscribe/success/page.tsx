@@ -12,6 +12,7 @@ export const dynamic = "force-dynamic"
 export const metadata: Metadata = {
   title: "Subscription confirmed | CallGrabbr",
   description: "Your CallGrabbr subscription is active. Finish setup or go to your dashboard.",
+  robots: { index: false, follow: false },
 }
 
 export default async function SubscribeSuccessPage({
