@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { unstable_cache } from "next/cache"
 import { listArticles } from "@/lib/articles"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data"
@@ -7,7 +8,11 @@ import { DEFAULT_OG_IMAGE } from "@/lib/seo"
 import { keywordsForPath } from "@/lib/seo-keywords"
 import { SEO_HUBS } from "@/lib/seo-hubs"
 
-export const revalidate = 3600
+export const dynamic = "force-dynamic"
+
+const getCachedArticles = unstable_cache(listArticles, ["blog-articles"], {
+  revalidate: 3600,
+})
 
 const { title: TITLE, description: DESCRIPTION } = SEO_HUBS.blog
 
@@ -41,7 +46,7 @@ function formatDate(value: Date | null | undefined): string | null {
 }
 
 export default async function BlogIndexPage() {
-  const articles = await listArticles()
+  const articles = await getCachedArticles()
   const published = articles.filter((a) => a.slug)
 
   return (
