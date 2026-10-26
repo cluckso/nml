@@ -37,9 +37,9 @@ import {
 } from "@/lib/pricing-query"
 import type { BillingInterval } from "@/lib/stripe-billing"
 
-const PRICING_TITLE = "Pricing - AI Answering Service for Trades | CallGrabbr"
+const PRICING_TITLE = "Missed-Call Lead Capture Pricing | CallGrabbr"
 const PRICING_DESCRIPTION =
-  "AI answering service pricing for HVAC, plumbing, and trades. Plans from $99/mo. 14 days or 40 call minutes free trial. 30-day money-back on paid plans."
+  "Basic $99, Growth $189, Platinum $279. Missed-call lead capture for HVAC and trades. 14-day or 40-min free trial. 30-day money-back."
 
 export const metadata: Metadata = {
   title: PRICING_TITLE,

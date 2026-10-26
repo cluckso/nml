@@ -215,6 +215,12 @@ const LANDING_PAGES: IndustryLandingData[] = [
       "What's the best number to reach you?",
     ],
     statMissedCalls: "Parents call 3–4 centers before enrolling",
+    relatedGuides: [
+      { label: "Missed-call lead capture vs AI answering", href: "/guides/missed-call-lead-capture-vs-ai-answering" },
+      { label: "Missed-call lead capture vs live receptionist", href: "/guides/ai-vs-live-answering-for-contractors" },
+      { label: "After-hours lead capture cost", href: "/guides/after-hours-answering-cost-for-contractors" },
+      { label: "Pricing", href: "/pricing" },
+    ],
   },
   {
     slug: "cleaning",
@@ -236,6 +242,13 @@ const LANDING_PAGES: IndustryLandingData[] = [
       "What's the property address?",
     ],
     statMissedCalls: "Speed-to-lead wins recurring contracts",
+    relatedGuides: [
+      { label: "Missed-call lead capture vs AI answering", href: "/guides/missed-call-lead-capture-vs-ai-answering" },
+      { label: "Missed-call lead capture vs live receptionist", href: "/guides/ai-vs-live-answering-for-contractors" },
+      { label: "After-hours lead capture cost", href: "/guides/after-hours-answering-cost-for-contractors" },
+      { label: "CallGrabbr vs Rosie", href: "/guides/callgrabbr-vs-rosie" },
+      { label: "Pricing", href: "/pricing" },
+    ],
   },
   {
     slug: "landscaping",
@@ -258,6 +271,13 @@ const LANDING_PAGES: IndustryLandingData[] = [
       "Are you looking for a one-time or recurring service?",
     ],
     statMissedCalls: "Spring rush means more missed calls than any other season",
+    relatedGuides: [
+      { label: "Missed-call lead capture vs AI answering", href: "/guides/missed-call-lead-capture-vs-ai-answering" },
+      { label: "Missed-call lead capture vs live receptionist", href: "/guides/ai-vs-live-answering-for-contractors" },
+      { label: "After-hours lead capture cost", href: "/guides/after-hours-answering-cost-for-contractors" },
+      { label: "CallGrabbr vs OnCrew", href: "/guides/callgrabbr-vs-oncrew" },
+      { label: "Pricing", href: "/pricing" },
+    ],
   },
 ]
 

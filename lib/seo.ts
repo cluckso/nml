@@ -5,12 +5,15 @@ import { siteMetaDescription } from "@/lib/trial-marketing"
 /** Shared SEO keywords — lead with missed-call lead capture; legacy answering terms secondary. */
 export const SEO_KEYWORDS = [
   "missed call lead capture",
+  "after hours lead capture",
   "after hours lead capture HVAC",
   "voicemail alternative for contractors",
   "stop losing jobs to missed calls",
   "contractor lead capture from missed calls",
   "lead capture phone system",
+  "missed call text alert",
   "missed call solution",
+  "AI answering for trades",
   "HVAC answering service",
   "plumber answering service",
   "local service business",

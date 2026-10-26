@@ -159,10 +159,35 @@ export function softwareApplicationJsonLd() {
     downloadUrl: GOOGLE_PLAY_STORE_URL,
     description: softwareApplicationDescription(),
     offers: {
-      "@type": "Offer",
-      price: "99",
+      "@type": "AggregateOffer",
+      lowPrice: "99",
+      highPrice: "279",
       priceCurrency: "USD",
+      offerCount: "3",
       description: pricingSchemaTrialDescription(),
+      offers: [
+        {
+          "@type": "Offer",
+          name: "Basic",
+          price: "99",
+          priceCurrency: "USD",
+          description: "250 included minutes/mo. Overage $0.29/min.",
+        },
+        {
+          "@type": "Offer",
+          name: "Growth",
+          price: "189",
+          priceCurrency: "USD",
+          description: "500 included minutes/mo. Appointments, follow-up, CRM webhook.",
+        },
+        {
+          "@type": "Offer",
+          name: "Platinum",
+          price: "279",
+          priceCurrency: "USD",
+          description: "1,200 included minutes/mo. Multi-crew, high volume.",
+        },
+      ],
     },
   }
 }

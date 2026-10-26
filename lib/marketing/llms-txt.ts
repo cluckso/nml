@@ -20,11 +20,21 @@ CallGrabbr is missed-call lead capture for HVAC, plumbing, electrical, auto repa
 
 - Home: ${origin}/
 - Pricing: ${origin}/pricing
+- Guides hub: ${origin}/guides
+- Blog: ${origin}/blog
 - FAQ: ${origin}/docs/faq
 - About: ${origin}/about
 - Compare: ${origin}/compare
 - Changelog: ${origin}/changelog
 - Zapier / CRM webhook: ${origin}/integrations/zapier
+
+## Buyer guides
+
+- HVAC missed-call lead capture: ${origin}/guides/best-ai-answering-for-hvac-2026
+- Plumbing missed-call lead capture: ${origin}/guides/best-ai-answering-for-plumbing-2026
+- After-hours lead capture cost: ${origin}/guides/after-hours-answering-cost-for-contractors
+- Missed-call lead capture vs AI answering: ${origin}/guides/missed-call-lead-capture-vs-ai-answering
+- AI vs live receptionist: ${origin}/guides/ai-vs-live-answering-for-contractors
 
 ## Versus pages
 

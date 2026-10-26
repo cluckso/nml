@@ -8,12 +8,28 @@ import {
   getMetaIndustryFromParams,
   parseMetaLeadPrefill,
 } from "@/lib/meta-lead-routing"
+import { DEFAULT_OG_IMAGE } from "@/lib/seo"
+
+const START_TITLE = "Get Started with CallGrabbr — choose your trade now"
+const START_DESCRIPTION = `Choose your trade to see your missed-call estimate — ${CATEGORY_NAME} that texts you the lead in seconds. HVAC, plumbing, electrical, auto, and handyman shops start free.`
 
 export const metadata: Metadata = {
-  title: "Get Started with CallGrabbr — choose your trade now",
-  description: `Choose your trade to see your missed-call estimate — ${CATEGORY_NAME} that texts you the lead in seconds. HVAC, plumbing, electrical, auto, and handyman shops start free.`,
+  title: START_TITLE,
+  description: START_DESCRIPTION,
   alternates: { canonical: "/start" },
   robots: { index: true, follow: true },
+  openGraph: {
+    title: START_TITLE,
+    description: START_DESCRIPTION,
+    type: "website",
+    images: [DEFAULT_OG_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: START_TITLE,
+    description: START_DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE.url],
+  },
 }
 
 type PageProps = {

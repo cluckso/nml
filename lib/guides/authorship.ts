@@ -9,4 +9,4 @@ export const GUIDE_AUTHOR_NAME = FOUNDER.name
 export const GUIDE_PUBLISHED = "2026-09-15"
 
 /** Real edit date for the guide template, limits, and citations. */
-export const GUIDE_UPDATED = "2026-09-30"
+export const GUIDE_UPDATED = "2026-10-25"

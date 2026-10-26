@@ -14,7 +14,7 @@ import { siteMetaDescription } from "@/lib/trial-marketing"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { organizationJsonLd, webSiteJsonLd } from "@/lib/structured-data"
 
-const inter = Inter({ subsets: ["latin"] })
+const inter = Inter({ subsets: ["latin"], display: "swap" })
 
 const googleSiteVerification =
   process.env.GOOGLE_SITE_VERIFICATION || "vbp7kMaN9FYqtyLddH0hqILwUGQLAq6l8XbER6JwCJ0"
@@ -214,7 +214,7 @@ rkp("init","PaccPmsytSiq");rkp("event","PAGE_VIEW");
                 >
                   Android app
                 </a>
-                <Link href="/funnel/hvac" className="hover:text-foreground font-medium">
+                <Link href="/for/hvac" className="hover:text-foreground font-medium">
                   See how it works
                 </Link>
                 <Link href="/privacy" className="hover:text-foreground">

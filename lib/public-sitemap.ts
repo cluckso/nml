@@ -6,25 +6,27 @@ import { getAllIndustrySlugs } from "@/lib/industry-data"
 import { SITE_URL } from "@/lib/site-url"
 
 /** Content edit dates. Not the build clock. */
-const EDITED_ON = "2026-09-30"
+const EDITED_ON = "2026-10-25"
 const SHIPPED_ON = "2026-09-15"
 const LEGAL_ON = "2026-09-19"
+const PRICING_ON = "2026-10-25"
 
 const STATIC_DATES: Record<string, string> = {
   "": SHIPPED_ON,
-  "/pricing": EDITED_ON,
+  "/pricing": PRICING_ON,
   "/about": SHIPPED_ON,
-  "/compare": SHIPPED_ON,
-  "/changelog": EDITED_ON,
+  "/compare": EDITED_ON,
+  "/changelog": PRICING_ON,
   "/docs/faq": EDITED_ON,
   "/privacy": LEGAL_ON,
   "/terms": LEGAL_ON,
   "/sms-terms": EDITED_ON,
+  "/start": EDITED_ON,
   "/trial/start": EDITED_ON,
   "/integrations/zapier": EDITED_ON,
   "/guides": EDITED_ON,
   "/blog": EDITED_ON,
-  "/llms.txt": SHIPPED_ON,
+  "/llms.txt": PRICING_ON,
   [AUTHOR_PATH]: GUIDE_UPDATED,
   "/for/landscaping": EDITED_ON,
   "/for/plumbing": EDITED_ON,

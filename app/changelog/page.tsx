@@ -15,6 +15,16 @@ const DESCRIPTION =
 const ENTRIES = [
   {
     date: "2026-10-25",
+    title: "SEO crawl fixes and discovery",
+    items: [
+      "Auth pages noindex to match robots.txt; footer “See how it works” points at /for/hvac instead of a noindex funnel.",
+      "Sitemap lastmod and guide dateModified bumped for the pricing package; /start added to the sitemap.",
+      "Pricing and FAQ titles lead with missed-call lead capture; SoftwareApplication schema uses AggregateOffer for all three plans.",
+      "llms.txt lists guides hub, blog, and buyer guides; Compare added to nav; related guides on childcare, cleaning, and landscaping pages.",
+    ],
+  },
+  {
+    date: "2026-10-25",
     title: "Pricing package for margin and adoption",
     items: [
       "Basic stays $99 with 250 included minutes (was 300); default “best to start” plan.",
@@ -55,6 +65,12 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     type: "article",
     images: [DEFAULT_OG_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE.url],
   },
 }
 

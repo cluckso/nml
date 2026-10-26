@@ -1,12 +1,28 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { DEFAULT_OG_IMAGE } from "@/lib/seo"
 import { LEGAL_LAST_UPDATED, SUPPORT_EMAIL } from "@/lib/site-contact"
 
+const PRIVACY_TITLE = "Privacy Policy - CallGrabbr"
+const PRIVACY_DESCRIPTION =
+  "Privacy policy for CallGrabbr website, web dashboard, and mobile apps — how we collect, use, and protect your information."
+
 export const metadata: Metadata = {
-  title: "Privacy Policy - CallGrabbr",
-  description:
-    "Privacy policy for CallGrabbr website, web dashboard, and mobile apps — how we collect, use, and protect your information.",
+  title: PRIVACY_TITLE,
+  description: PRIVACY_DESCRIPTION,
   alternates: { canonical: "/privacy" },
+  openGraph: {
+    title: PRIVACY_TITLE,
+    description: PRIVACY_DESCRIPTION,
+    type: "website",
+    images: [DEFAULT_OG_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: PRIVACY_TITLE,
+    description: PRIVACY_DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE.url],
+  },
 }
 
 export default function PrivacyPage() {

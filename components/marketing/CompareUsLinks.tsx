@@ -62,8 +62,16 @@ export function CompareUsLinks({
       <h2 id="compare-us-heading" className="text-2xl font-bold tracking-tight text-center mb-3">
         {heading}
       </h2>
-      <p className="text-center text-muted-foreground mb-8 max-w-xl mx-auto">
+      <p className="text-center text-muted-foreground mb-6 max-w-xl mx-auto">
         Side-by-side guides for shops already looking at a receptionist or another answering tool.
+      </p>
+      <p className="text-center mb-8">
+        <Link
+          href="/compare"
+          className="text-sm font-medium text-primary hover:underline underline-offset-4"
+        >
+          Full comparison hub
+        </Link>
       </p>
       <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-3xl mx-auto list-none">
         {VS_PAGE_LINKS.map((item) => (

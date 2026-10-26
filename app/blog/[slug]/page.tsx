@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { getArticleBySlug } from "@/lib/articles"
+import { DEFAULT_OG_IMAGE } from "@/lib/seo"
 import { SITE_URL } from "@/lib/site-url"
 
 export const dynamic = "force-dynamic"
@@ -21,7 +22,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const url = `${SITE_URL}/blog/${article.slug}`
   const images = article.imageUrl
     ? [{ url: article.imageUrl }]
-    : undefined
+    : [DEFAULT_OG_IMAGE]
 
   return {
     title,
@@ -32,16 +33,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description,
       url,
       type: "article",
-      ...(images ? { images } : {}),
+      images,
       ...(article.publishedAt ? { publishedTime: article.publishedAt.toISOString() } : {}),
       ...(article.updatedAt ? { modifiedTime: article.updatedAt.toISOString() } : {}),
       ...(article.authorName ? { authors: [article.authorName] } : {}),
     },
     twitter: {
-      card: article.imageUrl ? "summary_large_image" : "summary",
+      card: "summary_large_image",
       title,
       description,
-      ...(article.imageUrl ? { images: [article.imageUrl] } : {}),
+      images: article.imageUrl ? [article.imageUrl] : [DEFAULT_OG_IMAGE.url],
     },
   }
 }

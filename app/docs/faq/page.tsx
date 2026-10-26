@@ -11,17 +11,22 @@ import { Button } from "@/components/ui/button"
 import { DeleteAccountControl } from "@/components/help/DeleteAccountControl"
 import { JsonLd } from "@/components/seo/JsonLd"
 import { PRODUCT_FAQ } from "@/lib/faq-data"
-import { faqPageJsonLd, webPageJsonLd } from "@/lib/structured-data"
+import { breadcrumbJsonLd, faqPageJsonLd, webPageJsonLd } from "@/lib/structured-data"
 import { DEFAULT_OG_IMAGE, SEO_KEYWORDS } from "@/lib/seo"
 
-const FAQ_TITLE = "HVAC and Plumbing Answering Service FAQ | CallGrabbr"
+const FAQ_TITLE = "Missed-Call Lead Capture FAQ | CallGrabbr"
 const FAQ_DESCRIPTION =
-  "HVAC and plumbing answering service FAQ. Call forwarding for AT&T, Verizon, and T-Mobile. Pricing, trial, and missed-call leads."
+  "Missed-call and after-hours lead capture FAQ for HVAC and plumbing. Call forwarding for AT&T, Verizon, T-Mobile. Pricing, trial, and setup."
 
 export const metadata: Metadata = {
   title: FAQ_TITLE,
   description: FAQ_DESCRIPTION,
-  keywords: [...SEO_KEYWORDS, "HVAC answering service FAQ", "plumber answering service", "call forwarding setup"],
+  keywords: [
+    ...SEO_KEYWORDS,
+    "missed call FAQ",
+    "after hours lead capture FAQ",
+    "call forwarding setup",
+  ],
   alternates: { canonical: "/docs/faq" },
   openGraph: {
     title: FAQ_TITLE,
@@ -36,9 +41,6 @@ export const metadata: Metadata = {
     images: [DEFAULT_OG_IMAGE.url],
   },
 }
-
-// Force dynamic so Vercel builder gets a lambda for this route (static pages don't emit one).
-export const dynamic = "force-dynamic"
 
 const CARRIERS = [
   {
@@ -316,6 +318,10 @@ export default function DocsFaqPage() {
             description: FAQ_DESCRIPTION,
             path: "/docs/faq",
           }),
+          breadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Help & FAQ", path: "/docs/faq" },
+          ]),
         ]}
       />
       <div className="mb-10">

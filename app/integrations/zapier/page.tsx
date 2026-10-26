@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Zap, Webhook, Key, ArrowRight } from "lucide-react"
 import { GROWTH_AND_PLATINUM_LABEL } from "@/lib/plan-labels"
 import { JsonLd } from "@/components/seo/JsonLd"
-import { webPageJsonLd } from "@/lib/structured-data"
+import { DEFAULT_OG_IMAGE } from "@/lib/seo"
+import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data"
 
 const ZAPIER_TITLE = "Zapier Integration - CallGrabbr"
 const ZAPIER_DESCRIPTION =
@@ -15,6 +16,18 @@ export const metadata: Metadata = {
   title: ZAPIER_TITLE,
   description: ZAPIER_DESCRIPTION,
   alternates: { canonical: "/integrations/zapier" },
+  openGraph: {
+    title: ZAPIER_TITLE,
+    description: ZAPIER_DESCRIPTION,
+    type: "website",
+    images: [DEFAULT_OG_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: ZAPIER_TITLE,
+    description: ZAPIER_DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE.url],
+  },
 }
 
 const STEPS = [
@@ -46,11 +59,17 @@ export default function ZapierIntegrationPage() {
   return (
     <div className="container mx-auto px-4 py-16 max-w-4xl">
       <JsonLd
-        data={webPageJsonLd({
-          name: ZAPIER_TITLE,
-          description: ZAPIER_DESCRIPTION,
-          path: "/integrations/zapier",
-        })}
+        data={[
+          webPageJsonLd({
+            name: ZAPIER_TITLE,
+            description: ZAPIER_DESCRIPTION,
+            path: "/integrations/zapier",
+          }),
+          breadcrumbJsonLd([
+            { name: "Home", path: "/" },
+            { name: "Zapier Integration", path: "/integrations/zapier" },
+          ]),
+        ]}
       />
       <div className="text-center mb-12">
         <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary mb-4">

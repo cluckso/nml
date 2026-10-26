@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { DEFAULT_OG_IMAGE } from "@/lib/seo"
 import { LEGAL_LAST_UPDATED, SUPPORT_EMAIL } from "@/lib/site-contact"
 
 const TERMS_TITLE = "CallGrabbr Terms of Service for accounts and billing"
@@ -11,6 +12,18 @@ export const metadata: Metadata = {
   description: TERMS_DESCRIPTION,
   alternates: { canonical: "/terms" },
   robots: { index: true, follow: true },
+  openGraph: {
+    title: TERMS_TITLE,
+    description: TERMS_DESCRIPTION,
+    type: "website",
+    images: [DEFAULT_OG_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TERMS_TITLE,
+    description: TERMS_DESCRIPTION,
+    images: [DEFAULT_OG_IMAGE.url],
+  },
 }
 
 export default function TermsPage() {

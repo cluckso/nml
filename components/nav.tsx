@@ -111,6 +111,7 @@ export function Nav() {
   const marketingLinks: NavLink[] = [
     ...(!user ? [{ href: "/#demo", label: "Demo" }] : []),
     { href: "/guides", label: "Guides" },
+    { href: "/compare", label: "Compare" },
     { href: "/blog", label: "Blog" },
     { href: "/about", label: "About" },
     { href: "/pricing", label: "Pricing" },
