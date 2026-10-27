@@ -6,7 +6,9 @@ export async function createClient() {
   const url = getSupabaseUrl()
   const key = getSupabaseAnonKey()
   if (!url || !key) {
-    throw new Error("NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) must be set")
+    throw new Error(
+      "Supabase auth is not configured. Set NEXT_PUBLIC_SUPABASE_URL and either NEXT_PUBLIC_SUPABASE_ANON_KEY or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY in the project-root .env.local file, or add them to the Vercel project's Environment Variables and redeploy."
+    )
   }
 
   const cookieStore = await cookies()

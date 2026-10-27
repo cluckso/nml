@@ -7,6 +7,7 @@ import { breadcrumbJsonLd, webPageJsonLd } from "@/lib/structured-data"
 import { DEFAULT_OG_IMAGE } from "@/lib/seo"
 import { keywordsForPath } from "@/lib/seo-keywords"
 import { SEO_HUBS } from "@/lib/seo-hubs"
+import { formatBlogDate } from "@/lib/blog-date"
 
 export const dynamic = "force-dynamic"
 
@@ -34,15 +35,6 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     images: [DEFAULT_OG_IMAGE.url],
   },
-}
-
-function formatDate(value: Date | null | undefined): string | null {
-  if (!value) return null
-  return value.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  })
 }
 
 export default async function BlogIndexPage() {
@@ -75,7 +67,7 @@ export default async function BlogIndexPage() {
         <ul className="space-y-8 list-none">
           {published.map((article) => {
             const href = `/blog/${article.slug}`
-            const when = formatDate(article.publishedAt ?? article.updatedAt)
+            const when = formatBlogDate(article.publishedAt ?? article.updatedAt)
             return (
               <li key={article.id} className="border-b border-border/50 pb-8 last:border-0">
                 {article.category && (

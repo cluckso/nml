@@ -33,7 +33,9 @@ Ensure these are set in your Vercel project settings:
 
 ### Authentication
 - `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` or `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+
+For local development, create `.env.local` in the project root and copy the project URL and public anon/publishable key from Supabase Dashboard → Project Settings → API. Restart the Next.js dev server after changing these values. In Vercel, add the same variables under the `callgrabbr` project's Settings → Environment Variables, apply them to the environments you deploy, and redeploy.
 
 ### Payment (Stripe)
 - `STRIPE_SECRET_KEY`

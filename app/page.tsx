@@ -12,11 +12,9 @@ import { IndustryPhotoCards } from "@/components/marketing/IndustryPhotoCards"
 import { JtbdOutcomes } from "@/components/marketing/JtbdOutcomes"
 import { BeforeAfterCall } from "@/components/marketing/BeforeAfterCall"
 import { CompareUsLinks } from "@/components/marketing/CompareUsLinks"
-import { SectionBackdrop } from "@/components/marketing/SectionBackdrop"
 import { TrustStrip } from "@/components/marketing/TrustStrip"
 import { MobileAppDownload } from "@/components/marketing/MobileAppDownload"
 import { TradeIntakeCompare } from "@/components/marketing/TradeIntakeCompare"
-import { MARKETING_IMAGES, MARKETING_IMAGE_ALT } from "@/lib/marketing-images"
 import { formatJobValuePromptLine, PRICING_TIERS } from "@/lib/pricing-catalog"
 import {
   ArrowRight,
@@ -92,7 +90,10 @@ export default function HomePage() {
         </Link>
       </nav>
 
-      <section id="demo" className="bg-muted/30 py-16 border-y border-border/50">
+      <section
+        id="demo"
+        className="scroll-mt-20 bg-muted/30 py-16 border-y border-border/50"
+      >
         <div className="container mx-auto px-4">
           <div className="max-w-md mx-auto">
             <DemoUnlock />
@@ -100,26 +101,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      <SectionBackdrop
-        src={MARKETING_IMAGES.whyMatters}
-        alt={MARKETING_IMAGE_ALT.whyMatters}
-        overlay="heavy"
-        imageClassName="object-cover object-[75%_center]"
-        className="border-y border-border/50"
-        contentClassName=""
-      >
+      <section className="border-y border-border/50 bg-background">
         <LostJobsMath />
-      </SectionBackdrop>
+      </section>
 
       {/* What you get isn't a transcript — it's a lead */}
-      <SectionBackdrop
-        src={MARKETING_IMAGES.leadCapture}
-        alt={MARKETING_IMAGE_ALT.leadCapture}
-        overlay="medium"
-        imageClassName="object-cover object-[30%_center]"
-        className="py-16 border-y border-border/50"
-        contentClassName="container mx-auto px-4"
-      >
+      <section className="py-16 border-y border-border/50 bg-muted/30">
+        <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-3">
           What you get isn&apos;t a transcript — it&apos;s a lead
         </h2>
@@ -155,7 +143,8 @@ export default function HomePage() {
             </p>
           </div>
         </div>
-      </SectionBackdrop>
+        </div>
+      </section>
 
       {/* How It Works */}
       <section className="container mx-auto px-4 py-16">
@@ -511,15 +500,9 @@ export default function HomePage() {
       </section>
 
       {/* Final CTA */}
-      <SectionBackdrop
-        src={MARKETING_IMAGES.finalCta}
-        alt={MARKETING_IMAGE_ALT.finalCta}
-        overlay="heavy"
-        imageClassName="object-cover object-[center_65%]"
-        className="py-20"
-        contentClassName="container mx-auto px-4 text-center"
-      >
-        <div className="max-w-3xl mx-auto rounded-2xl border border-white/10 bg-primary/90 backdrop-blur-md px-6 py-12 sm:px-10 text-primary-foreground shadow-2xl shadow-primary/20">
+      <section className="py-20 bg-muted/30">
+        <div className="container mx-auto px-4 text-center">
+        <div className="max-w-3xl mx-auto rounded-2xl border border-primary/20 bg-primary px-6 py-12 sm:px-10 text-primary-foreground shadow-2xl shadow-primary/20">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Turn missed calls into paying jobs</h2>
           <p className="text-lg opacity-90 max-w-2xl mx-auto mb-8">
             We grab the job when you can&apos;t and text you the lead in seconds.
@@ -545,7 +528,8 @@ export default function HomePage() {
             </Link>
           </p>
         </div>
-      </SectionBackdrop>
+        </div>
+      </section>
     </div>
   )
 }

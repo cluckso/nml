@@ -5,10 +5,10 @@ import { cn } from "@/lib/utils"
 type OverlayStrength = "light" | "medium" | "heavy" | "hero"
 
 const overlayStyles: Record<OverlayStrength, string> = {
-  light: "bg-gradient-to-b from-black/45 via-background/88 to-background/95",
-  medium: "bg-gradient-to-b from-black/60 via-background/92 to-background/98",
-  heavy: "bg-gradient-to-b from-black/75 via-black/65 to-background",
-  hero: "bg-gradient-to-b from-black/50 via-background/82 to-background",
+  light: "bg-gradient-to-b from-background/45 via-background/80 to-background/95",
+  medium: "bg-gradient-to-b from-background/55 via-background/85 to-background/98",
+  heavy: "bg-gradient-to-b from-background/65 via-background/80 to-background/95",
+  hero: "bg-gradient-to-b from-background/60 via-background/85 to-background",
 }
 
 type SectionBackdropProps = {
@@ -49,7 +49,7 @@ export function SectionBackdrop({
       />
       <div className={cn("absolute inset-0", overlayStyles[overlay])} aria-hidden />
       <div
-        className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(217_91%_60%_/_.14),transparent)]"
+        className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,hsl(17_89%_43%_/_.10),transparent)]"
         aria-hidden
       />
       <div className={cn("relative z-10", contentClassName)}>{children}</div>

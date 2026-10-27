@@ -15,7 +15,7 @@ export function createClient(options?: CreateClientOptions) {
   const key = getSupabaseAnonKey()
   if (!url || !key) {
     throw new Error(
-      "Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) in nml-main/.env"
+      "Supabase auth is not configured. Set NEXT_PUBLIC_SUPABASE_URL and either NEXT_PUBLIC_SUPABASE_ANON_KEY or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY in the project-root .env.local file, or add them to the Vercel project's Environment Variables and redeploy."
     )
   }
 

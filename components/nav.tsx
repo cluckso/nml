@@ -132,7 +132,7 @@ export function Nav() {
   const allMenuLinks = [...marketingLinks, ...appLinks]
 
   return (
-    <nav className="border-b border-border/50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="sticky top-0 z-50 border-b border-border/50 bg-background backdrop-blur-md">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center gap-3 min-h-14">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           <BrandMark size="sm" className="shrink-0" />

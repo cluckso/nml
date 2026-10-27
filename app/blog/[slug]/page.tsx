@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { getArticleBySlug } from "@/lib/articles"
 import { DEFAULT_OG_IMAGE } from "@/lib/seo"
 import { SITE_URL } from "@/lib/site-url"
+import { formatBlogDate } from "@/lib/blog-date"
 
 export const dynamic = "force-dynamic"
 
@@ -47,15 +48,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-function formatDate(value: Date | null | undefined): string | null {
-  if (!value) return null
-  return value.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })
-}
-
 export default async function BlogArticlePage({ params }: PageProps) {
   const { slug } = await params
   const article = await getArticleBySlug(slug)
@@ -64,7 +56,7 @@ export default async function BlogArticlePage({ params }: PageProps) {
   }
 
   const title = article.title || article.metaTitle || "Untitled"
-  const when = formatDate(article.publishedAt ?? article.updatedAt)
+  const when = formatBlogDate(article.publishedAt ?? article.updatedAt, "long")
   const canonical = `${SITE_URL}/blog/${article.slug}`
 
   let jsonLdHtml: string | null = null
