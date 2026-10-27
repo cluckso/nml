@@ -5,13 +5,15 @@ import Image from "next/image"
 export function BrandMark({
   href = "/",
   size = "md",
+  iconSize,
   className = "",
 }: {
   href?: string
   size?: "sm" | "md" | "lg" | "xl"
+  iconSize?: number
   className?: string
 }) {
-  const iconPx = size === "sm" ? 32 : size === "lg" ? 48 : size === "xl" ? 64 : 36
+  const iconPx = iconSize ?? (size === "sm" ? 32 : size === "lg" ? 48 : size === "xl" ? 64 : 36)
   const textClass =
     size === "sm"
       ? "text-lg"

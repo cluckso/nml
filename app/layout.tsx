@@ -5,10 +5,13 @@ import { Inter } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { Providers } from "./providers"
-import { Nav } from "@/components/nav"
+import { SiteNav } from "@/components/nav/SiteNav"
+import { SiteFooter } from "@/components/nav/SiteFooter"
+import { BrandMark } from "@/components/brand/BrandMark"
 import { SUPPORT_EMAIL } from "@/lib/site-contact"
 import { VS_PAGE_LINKS } from "@/lib/marketing/comparisons"
 import { GOOGLE_PLAY_STORE_URL } from "@/lib/mobile-app"
+import { HOMEPAGE_INDUSTRY_LINKS } from "@/lib/industry-data"
 import {
   GA4_MEASUREMENT_ID,
   googleSiteVerificationToken,
@@ -183,83 +186,101 @@ rkp("init","PaccPmsytSiq");rkp("event","PAGE_VIEW");
           }}
         />
         <Providers>
-          <Nav />
+          <SiteNav />
           <main className="flex-1">{children}</main>
-          <footer className="border-t border-border/50 py-8 bg-muted/30">
-            <div className="container mx-auto px-4">
-              <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-sm text-muted-foreground">
-                <Link href="/about" className="hover:text-foreground font-medium">
-                  About
-                </Link>
-                <Link href="/pricing" className="hover:text-foreground font-medium">
-                  Pricing
-                </Link>
-                <Link href="/guides" className="hover:text-foreground font-medium">
-                  Guides
-                </Link>
-                <Link href="/blog" className="hover:text-foreground font-medium">
-                  Blog
-                </Link>
-                <Link href="/compare" className="hover:text-foreground font-medium">
-                  Compare
-                </Link>
-                <Link href="/docs/faq" className="hover:text-foreground font-medium">
-                  Help &amp; FAQ
-                </Link>
-                <Link href="/changelog" className="hover:text-foreground font-medium">
-                  Changelog
-                </Link>
-                <a
-                  href={GOOGLE_PLAY_STORE_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:text-foreground font-medium"
-                >
-                  Android app
-                </a>
-                <Link href="/for/hvac" className="hover:text-foreground font-medium">
-                  HVAC
-                </Link>
-                <Link href="/for/plumbing" className="hover:text-foreground font-medium">
-                  Plumbing
-                </Link>
-                <Link href="/for/electrical" className="hover:text-foreground font-medium">
-                  Electrical
-                </Link>
-                <Link href="/integrations/zapier" className="hover:text-foreground font-medium">
-                  Zapier
-                </Link>
-                <Link href="/privacy" className="hover:text-foreground">
-                  Privacy Policy
-                </Link>
-                <Link href="/terms" className="hover:text-foreground">
-                  Terms of Service
-                </Link>
-                <Link href="/sms-terms" className="hover:text-foreground">
-                  SMS Terms
-                </Link>
-                <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:text-foreground">
-                  {SUPPORT_EMAIL}
-                </a>
+          <SiteFooter>
+            <footer className="border-t border-border/70 bg-muted/25">
+              <div className="container mx-auto px-4 py-12 md:py-14">
+                <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1fr] lg:gap-8">
+                  <div className="flex flex-col items-start gap-4">
+                    <BrandMark size="md" />
+                    <p className="max-w-xs text-sm leading-6 text-muted-foreground">
+                      AI-powered missed-call lead capture for local service businesses.
+                    </p>
+                    <a
+                      href={GOOGLE_PLAY_STORE_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium text-primary transition-colors hover:text-primary/80"
+                    >
+                      Get the Android app
+                    </a>
+                    <a
+                      href={`mailto:${SUPPORT_EMAIL}`}
+                      className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      {SUPPORT_EMAIL}
+                    </a>
+                  </div>
+
+                  <div>
+                    <h2 className="mb-4 text-sm font-semibold text-foreground">Product</h2>
+                    <ul className="flex flex-col gap-3 text-sm text-muted-foreground">
+                      <li><Link href="/#how-it-works" className="transition-colors hover:text-primary">How It Works</Link></li>
+                      <li><Link href="/#features" className="transition-colors hover:text-primary">Features</Link></li>
+                      <li><Link href="/#demo" className="transition-colors hover:text-primary">Demo</Link></li>
+                      <li><Link href="/pricing" className="transition-colors hover:text-primary">Pricing</Link></li>
+                      <li><Link href="/integrations/zapier" className="transition-colors hover:text-primary">Zapier</Link></li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h2 className="mb-4 text-sm font-semibold text-foreground">Industries</h2>
+                    <ul className="flex flex-col gap-3 text-sm text-muted-foreground">
+                      {HOMEPAGE_INDUSTRY_LINKS.map(({ name, slug }) => (
+                        <li key={slug}>
+                          <Link href={`/for/${slug}`} className="transition-colors hover:text-primary">
+                            {name}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h2 className="mb-4 text-sm font-semibold text-foreground">Resources</h2>
+                    <ul className="flex flex-col gap-3 text-sm text-muted-foreground">
+                      <li><Link href="/guides" className="transition-colors hover:text-primary">Guides</Link></li>
+                      <li><Link href="/compare" className="transition-colors hover:text-primary">Comparisons</Link></li>
+                      <li><Link href="/blog" className="transition-colors hover:text-primary">Blog</Link></li>
+                      <li><Link href="/docs/faq" className="transition-colors hover:text-primary">Help &amp; FAQ</Link></li>
+                      <li><Link href="/changelog" className="transition-colors hover:text-primary">Changelog</Link></li>
+                    </ul>
+                  </div>
+
+                  <div>
+                    <h2 className="mb-4 text-sm font-semibold text-foreground">Company</h2>
+                    <ul className="flex flex-col gap-3 text-sm text-muted-foreground">
+                      <li><Link href="/about" className="transition-colors hover:text-primary">About</Link></li>
+                      <li><Link href="/sign-in" className="transition-colors hover:text-primary">Sign In</Link></li>
+                      <li><Link href="/privacy" className="transition-colors hover:text-primary">Privacy Policy</Link></li>
+                      <li><Link href="/terms" className="transition-colors hover:text-primary">Terms of Service</Link></li>
+                      <li><Link href="/sms-terms" className="transition-colors hover:text-primary">SMS Terms</Link></li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="mt-10 border-t border-border/70 pt-6">
+                  <div className="flex flex-col gap-4 text-center text-xs text-muted-foreground md:flex-row md:items-center md:justify-between md:text-left">
+                    <p>
+                      © {new Date().getFullYear()} CallGrabbr. Missed-call lead capture for local service businesses.
+                    </p>
+                    <p>
+                      Compare:{" "}
+                      {VS_PAGE_LINKS.map((item, i) => (
+                        <span key={item.href}>
+                          {i > 0 && <span className="px-1 text-muted-foreground/60">·</span>}
+                          <Link href={item.href} className="transition-colors hover:text-primary">
+                            {item.shortLabel}
+                          </Link>
+                        </span>
+                      ))}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="mt-6 text-center">
-                <p className="text-sm text-muted-foreground">
-                  Compare:{" "}
-                  {VS_PAGE_LINKS.map((item, i) => (
-                    <span key={item.href}>
-                      {i > 0 && <span className="text-muted-foreground/60"> · </span>}
-                      <Link href={item.href} className="hover:text-foreground font-medium">
-                        {item.shortLabel}
-                      </Link>
-                    </span>
-                  ))}
-                </p>
-              </div>
-              <p className="text-center text-xs text-muted-foreground/80 mt-4">
-                © {new Date().getFullYear()} CallGrabbr. Missed-call lead capture for local service businesses.
-              </p>
-            </div>
-          </footer>
+            </footer>
+          </SiteFooter>
         </Providers>
         <Analytics />
       </body>

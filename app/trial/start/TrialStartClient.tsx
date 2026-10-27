@@ -25,6 +25,7 @@ import {
 import { pricingUrl } from "@/lib/monetization-urls"
 import { PLAN_BASIC, PLAN_GROWTH } from "@/lib/plan-labels"
 import { CreditCard, Shield } from "lucide-react"
+import { formatUsPhoneInput, validateUsPhone } from "@/lib/utils"
 
 const PLAN_OPTIONS = [
   { type: PlanType.STARTER, label: PLAN_BASIC },
@@ -44,6 +45,7 @@ export function TrialStartClient() {
 
   const [funnelCtx, setFunnelCtx] = useState<FunnelTrialContext | null>(null)
   const [businessPhone, setBusinessPhone] = useState("")
+  const [phoneError, setPhoneError] = useState<string | null>(null)
   const [selectedPlan, setSelectedPlan] = useState<PlanType>(initialPlan)
   const smsConsent = false
   const [loading, setLoading] = useState(false)
@@ -53,7 +55,7 @@ export function TrialStartClient() {
     const ctx = loadFunnelTrialContext()
     if (!ctx) return
     setFunnelCtx(ctx)
-    if (ctx.contactPhone) setBusinessPhone(ctx.contactPhone)
+    if (ctx.contactPhone) setBusinessPhone(formatUsPhoneInput(ctx.contactPhone))
   }, [])
 
   const fromFunnel =
@@ -69,9 +71,9 @@ export function TrialStartClient() {
     }
   }
 
-  const buildStartBody = (): Record<string, string | undefined> => {
+  const buildStartBody = (phone: string): Record<string, string | undefined> => {
     const startBody: Record<string, string | undefined> = {
-      businessPhone: businessPhone.trim(),
+      businessPhone: phone,
       planType: selectedPlan,
     }
     if (funnelCtx) {
@@ -84,13 +86,20 @@ export function TrialStartClient() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    const phoneResult = validateUsPhone(businessPhone)
+    if (phoneResult.ok === false) {
+      setPhoneError(phoneResult.error)
+      return
+    }
+
+    setPhoneError(null)
     setLoading(true)
     setError(null)
     try {
       const eligibilityRes = await fetch("/api/trial/eligibility", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ businessPhone: businessPhone.trim() }),
+        body: JSON.stringify({ businessPhone: phoneResult.phone }),
       })
       const eligibilityData = await parseJsonSafe(eligibilityRes)
       if (!eligibilityRes.ok) {
@@ -107,7 +116,7 @@ export function TrialStartClient() {
       const startRes = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...buildStartBody(), smsConsent }),
+        body: JSON.stringify({ ...buildStartBody(phoneResult.phone), smsConsent }),
       })
       const startData = await parseJsonSafe(startRes)
       if (!startRes.ok) {
@@ -202,14 +211,33 @@ export function TrialStartClient() {
                 type="tel"
                 placeholder="(608) 555-1234"
                 value={businessPhone}
-                onChange={(e) => setBusinessPhone(e.target.value)}
+                inputMode="tel"
+                autoComplete="tel"
+                maxLength={14}
+                aria-invalid={!!phoneError}
+                aria-describedby={phoneError ? "businessPhone-error" : "businessPhone-hint"}
+                onChange={(e) => {
+                  setBusinessPhone(formatUsPhoneInput(e.target.value))
+                  if (phoneError) setPhoneError(null)
+                }}
+                onBlur={() => {
+                  if (businessPhone.trim()) {
+                    const result = validateUsPhone(businessPhone)
+                    setPhoneError(result.ok === false ? result.error : null)
+                  }
+                }}
                 required
                 disabled={loading}
               />
-              <p className="text-xs text-muted-foreground">
-                {fromFunnel
+              <p
+                id={phoneError ? "businessPhone-error" : "businessPhone-hint"}
+                className={phoneError ? "text-xs text-destructive" : "text-xs text-muted-foreground"}
+                role={phoneError ? "alert" : undefined}
+              >
+                {phoneError ||
+                  (fromFunnel
                   ? "The number your customers call — we pre-filled it if you entered one in the form."
-                  : "One trial per business line — helps us keep the free trial fair for real shops."}
+                  : "One trial per business line — helps us keep the free trial fair for real shops.")}
               </p>
             </div>
             <p className="text-xs text-muted-foreground">

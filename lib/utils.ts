@@ -18,6 +18,29 @@ export function formatPhoneForDisplay(raw: string | null | undefined): string {
   return raw
 }
 
+/** Format a US phone number as the user types, keeping the display at 10 digits. */
+export function formatUsPhoneInput(raw: string): string {
+  let digits = raw.replace(/\D/g, "")
+  if (digits.length === 11 && digits.startsWith("1")) digits = digits.slice(1)
+  digits = digits.slice(0, 10)
+
+  if (digits.length <= 3) return digits
+  if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`
+}
+
+/** Validate a US phone number and return its E.164 form when valid. */
+export function validateUsPhone(raw: string): { ok: true; phone: string } | { ok: false; error: string } {
+  if (!/^[+\d\s().-]+$/.test(raw.trim())) {
+    return { ok: false, error: "Enter a valid 10-digit US phone number." }
+  }
+  const phone = normalizePhoneToE164(raw)
+  if (!phone) {
+    return { ok: false, error: "Enter a valid 10-digit US phone number." }
+  }
+  return { ok: true, phone }
+}
+
 /** Normalize US phone to E.164 (+1XXXXXXXXXX). Returns null if invalid. */
 export function normalizePhoneToE164(raw: string | null | undefined): string | null {
   if (raw == null || raw === "") return null

@@ -4,7 +4,7 @@ import Link from "next/link"
 import { analytics } from "@heycatch/sdk"
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/client"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useRef, useState } from "react"
 import type { User } from "@supabase/supabase-js"
 import { ChevronDown, Menu, X } from "lucide-react"
@@ -62,13 +62,21 @@ const dropdownGroups = [
   { id: "resources", label: "Resources", links: resourceLinks },
 ]
 
+function isNavLinkActive(href: string, pathname: string, hash: string): boolean {
+  const [path, anchor] = href.split("#")
+  if (anchor) return pathname === (path || "/") && hash === anchor
+  return pathname === path || pathname.startsWith(`${path}/`)
+}
+
 export function Nav() {
+  const pathname = usePathname()
   const [user, setUser] = useState<User | null>(null)
   const [businessName, setBusinessName] = useState<string | null>(null)
   const [trialBadge, setTrialBadge] = useState<TrialNavBadgeData | null>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [openDropdown, setOpenDropdown] = useState<string | null>(null)
   const [openMobileGroup, setOpenMobileGroup] = useState<string | null>(null)
+  const [currentHash, setCurrentHash] = useState("")
   const navRef = useRef<HTMLElement>(null)
   const mobileMenuButtonRef = useRef<HTMLButtonElement>(null)
   const dropdownTriggerRefs = useRef<Record<string, HTMLButtonElement | null>>({})
@@ -141,6 +149,17 @@ export function Nav() {
   }, [user])
 
   useEffect(() => {
+    const updateHash = () => setCurrentHash(window.location.hash.slice(1))
+    updateHash()
+    window.addEventListener("hashchange", updateHash)
+    window.addEventListener("popstate", updateHash)
+    return () => {
+      window.removeEventListener("hashchange", updateHash)
+      window.removeEventListener("popstate", updateHash)
+    }
+  }, [pathname])
+
+  useEffect(() => {
     if (!openDropdown && !menuOpen) return
 
     function handleOutsidePointerDown(event: PointerEvent) {
@@ -203,9 +222,6 @@ export function Nav() {
           <span className="sm:hidden text-base font-bold tracking-tight text-foreground">
             CallGrabbr
           </span>
-          <span className="hidden sm:inline border-l border-border pl-3 text-xs font-medium tracking-wide text-muted-foreground whitespace-nowrap">
-            AI receptionist
-          </span>
           {businessName && (
             <span
               className="hidden sm:inline text-sm text-muted-foreground border-l border-border/60 pl-3 font-medium truncate max-w-[100px] md:max-w-[160px] lg:max-w-[220px]"
@@ -224,6 +240,11 @@ export function Nav() {
         <div className="hidden xl:flex items-center gap-1">
           {dropdownGroups.map((group) => {
             const isOpen = openDropdown === group.id
+            const isActive = group.links.some((link) =>
+              isNavLinkActive(link.href, pathname, currentHash)
+            ) || (group.id === "resources" && user && appLinks.some((link) =>
+              isNavLinkActive(link.href, pathname, currentHash)
+            ))
             return (
               <div
                 key={group.id}
@@ -241,6 +262,7 @@ export function Nav() {
                   aria-haspopup="true"
                   aria-expanded={isOpen}
                   aria-controls={`${group.id}-menu`}
+                  className={isActive ? "text-primary bg-primary/10 hover:bg-primary/15 hover:text-primary" : ""}
                   onClick={() => setOpenDropdown(isOpen ? null : group.id)}
                 >
                   {group.label}
@@ -260,7 +282,12 @@ export function Nav() {
                         key={link.href}
                         href={link.href}
                         onClick={closeNavigation}
-                        className="block rounded-md px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:outline-none"
+                        aria-current={isNavLinkActive(link.href, pathname, currentHash) ? "page" : undefined}
+                        className={`block rounded-md px-3 py-2 text-sm transition-colors focus-visible:outline-none ${
+                          isNavLinkActive(link.href, pathname, currentHash)
+                            ? "bg-primary/10 font-medium text-primary"
+                            : "text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent"
+                        }`}
                       >
                         {link.label}
                       </Link>
@@ -273,7 +300,12 @@ export function Nav() {
                             key={link.href}
                             href={link.href}
                             onClick={closeNavigation}
-                            className="block rounded-md px-3 py-2 text-sm text-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:outline-none"
+                            aria-current={isNavLinkActive(link.href, pathname, currentHash) ? "page" : undefined}
+                            className={`block rounded-md px-3 py-2 text-sm transition-colors focus-visible:outline-none ${
+                              isNavLinkActive(link.href, pathname, currentHash)
+                                ? "bg-primary/10 font-medium text-primary"
+                                : "text-foreground hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent"
+                            }`}
                           >
                             {link.label}
                           </Link>
@@ -285,8 +317,12 @@ export function Nav() {
               </div>
             )
           })}
-          <Link href="/pricing" onClick={closeNavigation}>
-            <Button variant="ghost" size="sm">
+          <Link href="/pricing" onClick={closeNavigation} aria-current={pathname === "/pricing" ? "page" : undefined}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className={pathname === "/pricing" ? "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary" : ""}
+            >
               Pricing
             </Button>
           </Link>
@@ -365,12 +401,19 @@ export function Nav() {
             <div className="flex flex-col gap-1">
               {dropdownGroups.map((group) => {
                 const isOpen = openMobileGroup === group.id
+                const isActive = group.links.some((link) =>
+                  isNavLinkActive(link.href, pathname, currentHash)
+                ) || (group.id === "resources" && user && appLinks.some((link) =>
+                  isNavLinkActive(link.href, pathname, currentHash)
+                ))
                 return (
                   <div key={group.id} className="border-b border-border/60 last:border-0">
                     <Button
                       type="button"
                       variant="ghost"
-                      className="w-full justify-between px-3"
+                      className={`w-full justify-between px-3 ${
+                        isActive ? "bg-primary/10 text-primary hover:bg-primary/15 hover:text-primary" : ""
+                      }`}
                       aria-expanded={isOpen}
                       aria-controls={`mobile-${group.id}-menu`}
                       onClick={() => setOpenMobileGroup(isOpen ? null : group.id)}
@@ -392,7 +435,12 @@ export function Nav() {
                             key={link.href}
                             href={link.href}
                             onClick={closeNavigation}
-                            className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                            aria-current={isNavLinkActive(link.href, pathname, currentHash) ? "page" : undefined}
+                            className={`rounded-md px-3 py-2 text-sm ${
+                              isNavLinkActive(link.href, pathname, currentHash)
+                                ? "bg-primary/10 font-medium text-primary"
+                                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                            }`}
                           >
                             {link.label}
                           </Link>
@@ -405,7 +453,12 @@ export function Nav() {
                                 key={link.href}
                                 href={link.href}
                                 onClick={closeNavigation}
-                                className="rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                                aria-current={isNavLinkActive(link.href, pathname, currentHash) ? "page" : undefined}
+                                className={`rounded-md px-3 py-2 text-sm ${
+                                  isNavLinkActive(link.href, pathname, currentHash)
+                                    ? "bg-primary/10 font-medium text-primary"
+                                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                                }`}
                               >
                                 {link.label}
                               </Link>
@@ -420,7 +473,12 @@ export function Nav() {
               <Link
                 href="/pricing"
                 onClick={closeNavigation}
-                className="rounded-md px-3 py-2.5 text-sm font-medium hover:bg-accent"
+                aria-current={pathname === "/pricing" ? "page" : undefined}
+                className={`rounded-md px-3 py-2.5 text-sm font-medium ${
+                  pathname === "/pricing"
+                    ? "bg-primary/10 text-primary"
+                    : "hover:bg-accent"
+                }`}
               >
                 Pricing
               </Link>
