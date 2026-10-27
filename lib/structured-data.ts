@@ -15,7 +15,7 @@ export function organizationJsonLd() {
     "@type": "Organization",
     name: "CallGrabbr",
     url: SITE_URL,
-    logo: `${SITE_URL}/icon.png`,
+    logo: `${SITE_URL}/icon.webp`,
     description: organizationDescription(),
     contactPoint: {
       "@type": "ContactPoint",
@@ -140,7 +140,7 @@ export function articleJsonLd(input: {
       url: SITE_URL,
       logo: {
         "@type": "ImageObject",
-        url: `${SITE_URL}/icon.png`,
+        url: `${SITE_URL}/icon.webp`,
       },
     },
     mainEntityOfPage: url,

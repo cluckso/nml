@@ -1,4 +1,4 @@
-import logo from '../assets/logo.png'
+import logo from '../assets/logo.webp'
 
 export function AppLogo({ size = 32 }: { size?: number }) {
   return (

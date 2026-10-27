@@ -29,7 +29,7 @@ export function BrandMark({
       aria-label="CallGrabbr home"
     >
       <Image
-        src="/icon.png"
+        src="/icon.webp"
         alt=""
         width={iconPx}
         height={iconPx}

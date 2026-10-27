@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: "CallGrabbr - Stop Losing Jobs to Missed Calls",
   description: siteMetaDescription(),
-  icons: { icon: "/icon.png" },
+  icons: { icon: "/icon.webp" },
   verification: { google: googleSiteVerification },
   openGraph: {
     title: "CallGrabbr - Stop Losing Jobs to Missed Calls",

@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og"
 import { trialHeadlineLabel } from "@/lib/trial-marketing"
+import { SITE_URL } from "@/lib/site-url"
 
 export const runtime = "edge"
 export const alt = "CallGrabbr — Stop losing jobs to missed calls"
@@ -33,20 +34,16 @@ export default function OpenGraphImage() {
             letterSpacing: "-0.02em",
           }}
         >
-          <div
+          <img
+            src={`${SITE_URL}/icon.webp`}
+            width={56}
+            height={56}
             style={{
               width: 56,
               height: 56,
-              borderRadius: 14,
-              background: "#3b82f6",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 30,
+              objectFit: "contain",
             }}
-          >
-            📞
-          </div>
+          />
           CallGrabbr
         </div>
         <div
