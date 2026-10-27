@@ -92,7 +92,7 @@ export default function HomePage() {
 
       <section
         id="demo"
-        className="scroll-mt-20 bg-muted/30 py-16 border-y border-border/50"
+        className="scroll-mt-24 bg-muted/30 py-16 border-y border-border/50"
       >
         <div className="container mx-auto px-4">
           <div className="max-w-md mx-auto">
@@ -106,7 +106,7 @@ export default function HomePage() {
       </section>
 
       {/* What you get isn't a transcript — it's a lead */}
-      <section className="py-16 border-y border-border/50 bg-muted/30">
+      <section id="features" className="scroll-mt-24 py-16 border-y border-border/50 bg-muted/30">
         <div className="container mx-auto px-4">
         <h2 className="text-3xl font-bold text-center mb-3">
           What you get isn&apos;t a transcript — it&apos;s a lead
@@ -147,7 +147,7 @@ export default function HomePage() {
       </section>
 
       {/* How It Works */}
-      <section className="container mx-auto px-4 py-16">
+      <section id="how-it-works" className="scroll-mt-24 container mx-auto px-4 py-16">
         <h2 className="text-3xl font-bold text-center mb-3">How it works</h2>
         <p className="text-center text-muted-foreground mb-10 max-w-xl mx-auto">
           Setup takes minutes — sign up, enter some details, attach your phone using our setup guide.
